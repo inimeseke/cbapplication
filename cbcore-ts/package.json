@@ -1,0 +1,51 @@
+{
+  "name": "cbcore-ts",
+  "version": "1.0.0",
+  "description": "CBCore is a library to build web applications using pure Typescript.",
+  "main": "compiledScripts/index.js",
+  "types": "compiledScripts/index.d.ts",
+  "scripts": {
+    "build": "etsc && tsc --emitDeclarationOnly",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inimeseke/UICore-TS.git"
+  },
+  "keywords": [
+    "UICore",
+    "UIKit",
+    "Apple",
+    "IOS",
+    "UI",
+    "Framework",
+    "Native-like",
+    "Native",
+    "Typescript"
+  ],
+  "author": "Mart Ernits",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inimeseke/UICore-TS/issues"
+  },
+  "homepage": "https://github.com/inimeseke/UICore-TS",
+  "dependencies": {
+    "@types/object-hash": "^2.1.1",
+    "object-hash": "^2.1.1",
+    "socket.io-client": "^4.5.1",
+    "uicore-ts": "^1.0.7"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "esbuild": "^0.14.53",
+    "esbuild-node-tsc": "^1.8.8",
+    "esbuild-plugin-inline-worker": "^0.1.1",
+    "etsc": "^0.1.0",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-typescript2": "^0.32.1",
+    "rollup-plugin-web-worker-loader": "^1.6.1",
+    "typescript": "^4.7.4"
+  }
+}

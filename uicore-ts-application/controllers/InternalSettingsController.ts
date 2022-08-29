@@ -1,18 +1,12 @@
 import { ObjectID } from "bson"
+import { CBDropdownData, CBDropdownDataItem, CBLanguageItem, CBReferenceID, CBUserProfile } from "cbcore-ts"
 import { Application } from "express"
-import { AdministratorRightsModel, DropdownDataItemModel, DropdownDataModel, LanguageItemModel } from "../models"
 
 import * as mongoose from "mongoose"
 import "../Extensions"
+import { AdministratorRightsModel, DropdownDataItemModel, DropdownDataModel, LanguageItemModel } from "../models"
 
 import { CBDocument } from "../TypeUtil"
-import {
-    CBDropdownData,
-    CBDropdownDataItem,
-    CBLanguageItem,
-    CBReferenceID,
-    CBUserProfile
-} from "../../cbcore-ts/scripts/CBDataInterfaces"
 import { RoutesController } from "./RoutesController"
 import { SocketController } from "./SocketController"
 import SocketSession from "./SocketSession"
@@ -33,17 +27,28 @@ export class InternalSettingsController extends RoutesController {
     
     
     public registerRoutes() {
-        
+    
         const targets = SocketController.sharedInstance.messageTargets
+    
+        targets.PerformAction = (message, socketSession, respondWithMessage) => respondWithMessage()
+    
+        targets.PerformActionAndRetrieveData = (message, socketSession, respondWithMessage) => respondWithMessage(true)
+    
+        targets.PerformActionAndRetrieveDataWithParameters = async (message, socketSession, respondWithMessage) => {
         
+            await respondWithMessage(message == "Autopood")
+        
+        }
+    
+    
         targets.AreCBInternalSettingsAvailableForCurrentUser = async (message, socketSession, respondWithMessage) => {
             await respondWithMessage(await this.isUserAnAdministrator(socketSession.userProfile))
         }
-        
+    
         targets.RetrieveLanguageData = async (message, socketSession, respondWithMessage) => {
-            
+        
             if (await this.isUserAnAdministrator(socketSession.userProfile)) {
-                
+            
                 try {
                     
                     const startTime = Date.now()
@@ -69,8 +74,6 @@ export class InternalSettingsController extends RoutesController {
             if (await this.isUserAnAdministrator(socketSession.userProfile)) {
                 
                 try {
-                    
-                    
                     
                     await LanguageItemModel.deleteMany({ languageKey: languageKey })
                     

@@ -1,3 +1,5 @@
+/// <reference path="../webclient/scripts/SocketClientFunctions.d.ts" />
+
 import { Application } from "express"
 import * as mongoose from "mongoose"
 

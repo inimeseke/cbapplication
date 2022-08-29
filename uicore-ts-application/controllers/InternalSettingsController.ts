@@ -27,28 +27,28 @@ export class InternalSettingsController extends RoutesController {
     
     
     public registerRoutes() {
-    
+        
         const targets = SocketController.sharedInstance.messageTargets
-    
+        
         targets.PerformAction = (message, socketSession, respondWithMessage) => respondWithMessage()
-    
+        
         targets.PerformActionAndRetrieveData = (message, socketSession, respondWithMessage) => respondWithMessage(true)
-    
+        
         targets.PerformActionAndRetrieveDataWithParameters = async (message, socketSession, respondWithMessage) => {
-        
+            
             await respondWithMessage(message == "Autopood")
-        
+            
         }
-    
-    
+        
+        
         targets.AreCBInternalSettingsAvailableForCurrentUser = async (message, socketSession, respondWithMessage) => {
             await respondWithMessage(await this.isUserAnAdministrator(socketSession.userProfile))
         }
-    
-        targets.RetrieveLanguageData = async (message, socketSession, respondWithMessage) => {
         
-            if (await this.isUserAnAdministrator(socketSession.userProfile)) {
+        targets.RetrieveLanguageData = async (message, socketSession, respondWithMessage) => {
             
+            if (await this.isUserAnAdministrator(socketSession.userProfile)) {
+                
                 try {
                     
                     const startTime = Date.now()

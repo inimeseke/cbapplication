@@ -175,19 +175,6 @@ export interface SocketClientInterface {
     
     [x: string]: SocketClientFunction<any, any>;
     
-    // Internal settings controller
-    
-    AreCBInternalSettingsAvailableForCurrentUser: SocketClientNoMessageFunction<boolean>
-    
-    RetrieveLanguageData: SocketClientNoMessageFunction<LanguagesData>;
-    DeleteLanguageWithKey: SocketClientFunction<string, LanguagesData>;
-    SaveLanguagesData: SocketClientFunction<LanguagesData, LanguagesData>;
-    
-    RetrieveDropdownCodes: SocketClientNoMessageFunction<string[]>;
-    DeleteDropdownDataForCode: SocketClientFunction<string, null>;
-    RetrieveDropdownDataForCode: SocketClientFunction<string, CBDropdownData<any>>;
-    SaveDropdownData: SocketClientFunction<CBDropdownData<any>, CBDropdownData<any>>;
-    
 }
 
 

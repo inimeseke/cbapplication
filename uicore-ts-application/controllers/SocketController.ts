@@ -1,7 +1,9 @@
 import {
     CBSocketHandshakeInitMessage,
-    CBSocketHandshakeResponseMessage, CBSocketMessage,
-    CBSocketMessageSendResponseFunction, CBUserProfile,
+    CBSocketHandshakeResponseMessage,
+    CBSocketMessage,
+    CBSocketMessageSendResponseFunction,
+    CBUserProfile,
     SocketClientInterface
 } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import * as mongoose from "mongoose"

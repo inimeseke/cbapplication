@@ -12,7 +12,7 @@ const kAscendingColumnImageAddress = "images/baseline-expand_more-24px.svg"
 
 export class CBTableHeaderView extends RowView<CellView> {
     
-    orderingStates = []
+    orderingStates: string[] = []
     
     private _descriptors: CBTableViewCellDescriptor[] = []
     
@@ -24,7 +24,7 @@ export class CBTableHeaderView extends RowView<CellView> {
         
     }
     
-
+    
     updateContentForButtonStates() {
         
         this.cells.forEach((cell, index, array) => {
@@ -40,13 +40,7 @@ export class CBTableHeaderView extends RowView<CellView> {
     }
     
     
-    
-    
-    
     orderingStateDidChange() {
-    
-    
-    
     
     
     }
@@ -65,12 +59,9 @@ export class CBTableHeaderView extends RowView<CellView> {
     }
     
     
-    
-    
-    
     private updateContent() {
-        
-        const cells = []
+    
+        const cells: CellView[] = []
         
         this.orderingStates = [CBTableHeaderView.orderingState.unordered].arrayByRepeating(cells.length)
         
@@ -139,7 +130,6 @@ export class CBTableHeaderView extends RowView<CellView> {
         this.cells = cells
         
         
-        
         const allUnordered = this.orderingStates.allMatch((value, index, obj) => value ==
             CBTableHeaderView.orderingState.unordered)
         
@@ -148,7 +138,6 @@ export class CBTableHeaderView extends RowView<CellView> {
             this.orderingStates.firstElement = CBTableHeaderView.orderingState.descending
             
         }
-        
         
         
         this.updateContentForButtonStates()
@@ -189,9 +178,6 @@ export class CBTableHeaderView extends RowView<CellView> {
     }
     
     
-    
-    
-    
     static orderingState = {
         
         "unordered": "unordered",
@@ -215,9 +201,6 @@ export class CBTableHeaderView extends RowView<CellView> {
         [UIKeyValueStringSorter.direction.ascending]: UIKeyValueStringSorter.direction.descending
         
     }
-    
-    
-    
     
     
 }

@@ -3,6 +3,7 @@ import { CBDropdownData, CBDropdownDataItem, CBLanguageItem, CBReferenceID, CBUs
 import { Application } from "express"
 
 import * as mongoose from "mongoose"
+import { Server } from "socket.io"
 import "../Extensions"
 import { AdministratorRightsModel, DropdownDataItemModel, DropdownDataModel, LanguageItemModel } from "../models"
 
@@ -553,7 +554,7 @@ export class InternalSettingsController extends RoutesController {
     }
     
     // noinspection TypeScriptUMDGlobal,JSDeprecatedSymbols
-    public static Instance(expressApp: Application, socketIO: SocketIO.Server) {
+    public static Instance(expressApp: Application, socketIO: Server) {
         return this._instance || (this._instance = new this(expressApp, socketIO))
     }
     

@@ -44,7 +44,7 @@ declare interface CBSocketClientErrorMessage {
 }
 
 
-
+type FilterConditionally<Source, Condition> = Pick<Source, { [K in keyof Source]: Source[K] extends Condition ? K : never }[keyof Source]>;
 
 
 export function IS_SOCKET_ERROR(object: any): object is CBSocketClientErrorMessage {
@@ -60,9 +60,6 @@ export function IS_NOT_SOCKET_ERROR(object: any) {
     return !IS_SOCKET_ERROR(object)
     
 }
-
-
-
 
 
 export class CBSocketClient extends UIObject {
@@ -152,7 +149,8 @@ export class CBSocketClient extends UIObject {
                     
                     this._core.dialogViewShowerClass.alert(
                         "Failed to establish connection to server.",
-                        () => {}
+                        () => {
+                        }
                     )
                     
                 }
@@ -187,9 +185,6 @@ export class CBSocketClient extends UIObject {
         })
         
         
-        
-        
-        
         this.socket.on("CBPerformReconnect", (message?: string) => {
             
             console.log("Performing socket reconnection.")
@@ -203,11 +198,7 @@ export class CBSocketClient extends UIObject {
             }
             
             
-            
         })
-        
-        
-        
         
         
         this._socket.on(
@@ -224,28 +215,18 @@ export class CBSocketClient extends UIObject {
             (message: CBSocketMessage<CBSocketMultipleMessageObject[]>) => {
                 
                 console.log("Received " + message.messageData.length + " messages.")
-                
-                
                 this.didReceiveMessageForKey(CBSocketClient.multipleMessageKey, message)
                 
             }
         )
         
         
-        
-        
     }
-    
-    
-    
     
     
     get socket() {
         return this._socket
     }
-    
-    
-    
     
     
     cancelUnsentMessages(messagesToCancel: CBSocketClientMessageToBeSent[]) {
@@ -257,9 +238,6 @@ export class CBSocketClient extends UIObject {
         ) => !messagesToCancel.contains(messageObject))
         
     }
-    
-    
-    
     
     
     sendUnsentMessages(receiveResponsesTogether = NO, completion?: CBSocketMultipleMessagecompletionFunction) {
@@ -344,7 +322,6 @@ export class CBSocketClient extends UIObject {
         }
         
         
-        
         const messageObject: CBSocketMultipleMessage = {
             
             messageData: groupedMessages,
@@ -370,9 +347,6 @@ export class CBSocketClient extends UIObject {
     }
     
     
-    
-    
-    
     static completionPolicy = {
         
         "all": "all",
@@ -384,48 +358,57 @@ export class CBSocketClient extends UIObject {
         "directOnly": "directOnly",
         "firstOnly": "firstOnly",
         "storedOrFirst": "storedOrFirst"
-        
+    
     }
     
     
     sendUserBoundMessageForKeyWithPolicy(
-        key: string,
+        key: keyof SocketClientInterface,
         message: any,
-        completionPolicy: string,
+        completionPolicy: keyof typeof CBSocketClient.completionPolicy,
         completion?: CBSocketMessageCompletionFunction
     ) {
         
         
-        this._sendMessageForKey(key, message, undefined, NO, completionPolicy, YES, nil, completion)
+        this._sendMessageForKey(key as string, message, undefined, NO, completionPolicy, YES, nil, completion)
         
     }
     
-    sendUserBoundMessageForKey(key: string, message: any, completion?: CBSocketMessageCompletionFunction) {
+    sendUserBoundMessageForKey(
+        key: keyof SocketClientInterface,
+        message: any,
+        completion?: CBSocketMessageCompletionFunction
+    ) {
         
-        this._sendMessageForKey(key, message, undefined, NO, undefined, YES, nil, completion)
+        this._sendMessageForKey(key as string, message, undefined, NO, undefined, YES, nil, completion)
         
     }
     
     sendMessageForKeyWithPolicy(
-        key: string,
+        key: keyof SocketClientInterface,
         message: any,
-        completionPolicy: string,
+        completionPolicy: keyof typeof CBSocketClient.completionPolicy,
         completion?: CBSocketMessageCompletionFunction
     ) {
         
         
-        this._sendMessageForKey(key, message, undefined, NO, completionPolicy, NO, nil, completion)
+        this._sendMessageForKey(key as string, message, undefined, NO, completionPolicy, NO, nil, completion)
         
     }
     
-    sendMessageForKey(key: string, message: any, completion?: CBSocketMessageCompletionFunction) {
+    sendMessageForKey(key: keyof SocketClientInterface, message: any, completion?: CBSocketMessageCompletionFunction) {
         
-        this._sendMessageForKey(key, message, undefined, NO, undefined, NO, nil, completion)
+        this._sendMessageForKey(key as string, message, undefined, NO, undefined, NO, nil, completion)
         
     }
     
     
-    resultForMessageForKey(key: string, message: any, completionPolicy?: string, isUserBound = NO) {
+    resultForMessageForKey(
+        key: keyof SocketClientInterface,
+        message: any,
+        completionPolicy?: keyof typeof CBSocketClient.completionPolicy,
+        isUserBound = NO
+    ) {
         
         const result = new Promise<{
             
@@ -438,7 +421,7 @@ export class CBSocketClient extends UIObject {
         }>((resolve, reject) => {
             
             this._sendMessageForKey(
-                key,
+                key as string,
                 message,
                 undefined,
                 NO,
@@ -446,7 +429,7 @@ export class CBSocketClient extends UIObject {
                 isUserBound,
                 nil,
                 (responseMessage, respondWithMessage) => resolve({
-                    
+        
                     responseMessage: responseMessage,
                     result: IF(IS_NOT_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE(RETURNER(undefined)),
                     errorResult: IF(IS_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE(RETURNER(undefined)),
@@ -461,9 +444,6 @@ export class CBSocketClient extends UIObject {
         return result
         
     }
-    
-    
-    
     
     
     _sendMessageForKey(
@@ -534,9 +514,6 @@ export class CBSocketClient extends UIObject {
     }
     
     
-    
-    
-    
     sendMessagesAsGroup<FunctionReturnType extends object>(functionToCall: () => FunctionReturnType) {
         
         const collectMessagesToSendLater = this._collectMessagesToSendLater
@@ -571,9 +548,6 @@ export class CBSocketClient extends UIObject {
         return result
         
     }
-    
-    
-    
     
     
     didReceiveMessageForKey(key: string, message: CBSocketMessage<any>) {
@@ -662,7 +636,6 @@ export class CBSocketClient extends UIObject {
             console.log(message.messageData)
             
             
-            
         }
         
         
@@ -671,17 +644,11 @@ export class CBSocketClient extends UIObject {
     }
     
     
-    
-    
-    
     addTargetForMessagesForKeys(keys: string[], handlerFunction: CBSocketMessageHandlerFunction) {
         keys.forEach(function (this: CBSocketClient, key: string, index: number, array: string[]) {
             this.addTargetForMessagesForKey(key, handlerFunction)
         }.bind(this))
     }
-    
-    
-    
     
     
     addTargetForMessagesForKey(key: string, handlerFunction: CBSocketMessageHandlerFunction) {
@@ -699,7 +666,6 @@ export class CBSocketClient extends UIObject {
             this._subscribedKeys[key] = true
             
         }
-        
         
         
     }
@@ -721,17 +687,10 @@ export class CBSocketClient extends UIObject {
         }
         
         
-        
     }
     
     
-    
-    
-    
 }
-
-
-
 
 
 export const SocketClient: SocketClientInterface = new Proxy({ "name": "SocketClient" }, {
@@ -748,7 +707,6 @@ export const SocketClient: SocketClientInterface = new Proxy({ "name": "SocketCl
             completionPolicy,
             isUserBound
         )
-        
         
         
         return result

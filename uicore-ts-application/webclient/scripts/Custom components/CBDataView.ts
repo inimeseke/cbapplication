@@ -1,3 +1,4 @@
+import { CBLocalizedTextObject } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import {
     IF,
     IS_NOT,
@@ -12,17 +13,13 @@ import {
     ValueOf,
     YES
 } from "uicore-ts"
-import { CBLocalizedTextObject } from "cbcore-ts/compiledScripts/CBDataInterfaces"
+import { LanguageService } from "../LanguageService"
 import { CBTableHeaderView } from "./CBTableHeaderView"
 import { CBTableRowView } from "./CBTableRowView"
 import { CellView } from "./CellView"
 
 
-
-
-
 export interface CBTableViewCellDescriptor {
-    
     
     
     keyPath: string;
@@ -51,9 +48,6 @@ export interface CBTableViewCellDescriptor {
 export class CBDataView extends UIView {
     
     
-    
-    
-    
     private _descriptors: CBTableViewCellDescriptor[] = []
     
     private _filteringArray: string[] = []
@@ -78,13 +72,6 @@ export class CBDataView extends UIView {
         
         super(elementID)
         
-    }
-    
-
-    initView(elementID: string, viewHTMLElement: HTMLElement, initViewData?: any) {
-        
-        super.initView(elementID, viewHTMLElement, initViewData)
-        
         this.titleLabel = new UITextView(this.elementID + "TitleLabel", UITextView.type.header5)
         this.addSubview(this.titleLabel)
         
@@ -105,8 +92,6 @@ export class CBDataView extends UIView {
         
         this.tableView = new UITableView(this.elementID + "TableView")
         this.addSubview(this.tableView)
-        
-        
         
         
         this.tableView.heightForRowWithIndex =
@@ -149,9 +134,6 @@ export class CBDataView extends UIView {
         }
         
         
-        
-        
-        
         this.searchTextField.addTargetForControlEvent(
             UITextField.controlEvent.TextChange,
             (sender, event) => {
@@ -166,11 +148,7 @@ export class CBDataView extends UIView {
             }
         )
         
-        
     }
-    
-    
-    
     
     
     wasAddedToViewTree() {
@@ -180,9 +158,6 @@ export class CBDataView extends UIView {
         this.updateTableDataByFiltering()
         
     }
-    
-    
-    
     
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
@@ -197,9 +172,6 @@ export class CBDataView extends UIView {
         
         
     }
-    
-    
-    
     
     
     get descriptors(): CBTableViewCellDescriptor[] {
@@ -323,7 +295,6 @@ export class CBDataView extends UIView {
     }
     
     
-    
     async sortTableData() {
         
         this.filteredData = (await this._stringSorter.sortedData(
@@ -335,14 +306,11 @@ export class CBDataView extends UIView {
     }
     
     
-    
-    
-    
     layoutSubviews() {
         
         super.layoutSubviews()
-    
-    
+        
+        
         const padding = this.core.paddingLength
         const labelHeight = padding
         
@@ -381,17 +349,11 @@ export class CBDataView extends UIView {
         )
         
         
-        
-        
-        
     }
     
     
-    
-    
-    
     intrinsicContentHeight(constrainingWidth: number = 0): number {
-    
+        
         const padding = this.core.paddingLength
         const labelHeight = padding
         
@@ -401,9 +363,6 @@ export class CBDataView extends UIView {
         return result
         
     }
-    
-    
-    
     
     
 }

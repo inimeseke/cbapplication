@@ -5,6 +5,7 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __reflectGet = Reflect.get;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
   get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
 }) : x)(function(x) {
@@ -60,23 +61,24 @@ var __async = (__this, __arguments, generator) => {
 // node_modules/uicore-ts/compiledScripts/UICoreExtensionValueObject.js
 var require_UICoreExtensionValueObject = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UICoreExtensionValueObject.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UICoreExtensionValueObject_exports = {};
     __export2(UICoreExtensionValueObject_exports, {
       UICoreExtensionValueObject: () => UICoreExtensionValueObject
@@ -88,36 +90,38 @@ var require_UICoreExtensionValueObject = __commonJS({
         this.value = value;
       }
     };
+    __name(UICoreExtensionValueObject, "UICoreExtensionValueObject");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UITimer.js
 var require_UITimer = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UITimer.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITimer_exports = {};
     __export2(UITimer_exports, {
       UITimer: () => UITimer
     });
     module.exports = __toCommonJS2(UITimer_exports);
     var YES9 = true;
-    var NO9 = false;
+    var NO10 = false;
     var UITimer = class {
       constructor(interval, repeats, target) {
         this.interval = interval;
@@ -127,12 +131,12 @@ var require_UITimer = __commonJS({
         this.schedule();
       }
       schedule() {
-        const callback = function() {
-          if (this.repeats == NO9) {
+        const callback = /* @__PURE__ */ __name(() => {
+          if (this.repeats == NO10) {
             this.invalidate();
           }
           this.target();
-        }.bind(this);
+        }, "callback");
         this._intervalID = window.setInterval(callback, this.interval * 1e3);
       }
       reschedule() {
@@ -140,7 +144,7 @@ var require_UITimer = __commonJS({
         this.schedule();
       }
       fire() {
-        if (this.repeats == NO9) {
+        if (this.repeats == NO10) {
           this.invalidate();
         } else {
           this.reschedule();
@@ -150,69 +154,71 @@ var require_UITimer = __commonJS({
       invalidate() {
         if (this.isValid) {
           clearInterval(this._intervalID);
-          this.isValid = NO9;
+          this.isValid = NO10;
         }
       }
     };
+    __name(UITimer, "UITimer");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIObject.js
 var require_UIObject = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIObject.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIObject_exports = {};
     __export2(UIObject_exports, {
-      CALL: () => CALL,
+      CALL: () => CALL2,
       EXTEND: () => EXTEND,
       FIRST: () => FIRST3,
       FIRST_OR_NIL: () => FIRST_OR_NIL2,
       IF: () => IF3,
-      IS: () => IS10,
+      IS: () => IS11,
       IS_AN_EMAIL_ADDRESS: () => IS_AN_EMAIL_ADDRESS,
       IS_DEFINED: () => IS_DEFINED3,
       IS_LIKE_NULL: () => IS_LIKE_NULL,
       IS_NIL: () => IS_NIL,
-      IS_NOT: () => IS_NOT7,
+      IS_NOT: () => IS_NOT8,
       IS_NOT_LIKE_NULL: () => IS_NOT_LIKE_NULL,
       IS_NOT_NIL: () => IS_NOT_NIL2,
       IS_UNDEFINED: () => IS_UNDEFINED2,
       LAZY_VALUE: () => LAZY_VALUE,
       MAKE_ID: () => MAKE_ID4,
-      NO: () => NO9,
-      NilFunction: () => NilFunction,
+      NO: () => NO10,
       RETURNER: () => RETURNER2,
       UIFunctionCall: () => UIFunctionCall,
       UIFunctionExtender: () => UIFunctionExtender,
       UILazyPropertyValue: () => UILazyPropertyValue,
       UIObject: () => UIObject2,
       YES: () => YES9,
-      nil: () => nil12,
+      nil: () => nil13,
       wrapInNil: () => wrapInNil
     });
     module.exports = __toCommonJS2(UIObject_exports);
     var import_UICoreExtensionValueObject = require_UICoreExtensionValueObject();
     var import_UITimer = require_UITimer();
     function NilFunction() {
-      return nil12;
+      return nil13;
     }
-    var nil12 = new Proxy(Object.assign(NilFunction, { "class": nil12, "className": "Nil" }), {
+    __name(NilFunction, "NilFunction");
+    var nil13 = new Proxy(Object.assign(NilFunction, { "class": null, "className": "Nil" }), {
       get(target, name) {
         if (name == Symbol.toPrimitive) {
           return function(hint) {
@@ -226,13 +232,13 @@ var require_UIObject = __commonJS({
           };
         }
         if (name == "toString") {
-          return function toString() {
+          return /* @__PURE__ */ __name(function toString() {
             return "";
-          };
+          }, "toString");
         }
         return NilFunction();
       },
-      set(target, name, value) {
+      set() {
         return NilFunction();
       }
     });
@@ -251,10 +257,10 @@ var require_UIObject = __commonJS({
             if (IS_NOT_LIKE_NULL(value)) {
               return value;
             }
-            return nil12;
+            return nil13;
           },
           set(target, name, value) {
-            if (IS10(target)) {
+            if (IS11(target)) {
               target[name] = value;
             }
             return YES9;
@@ -263,57 +269,65 @@ var require_UIObject = __commonJS({
       }
       return result;
     }
+    __name(wrapInNil, "wrapInNil");
     var YES9 = true;
-    var NO9 = false;
-    function IS10(object) {
-      if (object && object !== nil12) {
+    var NO10 = false;
+    function IS11(object) {
+      if (object && object !== nil13) {
         return YES9;
       }
-      return NO9;
+      return NO10;
     }
-    function IS_NOT7(object) {
-      return !IS10(object);
+    __name(IS11, "IS");
+    function IS_NOT8(object) {
+      return !IS11(object);
     }
+    __name(IS_NOT8, "IS_NOT");
     function IS_DEFINED3(object) {
       if (object != void 0) {
         return YES9;
       }
-      return NO9;
+      return NO10;
     }
+    __name(IS_DEFINED3, "IS_DEFINED");
     function IS_UNDEFINED2(object) {
       return !IS_DEFINED3(object);
     }
+    __name(IS_UNDEFINED2, "IS_UNDEFINED");
     function IS_NIL(object) {
-      if (object === nil12) {
+      if (object === nil13) {
         return YES9;
       }
-      return NO9;
+      return NO10;
     }
+    __name(IS_NIL, "IS_NIL");
     function IS_NOT_NIL2(object) {
       return !IS_NIL(object);
     }
+    __name(IS_NOT_NIL2, "IS_NOT_NIL");
     function IS_LIKE_NULL(object) {
       return IS_UNDEFINED2(object) || IS_NIL(object) || object == null;
     }
+    __name(IS_LIKE_NULL, "IS_LIKE_NULL");
     function IS_NOT_LIKE_NULL(object) {
       return !IS_LIKE_NULL(object);
     }
+    __name(IS_NOT_LIKE_NULL, "IS_NOT_LIKE_NULL");
     function IS_AN_EMAIL_ADDRESS(email) {
       const re = /\S+@\S+\.\S+/;
       return re.test(email);
     }
+    __name(IS_AN_EMAIL_ADDRESS, "IS_AN_EMAIL_ADDRESS");
     function FIRST_OR_NIL2(...objects) {
-      const result = objects.find(function(object, index, array) {
-        return IS10(object);
-      });
-      return result || nil12;
+      const result = objects.find((object) => IS11(object));
+      return result || nil13;
     }
+    __name(FIRST_OR_NIL2, "FIRST_OR_NIL");
     function FIRST3(...objects) {
-      const result = objects.find(function(object, index, array) {
-        return IS10(object);
-      });
+      const result = objects.find((object) => IS11(object));
       return result || IF3(IS_DEFINED3(objects.lastElement))(RETURNER2(objects.lastElement))();
     }
+    __name(FIRST3, "FIRST");
     function MAKE_ID4(randomPartLength = 15) {
       let result = "";
       const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -323,18 +337,20 @@ var require_UIObject = __commonJS({
       result = result + Date.now();
       return result;
     }
+    __name(MAKE_ID4, "MAKE_ID");
     function RETURNER2(value) {
-      return (...objects) => value;
+      return (..._objects) => value;
     }
+    __name(RETURNER2, "RETURNER");
     function IF3(value) {
-      let thenFunction = nil12;
-      let elseFunction = nil12;
-      const result = function(functionToCall) {
+      let thenFunction = nil13;
+      let elseFunction = nil13;
+      const result = /* @__PURE__ */ __name(function(functionToCall) {
         thenFunction = functionToCall;
         return result.evaluateConditions;
-      };
+      }, "result");
       result.evaluateConditions = function() {
-        if (IS10(value)) {
+        if (IS11(value)) {
           return thenFunction();
         }
         return elseFunction();
@@ -342,9 +358,9 @@ var require_UIObject = __commonJS({
       result.evaluateConditions.ELSE_IF = function(otherValue) {
         const functionResult = IF3(otherValue);
         elseFunction = functionResult.evaluateConditions;
-        const functionResultEvaluateConditionsFunction = function() {
+        const functionResultEvaluateConditionsFunction = /* @__PURE__ */ __name(function() {
           return result.evaluateConditions();
-        };
+        }, "functionResultEvaluateConditionsFunction");
         functionResultEvaluateConditionsFunction.ELSE_IF = functionResult.evaluateConditions.ELSE_IF;
         functionResultEvaluateConditionsFunction.ELSE = functionResult.evaluateConditions.ELSE;
         functionResult.evaluateConditions = functionResultEvaluateConditionsFunction;
@@ -356,6 +372,7 @@ var require_UIObject = __commonJS({
       };
       return result;
     }
+    __name(IF3, "IF");
     var UIFunctionCall = class {
       constructor(...parameters) {
         this.isAUIFunctionCallObject = YES9;
@@ -366,10 +383,11 @@ var require_UIObject = __commonJS({
         functionToCall(...parameters);
       }
     };
-    function CALL(...objects) {
-      const result = new UIFunctionCall(...objects);
-      return result;
+    __name(UIFunctionCall, "UIFunctionCall");
+    function CALL2(...objects) {
+      return new UIFunctionCall(...objects);
     }
+    __name(CALL2, "CALL");
     var UIFunctionExtender = class {
       constructor(extendingFunction) {
         this.isAUIFunctionExtenderObject = YES9;
@@ -383,30 +401,32 @@ var require_UIObject = __commonJS({
           const boundExtendingFunction = extendingFunction.bind(this);
           boundExtendingFunction(...objects);
         }
+        __name(extendedFunction, "extendedFunction");
         return extendedFunction;
       }
     };
+    __name(UIFunctionExtender, "UIFunctionExtender");
     function EXTEND(extendingFunction) {
-      const result = new UIFunctionExtender(extendingFunction);
-      return result;
+      return new UIFunctionExtender(extendingFunction);
     }
+    __name(EXTEND, "EXTEND");
     var UILazyPropertyValue = class {
       constructor(initFunction) {
         this.isAUILazyPropertyValueObject = YES9;
         this.initFunction = initFunction;
       }
       setLazyPropertyValue(key, target) {
-        let isValueInitialized = NO9;
-        let _value = nil12;
-        const initValue = () => {
+        let isValueInitialized = NO10;
+        let _value = nil13;
+        const initValue = /* @__PURE__ */ __name(() => {
           _value = this.initFunction();
           isValueInitialized = YES9;
-          this.initFunction = nil12;
-        };
+          this.initFunction = nil13;
+        }, "initValue");
         if (delete target[key]) {
           Object.defineProperty(target, key, {
             get: function() {
-              if (IS_NOT7(isValueInitialized)) {
+              if (IS_NOT8(isValueInitialized)) {
                 initValue();
               }
               return _value;
@@ -420,10 +440,11 @@ var require_UIObject = __commonJS({
         }
       }
     };
+    __name(UILazyPropertyValue, "UILazyPropertyValue");
     function LAZY_VALUE(initFunction) {
-      const result = new UILazyPropertyValue(initFunction);
-      return result;
+      return new UILazyPropertyValue(initFunction);
     }
+    __name(LAZY_VALUE, "LAZY_VALUE");
     var UIObject2 = class {
       constructor() {
       }
@@ -433,28 +454,28 @@ var require_UIObject = __commonJS({
       get superclass() {
         return Object.getPrototypeOf(Object.getPrototypeOf(this)).constructor;
       }
+      isKindOfClass(classObject) {
+        if (this.isMemberOfClass(classObject)) {
+          return YES9;
+        }
+        for (let superclassObject = this.superclass; IS11(superclassObject); superclassObject = superclassObject.superclass) {
+          if (superclassObject == classObject) {
+            return YES9;
+          }
+        }
+        return NO10;
+      }
+      isMemberOfClass(classObject) {
+        return this.class == classObject;
+      }
       static wrapObject(object) {
-        if (IS_NOT7(object)) {
-          return nil12;
+        if (IS_NOT8(object)) {
+          return nil13;
         }
         if (object instanceof UIObject2) {
           return object;
         }
         return Object.assign(new UIObject2(), object);
-      }
-      isKindOfClass(classObject) {
-        if (this.isMemberOfClass(classObject)) {
-          return YES9;
-        }
-        for (let superclassObject = this.superclass; IS10(superclassObject); superclassObject = superclassObject.superclass) {
-          if (superclassObject == classObject) {
-            return YES9;
-          }
-        }
-        return NO9;
-      }
-      isMemberOfClass(classObject) {
-        return this.class == classObject;
       }
       valueForKey(key) {
         return this[key];
@@ -463,7 +484,7 @@ var require_UIObject = __commonJS({
         return UIObject2.valueForKeyPath(keyPath, this);
       }
       static valueForKeyPath(keyPath, object) {
-        if (IS_NOT7(keyPath)) {
+        if (IS_NOT8(keyPath)) {
           return object;
         }
         const keys = keyPath.split(".");
@@ -474,14 +495,12 @@ var require_UIObject = __commonJS({
             currentObject = currentObject[key.substring(2)];
             const remainingKeyPath = keys.slice(i + 1).join(".");
             const currentArray = currentObject;
-            currentObject = currentArray.map(function(subObject, index, array) {
-              return UIObject2.valueForKeyPath(remainingKeyPath, subObject);
-            });
+            currentObject = currentArray.map((subObject) => UIObject2.valueForKeyPath(remainingKeyPath, subObject));
             break;
           }
           currentObject = currentObject[key];
-          if (IS_NOT7(currentObject)) {
-            currentObject = nil12;
+          if (IS_NOT8(currentObject)) {
+            currentObject = nil13;
           }
         }
         return currentObject;
@@ -491,13 +510,13 @@ var require_UIObject = __commonJS({
       }
       static setValueForKeyPath(keyPath, value, currentObject, createPath) {
         const keys = keyPath.split(".");
-        let didSetValue = NO9;
-        keys.forEach(function(key, index, array) {
+        let didSetValue = NO10;
+        keys.forEach((key, index, array) => {
           if (index == array.length - 1 && IS_NOT_LIKE_NULL(currentObject)) {
             currentObject[key] = value;
             didSetValue = YES9;
             return;
-          } else if (IS_NOT7(currentObject)) {
+          } else if (IS_NOT8(currentObject)) {
             return;
           }
           const currentObjectValue = currentObject[key];
@@ -515,12 +534,13 @@ var require_UIObject = __commonJS({
         return UIObject2.configureWithObject(this, object);
       }
       static configureWithObject(configurationTarget, object) {
-        const isAnObject = (item) => item && typeof item === "object" && !Array.isArray(item) && !(item instanceof import_UICoreExtensionValueObject.UICoreExtensionValueObject);
+        const isAnObject = /* @__PURE__ */ __name((item) => item && typeof item === "object" && !Array.isArray(item) && !(item instanceof import_UICoreExtensionValueObject.UICoreExtensionValueObject), "isAnObject");
         function isAClass(funcOrClass) {
-          const isFunction = (functionToCheck) => functionToCheck && {}.toString.call(functionToCheck) === "[object Function]";
+          const isFunction = /* @__PURE__ */ __name((functionToCheck) => functionToCheck && {}.toString.call(functionToCheck) === "[object Function]", "isFunction");
           const propertyNames = Object.getOwnPropertyNames(funcOrClass);
           return isFunction(funcOrClass) && !propertyNames.includes("arguments") && propertyNames.includes("prototype");
         }
+        __name(isAClass, "isAClass");
         let keyPathsAndValues = [];
         function prepareKeyPathsAndValues(target, source, keyPath = "") {
           if ((isAnObject(target) || isAClass(target)) && isAnObject(source)) {
@@ -532,6 +552,7 @@ var require_UIObject = __commonJS({
                   keyPath: valueKeyPath.replace(".", "")
                 });
               }
+              __name(addValueAndKeyPath, "addValueAndKeyPath");
               if (isAnObject(sourceValue) || isAClass(sourceValue)) {
                 if (!(key in target) || target[key] instanceof Function) {
                   addValueAndKeyPath(sourceValue);
@@ -546,6 +567,7 @@ var require_UIObject = __commonJS({
             });
           }
         }
+        __name(prepareKeyPathsAndValues, "prepareKeyPathsAndValues");
         prepareKeyPathsAndValues(configurationTarget, object);
         keyPathsAndValues = keyPathsAndValues.sort((a, b) => {
           const firstKeyPath = a.keyPath.split(".").length;
@@ -561,7 +583,7 @@ var require_UIObject = __commonJS({
         keyPathsAndValues.forEach((valueAndKeyPath) => {
           const keyPath = valueAndKeyPath.keyPath;
           let value = valueAndKeyPath.value;
-          const getTargetFunction = (bindThis = NO9) => {
+          const getTargetFunction = /* @__PURE__ */ __name((bindThis = NO10) => {
             let result = UIObject2.valueForKeyPath(keyPath, configurationTarget);
             if (bindThis) {
               const indexOfDot = keyPath.lastIndexOf(".");
@@ -569,7 +591,7 @@ var require_UIObject = __commonJS({
               result = result.bind(thisObject);
             }
             return result;
-          };
+          }, "getTargetFunction");
           if (value instanceof UILazyPropertyValue) {
             const indexOfDot = keyPath.lastIndexOf(".");
             const thisObject = UIObject2.valueForKeyPath(keyPath.substring(0, indexOfDot), configurationTarget);
@@ -596,32 +618,34 @@ var require_UIObject = __commonJS({
         return this;
       }
       performFunctionWithDelay(delay, functionToCall) {
-        new import_UITimer.UITimer(delay, NO9, functionToCall);
+        new import_UITimer.UITimer(delay, NO10, functionToCall);
       }
     };
+    __name(UIObject2, "UIObject");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/ClientCheckers.js
 var require_ClientCheckers = __commonJS({
   "node_modules/uicore-ts/compiledScripts/ClientCheckers.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var ClientCheckers_exports = {};
     __export2(ClientCheckers_exports, {
       IS_FIREFOX: () => IS_FIREFOX,
@@ -636,23 +660,24 @@ var require_ClientCheckers = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIColor.js
 var require_UIColor = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIColor.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIColor_exports = {};
     __export2(UIColor_exports, {
       UIColor: () => UIColor16
@@ -929,120 +954,108 @@ var require_UIColor = __commonJS({
         return result;
       }
     };
+    __name(UIColor16, "UIColor");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UICoreExtensions.js
 var require_UICoreExtensions = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UICoreExtensions.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
-      for (var name in all)
-        __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
-    var __async2 = (__this, __arguments, generator) => {
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
+    var __async2 = /* @__PURE__ */ __name((__this, __arguments, generator) => {
       return new Promise((resolve, reject) => {
-        var fulfilled = (value) => {
+        var fulfilled = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.next(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var rejected = (value) => {
+        }, "fulfilled");
+        var rejected = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.throw(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+        }, "rejected");
+        var step = /* @__PURE__ */ __name((x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected), "step");
         step((generator = generator.apply(__this, __arguments)).next());
       });
-    };
+    }, "__async");
     var UICoreExtensions_exports = {};
-    __export2(UICoreExtensions_exports, {
-      PrimitiveNumber: () => PrimitiveNumber,
-      promisedProperties: () => promisedProperties
-    });
     module.exports = __toCommonJS2(UICoreExtensions_exports);
     var import_UICoreExtensionValueObject = require_UICoreExtensionValueObject();
     var import_UIObject = require_UIObject();
     var YES9 = true;
-    var NO9 = false;
-    if ("removeElementAtIndex" in Array.prototype == NO9) {
+    var NO10 = false;
+    if ("removeElementAtIndex" in Array.prototype == NO10) {
       Array.prototype.removeElementAtIndex = function(index) {
         if (index >= 0 && index < this.length) {
           this.splice(index, 1);
         }
       };
     }
-    if ("removeElement" in Array.prototype == NO9) {
+    if ("removeElement" in Array.prototype == NO10) {
       Array.prototype.removeElement = function(element) {
         this.removeElementAtIndex(this.indexOf(element));
       };
     }
-    if ("insertElementAtIndex" in Array.prototype == NO9) {
+    if ("insertElementAtIndex" in Array.prototype == NO10) {
       Array.prototype.insertElementAtIndex = function(index, element) {
         if (index >= 0 && index <= this.length) {
           this.splice(index, 0, element);
         }
       };
     }
-    if ("replaceElementAtIndex" in Array.prototype == NO9) {
+    if ("replaceElementAtIndex" in Array.prototype == NO10) {
       Array.prototype.replaceElementAtIndex = function(index, element) {
         this.removeElementAtIndex(index);
         this.insertElementAtIndex(index, element);
       };
     }
-    if ("contains" in Array.prototype == NO9) {
+    if ("contains" in Array.prototype == NO10) {
       Array.prototype.contains = function(element) {
-        const result = this.indexOf(element) != -1;
-        return result;
+        return this.indexOf(element) != -1;
       };
     }
-    if ("containsAny" in Array.prototype == NO9) {
+    if ("containsAny" in Array.prototype == NO10) {
       Array.prototype.containsAny = function(elements) {
-        const result = this.anyMatch(function(element, index, array) {
-          return elements.contains(element);
-        });
-        return result;
+        return this.anyMatch((element) => elements.contains(element));
       };
     }
-    if ("anyMatch" in Array.prototype == NO9) {
+    if ("anyMatch" in Array.prototype == NO10) {
       Array.prototype.anyMatch = function(functionToCall) {
-        const result = this.findIndex(functionToCall) > -1;
-        return result;
+        return this.findIndex(functionToCall) > -1;
       };
     }
-    if ("noneMatch" in Array.prototype == NO9) {
+    if ("noneMatch" in Array.prototype == NO10) {
       Array.prototype.noneMatch = function(functionToCall) {
-        const result = this.findIndex(functionToCall) == -1;
-        return result;
+        return this.findIndex(functionToCall) == -1;
       };
     }
-    if ("allMatch" in Array.prototype == NO9) {
+    if ("allMatch" in Array.prototype == NO10) {
       Array.prototype.allMatch = function(functionToCall) {
         function reversedFunction(value, index, array) {
           return !functionToCall(value, index, array);
         }
-        const result = this.findIndex(reversedFunction) == -1;
-        return result;
+        __name(reversedFunction, "reversedFunction");
+        return this.findIndex(reversedFunction) == -1;
       };
     }
-    if ("findAsyncSequential" in Array.prototype == NO9) {
+    if ("findAsyncSequential" in Array.prototype == NO10) {
       Array.prototype.findAsyncSequential = function(functionToCall) {
         function findAsyncSequential(array, predicate) {
           return __async2(this, null, function* () {
@@ -1054,11 +1067,11 @@ var require_UICoreExtensions = __commonJS({
             return void 0;
           });
         }
-        const result = findAsyncSequential(this, functionToCall);
-        return result;
+        __name(findAsyncSequential, "findAsyncSequential");
+        return findAsyncSequential(this, functionToCall);
       };
     }
-    if ("groupedBy" in Array.prototype == NO9) {
+    if ("groupedBy" in Array.prototype == NO10) {
       Array.prototype.groupedBy = function(funcProp) {
         return this.reduce(function(acc, val) {
           (acc[funcProp(val)] = acc[funcProp(val)] || []).push(val);
@@ -1066,12 +1079,11 @@ var require_UICoreExtensions = __commonJS({
         }, {});
       };
     }
-    if ("firstElement" in Array.prototype == NO9) {
+    if ("firstElement" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "firstElement", {
-        get: function firstElement() {
-          const result = this[0];
-          return result;
-        },
+        get: /* @__PURE__ */ __name(function firstElement() {
+          return this[0];
+        }, "firstElement"),
         set: function(element) {
           if (this.length == 0) {
             this.push(element);
@@ -1081,12 +1093,11 @@ var require_UICoreExtensions = __commonJS({
         }
       });
     }
-    if ("lastElement" in Array.prototype == NO9) {
+    if ("lastElement" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "lastElement", {
-        get: function lastElement() {
-          const result = this[this.length - 1];
-          return result;
-        },
+        get: /* @__PURE__ */ __name(function lastElement() {
+          return this[this.length - 1];
+        }, "lastElement"),
         set: function(element) {
           if (this.length == 0) {
             this.push(element);
@@ -1096,12 +1107,12 @@ var require_UICoreExtensions = __commonJS({
         }
       });
     }
-    if ("everyElement" in Array.prototype == NO9) {
+    if ("everyElement" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "everyElement", {
-        get: function everyElement() {
+        get: /* @__PURE__ */ __name(function everyElement() {
           const valueKeys = [];
-          const targetFunction = (objects) => {
-            const result2 = this.map((element, index, array) => {
+          const targetFunction = /* @__PURE__ */ __name((objects) => {
+            return this.map((element) => {
               const thisObject = import_UIObject.UIObject.valueForKeyPath(
                 valueKeys.arrayByTrimmingToLengthIfLonger(valueKeys.length - 1).join("."),
                 element
@@ -1112,14 +1123,13 @@ var require_UICoreExtensions = __commonJS({
               );
               return elementFunction();
             });
-            return result2;
-          };
+          }, "targetFunction");
           const result = new Proxy(
             targetFunction,
             {
-              get: (target, key, receiver) => {
+              get: (target, key, _receiver) => {
                 if (key == "UI_elementValues") {
-                  return this.map((element, index, array) => import_UIObject.UIObject.valueForKeyPath(
+                  return this.map((element) => import_UIObject.UIObject.valueForKeyPath(
                     valueKeys.join("."),
                     element
                   ));
@@ -1127,58 +1137,52 @@ var require_UICoreExtensions = __commonJS({
                 valueKeys.push(key);
                 return result;
               },
-              set: (target, key, value, receiver) => {
+              set: (target, key, value, _receiver) => {
                 valueKeys.push(key);
-                this.forEach((element, index, array) => {
-                  import_UIObject.UIObject.setValueForKeyPath(valueKeys.join("."), value, element, YES9);
-                });
+                this.forEach((element) => import_UIObject.UIObject.setValueForKeyPath(valueKeys.join("."), value, element, YES9));
                 return true;
               }
             }
           );
           return result;
-        },
+        }, "everyElement"),
         set: function(element) {
-          for (var i = 0; i < this.length; ++i) {
+          for (let i = 0; i < this.length; ++i) {
             this[i] = element;
           }
         }
       });
     }
-    if ("copy" in Array.prototype == NO9) {
+    if ("copy" in Array.prototype == NO10) {
       Array.prototype.copy = function() {
-        const result = this.slice(0);
-        return result;
+        return this.slice(0);
       };
     }
-    if ("arrayByRepeating" in Array.prototype == NO9) {
+    if ("arrayByRepeating" in Array.prototype == NO10) {
       Array.prototype.arrayByRepeating = function(numberOfRepetitions) {
         const result = [];
-        for (var i = 0; i < numberOfRepetitions; i++) {
-          this.forEach(function(element, index, array) {
-            result.push(element);
-          });
+        for (let i = 0; i < numberOfRepetitions; i++) {
+          this.forEach((element) => result.push(element));
         }
         return result;
       };
     }
-    if ("arrayByTrimmingToLengthIfLonger" in Array.prototype == NO9) {
+    if ("arrayByTrimmingToLengthIfLonger" in Array.prototype == NO10) {
       Array.prototype.arrayByTrimmingToLengthIfLonger = function(maxLength) {
         const result = [];
-        for (var i = 0; i < maxLength && i < this.length; i++) {
+        for (let i = 0; i < maxLength && i < this.length; i++) {
           result.push(this[i]);
         }
         return result;
       };
     }
-    if ("summedValue" in Array.prototype == NO9) {
+    if ("summedValue" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "summedValue", {
-        get: function summedValue() {
-          const result = this.reduce(function(a, b) {
+        get: /* @__PURE__ */ __name(function summedValue() {
+          return this.reduce(function(a, b) {
             return a + b;
           }, 0);
-          return result;
-        }
+        }, "summedValue")
       });
     }
     Array.prototype.max = function() {
@@ -1187,7 +1191,7 @@ var require_UICoreExtensions = __commonJS({
     Array.prototype.min = function() {
       return Math.min.apply(null, this);
     };
-    if ("isEqualToArray" in Array.prototype == NO9) {
+    if ("isEqualToArray" in Array.prototype == NO10) {
       Array.prototype.isEqualToArray = function(array, keyPath) {
         if (!array) {
           return false;
@@ -1215,39 +1219,45 @@ var require_UICoreExtensions = __commonJS({
       };
       Object.defineProperty(Array.prototype, "isEqualToArray", { enumerable: false });
     }
-    if ("forEach" in Object.prototype == NO9) {
+    if ("forEach" in Object.prototype == NO10) {
       Object.prototype.forEach = function(callbackFunction) {
         const keys = Object.keys(this);
-        keys.forEach(function(key, index, array) {
-          callbackFunction(this[key], key);
-        }.bind(this));
+        let shouldStopLooping = NO10;
+        function stopLooping() {
+          shouldStopLooping = YES9;
+        }
+        __name(stopLooping, "stopLooping");
+        keys.anyMatch((key) => {
+          callbackFunction(this[key], key, stopLooping);
+          return shouldStopLooping;
+        });
       };
       Object.defineProperty(Object.prototype, "forEach", { enumerable: false });
     }
-    if ("allValues" in Object.prototype == NO9) {
+    if ("allValues" in Object.prototype == NO10) {
       Object.defineProperty(Object.prototype, "allValues", {
         get: function() {
           const values = [];
-          this.forEach(function(value) {
+          this.forEach((value) => {
             values.push(value);
           });
           return values;
         }
       });
     }
-    if ("allKeys" in Object.prototype == NO9) {
+    if ("allKeys" in Object.prototype == NO10) {
       Object.defineProperty(Object.prototype, "allKeys", {
         get: function() {
-          const values = Object.keys(this);
-          return values;
+          return Object.keys(this);
         }
       });
     }
-    if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO9) {
+    if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO10) {
       Object.prototype.objectByCopyingValuesRecursivelyFromObject = function(object) {
         function isAnObject(item) {
           return item && typeof item === "object" && !Array.isArray(item);
         }
+        __name(isAnObject, "isAnObject");
         function mergeRecursively(target, source) {
           const output = Object.assign({}, target);
           if (isAnObject(target) && isAnObject(source)) {
@@ -1261,72 +1271,58 @@ var require_UICoreExtensions = __commonJS({
           }
           return output;
         }
-        const result = mergeRecursively(this, object);
-        return result;
+        __name(mergeRecursively, "mergeRecursively");
+        return mergeRecursively(this, object);
       };
       Object.defineProperty(Object.prototype, "objectByCopyingValuesRecursivelyFromObject", { enumerable: false });
     }
-    if ("asValueObject" in Object.prototype == NO9) {
+    if ("asValueObject" in Object.prototype == NO10) {
       Object.prototype.asValueObject = function() {
-        const result = new import_UICoreExtensionValueObject.UICoreExtensionValueObject(this);
-        return result;
+        return new import_UICoreExtensionValueObject.UICoreExtensionValueObject(this);
       };
       Object.defineProperty(Object.prototype, "asValueObject", { enumerable: false });
     }
-    function promisedProperties(object) {
-      let promisedProperties2 = [];
-      const objectKeys = Object.keys(object);
-      objectKeys.forEach((key) => promisedProperties2.push(object[key]));
-      return Promise.all(promisedProperties2).then((resolvedValues) => {
-        return resolvedValues.reduce((resolvedObject, property, index) => {
-          resolvedObject[objectKeys[index]] = property;
-          return resolvedObject;
-        }, object);
-      });
-    }
-    if ("contains" in String.prototype == NO9) {
+    if ("contains" in String.prototype == NO10) {
       String.prototype.contains = function(string) {
-        const result = this.indexOf(string) != -1;
-        return result;
+        return this.indexOf(string) != -1;
       };
       Object.defineProperty(Object.prototype, "contains", { enumerable: false });
     }
-    if ("capitalizedString" in String.prototype == NO9) {
+    if ("capitalizedString" in String.prototype == NO10) {
       Object.defineProperty(Object.prototype, "capitalizedString", {
         get: function() {
-          const result = this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
-          return result;
+          return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
         }
       });
     }
-    if ("numericalValue" in String.prototype == NO9) {
+    if ("numericalValue" in String.prototype == NO10) {
       Object.defineProperty(String.prototype, "numericalValue", {
-        get: function numericalValue() {
-          const result = Number(this);
-          return result;
-        }
+        get: /* @__PURE__ */ __name(function numericalValue() {
+          return Number(this);
+        }, "numericalValue")
       });
     }
-    if ("isAString" in String.prototype == NO9) {
+    if ("integerValue" in String.prototype == NO10) {
+      Object.defineProperty(String.prototype, "integerValue", {
+        get: /* @__PURE__ */ __name(function integerValue() {
+          return Number(this).integerValue;
+        }, "integerValue")
+      });
+    }
+    if ("isAString" in String.prototype == NO10) {
       String.prototype.isAString = YES9;
     }
-    if ("isANumber" in Number.prototype == NO9) {
+    if ("isANumber" in Number.prototype == NO10) {
       Number.prototype.isANumber = YES9;
     }
-    if ("integerValue" in Number.prototype == NO9) {
+    if ("integerValue" in Number.prototype == NO10) {
       Object.defineProperty(Number.prototype, "integerValue", {
         get: function() {
-          const result = parseInt("" + (Math.round(this) + 0.5));
-          return result;
+          return parseInt("" + (Math.round(this) + 0.5));
         }
       });
     }
-    var PrimitiveNumber = class {
-      static [Symbol.hasInstance](x) {
-        return;
-      }
-    };
-    if ("integerValue" in Boolean.prototype == NO9) {
+    if ("integerValue" in Boolean.prototype == NO10) {
       Object.defineProperty(Boolean.prototype, "integerValue", {
         get: function() {
           if (this == true) {
@@ -1336,12 +1332,11 @@ var require_UICoreExtensions = __commonJS({
         }
       });
     }
-    if ("dateString" in Date.prototype == NO9) {
+    if ("dateString" in Date.prototype == NO10) {
       Object.defineProperty(Date.prototype, "dateString", {
-        get: function dateString() {
-          const result = ("0" + this.getDate()).slice(-2) + "-" + ("0" + (this.getMonth() + 1)).slice(-2) + "-" + this.getFullYear() + " " + ("0" + this.getHours()).slice(-2) + ":" + ("0" + this.getMinutes()).slice(-2);
-          return result;
-        }
+        get: /* @__PURE__ */ __name(function dateString() {
+          return ("0" + this.getDate()).slice(-2) + "-" + ("0" + (this.getMonth() + 1)).slice(-2) + "-" + this.getFullYear() + " " + ("0" + this.getHours()).slice(-2) + ":" + ("0" + this.getMinutes()).slice(-2);
+        }, "dateString")
       });
     }
   }
@@ -1350,30 +1345,31 @@ var require_UICoreExtensions = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIRoute.js
 var require_UIRoute = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIRoute.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIRoute_exports = {};
     __export2(UIRoute_exports, {
-      UIRoute: () => UIRoute7
+      UIRoute: () => UIRoute8
     });
     module.exports = __toCommonJS2(UIRoute_exports);
     var import_UIObject = require_UIObject();
-    var UIRoute7 = class extends Array {
+    var UIRoute8 = class extends Array {
       constructor(hash) {
         super();
         if (!hash || !hash.startsWith) {
@@ -1384,7 +1380,7 @@ var require_UIRoute = __commonJS({
         }
         hash = decodeURIComponent(hash);
         const components = hash.split("]");
-        components.forEach(function(component, index, array) {
+        components.forEach((component) => {
           const componentName = component.split("[")[0];
           const parameters = {};
           if (!componentName) {
@@ -1392,7 +1388,7 @@ var require_UIRoute = __commonJS({
           }
           const parametersString = component.split("[")[1] || "";
           const parameterPairStrings = parametersString.split(",") || [];
-          parameterPairStrings.forEach(function(pairString, index2, array2) {
+          parameterPairStrings.forEach((pairString) => {
             const keyAndValueArray = pairString.split(":");
             const key = decodeURIComponent(keyAndValueArray[0]);
             const value = decodeURIComponent(keyAndValueArray[1]);
@@ -1404,10 +1400,10 @@ var require_UIRoute = __commonJS({
             name: componentName,
             parameters
           });
-        }, this);
+        });
       }
       static get currentRoute() {
-        return new UIRoute7(window.location.hash);
+        return new UIRoute8(window.location.hash);
       }
       apply() {
         window.location.hash = this.stringRepresentation;
@@ -1416,7 +1412,7 @@ var require_UIRoute = __commonJS({
         window.location.replace(this.linkRepresentation);
       }
       copy() {
-        var result = new UIRoute7();
+        var result = new UIRoute8();
         result = Object.assign(result, this);
         return result;
       }
@@ -1527,57 +1523,59 @@ var require_UIRoute = __commonJS({
         return result;
       }
     };
+    __name(UIRoute8, "UIRoute");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIViewController.js
 var require_UIViewController = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIViewController.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
-    var __async2 = (__this, __arguments, generator) => {
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
+    var __async2 = /* @__PURE__ */ __name((__this, __arguments, generator) => {
       return new Promise((resolve, reject) => {
-        var fulfilled = (value) => {
+        var fulfilled = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.next(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var rejected = (value) => {
+        }, "fulfilled");
+        var rejected = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.throw(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+        }, "rejected");
+        var step = /* @__PURE__ */ __name((x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected), "step");
         step((generator = generator.apply(__this, __arguments)).next());
       });
-    };
+    }, "__async");
     var UIViewController_exports = {};
     __export2(UIViewController_exports, {
-      UIViewController: () => UIViewController6
+      UIViewController: () => UIViewController7
     });
     module.exports = __toCommonJS2(UIViewController_exports);
     var import_UIObject = require_UIObject();
     var import_UIRoute = require_UIRoute();
-    var UIViewController6 = class extends import_UIObject.UIObject {
+    var UIViewController7 = class extends import_UIObject.UIObject {
       constructor(view) {
         super();
         this.view = view;
@@ -1648,14 +1646,12 @@ var require_UIViewController = __commonJS({
         if (!this.hasChildViewController(viewController)) {
           viewController.willMoveToParentViewController(this);
           this.childViewControllers.push(viewController);
+          this.view.addSubview(viewController.view);
+          viewController.didMoveToParentViewController(this);
         }
       }
       removeFromParentViewController() {
-        const index = this.parentViewController.childViewControllers.indexOf(this);
-        if (index > -1) {
-          this.parentViewController.childViewControllers.splice(index, 1);
-          this.parentViewController = import_UIObject.nil;
-        }
+        this.parentViewController.removeChildViewController(this);
       }
       willMoveToParentViewController(parentViewController) {
       }
@@ -1666,7 +1662,12 @@ var require_UIViewController = __commonJS({
         controller = (0, import_UIObject.FIRST_OR_NIL)(controller);
         controller.viewWillDisappear();
         if ((0, import_UIObject.IS)(controller.parentViewController)) {
-          controller.removeFromParentViewController();
+          const index = this.parentViewController.childViewControllers.indexOf(this);
+          if (index > -1) {
+            this.parentViewController.childViewControllers.splice(index, 1);
+            this.view.removeFromSuperview();
+            this.parentViewController = import_UIObject.nil;
+          }
         }
         if ((0, import_UIObject.IS)(controller.view)) {
           controller.view.removeFromSuperview();
@@ -1699,29 +1700,31 @@ var require_UIViewController = __commonJS({
         controller.handleRouteRecursively(import_UIRoute.UIRoute.currentRoute);
       }
     };
+    __name(UIViewController7, "UIViewController");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UICore.js
 var require_UICore = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UICore.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UICore_exports = {};
     __export2(UICore_exports, {
       UICore: () => UICore5
@@ -1732,7 +1735,7 @@ var require_UICore = __commonJS({
     var import_UIRoute = require_UIRoute();
     var import_UIView = require_UIView();
     var import_UIViewController = require_UIViewController();
-    var _UICore = class extends import_UIObject.UIObject {
+    var _UICore = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(rootDivElementID, rootViewControllerClass) {
         super();
         this.rootViewController = import_UIObject.nil;
@@ -1754,15 +1757,16 @@ var require_UICore = __commonJS({
         } else {
           this.rootViewController = new import_UIViewController.UIViewController(rootView);
         }
-        this.rootViewController.viewWillAppear();
-        this.rootViewController.viewDidAppear();
+        this.rootViewController.viewWillAppear().then(
+          () => this.rootViewController.viewDidAppear()
+        );
         this.rootViewController.view.addTargetForControlEvent(
           import_UIView.UIView.controlEvent.PointerUpInside,
-          function(sender, event2) {
+          () => {
             document.activeElement.blur();
           }
         );
-        const windowDidResize = function() {
+        const windowDidResize = /* @__PURE__ */ __name(() => {
           this.rootViewController._triggerLayoutViewSubviews();
           import_UIView.UIView.layoutViewsIfNeeded();
           this.rootViewController._triggerLayoutViewSubviews();
@@ -1770,26 +1774,26 @@ var require_UICore = __commonJS({
             name: _UICore.broadcastEventName.WindowDidResize,
             parameters: import_UIObject.nil
           });
-        };
-        window.addEventListener("resize", windowDidResize.bind(this));
-        const didScroll = function() {
+        }, "windowDidResize");
+        window.addEventListener("resize", windowDidResize);
+        const didScroll = /* @__PURE__ */ __name(() => {
           this.rootViewController.view.broadcastEventInSubtree({
             name: import_UIView.UIView.broadcastEventName.PageDidScroll,
             parameters: import_UIObject.nil
           });
-        }.bind(this);
+        }, "didScroll");
         window.addEventListener("scroll", didScroll, false);
-        const hashDidChange = function() {
+        const hashDidChange = /* @__PURE__ */ __name(() => {
           this.rootViewController.handleRouteRecursively(import_UIRoute.UIRoute.currentRoute);
           this.rootViewController.view.broadcastEventInSubtree({
             name: _UICore.broadcastEventName.RouteDidChange,
             parameters: import_UIObject.nil
           });
-        }.bind(this);
-        window.addEventListener("hashchange", hashDidChange.bind(this), false);
+        }, "hashDidChange");
+        window.addEventListener("hashchange", hashDidChange, false);
         hashDidChange();
       }
-    };
+    }, "_UICore");
     var UICore5 = _UICore;
     UICore5.RootViewControllerClass = import_UIObject.nil;
     UICore5.languageService = import_UIObject.nil;
@@ -1798,7 +1802,7 @@ var require_UICore = __commonJS({
       "WindowDidResize": "WindowDidResize"
     };
     Array.prototype.indexOf || (Array.prototype.indexOf = function(d, e) {
-      var a;
+      let a;
       if (null == this) {
         throw new TypeError('"this" is null or not defined');
       }
@@ -1825,41 +1829,41 @@ var require_UICore = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIPoint.js
 var require_UIPoint = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIPoint.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIPoint_exports = {};
     __export2(UIPoint_exports, {
-      UIPoint: () => UIPoint
+      UIPoint: () => UIPoint2
     });
     module.exports = __toCommonJS2(UIPoint_exports);
     var import_UIObject = require_UIObject();
-    var UIPoint = class extends import_UIObject.UIObject {
+    var UIPoint2 = class extends import_UIObject.UIObject {
       constructor(x, y) {
         super();
         this.x = x;
         this.y = y;
       }
       copy() {
-        return new UIPoint(this.x, this.y);
+        return new UIPoint2(this.x, this.y);
       }
       isEqualTo(point) {
-        const result = this.x == point.x && this.y == point.y;
-        return result;
+        return this.x == point.x && this.y == point.y;
       }
       scale(zoom) {
         const x = this.x;
@@ -1868,20 +1872,18 @@ var require_UIPoint = __commonJS({
         this.y = y * zoom;
         return this;
       }
-      add(v) {
-        this.x = this.x + v.x;
-        this.y = this.y + v.y;
+      add(point) {
+        this.x = this.x + point.x;
+        this.y = this.y + point.y;
         return this;
       }
-      subtract(v) {
-        this.x = this.x - v.x;
-        this.y = this.y - v.y;
+      subtract(point) {
+        this.x = this.x - point.x;
+        this.y = this.y - point.y;
         return this;
       }
-      to(b) {
-        const a = this;
-        const ab = b.copy().add(a.copy().scale(-1));
-        return ab;
+      to(targetPoint) {
+        return targetPoint.copy().add(this.copy().scale(-1));
       }
       pointWithX(x) {
         const result = this.copy();
@@ -1900,50 +1902,59 @@ var require_UIPoint = __commonJS({
         return this.pointWithY(this.y + y);
       }
       get length() {
-        var result = this.x * this.x + this.y * this.y;
+        let result = this.x * this.x + this.y * this.y;
         result = Math.sqrt(result);
         return result;
       }
       didChange(b) {
       }
     };
+    __name(UIPoint2, "UIPoint");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIRectangle.js
 var require_UIRectangle = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIRectangle.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIRectangle_exports = {};
     __export2(UIRectangle_exports, {
-      UIRectangle: () => UIRectangle4
+      UIRectangle: () => UIRectangle5
     });
     module.exports = __toCommonJS2(UIRectangle_exports);
     var import_UIObject = require_UIObject();
     var import_UIPoint = require_UIPoint();
-    var UIRectangle4 = class extends import_UIObject.UIObject {
+    var UIRectangle5 = class extends import_UIObject.UIObject {
       constructor(x = 0, y = 0, height = 0, width = 0) {
         super();
+        this.rectanglePointDidChange = import_UIObject.nil;
         this.min = new import_UIPoint.UIPoint(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
         this.max = new import_UIPoint.UIPoint(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
-        this.min.didChange = this.rectanglePointDidChange;
-        this.max.didChange = this.rectanglePointDidChange;
+        this.min.didChange = (point) => {
+          this.rectanglePointDidChange(point);
+          this._rectanglePointDidChange();
+        };
+        this.max.didChange = (point) => {
+          this.rectanglePointDidChange(point);
+          this._rectanglePointDidChange();
+        };
         this._isBeingUpdated = import_UIObject.NO;
         this.min = new import_UIPoint.UIPoint(x, y);
         this.max = new import_UIPoint.UIPoint(x + width, y + height);
@@ -1955,16 +1966,13 @@ var require_UIRectangle = __commonJS({
         }
       }
       copy() {
-        const result = new UIRectangle4(this.x, this.y, this.height, this.width);
-        return result;
+        return new UIRectangle5(this.x, this.y, this.height, this.width);
       }
       isEqualTo(rectangle) {
-        const result = (0, import_UIObject.IS)(rectangle) && this.min.isEqualTo(rectangle.min) && this.max.isEqualTo(rectangle.max);
-        return result;
+        return (0, import_UIObject.IS)(rectangle) && this.min.isEqualTo(rectangle.min) && this.max.isEqualTo(rectangle.max);
       }
       static zero() {
-        const result = new UIRectangle4(0, 0, 0, 0);
-        return result;
+        return new UIRectangle5(0, 0, 0, 0);
       }
       containsPoint(point) {
         return this.min.x <= point.x && this.min.y <= point.y && point.x <= this.max.x && point.y <= this.max.y;
@@ -2045,8 +2053,7 @@ var require_UIRectangle = __commonJS({
         return this.max.copy();
       }
       get center() {
-        const result = this.min.copy().add(this.min.to(this.max).scale(0.5));
-        return result;
+        return this.min.copy().add(this.min.to(this.max).scale(0.5));
       }
       set center(center) {
         const offset = this.center.to(center);
@@ -2097,8 +2104,7 @@ var require_UIRectangle = __commonJS({
         return result;
       }
       get area() {
-        const result = this.height * this.width;
-        return result;
+        return this.height * this.width;
       }
       intersectsWithRectangle(rectangle) {
         return this.intersectionRectangleWithRectangle(rectangle).area != 0;
@@ -2112,8 +2118,7 @@ var require_UIRectangle = __commonJS({
         return result;
       }
       rectangleWithInset(inset) {
-        const result = this.rectangleWithInsets(inset, inset, inset, inset);
-        return result;
+        return this.rectangleWithInsets(inset, inset, inset, inset);
       }
       rectangleWithHeight(height, centeredOnPosition = import_UIObject.nil) {
         if (isNaN(centeredOnPosition)) {
@@ -2140,12 +2145,10 @@ var require_UIRectangle = __commonJS({
         return result;
       }
       rectangleWithHeightRelativeToWidth(heightRatio = 1, centeredOnPosition = import_UIObject.nil) {
-        const result = this.rectangleWithHeight(this.width * heightRatio, centeredOnPosition);
-        return result;
+        return this.rectangleWithHeight(this.width * heightRatio, centeredOnPosition);
       }
       rectangleWithWidthRelativeToHeight(widthRatio = 1, centeredOnPosition = import_UIObject.nil) {
-        const result = this.rectangleWithWidth(this.height * widthRatio, centeredOnPosition);
-        return result;
+        return this.rectangleWithWidth(this.height * widthRatio, centeredOnPosition);
       }
       rectangleWithX(x, centeredOnPosition = 0) {
         const result = this.copy();
@@ -2179,25 +2182,28 @@ var require_UIRectangle = __commonJS({
           absoluteWidths = [absoluteWidths].arrayByRepeating(weights.length);
         }
         const result = [];
-        const sumOfWeights = weights.reduce(function(a, b, index) {
-          if ((0, import_UIObject.IS_NOT_NIL)(absoluteWidths[index])) {
-            b = 0;
-          }
-          return a + b;
-        }, 0);
+        const sumOfWeights = weights.reduce(
+          (a, b, index) => {
+            if ((0, import_UIObject.IS_NOT_NIL)(absoluteWidths[index])) {
+              b = 0;
+            }
+            return a + b;
+          },
+          0
+        );
         const sumOfPaddings = paddings.summedValue;
         const sumOfAbsoluteWidths = absoluteWidths.summedValue;
         const totalRelativeWidth = this.width - sumOfPaddings - sumOfAbsoluteWidths;
-        var previousCellMaxX = this.x;
-        for (var i = 0; i < weights.length; i++) {
-          var resultWidth;
+        let previousCellMaxX = this.x;
+        for (let i = 0; i < weights.length; i++) {
+          let resultWidth;
           if ((0, import_UIObject.IS_NOT_NIL)(absoluteWidths[i])) {
             resultWidth = absoluteWidths[i] || 0;
           } else {
             resultWidth = totalRelativeWidth * (weights[i] / sumOfWeights);
           }
           const rectangle = this.rectangleWithWidth(resultWidth);
-          var padding = 0;
+          let padding = 0;
           if (paddings.length > i && paddings[i]) {
             padding = paddings[i];
           }
@@ -2219,12 +2225,15 @@ var require_UIRectangle = __commonJS({
           absoluteHeights = [absoluteHeights].arrayByRepeating(weights.length);
         }
         const result = [];
-        const sumOfWeights = weights.reduce(function(a, b, index) {
-          if ((0, import_UIObject.IS_NOT_NIL)(absoluteHeights[index])) {
-            b = 0;
-          }
-          return a + b;
-        }, 0);
+        const sumOfWeights = weights.reduce(
+          (a, b, index) => {
+            if ((0, import_UIObject.IS_NOT_NIL)(absoluteHeights[index])) {
+              b = 0;
+            }
+            return a + b;
+          },
+          0
+        );
         const sumOfPaddings = paddings.summedValue;
         const sumOfAbsoluteHeights = absoluteHeights.summedValue;
         const totalRelativeHeight = this.height - sumOfPaddings - sumOfAbsoluteHeights;
@@ -2272,7 +2281,7 @@ var require_UIRectangle = __commonJS({
           weights = [weights].arrayByRepeating(views.length);
         }
         const frames = this.rectanglesBySplittingWidth(weights, paddings, absoluteWidths);
-        frames.forEach((frame, index, array) => (0, import_UIObject.FIRST_OR_NIL)(views[index]).frame = frame);
+        frames.forEach((frame, index) => (0, import_UIObject.FIRST_OR_NIL)(views[index]).frame = frame);
         return this;
       }
       distributeViewsAlongHeight(views, weights = 1, paddings, absoluteHeights) {
@@ -2280,21 +2289,17 @@ var require_UIRectangle = __commonJS({
           weights = [weights].arrayByRepeating(views.length);
         }
         const frames = this.rectanglesBySplittingHeight(weights, paddings, absoluteHeights);
-        frames.forEach((frame, index, array) => (0, import_UIObject.FIRST_OR_NIL)(views[index]).frame = frame);
+        frames.forEach((frame, index) => (0, import_UIObject.FIRST_OR_NIL)(views[index]).frame = frame);
         return this;
       }
       distributeViewsEquallyAlongWidth(views, padding) {
         const frames = this.rectanglesByEquallySplittingWidth(views.length, padding);
-        frames.forEach(function(frame, index, array) {
-          views[index].frame = frame;
-        });
+        frames.forEach((frame, index) => views[index].frame = frame);
         return this;
       }
       distributeViewsEquallyAlongHeight(views, padding) {
         const frames = this.rectanglesByEquallySplittingHeight(views.length, padding);
-        frames.forEach(function(frame, index, array) {
-          views[index].frame = frame;
-        });
+        frames.forEach((frame, index) => views[index].frame = frame);
         return this;
       }
       rectangleForNextRow(padding = 0, height = this.height) {
@@ -2312,16 +2317,14 @@ var require_UIRectangle = __commonJS({
         return result;
       }
       rectangleForPreviousRow(padding = 0) {
-        const result = this.rectangleWithY(this.min.y - this.height - padding);
-        return result;
+        return this.rectangleWithY(this.min.y - this.height - padding);
       }
       rectangleForPreviousColumn(padding = 0) {
-        const result = this.rectangleWithX(this.min.x - this.width - padding);
-        return result;
+        return this.rectangleWithX(this.min.x - this.width - padding);
       }
       static boundingBoxForPoints(points) {
-        const result = new UIRectangle4();
-        for (var i = 0; i < points.length; i++) {
+        const result = new UIRectangle5();
+        for (let i = 0; i < points.length; i++) {
           result.updateByAddingPoint(points[i]);
         }
         return result;
@@ -2341,32 +2344,34 @@ var require_UIRectangle = __commonJS({
         }
       }
     };
+    __name(UIRectangle5, "UIRectangle");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIView.js
 var require_UIView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIView_exports = {};
     __export2(UIView_exports, {
-      UIView: () => UIView14
+      UIView: () => UIView17
     });
     module.exports = __toCommonJS2(UIView_exports);
     var import_ClientCheckers = require_ClientCheckers();
@@ -2379,7 +2384,7 @@ var require_UIView = __commonJS({
     if (!window.AutoLayout) {
       window.AutoLayout = import_UIObject.nil;
     }
-    var _UIView = class extends import_UIObject.UIObject {
+    var _UIView = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(elementID = "UIView" + _UIView.nextIndex, viewHTMLElement = null, elementType = null, initViewData) {
         super();
         this._nativeSelectionEnabled = import_UIObject.YES;
@@ -2392,6 +2397,9 @@ var require_UIView = __commonJS({
         this._isHidden = import_UIObject.NO;
         this.pausesPointerEvents = import_UIObject.NO;
         this.stopsPointerEventPropagation = import_UIObject.YES;
+        this.pointerDraggingPoint = new import_UIPoint.UIPoint(0, 0);
+        this._previousClientPoint = new import_UIPoint.UIPoint(0, 0);
+        this._isPointerDown = import_UIObject.NO;
         this._pointerDragThreshold = 2;
         this.ignoresTouches = import_UIObject.NO;
         this.ignoresMouse = import_UIObject.NO;
@@ -2407,7 +2415,6 @@ var require_UIView = __commonJS({
         this._constraints = [];
         this._updateLayoutFunction = import_UIObject.nil;
         this._frameTransform = "";
-        this.initView(this.viewHTMLElement.id, this.viewHTMLElement, initViewData);
         this._initViewCSSSelectorsIfNeeded();
         this._loadUIEvents();
         this.setNeedsLayout();
@@ -2418,22 +2425,18 @@ var require_UIView = __commonJS({
       static get pageHeight() {
         const body = document.body;
         const html = document.documentElement;
-        const height = Math.max(
+        return Math.max(
           body.scrollHeight,
           body.offsetHeight,
           html.clientHeight,
           html.scrollHeight,
           html.offsetHeight
         );
-        return height;
       }
       static get pageWidth() {
         const body = document.body;
         const html = document.documentElement;
-        const width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth);
-        return width;
-      }
-      initView(elementID, viewHTMLElement, initViewData) {
+        return Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth);
       }
       centerInContainer() {
         this.style.left = "50%";
@@ -2448,7 +2451,7 @@ var require_UIView = __commonJS({
         this.style.top = "50%";
         this.style.transform = "translateY(-50%)";
       }
-      _initViewHTMLElement(elementID, viewHTMLElement, elementType = "div") {
+      _initViewHTMLElement(elementID, viewHTMLElement, elementType) {
         if (!(0, import_UIObject.IS)(elementType)) {
           elementType = "div";
         }
@@ -2478,8 +2481,7 @@ var require_UIView = __commonJS({
         return this._nativeSelectionEnabled;
       }
       get styleClassName() {
-        const result = "UICore_UIView_" + this.class.name;
-        return result;
+        return "UICore_UIView_" + this.class.name;
       }
       _initViewCSSSelectorsIfNeeded() {
         if (!this.class._areViewCSSSelectorsInitialized) {
@@ -2514,7 +2516,7 @@ var require_UIView = __commonJS({
         this._parameters = parameters;
         const languageName = import_UICore.UICore.languageService.currentLanguageKey;
         const result = import_UICore.UICore.languageService.stringForKey(key, languageName, defaultString, parameters);
-        this.innerHTML = result;
+        this.innerHTML = result != null ? result : "";
       }
       _setInnerHTMLFromKeyIfPossible() {
         if (this._innerHTMLKey && this._defaultInnerHTML) {
@@ -2545,11 +2547,11 @@ var require_UIView = __commonJS({
         this.viewHTMLElement.setAttribute("title", hoverText);
       }
       get hoverText() {
-        return this.viewHTMLElement.getAttribute("title");
+        var _a;
+        return (_a = this.viewHTMLElement.getAttribute("title")) != null ? _a : "";
       }
       get scrollSize() {
-        const result = new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.scrollHeight, this.viewHTMLElement.scrollWidth);
-        return result;
+        return new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.scrollHeight, this.viewHTMLElement.scrollWidth);
       }
       get dialogView() {
         if (!(0, import_UIObject.IS)(this.superview)) {
@@ -2582,6 +2584,22 @@ var require_UIView = __commonJS({
       }
       set tabIndex(index) {
         this.viewHTMLElement.setAttribute("tabindex", "" + index);
+      }
+      get propertyDescriptors() {
+        let result = [];
+        this.allSuperviews.forEach((view) => {
+          (0, import_UIObject.FIRST_OR_NIL)(view.viewController).forEach((value, key, stopLooping) => {
+            if (this == value) {
+              result.push({ object: view.viewController, name: key });
+            }
+          });
+          view.forEach((value, key, stopLooping) => {
+            if (this == value) {
+              result.push({ object: view, name: key });
+            }
+          });
+        });
+        return result;
       }
       get styleClasses() {
         return this._styleClasses;
@@ -2621,86 +2639,38 @@ var require_UIView = __commonJS({
         if ((0, import_UIObject.IS_NOT)(viewHTMLElement)) {
           return import_UIObject.nil;
         }
-        const result = viewHTMLElement.UIView;
-        return result;
+        return viewHTMLElement.UIView;
       }
       static createStyleSelector(selector, style) {
         return;
-        if (!document.styleSheets) {
-          return;
-        }
-        if (document.getElementsByTagName("head").length == 0) {
-          return;
-        }
-        var styleSheet;
-        var mediaType;
-        if (document.styleSheets.length > 0) {
-          for (var i = 0, l = document.styleSheets.length; i < l; i++) {
-            if (document.styleSheets[i].disabled) {
-              continue;
-            }
-            const media = document.styleSheets[i].media;
-            mediaType = typeof media;
-            if (mediaType === "string") {
-              if (media === "" || media.indexOf("screen") !== -1) {
-                styleSheet = document.styleSheets[i];
-              }
-            } else if (mediaType == "object") {
-              if (media.mediaText === "" || media.mediaText.indexOf("screen") !== -1) {
-                styleSheet = document.styleSheets[i];
-              }
-            }
-            if (typeof styleSheet !== "undefined") {
-              break;
-            }
-          }
-        }
-        if (typeof styleSheet === "undefined") {
-          const styleSheetElement = document.createElement("style");
-          styleSheetElement.type = "text/css";
-          document.getElementsByTagName("head")[0].appendChild(styleSheetElement);
-          for (i = 0; i < document.styleSheets.length; i++) {
-            if (document.styleSheets[i].disabled) {
-              continue;
-            }
-            styleSheet = document.styleSheets[i];
-          }
-          mediaType = typeof styleSheet.media;
-        }
-        if (mediaType === "string") {
-          for (var i = 0, l = styleSheet.rules.length; i < l; i++) {
-            if (styleSheet.rules[i].selectorText && styleSheet.rules[i].selectorText.toLowerCase() == selector.toLowerCase()) {
-              styleSheet.rules[i].style.cssText = style;
-              return;
-            }
-          }
-          styleSheet.addRule(selector, style);
-        } else if (mediaType === "object") {
-          var styleSheetLength = 0;
-          try {
-            styleSheetLength = styleSheet.cssRules ? styleSheet.cssRules.length : 0;
-          } catch (error) {
-          }
-          for (var i = 0; i < styleSheetLength; i++) {
-            if (styleSheet.cssRules[i].selectorText && styleSheet.cssRules[i].selectorText.toLowerCase() == selector.toLowerCase()) {
-              styleSheet.cssRules[i].style.cssText = style;
-              return;
-            }
-          }
-          styleSheet.insertRule(selector + "{" + style + "}", styleSheetLength);
-        }
       }
       static getStyleRules(selector) {
-        var selector = selector.toLowerCase();
-        for (var i = 0; i < document.styleSheets.length; i++) {
-          const styleSheet = document.styleSheets[i];
-          var styleRules;
-          try {
-            styleRules = styleSheet.cssRules ? styleSheet.cssRules : styleSheet.rules;
-          } catch (error) {
+        const getCssClasses = function() {
+          function normalize(str) {
+            if (!str) {
+              return "";
+            }
+            str = String(str).replace(/\s*([>~+])\s*/g, " $1 ");
+            return str.replace(/(\s+)/g, " ").trim();
           }
-          return styleRules;
-        }
+          __name(normalize, "normalize");
+          function split(str, on) {
+            return str.split(on).map((x) => x.trim()).filter((x) => x);
+          }
+          __name(split, "split");
+          function containsAny(selText, ors) {
+            return selText ? ors.some((x) => selText.indexOf(x) >= 0) : false;
+          }
+          __name(containsAny, "containsAny");
+          return function(selector2) {
+            const logicalORs = split(normalize(selector2), ",");
+            const sheets = Array.from(window.document.styleSheets);
+            const ruleArrays = sheets.map((x) => Array.from(x.rules || x.cssRules || []));
+            const allRules = ruleArrays.reduce((all, x) => all.concat(x), []);
+            return allRules.filter((x) => containsAny(normalize(x.selectorText), logicalORs));
+          };
+        }();
+        return getCssClasses(selector);
       }
       get style() {
         return this.viewHTMLElement.style;
@@ -2734,16 +2704,22 @@ var require_UIView = __commonJS({
       calculateAndSetViewFrame() {
       }
       get frame() {
-        var result = this._frame;
+        var _a;
+        let result = (_a = this._frame) == null ? void 0 : _a.copy();
         if (!result) {
-          result = new import_UIRectangle.UIRectangle(1 * this.viewHTMLElement.offsetLeft, 1 * this.viewHTMLElement.offsetTop, 1 * this.viewHTMLElement.offsetHeight, 1 * this.viewHTMLElement.offsetWidth);
+          result = new import_UIRectangle.UIRectangle(
+            this.viewHTMLElement.offsetLeft,
+            this.viewHTMLElement.offsetTop,
+            this.viewHTMLElement.offsetHeight,
+            this.viewHTMLElement.offsetWidth
+          );
           result.zIndex = 0;
         }
-        return result.copy();
+        return result;
       }
       set frame(rectangle) {
         if ((0, import_UIObject.IS)(rectangle)) {
-          this.setFrame(rectangle);
+          this.setFrame(rectangle, rectangle.zIndex);
         }
       }
       setFrame(rectangle, zIndex = 0, performUncheckedLayout = import_UIObject.NO) {
@@ -2752,7 +2728,7 @@ var require_UIView = __commonJS({
           rectangle.zIndex = zIndex;
         }
         this._frame = rectangle;
-        if (frame && frame.isEqualTo(rectangle) && !performUncheckedLayout) {
+        if (frame && frame.isEqualTo(rectangle) && frame.zIndex == rectangle.zIndex && !performUncheckedLayout) {
           return;
         }
         _UIView._setAbsoluteSizeAndPosition(
@@ -2769,9 +2745,9 @@ var require_UIView = __commonJS({
         }
       }
       get bounds() {
-        var result;
+        let result;
         if ((0, import_UIObject.IS_NOT)(this._frame)) {
-          result = new import_UIRectangle.UIRectangle(0, 0, 1 * this.viewHTMLElement.offsetHeight, 1 * this.viewHTMLElement.offsetWidth);
+          result = new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.offsetHeight, this.viewHTMLElement.offsetWidth);
         } else {
           result = this.frame.copy();
           result.x = 0;
@@ -2781,7 +2757,9 @@ var require_UIView = __commonJS({
       }
       set bounds(rectangle) {
         const frame = this.frame;
-        this.frame = new import_UIRectangle.UIRectangle(frame.topLeft.x, frame.topLeft.y, rectangle.height, rectangle.width);
+        const newFrame = new import_UIRectangle.UIRectangle(frame.topLeft.x, frame.topLeft.y, rectangle.height, rectangle.width);
+        newFrame.zIndex = frame.zIndex;
+        this.frame = newFrame;
       }
       boundsDidChange() {
       }
@@ -2891,8 +2869,7 @@ var require_UIView = __commonJS({
         }
       }
       get userInteractionEnabled() {
-        const result = this.style.pointerEvents != "none";
-        return result;
+        return this.style.pointerEvents != "none";
       }
       set userInteractionEnabled(userInteractionEnabled) {
         if (userInteractionEnabled) {
@@ -2917,10 +2894,13 @@ var require_UIView = __commonJS({
       static animateViewOrViewsWithDurationDelayAndFunction(viewOrViews, duration, delay, timingStyle = "cubic-bezier(0.25,0.1,0.25,1)", transformFunction, transitioncompletionFunction) {
         function callTransitioncompletionFunction() {
           (transitioncompletionFunction || import_UIObject.nil)();
-          viewOrViews.forEach(function(view2, index, array) {
-            view2.animationDidFinish();
+          viewOrViews.forEach((view) => {
+            if (view instanceof _UIView) {
+              view.animationDidFinish();
+            }
           });
         }
+        __name(callTransitioncompletionFunction, "callTransitioncompletionFunction");
         if (import_ClientCheckers.IS_FIREFOX) {
           new import_UIObject.UIObject().performFunctionWithDelay(delay + duration, callTransitioncompletionFunction);
         }
@@ -2931,9 +2911,13 @@ var require_UIView = __commonJS({
         const transitionDurations = [];
         const transitionDelays = [];
         const transitionTimings = [];
+        function isUIView(view) {
+          return (0, import_UIObject.IS)(view.viewHTMLElement);
+        }
+        __name(isUIView, "isUIView");
         for (var i = 0; i < viewOrViews.length; i++) {
-          var view = viewOrViews[i];
-          if (view.viewHTMLElement) {
+          let view = viewOrViews[i];
+          if (isUIView(view)) {
             view = view.viewHTMLElement;
           }
           view.addEventListener("transitionend", transitionDidFinish, true);
@@ -2955,47 +2939,50 @@ var require_UIView = __commonJS({
         };
         function finishTransitionImmediately() {
           for (var i2 = 0; i2 < viewOrViews.length; i2++) {
-            var view2 = viewOrViews[i2];
-            if (view2.viewHTMLElement) {
-              view2 = view2.viewHTMLElement;
+            let view = viewOrViews[i2];
+            if (isUIView(view)) {
+              view = view.viewHTMLElement;
             }
-            view2.style.transition = "all";
-            view2.style.transitionDuration = "" + duration + "s";
-            view2.style.transitionDelay = "" + delay + "s";
-            view2.style.transition = transitionStyles[i2];
-            view2.style.transitionDuration = transitionDurations[i2];
-            view2.style.transitionDelay = transitionDelays[i2];
-            view2.style.transitionTimingFunction = transitionTimings[i2];
+            view.style.transition = "all";
+            view.style.transitionDuration = "" + duration + "s";
+            view.style.transitionDelay = "" + delay + "s";
+            view.style.transition = transitionStyles[i2];
+            view.style.transitionDuration = transitionDurations[i2];
+            view.style.transitionDelay = transitionDelays[i2];
+            view.style.transitionTimingFunction = transitionTimings[i2];
           }
         }
+        __name(finishTransitionImmediately, "finishTransitionImmediately");
         function transitionDidFinish(event2) {
-          var view2 = event2.srcElement;
-          if (!view2) {
+          let view = event2.srcElement;
+          if (!view) {
             return;
           }
-          if (view2.viewHTMLElement) {
-            view2 = view2.viewHTMLElement;
+          if (isUIView(view)) {
+            view = view.viewHTMLElement;
           }
-          view2.style.transition = transitionStyles[i];
-          view2.style.transitionDuration = transitionDurations[i];
-          view2.style.transitionDelay = transitionDelays[i];
-          view2.style.transitionTimingFunction = transitionTimings[i];
+          view.style.transition = transitionStyles[i];
+          view.style.transitionDuration = transitionDurations[i];
+          view.style.transitionDelay = transitionDelays[i];
+          view.style.transitionTimingFunction = transitionTimings[i];
           callTransitioncompletionFunction();
-          view2.removeEventListener("transitionend", transitionDidFinish, true);
+          view.removeEventListener("transitionend", transitionDidFinish, true);
         }
+        __name(transitionDidFinish, "transitionDidFinish");
         function transitionDidFinishManually() {
-          for (var i2 = 0; i2 < viewOrViews.length; i2++) {
-            var view2 = viewOrViews[i2];
-            if (view2.viewHTMLElement) {
-              view2 = view2.viewHTMLElement;
+          for (let i2 = 0; i2 < viewOrViews.length; i2++) {
+            let view = viewOrViews[i2];
+            if (isUIView(view)) {
+              view = view.viewHTMLElement;
             }
-            view2.style.transition = transitionStyles[i2];
-            view2.style.transitionDuration = transitionDurations[i2];
-            view2.style.transitionDelay = transitionDelays[i2];
-            view2.style.transitionTimingFunction = transitionTimings[i2];
-            view2.removeEventListener("transitionend", transitionDidFinish, true);
+            view.style.transition = transitionStyles[i2];
+            view.style.transitionDuration = transitionDurations[i2];
+            view.style.transitionDelay = transitionDelays[i2];
+            view.style.transitionTimingFunction = transitionTimings[i2];
+            view.removeEventListener("transitionend", transitionDidFinish, true);
           }
         }
+        __name(transitionDidFinishManually, "transitionDidFinishManually");
         return transitionObject;
       }
       animationDidFinish() {
@@ -3004,34 +2991,33 @@ var require_UIView = __commonJS({
         if (!(0, import_UIObject.IS)(element) || !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) {
           return;
         }
-        if (element.id == "mainView") {
-          var asd = 1;
-        }
         if ((0, import_UIObject.IS)(height)) {
           height = height.integerValue + "px";
         }
         if ((0, import_UIObject.IS)(width)) {
           width = width.integerValue + "px";
         }
-        var str = element.style.cssText;
-        const frameTransform = _UIView._transformAttribute + ": translate3d(" + (1 * left).integerValue + "px, " + (1 * top).integerValue + "px, " + zIndex.integerValue + "px)";
+        let str = element.style.cssText;
+        const frameTransform = _UIView._transformAttribute + ": translate3d(" + left.integerValue + "px, " + top.integerValue + "px, 0px)";
         if (element.UIView) {
           str = str + frameTransform + ";";
         } else {
           element.UIView._frameTransform = frameTransform;
         }
-        if (height == import_UIObject.nil) {
+        if ((0, import_UIObject.IS_NIL)(height)) {
           str = str + " height: unset;";
         } else {
           str = str + " height:" + height + ";";
         }
-        if (width == import_UIObject.nil) {
+        if ((0, import_UIObject.IS_NIL)(width)) {
           str = str + " width: unset;";
         } else {
           str = str + " width:" + width + ";";
         }
-        if (element.id == "mainView") {
-          var asd = 1;
+        if ((0, import_UIObject.IS_NIL)(zIndex)) {
+          str = str + " z-index: unset;";
+        } else {
+          str = str + " z-index:" + zIndex + ";";
         }
         element.style.cssText = element.style.cssText + str;
       }
@@ -3053,17 +3039,16 @@ var require_UIView = __commonJS({
             element = parentElement.querySelector("#" + key);
           } catch (error) {
           }
-          if (element && !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) {
-          } else if (element) {
+          if (!(element && !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) && element) {
             element.className += element.className ? " abs" : "abs";
             elements[key] = element;
           }
         }
-        var parentUIView = import_UIObject.nil;
+        let parentUIView = import_UIObject.nil;
         if (parentElement.UIView) {
           parentUIView = parentElement.UIView;
         }
-        const updateLayout = function() {
+        const updateLayout = /* @__PURE__ */ __name(function() {
           view.setSize(
             parentElement ? parentElement.clientWidth : window.innerWidth,
             parentElement ? parentElement.clientHeight : window.innerHeight
@@ -3084,7 +3069,7 @@ var require_UIView = __commonJS({
             }
           }
           parentUIView.didLayoutSubviews();
-        };
+        }, "updateLayout");
         updateLayout();
         return updateLayout;
       }
@@ -3145,7 +3130,7 @@ var require_UIView = __commonJS({
         this.didLayoutSubviews();
       }
       applyClassesAndStyles() {
-        for (var i = 0; i < this.styleClasses.length; i++) {
+        for (let i = 0; i < this.styleClasses.length; i++) {
           const styleClass = this.styleClasses[i];
           if (styleClass) {
             this.viewHTMLElement.classList.add(styleClass);
@@ -3174,8 +3159,8 @@ var require_UIView = __commonJS({
         ));
       }
       static constraintWithView(view, attribute, relation, toView, toAttribute, multiplier, constant, priority) {
-        var UIViewObject = import_UIObject.nil;
-        var viewID = null;
+        let UIViewObject = import_UIObject.nil;
+        let viewID = null;
         if (view) {
           if (view.isKindOfClass && view.isKindOfClass(_UIView)) {
             UIViewObject = view;
@@ -3183,8 +3168,8 @@ var require_UIView = __commonJS({
           }
           viewID = view.id;
         }
-        var toUIViewObject = import_UIObject.nil;
-        var toViewID = null;
+        let toUIViewObject = import_UIObject.nil;
+        let toViewID = null;
         if (toView) {
           if (toView.isKindOfClass && view.isKindOfClass(_UIView)) {
             toUIViewObject = toView;
@@ -3205,10 +3190,11 @@ var require_UIView = __commonJS({
         return constraint;
       }
       subviewWithID(viewID) {
-        var resultHTMLElement = import_UIObject.nil;
+        let resultHTMLElement = import_UIObject.nil;
         try {
           resultHTMLElement = this.viewHTMLElement.querySelector("#" + viewID);
         } catch (error) {
+          console.log(error);
         }
         if (resultHTMLElement && resultHTMLElement.UIView) {
           return resultHTMLElement.UIView;
@@ -3217,10 +3203,10 @@ var require_UIView = __commonJS({
       }
       rectangleContainingSubviews() {
         const center = this.bounds.center;
-        var result = new import_UIRectangle.UIRectangle(center.x, center.y, 0, 0);
-        for (var i = 0; i < this.subviews.length; i++) {
+        let result = new import_UIRectangle.UIRectangle(center.x, center.y, 0, 0);
+        for (let i = 0; i < this.subviews.length; i++) {
           const subview = this.subviews[i];
-          var frame = subview.frame;
+          let frame = subview.frame;
           const rectangleContainingSubviews = subview.rectangleContainingSubviews();
           frame = frame.concatenateWithRectangle(rectangleContainingSubviews);
           result = result.concatenateWithRectangle(frame);
@@ -3231,7 +3217,7 @@ var require_UIView = __commonJS({
         if (!(0, import_UIObject.IS)(view)) {
           return import_UIObject.NO;
         }
-        for (var i = 0; i < this.subviews.length; i++) {
+        for (let i = 0; i < this.subviews.length; i++) {
           const subview = this.subviews[i];
           if (subview == view) {
             return import_UIObject.YES;
@@ -3269,9 +3255,7 @@ var require_UIView = __commonJS({
         }
       }
       addSubviews(views) {
-        views.forEach(function(view, index, array) {
-          this.addSubview(view);
-        }, this);
+        views.forEach((view) => this.addSubview(view));
       }
       moveToBottomOfSuperview() {
         if ((0, import_UIObject.IS)(this.superview)) {
@@ -3297,9 +3281,7 @@ var require_UIView = __commonJS({
       }
       removeFromSuperview() {
         if ((0, import_UIObject.IS)(this.superview)) {
-          this.forEachViewInSubtree(function(view) {
-            view.blur();
-          });
+          this.forEachViewInSubtree((view) => view.blur());
           const index = this.superview.subviews.indexOf(this);
           if (index > -1) {
             this.superview.subviews.splice(index, 1);
@@ -3326,8 +3308,8 @@ var require_UIView = __commonJS({
       wasRemovedFromViewTree() {
       }
       get isMemberOfViewTree() {
-        var element = this.viewHTMLElement;
-        for (var i = 0; element; i = i) {
+        let element = this.viewHTMLElement;
+        for (let i = 0; element; i = i) {
           if (element.parentElement && element.parentElement == document.body) {
             return import_UIObject.YES;
           }
@@ -3337,17 +3319,15 @@ var require_UIView = __commonJS({
       }
       get allSuperviews() {
         const result = [];
-        var view = this;
-        for (var i = 0; (0, import_UIObject.IS)(view); i = i) {
+        let view = this;
+        for (let i = 0; (0, import_UIObject.IS)(view); i = i) {
           result.push(view);
           view = view.superview;
         }
         return result;
       }
       setNeedsLayoutOnAllSuperviews() {
-        this.allSuperviews.reverse().forEach(function(view, index, array) {
-          view.setNeedsLayout();
-        });
+        this.allSuperviews.reverse().everyElement.setNeedsLayout();
       }
       setNeedsLayoutUpToRootView() {
         this.setNeedsLayoutOnAllSuperviews();
@@ -3359,9 +3339,11 @@ var require_UIView = __commonJS({
       blur() {
         this.viewHTMLElement.blur();
       }
+      static pointerUpInsideCalled(view) {
+      }
       _loadUIEvents() {
         const isTouchEventClassDefined = import_UIObject.NO || window.TouchEvent;
-        const pauseEvent = (event2, forced = import_UIObject.NO) => {
+        const pauseEvent = /* @__PURE__ */ __name((event2, forced = import_UIObject.NO) => {
           if (this.pausesPointerEvents || forced) {
             if (event2.stopPropagation) {
               event2.stopPropagation();
@@ -3376,14 +3358,15 @@ var require_UIView = __commonJS({
           if (event2.stopPropagation && this.stopsPointerEventPropagation) {
             event2.stopPropagation();
           }
-        };
-        const onMouseDown = (event2) => {
+        }, "pauseEvent");
+        const onMouseDown = /* @__PURE__ */ __name((event2) => {
           if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || (this.ignoresMouse || (0, import_UIObject.IS)(this._touchEventTime) && Date.now() - this._touchEventTime > 500) && event2 instanceof MouseEvent) {
             return;
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerDown, event2);
           this._isPointerInside = import_UIObject.YES;
           this._isPointerValid = import_UIObject.YES;
+          this._isPointerDown = import_UIObject.YES;
           this._initialPointerPosition = new import_UIPoint.UIPoint(event2.clientX, event2.clientY);
           if (isTouchEventClassDefined && event2 instanceof TouchEvent) {
             this._touchEventTime = Date.now();
@@ -3397,9 +3380,17 @@ var require_UIView = __commonJS({
             pauseEvent(event2);
           }
           this._hasPointerDragged = import_UIObject.NO;
-        };
+          window.addEventListener("mousemove", onMouseMove, true);
+          window.addEventListener("mouseup", (event22) => {
+            window.removeEventListener("mousemove", onMouseMove, true);
+            onmouseup(event22);
+          });
+          window.addEventListener("touchmove", onTouchMove, true);
+          window.addEventListener("mouseup", () => window.removeEventListener("touchmove", onTouchMove, true));
+        }, "onMouseDown");
         const onTouchStart = onMouseDown;
-        const onmouseup = (event2) => {
+        const onmouseup = /* @__PURE__ */ __name((event2) => {
+          this._isPointerDown = import_UIObject.NO;
           if (!this._isPointerValid) {
             return;
           }
@@ -3414,28 +3405,18 @@ var require_UIView = __commonJS({
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerUp, event2);
           pauseEvent(event2);
-        };
+        }, "onmouseup");
         const onTouchEnd = onmouseup;
-        const onmouseout = (event2) => {
+        const onmouseout = /* @__PURE__ */ __name((event2) => {
           if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || this.ignoresMouse && event2 instanceof MouseEvent) {
             return;
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerLeave, event2);
           this._isPointerInside = import_UIObject.NO;
           pauseEvent(event2);
-        };
+        }, "onmouseout");
         const onTouchLeave = onmouseout;
-        var onTouchCancel = function(event2) {
-          if (!this._isPointerValid) {
-            return;
-          }
-          if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || this.ignoresMouse && event2 instanceof MouseEvent) {
-            return;
-          }
-          this._isPointerValid = import_UIObject.NO;
-          this.sendControlEventForKey(_UIView.controlEvent.PointerCancel, event2);
-        }.bind(this);
-        const onmouseover = (event2) => {
+        const onmouseover = /* @__PURE__ */ __name((event2) => {
           if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || this.ignoresMouse && event2 instanceof MouseEvent) {
             return;
           }
@@ -3443,24 +3424,35 @@ var require_UIView = __commonJS({
           this._isPointerInside = import_UIObject.YES;
           this._isPointerValid = import_UIObject.YES;
           pauseEvent(event2);
-        };
-        const onMouseMove = (event2) => {
+        }, "onmouseover");
+        const onMouseMove = /* @__PURE__ */ __name((event2) => {
           if (!this._isPointerValid) {
             return;
           }
           if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || this.ignoresMouse && event2 instanceof MouseEvent) {
             return;
           }
+          const clientPoint = new import_UIPoint.UIPoint(
+            event2.clientX,
+            event2.clientY
+          );
           if ((0, import_UIObject.IS_NOT)(this._initialPointerPosition)) {
-            this._initialPointerPosition = new import_UIPoint.UIPoint(event2.clientX, event2.clientY);
+            this._initialPointerPosition = clientPoint;
           }
-          if (new import_UIPoint.UIPoint(event2.clientX, event2.clientY).to(this._initialPointerPosition).length > this._pointerDragThreshold) {
+          const distanceToInitialPoint = clientPoint.to(this._initialPointerPosition).length;
+          if (distanceToInitialPoint > this._pointerDragThreshold) {
             this._hasPointerDragged = import_UIObject.YES;
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerMove, event2);
+          if (this._hasPointerDragged && this._isPointerDown) {
+            const movementPoint = this._previousClientPoint.to(clientPoint);
+            this.pointerDraggingPoint = new import_UIPoint.UIPoint(movementPoint.x, movementPoint.y).scale(1 / _UIView.pageScale).add(this.pointerDraggingPoint);
+            this.sendControlEventForKey(_UIView.controlEvent.PointerDrag, event2);
+          }
+          this._previousClientPoint = clientPoint;
           pauseEvent(event2);
-        };
-        const onTouchMove = function(event2) {
+        }, "onMouseMove");
+        const onTouchMove = /* @__PURE__ */ __name((event2) => {
           if (!this._isPointerValid) {
             return;
           }
@@ -3472,7 +3464,12 @@ var require_UIView = __commonJS({
             return;
           }
           const touch = event2.touches[0];
-          if (new import_UIPoint.UIPoint(touch.clientX, touch.clientY).to(this._initialPointerPosition).length > this._pointerDragThreshold) {
+          const clientPoint = new import_UIPoint.UIPoint(
+            touch.clientX,
+            touch.clientY
+          );
+          const distanceToInitialPoint = clientPoint.to(this._initialPointerPosition).length;
+          if (distanceToInitialPoint > this._pointerDragThreshold) {
             this._hasPointerDragged = import_UIObject.YES;
           }
           if (this._isPointerInside && this.viewHTMLElement != document.elementFromPoint(touch.clientX, touch.clientY)) {
@@ -3480,28 +3477,49 @@ var require_UIView = __commonJS({
             this.sendControlEventForKey(_UIView.controlEvent.PointerLeave, event2);
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerMove, event2);
-        };
-        var onTouchZoom = function onTouchZoom2(event2) {
+          if (this._hasPointerDragged) {
+            const movementPoint = this._previousClientPoint.to(clientPoint);
+            this.pointerDraggingPoint = new import_UIPoint.UIPoint(movementPoint.x, movementPoint.y).scale(1 / _UIView.pageScale).add(this.pointerDraggingPoint);
+            this.sendControlEventForKey(_UIView.controlEvent.PointerDrag, event2);
+          }
+          this._previousClientPoint = clientPoint;
+        }, "onTouchMove");
+        const onTouchZoom = /* @__PURE__ */ __name((event2) => {
           this.sendControlEventForKey(_UIView.controlEvent.MultipleTouches, event2);
-        }.bind(this);
-        var onPointerUpInside = (event2) => {
+        }, "onTouchZoom");
+        const onPointerUpInside = /* @__PURE__ */ __name((event2) => {
           pauseEvent(event2);
+          this._isPointerDown = import_UIObject.NO;
           this.sendControlEventForKey(_UIView.controlEvent.PointerUpInside, event2);
-        };
+          _UIView.pointerUpInsideCalled(this);
+        }, "onPointerUpInside");
+        const onTouchCancel = /* @__PURE__ */ __name((event2) => {
+          if (!this._isPointerValid) {
+            return;
+          }
+          if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || this.ignoresMouse && event2 instanceof MouseEvent) {
+            return;
+          }
+          this._isPointerValid = import_UIObject.NO;
+          this._isPointerDown = import_UIObject.NO;
+          this.sendControlEventForKey(_UIView.controlEvent.PointerCancel, event2);
+        }, "onTouchCancel");
         function eventKeyIsEnter(event2) {
           if (event2.keyCode !== 13) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsEnter, "eventKeyIsEnter");
         function eventKeyIsTab(event2) {
           if (event2.keyCode !== 9) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsTab, "eventKeyIsTab");
         function eventKeyIsEsc(event2) {
-          var result = false;
+          let result;
           if ("key" in event2) {
             result = event2.key == "Escape" || event2.key == "Esc";
           } else {
@@ -3509,31 +3527,36 @@ var require_UIView = __commonJS({
           }
           return result;
         }
+        __name(eventKeyIsEsc, "eventKeyIsEsc");
         function eventKeyIsLeft(event2) {
-          if (event2.keyCode != "37") {
+          if (event2.keyCode != 37) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsLeft, "eventKeyIsLeft");
         function eventKeyIsRight(event2) {
-          if (event2.keyCode != "39") {
+          if (event2.keyCode != 39) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsRight, "eventKeyIsRight");
         function eventKeyIsDown(event2) {
-          if (event2.keyCode != "40") {
+          if (event2.keyCode != 40) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsDown, "eventKeyIsDown");
         function eventKeyIsUp(event2) {
-          if (event2.keyCode != "38") {
+          if (event2.keyCode != 38) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
-        const onKeyDown = function(event2) {
+        __name(eventKeyIsUp, "eventKeyIsUp");
+        const onKeyDown = /* @__PURE__ */ __name((event2) => {
           if (eventKeyIsEnter(event2)) {
             this.sendControlEventForKey(_UIView.controlEvent.EnterDown, event2);
           }
@@ -3556,43 +3579,42 @@ var require_UIView = __commonJS({
           if (eventKeyIsUp(event2)) {
             this.sendControlEventForKey(_UIView.controlEvent.UpArrowDown, event2);
           }
-        }.bind(this);
-        const onKeyUp = function(event2) {
+        }, "onKeyDown");
+        const onKeyUp = /* @__PURE__ */ __name((event2) => {
           if (eventKeyIsEnter(event2)) {
             this.sendControlEventForKey(_UIView.controlEvent.EnterUp, event2);
           }
-        }.bind(this);
-        const onfocus = function(event2) {
+        }, "onKeyUp");
+        const onfocus = /* @__PURE__ */ __name((event2) => {
           this.sendControlEventForKey(_UIView.controlEvent.Focus, event2);
-        }.bind(this);
-        const onblur = function(event2) {
+        }, "onfocus");
+        const onblur = /* @__PURE__ */ __name((event2) => {
           this.sendControlEventForKey(_UIView.controlEvent.Blur, event2);
-        }.bind(this);
-        this._viewHTMLElement.onmousedown = onMouseDown.bind(this);
-        this._viewHTMLElement.ontouchstart = onTouchStart.bind(this);
-        this._viewHTMLElement.onmousemove = onMouseMove.bind(this);
-        this._viewHTMLElement.ontouchmove = onTouchMove.bind(this);
-        this._viewHTMLElement.onmouseover = onmouseover.bind(this);
-        this._viewHTMLElement.onmouseup = onmouseup.bind(this);
-        this._viewHTMLElement.ontouchend = onTouchEnd.bind(this);
-        this._viewHTMLElement.ontouchcancel = onTouchCancel.bind(this);
-        this._viewHTMLElement.onmouseout = onmouseout.bind(this);
-        this._viewHTMLElement.addEventListener("touchleave", onTouchLeave.bind(this), false);
+        }, "onblur");
+        this.viewHTMLElement.addEventListener("mousedown", onMouseDown, false);
+        this.viewHTMLElement.addEventListener("touchstart", onTouchStart, false);
+        this.viewHTMLElement.addEventListener("touchmove", onTouchMove, false);
+        this._viewHTMLElement.onmouseover = onmouseover;
+        this.viewHTMLElement.addEventListener("mouseup", onmouseup, false);
+        this.viewHTMLElement.addEventListener("touchend", onTouchEnd, false);
+        this.viewHTMLElement.addEventListener("touchcancel", onTouchCancel, false);
+        this.viewHTMLElement.addEventListener("mouseout", onmouseout, false);
+        this._viewHTMLElement.addEventListener("touchleave", onTouchLeave, true);
         this._viewHTMLElement.addEventListener("keydown", onKeyDown, false);
         this._viewHTMLElement.addEventListener("keyup", onKeyUp, false);
         this._viewHTMLElement.onfocus = onfocus;
         this._viewHTMLElement.onblur = onblur;
       }
-      get addControlEventTarget() {
+      get controlEventTargetAccumulator() {
         const eventKeys = [];
         const result = new Proxy(
           this.constructor.controlEvent,
           {
-            get: (target, key, receiver) => {
+            get: (target, key, _receiver) => {
               eventKeys.push(key);
               return result;
             },
-            set: (target, key, value, receiver) => {
+            set: (target, key, value, _receiver) => {
               eventKeys.push(key);
               this.addTargetForControlEvents(eventKeys, value);
               return true;
@@ -3602,12 +3624,10 @@ var require_UIView = __commonJS({
         return result;
       }
       addTargetForControlEvents(eventKeys, targetFunction) {
-        eventKeys.forEach(function(key, index, array) {
-          this.addTargetForControlEvent(key, targetFunction);
-        }, this);
+        eventKeys.forEach((key) => this.addTargetForControlEvent(key, targetFunction));
       }
       addTargetForControlEvent(eventKey, targetFunction) {
-        var targets = this._controlEventTargets[eventKey];
+        let targets = this._controlEventTargets[eventKey];
         if (!targets) {
           targets = [];
           this._controlEventTargets[eventKey] = targets;
@@ -3627,23 +3647,21 @@ var require_UIView = __commonJS({
         }
       }
       removeTargetForControlEvents(eventKeys, targetFunction) {
-        eventKeys.forEach(function(key, index, array) {
-          this.removeTargetForControlEvent(key, targetFunction);
-        }, this);
+        eventKeys.forEach((key) => this.removeTargetForControlEvent(key, targetFunction));
       }
       sendControlEventForKey(eventKey, nativeEvent) {
-        var targets = this._controlEventTargets[eventKey];
+        let targets = this._controlEventTargets[eventKey];
         if (!targets) {
           return;
         }
         targets = targets.copy();
-        for (var i = 0; i < targets.length; i++) {
+        for (let i = 0; i < targets.length; i++) {
           const target = targets[i];
           target(this, nativeEvent);
         }
       }
       broadcastEventInSubtree(event2) {
-        this.forEachViewInSubtree(function(view) {
+        this.forEachViewInSubtree((view) => {
           view.didReceiveBroadcastEvent(event2);
           if ((0, import_UIObject.IS)(view.viewController)) {
             view.viewController.viewDidReceiveBroadcastEvent(event2);
@@ -3667,9 +3685,7 @@ var require_UIView = __commonJS({
       }
       forEachViewInSubtree(functionToCall) {
         functionToCall(this);
-        this.subviews.forEach(function(subview, index, array) {
-          subview.forEachViewInSubtree(functionToCall);
-        });
+        this.subviews.everyElement.forEachViewInSubtree(functionToCall);
       }
       rectangleInView(rectangle, view) {
         if (!view.isMemberOfViewTree || !this.isMemberOfViewTree) {
@@ -3690,8 +3706,8 @@ var require_UIView = __commonJS({
         if (this.rootView.forceIntrinsicSizeZero) {
           return result;
         }
-        var temporarilyInViewTree = import_UIObject.NO;
-        var nodeAboveThisView;
+        let temporarilyInViewTree = import_UIObject.NO;
+        let nodeAboveThisView = null;
         if (!this.isMemberOfViewTree) {
           document.body.appendChild(this.viewHTMLElement);
           temporarilyInViewTree = import_UIObject.YES;
@@ -3735,23 +3751,21 @@ var require_UIView = __commonJS({
         return result;
       }
       intrinsicContentWidth(constrainingHeight = 0) {
-        const result = this.intrinsicContentSizeWithConstraints(constrainingHeight).width;
-        return result;
+        return this.intrinsicContentSizeWithConstraints(constrainingHeight).width;
       }
       intrinsicContentHeight(constrainingWidth = 0) {
-        const result = this.intrinsicContentSizeWithConstraints(void 0, constrainingWidth).height;
-        return result;
+        return this.intrinsicContentSizeWithConstraints(void 0, constrainingWidth).height;
       }
       intrinsicContentSize() {
         return import_UIObject.nil;
       }
-    };
-    var UIView14 = _UIView;
-    UIView14._UIViewIndex = -1;
-    UIView14._viewsToLayout = [];
-    UIView14._pageScale = 1;
-    UIView14._transformAttribute = ("transform" in document.documentElement.style ? "transform" : void 0) || ("-webkit-transform" in document.documentElement.style ? "-webkit-transform" : "undefined") || ("-moz-transform" in document.documentElement.style ? "-moz-transform" : "undefined") || ("-ms-transform" in document.documentElement.style ? "-ms-transform" : "undefined") || ("-o-transform" in document.documentElement.style ? "-o-transform" : "undefined");
-    UIView14.constraintAttribute = {
+    }, "_UIView");
+    var UIView17 = _UIView;
+    UIView17._UIViewIndex = -1;
+    UIView17._viewsToLayout = [];
+    UIView17._pageScale = 1;
+    UIView17._transformAttribute = ("transform" in document.documentElement.style ? "transform" : void 0) || ("-webkit-transform" in document.documentElement.style ? "-webkit-transform" : "undefined") || ("-moz-transform" in document.documentElement.style ? "-moz-transform" : "undefined") || ("-ms-transform" in document.documentElement.style ? "-ms-transform" : "undefined") || ("-o-transform" in document.documentElement.style ? "-o-transform" : "undefined");
+    UIView17.constraintAttribute = {
       "left": AutoLayout.Attribute.LEFT,
       "right": AutoLayout.Attribute.RIGHT,
       "bottom": AutoLayout.Attribute.BOTTOM,
@@ -3764,14 +3778,15 @@ var require_UIView = __commonJS({
       "constant": AutoLayout.Attribute.NOTANATTRIBUTE,
       "variable": AutoLayout.Attribute.VARIABLE
     };
-    UIView14.constraintRelation = {
+    UIView17.constraintRelation = {
       "equal": AutoLayout.Relation.EQU,
       "lessThanOrEqual": AutoLayout.Relation.LEQ,
       "greaterThanOrEqual": AutoLayout.Relation.GEQ
     };
-    UIView14.controlEvent = {
+    UIView17.controlEvent = {
       "PointerDown": "PointerDown",
       "PointerMove": "PointerMove",
+      "PointerDrag": "PointerDrag",
       "PointerLeave": "PointerLeave",
       "PointerEnter": "PointerEnter",
       "PointerUpInside": "PointerUpInside",
@@ -3791,7 +3806,7 @@ var require_UIView = __commonJS({
       "Focus": "Focus",
       "Blur": "Blur"
     };
-    UIView14.broadcastEventName = {
+    UIView17.broadcastEventName = {
       "LanguageChanged": "LanguageChanged",
       "RemovedFromViewTree": "RemovedFromViewTree",
       "AddedToViewTree": "AddedToViewTree",
@@ -3803,33 +3818,34 @@ var require_UIView = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UITextView.js
 var require_UITextView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UITextView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITextView_exports = {};
     __export2(UITextView_exports, {
-      UITextView: () => UITextView12
+      UITextView: () => UITextView13
     });
     module.exports = __toCommonJS2(UITextView_exports);
     var import_UIColor = require_UIColor();
     var import_UIObject = require_UIObject();
     var import_UIRectangle = require_UIRectangle();
     var import_UIView = require_UIView();
-    var _UITextView = class extends import_UIView.UIView {
+    var _UITextView = /* @__PURE__ */ __name(class extends import_UIView.UIView {
       constructor(elementID, textViewType = _UITextView.type.paragraph, viewHTMLElement = null) {
         super(elementID, viewHTMLElement, textViewType);
         this._textColor = _UITextView.defaultTextColor;
@@ -3858,6 +3874,9 @@ var require_UITextView = __commonJS({
         }
       }
       static _determinePXAndPTRatios() {
+        if (_UITextView._ptToPx) {
+          return;
+        }
         const o = document.createElement("div");
         o.style.width = "1000pt";
         document.body.appendChild(o);
@@ -4021,13 +4040,13 @@ var require_UITextView = __commonJS({
         const result = this.intrinsicContentSizeWithConstraints(import_UIObject.nil, import_UIObject.nil);
         return result;
       }
-    };
-    var UITextView12 = _UITextView;
-    UITextView12.defaultTextColor = import_UIColor.UIColor.blackColor;
-    UITextView12.notificationTextColor = import_UIColor.UIColor.redColor;
-    UITextView12._intrinsicHeightCache = new import_UIObject.UIObject();
-    UITextView12._intrinsicWidthCache = new import_UIObject.UIObject();
-    UITextView12.type = {
+    }, "_UITextView");
+    var UITextView13 = _UITextView;
+    UITextView13.defaultTextColor = import_UIColor.UIColor.blackColor;
+    UITextView13.notificationTextColor = import_UIColor.UIColor.redColor;
+    UITextView13._intrinsicHeightCache = new import_UIObject.UIObject();
+    UITextView13._intrinsicWidthCache = new import_UIObject.UIObject();
+    UITextView13.type = {
       "paragraph": "p",
       "header1": "h1",
       "header2": "h2",
@@ -4040,39 +4059,40 @@ var require_UITextView = __commonJS({
       "span": "span",
       "label": "label"
     };
-    UITextView12.textAlignment = {
+    UITextView13.textAlignment = {
       "left": "left",
       "center": "center",
       "right": "right",
       "justify": "justify"
     };
-    UITextView12._determinePXAndPTRatios();
+    UITextView13._determinePXAndPTRatios();
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UITextField.js
 var require_UITextField = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UITextField.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITextField_exports = {};
     __export2(UITextField_exports, {
-      UITextField: () => UITextField4
+      UITextField: () => UITextField2
     });
     module.exports = __toCommonJS2(UITextField_exports);
     var import_UIColor = require_UIColor();
@@ -4080,7 +4100,7 @@ var require_UITextField = __commonJS({
     var import_UIObject = require_UIObject();
     var import_UITextView = require_UITextView();
     var import_UIView = require_UIView();
-    var _UITextField = class extends import_UITextView.UITextView {
+    var _UITextField = /* @__PURE__ */ __name(class extends import_UITextView.UITextView {
       constructor(elementID, viewHTMLElement = null, type = import_UITextView.UITextView.type.textField) {
         super(elementID, type, viewHTMLElement);
         this.viewHTMLElement.setAttribute("type", "text");
@@ -4096,8 +4116,8 @@ var require_UITextField = __commonJS({
         this.nativeSelectionEnabled = import_UIObject.YES;
         this.pausesPointerEvents = import_UIObject.NO;
       }
-      get addControlEventTarget() {
-        return super.addControlEventTarget;
+      get controlEventTargetAccumulator() {
+        return super.controlEventTargetAccumulator;
       }
       get viewHTMLElement() {
         return this._viewHTMLElement;
@@ -4146,9 +4166,9 @@ var require_UITextField = __commonJS({
         }
         this.viewHTMLElement.type = type;
       }
-    };
-    var UITextField4 = _UITextField;
-    UITextField4.controlEvent = Object.assign({}, import_UIView.UIView.controlEvent, {
+    }, "_UITextField");
+    var UITextField2 = _UITextField;
+    UITextField2.controlEvent = Object.assign({}, import_UITextView.UITextView.controlEvent, {
       "TextChange": "TextChange"
     });
   }
@@ -4157,23 +4177,24 @@ var require_UITextField = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UITextArea.js
 var require_UITextArea = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UITextArea.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITextArea_exports = {};
     __export2(UITextArea_exports, {
       UITextArea: () => UITextArea3
@@ -4190,36 +4211,35 @@ var require_UITextArea = __commonJS({
         this.style.webkitUserSelect = "text";
         this.pausesPointerEvents = import_UIObject.NO;
       }
-      get addControlEventTarget() {
-        return super.addControlEventTarget;
-      }
       get viewHTMLElement() {
         return super.viewHTMLElement;
       }
     };
+    __name(UITextArea3, "UITextArea");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIBaseButton.js
 var require_UIBaseButton = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIBaseButton.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIBaseButton_exports = {};
     __export2(UIBaseButton_exports, {
       UIBaseButton: () => UIBaseButton
@@ -4234,67 +4254,62 @@ var require_UIBaseButton = __commonJS({
         this._selected = import_UIObject.NO;
         this._highlighted = import_UIObject.NO;
         this._isToggleable = import_UIObject.NO;
-        this.initViewStateControl();
-      }
-      initViewStateControl() {
-        this.class.superclass = import_UIView.UIView;
         this._isPointerInside = import_UIObject.NO;
-        const setHovered = function() {
+        const setHovered = /* @__PURE__ */ __name(() => {
           this.hovered = import_UIObject.YES;
-        }.bind(this);
+        }, "setHovered");
         this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerHover, setHovered);
-        const setNotHovered = function() {
+        const setNotHovered = /* @__PURE__ */ __name(() => {
           this.hovered = import_UIObject.NO;
-        }.bind(this);
+        }, "setNotHovered");
         this.addTargetForControlEvents([
           import_UIView.UIView.controlEvent.PointerLeave,
           import_UIView.UIView.controlEvent.PointerCancel,
           import_UIView.UIView.controlEvent.MultipleTouches
         ], setNotHovered);
         var highlightingTime;
-        const setHighlighted = function() {
+        const setHighlighted = /* @__PURE__ */ __name(() => {
           this.highlighted = import_UIObject.YES;
           highlightingTime = Date.now();
-        }.bind(this);
+        }, "setHighlighted");
         this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerDown, setHighlighted);
         this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerEnter, setHighlighted);
-        const setNotHighlighted = function() {
+        const setNotHighlighted = /* @__PURE__ */ __name(() => {
           this.highlighted = import_UIObject.NO;
-        }.bind(this);
-        const setNotHighlightedWithMinimumDuration = function() {
+        }, "setNotHighlighted");
+        const setNotHighlightedWithMinimumDuration = /* @__PURE__ */ __name(() => {
           const minimumDurationInMilliseconds = 50;
           const elapsedTime = Date.now() - highlightingTime;
           if (minimumDurationInMilliseconds < elapsedTime) {
             this.highlighted = import_UIObject.NO;
           } else {
-            setTimeout(function() {
+            setTimeout(() => {
               this.highlighted = import_UIObject.NO;
-            }.bind(this), minimumDurationInMilliseconds - elapsedTime);
+            }, minimumDurationInMilliseconds - elapsedTime);
           }
-        }.bind(this);
+        }, "setNotHighlightedWithMinimumDuration");
         this.addTargetForControlEvents([
           import_UIView.UIView.controlEvent.PointerLeave,
           import_UIView.UIView.controlEvent.PointerCancel,
           import_UIView.UIView.controlEvent.MultipleTouches
         ], setNotHighlighted);
         this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerUp, setNotHighlightedWithMinimumDuration);
-        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.EnterDown, function() {
+        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.EnterDown, () => {
           setHighlighted();
           setNotHighlightedWithMinimumDuration();
         });
         this.addTargetForControlEvent(
           import_UIView.UIView.controlEvent.Focus,
-          function(sender, event2) {
+          (sender, event2) => {
             this.focused = import_UIObject.YES;
-          }.bind(this)
+          }
         );
         this.addTargetForControlEvent(
           import_UIView.UIView.controlEvent.Blur,
-          function(sender, event2) {
+          (sender, event2) => {
             this.focused = import_UIObject.NO;
-          }.bind(this)
+          }
         );
-        this.updateContentForCurrentState();
         this.pausesPointerEvents = import_UIObject.YES;
         this.tabIndex = 1;
         this.style.cursor = "pointer";
@@ -4302,18 +4317,19 @@ var require_UIBaseButton = __commonJS({
         this.addTargetForControlEvents([
           import_UIView.UIView.controlEvent.EnterDown,
           import_UIView.UIView.controlEvent.PointerUpInside
-        ], function(sender, event2) {
+        ], () => {
           if (this.isToggleable) {
             this.toggleSelectedState();
           }
-        }.bind(this));
+        });
       }
       set hovered(hovered) {
         this._hovered = hovered;
         this.updateContentForCurrentState();
       }
       get hovered() {
-        return this._hovered;
+        var _a;
+        return (_a = this._hovered) != null ? _a : import_UIObject.NO;
       }
       set highlighted(highlighted) {
         this._highlighted = highlighted;
@@ -4332,7 +4348,8 @@ var require_UIBaseButton = __commonJS({
         this.updateContentForCurrentState();
       }
       get focused() {
-        return this._focused;
+        var _a;
+        return (_a = this._focused) != null ? _a : import_UIObject.NO;
       }
       set selected(selected) {
         this._selected = selected;
@@ -4342,7 +4359,7 @@ var require_UIBaseButton = __commonJS({
         return this._selected;
       }
       updateContentForCurrentState() {
-        var updateFunction = this.updateContentForNormalState;
+        let updateFunction = this.updateContentForNormalState;
         if (this.selected && this.highlighted) {
           updateFunction = this.updateContentForSelectedAndHighlightedState;
         } else if (this.selected) {
@@ -4401,6 +4418,7 @@ var require_UIBaseButton = __commonJS({
         if (event2.name == import_UIView.UIView.broadcastEventName.PageDidScroll || event2.name == import_UIView.UIView.broadcastEventName.AddedToViewTree) {
           this.hovered = import_UIObject.NO;
           this.highlighted = import_UIObject.NO;
+          this.updateContentForCurrentState();
         }
       }
       toggleSelectedState() {
@@ -4471,29 +4489,31 @@ var require_UIBaseButton = __commonJS({
         return coordinatesInElement;
       }
     };
+    __name(UIBaseButton, "UIBaseButton");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIImageView.js
 var require_UIImageView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIImageView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIImageView_exports = {};
     __export2(UIImageView_exports, {
       UIImageView: () => UIImageView4
@@ -4503,7 +4523,7 @@ var require_UIImageView = __commonJS({
     var import_UIObject = require_UIObject();
     var import_UIRectangle = require_UIRectangle();
     var import_UIView = require_UIView();
-    var _UIImageView = class extends import_UIView.UIView {
+    var _UIImageView = /* @__PURE__ */ __name(class extends import_UIView.UIView {
       constructor(elementID, viewHTMLElement = null) {
         super(elementID, viewHTMLElement, "img");
         this._hiddenWhenEmpty = import_UIObject.NO;
@@ -4513,8 +4533,7 @@ var require_UIImageView = __commonJS({
       }
       static objectURLFromDataURL(dataURL) {
         const blob = dataURLtoBlob(dataURL);
-        const objectURL = URL.createObjectURL(blob);
-        return objectURL;
+        return URL.createObjectURL(blob);
       }
       static dataURL(url, callback) {
         const xhr = new XMLHttpRequest();
@@ -4532,9 +4551,9 @@ var require_UIImageView = __commonJS({
       static dataURLWithMaxSize(URLString, maxSize, completion) {
         const imageView = new _UIImageView();
         imageView.imageSource = URLString;
-        imageView.viewHTMLElement.onload = function() {
+        imageView.viewHTMLElement.onload = () => {
           const originalSize = imageView.intrinsicContentSize();
-          var multiplier = maxSize / Math.max(originalSize.height, originalSize.width);
+          let multiplier = maxSize / Math.max(originalSize.height, originalSize.width);
           multiplier = Math.min(1, multiplier);
           const result = imageView.getDataURL((originalSize.height * multiplier).integerValue, (originalSize.width * multiplier).integerValue);
           completion(result);
@@ -4543,7 +4562,7 @@ var require_UIImageView = __commonJS({
       static dataURLWithSizes(URLString, height, width, completion) {
         const imageView = new _UIImageView();
         imageView.imageSource = URLString;
-        imageView.viewHTMLElement.onload = function() {
+        imageView.viewHTMLElement.onload = () => {
           const result = imageView.getDataURL(height, width);
           completion(result);
         };
@@ -4551,12 +4570,11 @@ var require_UIImageView = __commonJS({
       getDataURL(height, width) {
         const img = this.viewHTMLElement;
         const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width != null ? width : img.naturalWidth;
+        canvas.height = height != null ? height : img.naturalHeight;
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataURL = canvas.toDataURL("image/png");
-        return dataURL;
+        ctx.drawImage(img, 0, 0, width != null ? width : img.naturalWidth, height != null ? height : img.naturalHeight);
+        return canvas.toDataURL("image/png");
       }
       get imageSource() {
         return this.viewHTMLElement.src;
@@ -4575,9 +4593,7 @@ var require_UIImageView = __commonJS({
         } else {
           this.hidden = import_UIObject.NO;
         }
-        this.viewHTMLElement.onload = function(event2) {
-          this.superview.setNeedsLayout();
-        }.bind(this);
+        this.viewHTMLElement.onload = () => this.superview.setNeedsLayout();
       }
       setImageSource(key, defaultString) {
         const languageName = import_UICore.UICore.languageService.currentLanguageKey;
@@ -4621,17 +4637,15 @@ var require_UIImageView = __commonJS({
         super.layoutSubviews();
       }
       intrinsicContentSize() {
-        const result = new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.naturalHeight, this.viewHTMLElement.naturalWidth);
-        return result;
+        return new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.naturalHeight, this.viewHTMLElement.naturalWidth);
       }
       intrinsicContentSizeWithConstraints(constrainingHeight = 0, constrainingWidth = 0) {
         const heightRatio = constrainingHeight / this.viewHTMLElement.naturalHeight;
         const widthRatio = constrainingWidth / this.viewHTMLElement.naturalWidth;
         const multiplier = Math.max(heightRatio, widthRatio);
-        const result = new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.naturalHeight * multiplier, this.viewHTMLElement.naturalWidth * multiplier);
-        return result;
+        return new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.naturalHeight * multiplier, this.viewHTMLElement.naturalWidth * multiplier);
       }
-    };
+    }, "_UIImageView");
     var UIImageView4 = _UIImageView;
     UIImageView4.fillMode = {
       "stretchToFill": "fill",
@@ -4646,26 +4660,27 @@ var require_UIImageView = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIButton.js
 var require_UIButton = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIButton.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIButton_exports = {};
     __export2(UIButton_exports, {
-      UIButton: () => UIButton10
+      UIButton: () => UIButton11
     });
     module.exports = __toCommonJS2(UIButton_exports);
     var import_UIBaseButton = require_UIBaseButton();
@@ -4674,15 +4689,13 @@ var require_UIButton = __commonJS({
     var import_UIObject = require_UIObject();
     var import_UIRectangle = require_UIRectangle();
     var import_UITextView = require_UITextView();
-    var UIButton10 = class extends import_UIBaseButton.UIBaseButton {
+    var UIButton11 = class extends import_UIBaseButton.UIBaseButton {
       constructor(elementID, elementType, titleType = import_UITextView.UITextView.type.span) {
         super(elementID, elementType, { "titleType": titleType });
+        this._contentPadding = 0;
         this.usesAutomaticTitleFontSize = import_UIObject.NO;
         this.minAutomaticFontSize = import_UIObject.nil;
         this.maxAutomaticFontSize = 25;
-      }
-      initView(elementID, viewHTMLElement, initViewData) {
-        this.class.superclass = import_UIBaseButton.UIBaseButton;
         this.colors = {
           titleLabel: {
             normal: import_UIColor.UIColor.whiteColor,
@@ -4699,8 +4712,8 @@ var require_UIButton = __commonJS({
         this._imageView.hidden = import_UIObject.YES;
         this.addSubview(this.imageView);
         this.imageView.fillMode = import_UIImageView.UIImageView.fillMode.aspectFitIfLarger;
-        if ((0, import_UIObject.IS_NOT_NIL)(initViewData.titleType)) {
-          this._titleLabel = new import_UITextView.UITextView(elementID + "TitleLabel", initViewData.titleType);
+        if ((0, import_UIObject.IS_NOT_NIL)(titleType)) {
+          this._titleLabel = new import_UITextView.UITextView(elementID + "TitleLabel", titleType);
           this.titleLabel.style.whiteSpace = "nowrap";
           this.addSubview(this.titleLabel);
           this.titleLabel.userInteractionEnabled = import_UIObject.NO;
@@ -4722,7 +4735,8 @@ var require_UIButton = __commonJS({
         this.updateContentForCurrentState();
       }
       get hovered() {
-        return this._hovered;
+        var _a;
+        return (_a = this._hovered) != null ? _a : import_UIObject.NO;
       }
       set highlighted(highlighted) {
         this._highlighted = highlighted;
@@ -4741,7 +4755,8 @@ var require_UIButton = __commonJS({
         this.updateContentForCurrentState();
       }
       get focused() {
-        return this._focused;
+        var _a;
+        return (_a = this._focused) != null ? _a : import_UIObject.NO;
       }
       set selected(selected) {
         this._selected = selected;
@@ -4751,7 +4766,7 @@ var require_UIButton = __commonJS({
         return this._selected;
       }
       updateContentForCurrentState() {
-        var updateFunction = this.updateContentForNormalState;
+        let updateFunction = this.updateContentForNormalState;
         if (this.selected && this.highlighted) {
           updateFunction = this.updateContentForSelectedAndHighlightedState;
         } else if (this.selected) {
@@ -4832,27 +4847,27 @@ var require_UIButton = __commonJS({
         }
       }
       get titleLabel() {
-        return this._titleLabel;
+        var _a;
+        return (_a = this._titleLabel) != null ? _a : import_UIObject.nil;
       }
       get imageView() {
         return this._imageView;
       }
       layoutSubviews() {
         super.layoutSubviews();
-        var bounds = this.bounds;
+        let bounds = this.bounds;
         this.hoverText = this.titleLabel.text;
         if ((0, import_UIObject.IS_NOT)(this.imageView.hidden) && !(0, import_UIObject.IS)(this.titleLabel.text)) {
           this.imageView.frame = bounds;
         }
         if ((0, import_UIObject.IS)(this.imageView.hidden) && (0, import_UIObject.IS)(this.titleLabel.text)) {
-          var titleElement = this.titleLabel.viewHTMLElement;
-          this.titleLabel.style.left = this.contentPadding;
-          this.titleLabel.style.right = this.contentPadding;
+          this.titleLabel.style.left = this.contentPadding + "px";
+          this.titleLabel.style.right = this.contentPadding + "px";
           this.titleLabel.style.top = "50%";
           this.titleLabel.style.transform = "translateY(-50%)";
           this.titleLabel.frame = new import_UIRectangle.UIRectangle(import_UIObject.nil, import_UIObject.nil, import_UIObject.nil, import_UIObject.nil);
           if (this.usesAutomaticTitleFontSize) {
-            var hidden = this.titleLabel.hidden;
+            const hidden = this.titleLabel.hidden;
             this.titleLabel.hidden = import_UIObject.YES;
             this.titleLabel.fontSize = 15;
             this.titleLabel.fontSize = import_UITextView.UITextView.automaticallyCalculatedFontSize(
@@ -4860,7 +4875,7 @@ var require_UIButton = __commonJS({
                 0,
                 0,
                 this.bounds.height,
-                1 * this.titleLabel.viewHTMLElement.offsetWidth
+                this.titleLabel.viewHTMLElement.offsetWidth
               ),
               this.titleLabel.intrinsicContentSize(),
               this.titleLabel.fontSize,
@@ -4871,18 +4886,16 @@ var require_UIButton = __commonJS({
           }
         }
         if ((0, import_UIObject.IS_NOT)(this.imageView.hidden) && (0, import_UIObject.IS)(this.titleLabel.text)) {
-          const imageShareOfWidth = 0.25;
           bounds = bounds.rectangleWithInset(this.contentPadding);
           const imageFrame = bounds.copy();
           imageFrame.width = bounds.height - this.contentPadding * 0.5;
           this.imageView.frame = imageFrame;
-          var titleElement = this.titleLabel.viewHTMLElement;
-          this.titleLabel.style.left = imageFrame.max.x + this.contentPadding;
-          this.titleLabel.style.right = this.contentPadding;
+          this.titleLabel.style.left = imageFrame.max.x + this.contentPadding + "px";
+          this.titleLabel.style.right = this.contentPadding + "px";
           this.titleLabel.style.top = "50%";
           this.titleLabel.style.transform = "translateY(-50%)";
           if (this.usesAutomaticTitleFontSize) {
-            var hidden = this.titleLabel.hidden;
+            const hidden = this.titleLabel.hidden;
             this.titleLabel.hidden = import_UIObject.YES;
             this.titleLabel.fontSize = 15;
             this.titleLabel.fontSize = import_UITextView.UITextView.automaticallyCalculatedFontSize(
@@ -4890,7 +4903,7 @@ var require_UIButton = __commonJS({
                 0,
                 0,
                 this.bounds.height,
-                1 * this.titleLabel.viewHTMLElement.offsetWidth
+                this.titleLabel.viewHTMLElement.offsetWidth
               ),
               this.titleLabel.intrinsicContentSize(),
               this.titleLabel.fontSize,
@@ -4906,29 +4919,31 @@ var require_UIButton = __commonJS({
         this.initStyleSelector("." + this.styleClassName, "background-color: lightblue;");
       }
     };
+    __name(UIButton11, "UIButton");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UINativeScrollView.js
 var require_UINativeScrollView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UINativeScrollView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UINativeScrollView_exports = {};
     __export2(UINativeScrollView_exports, {
       UINativeScrollView: () => UINativeScrollView
@@ -4943,13 +4958,13 @@ var require_UINativeScrollView = __commonJS({
         this.animationDuration = 0;
         this.style.cssText = this.style.cssText + "-webkit-overflow-scrolling: touch;";
         this.style.overflow = "auto";
-        this.viewHTMLElement.addEventListener("scroll", function(event2) {
+        this.viewHTMLElement.addEventListener("scroll", () => {
           this.didScrollToPosition(new import_UIPoint.UIPoint(this.viewHTMLElement.scrollLeft, this.viewHTMLElement.scrollTop));
           this.broadcastEventInSubtree({
             name: import_UIView.UIView.broadcastEventName.PageDidScroll,
             parameters: import_UIObject.nil
           });
-        }.bind(this));
+        });
       }
       didScrollToPosition(offsetPosition) {
       }
@@ -5005,7 +5020,7 @@ var require_UINativeScrollView = __commonJS({
         const start = element.scrollTop;
         const change = to - start;
         const increment = 10;
-        const animateScroll = function(elapsedTime) {
+        const animateScroll = /* @__PURE__ */ __name((elapsedTime) => {
           elapsedTime += increment;
           const position = this.easeInOut(elapsedTime, start, change, duration);
           element.scrollTop = position;
@@ -5014,7 +5029,7 @@ var require_UINativeScrollView = __commonJS({
               animateScroll(elapsedTime);
             }, increment);
           }
-        }.bind(this);
+        }, "animateScroll");
         animateScroll(0);
       }
       scrollXTo(element, to, duration) {
@@ -5022,7 +5037,7 @@ var require_UINativeScrollView = __commonJS({
         const start = element.scrollTop;
         const change = to - start;
         const increment = 10;
-        const animateScroll = function(elapsedTime) {
+        const animateScroll = /* @__PURE__ */ __name((elapsedTime) => {
           elapsedTime += increment;
           const position = this.easeInOut(elapsedTime, start, change, duration);
           element.scrollLeft = position;
@@ -5031,7 +5046,7 @@ var require_UINativeScrollView = __commonJS({
               animateScroll(elapsedTime);
             }, increment);
           }
-        }.bind(this);
+        }, "animateScroll");
         animateScroll(0);
       }
       easeInOut(currentTime, start, change, duration) {
@@ -5043,39 +5058,41 @@ var require_UINativeScrollView = __commonJS({
         return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
       }
     };
+    __name(UINativeScrollView, "UINativeScrollView");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UITableView.js
 var require_UITableView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UITableView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITableView_exports = {};
     __export2(UITableView_exports, {
-      UITableView: () => UITableView4
+      UITableView: () => UITableView2
     });
     module.exports = __toCommonJS2(UITableView_exports);
     var import_UIButton = require_UIButton();
     var import_UINativeScrollView = require_UINativeScrollView();
     var import_UIObject = require_UIObject();
     var import_UIView = require_UIView();
-    var UITableView4 = class extends import_UINativeScrollView.UINativeScrollView {
+    var UITableView2 = class extends import_UINativeScrollView.UINativeScrollView {
       constructor(elementID) {
         super(elementID);
         this.allRowsHaveEqualHeight = import_UIObject.NO;
@@ -5092,14 +5109,11 @@ var require_UITableView = __commonJS({
         this._needsDrawingOfVisibleRowsBeforeLayout = import_UIObject.NO;
         this._isDrawVisibleRowsScheduled = import_UIObject.NO;
         this.animationDuration = 0.25;
-        this.scrollsX = import_UIObject.NO;
-      }
-      initView(elementID, viewHTMLElement) {
-        super.initView(elementID, viewHTMLElement);
         this._fullHeightView = new import_UIView.UIView();
         this._fullHeightView.hidden = import_UIObject.YES;
         this._fullHeightView.userInteractionEnabled = import_UIObject.NO;
         this.addSubview(this._fullHeightView);
+        this.scrollsX = import_UIObject.NO;
       }
       loadData() {
         this._persistedData = [];
@@ -5115,23 +5129,19 @@ var require_UITableView = __commonJS({
         this.loadData();
       }
       highlightChanges(previousData, newData) {
-        previousData = previousData.map(function(dataPoint, index, array) {
-          return JSON.stringify(dataPoint);
-        });
-        newData = newData.map(function(dataPoint, index, array) {
-          return JSON.stringify(dataPoint);
-        });
+        previousData = previousData.map((dataPoint) => JSON.stringify(dataPoint));
+        newData = newData.map((dataPoint) => JSON.stringify(dataPoint));
         const newIndexes = [];
-        newData.forEach(function(value, index, array) {
+        newData.forEach((value, index) => {
           if (!previousData.contains(value)) {
             newIndexes.push(index);
           }
         });
-        newIndexes.forEach(function(index) {
+        newIndexes.forEach((index) => {
           if (this.isRowWithIndexVisible(index)) {
             this.highlightRowAsNew(this.viewForRowWithIndex(index));
           }
-        }.bind(this));
+        });
       }
       highlightRowAsNew(row) {
       }
@@ -5217,27 +5227,27 @@ var require_UITableView = __commonJS({
       }
       _removeVisibleRows() {
         const visibleRows = [];
-        this._visibleRows.forEach(function(row, index, array) {
+        this._visibleRows.forEach((row) => {
           this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
             row._UITableViewRowIndex,
             row
           );
           row.removeFromSuperview();
           this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row);
-        }, this);
+        });
         this._visibleRows = visibleRows;
       }
       _removeAllReusableRows() {
-        this._reusableViews.forEach(function(rows) {
-          rows.forEach(function(row, index, array) {
+        this._reusableViews.forEach(
+          (rows) => rows.forEach((row) => {
             this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
               row._UITableViewRowIndex,
               row
             );
             row.removeFromSuperview();
             this._markReusableViewAsUnused(row);
-          }.bind(this));
-        }.bind(this));
+          })
+        );
       }
       _markReusableViewAsUnused(row) {
         if (!this._removedReusableViews[row._UITableViewReusabilityIdentifier].contains(row)) {
@@ -5253,7 +5263,7 @@ var require_UITableView = __commonJS({
         const maxIndex = visibleIndexes[visibleIndexes.length - 1];
         const removedViews = [];
         const visibleRows = [];
-        this._visibleRows.forEach(function(row, index, array) {
+        this._visibleRows.forEach((row) => {
           if (row._UITableViewRowIndex < minIndex || row._UITableViewRowIndex > maxIndex) {
             this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
               row._UITableViewRowIndex,
@@ -5264,19 +5274,19 @@ var require_UITableView = __commonJS({
           } else {
             visibleRows.push(row);
           }
-        }, this);
+        });
         this._visibleRows = visibleRows;
-        visibleIndexes.forEach(function(rowIndex, index, array) {
+        visibleIndexes.forEach((rowIndex) => {
           if (this.isRowWithIndexVisible(rowIndex)) {
             return;
           }
-          const view2 = this.viewForRowWithIndex(rowIndex);
-          this._firstLayoutVisibleRows.push(view2);
-          this._visibleRows.push(view2);
-          this.addSubview(view2);
-        }, this);
-        for (var i = 0; i < removedViews.length; i++) {
-          var view = removedViews[i];
+          const view = this.viewForRowWithIndex(rowIndex);
+          this._firstLayoutVisibleRows.push(view);
+          this._visibleRows.push(view);
+          this.addSubview(view);
+        });
+        for (let i = 0; i < removedViews.length; i++) {
+          const view = removedViews[i];
           if (this._visibleRows.indexOf(view) == -1) {
             view.removeFromSuperview();
           }
@@ -5309,9 +5319,6 @@ var require_UITableView = __commonJS({
         }
         const newView = this.newReusableViewForIdentifier(identifier, this._rowIDIndex);
         this._rowIDIndex = this._rowIDIndex + 1;
-        if (this._rowIDIndex > 40) {
-          const asd = 1;
-        }
         newView._UITableViewReusabilityIdentifier = identifier;
         newView._UITableViewRowIndex = rowIndex;
         Object.assign(newView, this._persistedData[rowIndex] || this.defaultRowPersistenceDataItem());
@@ -5373,7 +5380,7 @@ var require_UITableView = __commonJS({
       }
       _layoutAllRows(positions = this._rowPositions) {
         const bounds = this.bounds;
-        this._visibleRows.forEach(function(row, index, array) {
+        this._visibleRows.forEach((row) => {
           const frame = bounds.copy();
           const positionObject = positions[row._UITableViewRowIndex];
           frame.min.y = positionObject.topY;
@@ -5381,7 +5388,7 @@ var require_UITableView = __commonJS({
           row.frame = frame;
           row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px";
           row.style.left = "" + this.sidePadding.integerValue + "px";
-        }, this);
+        });
         this._fullHeightView.frame = bounds.rectangleWithHeight((positions.lastElement || import_UIObject.nil).bottomY).rectangleWithWidth(bounds.width * 0.5);
         this._firstLayoutVisibleRows = [];
       }
@@ -5433,6 +5440,7 @@ var require_UITableView = __commonJS({
         return result;
       }
     };
+    __name(UITableView2, "UITableView");
   }
 });
 
@@ -5446,6 +5454,7 @@ function inlineWorker(scriptText) {
 }
 var init_inline_worker = __esm({
   "inline-worker:__inline-worker"() {
+    __name(inlineWorker, "inlineWorker");
   }
 });
 
@@ -5455,40 +5464,42 @@ __export(UIStringFilterWebWorker_worker_exports, {
   default: () => Worker2
 });
 function Worker2() {
-  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(n){var r=this.indexOf(n)!=-1;return r});"contains"in String.prototype||(String.prototype.contains=function(n){var r=this.indexOf(n)!=-1;return r});onmessage=function(n){var r=h(n.data.filteringString,n.data.data,n.data.excludedData);r.identifier=n.data.identifier,r.instanceIdentifier=n.data.instanceIdentifier,postMessage(r)};function h(n,r,s){var a=[],e=[];if(n){var c=[];n.split(" ").forEach(function(i,t,o){i&&c.push(i.toLowerCase())}),r.forEach(function(i,t,o){var u=i.toLowerCase(),f=[];c.forEach(function(p){f.push(u.contains(p)&&!s.contains(i))}),f.contains(!0)&&!f.contains(!1)&&(a.push(i),e.push(t))})}else s.length?a=r.forEach(function(i,t,o){s.indexOf(i)==-1&&(a.push(i),e.push(t))}):(a=r,r.forEach(function(i,t,o){e.push(t)}));return{filteredData:a,filteredIndexes:e}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlTdHJpbmdGaWx0ZXJXZWJXb3JrZXIud29ya2VyLnRzIl0sCiAgInNvdXJjZXNDb250ZW50IjogWyIvLyBAdHMtY2hlY2tcblxuaWYgKFwiY29udGFpbnNcIiBpbiBBcnJheS5wcm90b3R5cGUgPT0gZmFsc2UpIHtcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgQXJyYXkucHJvdG90eXBlLmNvbnRhaW5zID0gZnVuY3Rpb24gKGVsZW1lbnQpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSAodGhpcy5pbmRleE9mKGVsZW1lbnQpICE9IC0xKVxuICAgICAgICByZXR1cm4gcmVzdWx0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbn1cblxuaWYgKFwiY29udGFpbnNcIiBpbiBTdHJpbmcucHJvdG90eXBlID09IGZhbHNlKSB7XG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIFN0cmluZy5wcm90b3R5cGUuY29udGFpbnMgPSBmdW5jdGlvbiAoc3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgcmVzdWx0ID0gKHRoaXMuaW5kZXhPZihzdHJpbmcpICE9IC0xKVxuICAgICAgICByZXR1cm4gcmVzdWx0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbn1cblxuXG5cblxuXG5vbm1lc3NhZ2UgPSBmdW5jdGlvbiAoZXZlbnQpIHtcbiAgICBcbiAgICAvL2NvbnNvbGUubG9nKCdNZXNzYWdlIHJlY2VpdmVkIGZyb20gbWFpbiBzY3JpcHQnKTtcbiAgICB2YXIgd29ya2VyUmVzdWx0ID0gZmlsdGVyRGF0YShldmVudC5kYXRhLmZpbHRlcmluZ1N0cmluZywgZXZlbnQuZGF0YS5kYXRhLCBldmVudC5kYXRhLmV4Y2x1ZGVkRGF0YSlcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0LmlkZW50aWZpZXIgPSBldmVudC5kYXRhLmlkZW50aWZpZXJcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0Lmluc3RhbmNlSWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaW5zdGFuY2VJZGVudGlmaWVyXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHBvc3RNZXNzYWdlKHdvcmtlclJlc3VsdClcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiBmaWx0ZXJEYXRhKGZpbHRlcmluZ1N0cmluZywgZGF0YSwgZXhjbHVkZWREYXRhKSB7XG4gICAgXG4gICAgdmFyIGZpbHRlcmVkRGF0YSA9IFtdXG4gICAgdmFyIGZpbHRlcmVkSW5kZXhlcyA9IFtdXG4gICAgXG4gICAgaWYgKGZpbHRlcmluZ1N0cmluZykge1xuICAgICAgICBcbiAgICAgICAgdmFyIGZpbHRlcmluZ1N0cmluZ1dvcmRzID0gW11cbiAgICAgICAgZmlsdGVyaW5nU3RyaW5nLnNwbGl0KFwiIFwiKS5mb3JFYWNoKGZ1bmN0aW9uICh3b3JkLCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIGlmICh3b3JkKSB7XG4gICAgICAgICAgICAgICAgZmlsdGVyaW5nU3RyaW5nV29yZHMucHVzaCh3b3JkLnRvTG93ZXJDYXNlKCkpXG4gICAgICAgICAgICB9XG4gICAgICAgIH0pXG4gICAgICAgIFxuICAgICAgICBkYXRhLmZvckVhY2goZnVuY3Rpb24gKGRhdGFTdHJpbmcsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgbG93ZXJjYXNlRGF0YVN0cmluZyA9IGRhdGFTdHJpbmcudG9Mb3dlckNhc2UoKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBMb29rIHRocm91Z2ggYWxsIHRoZSB3b3JkcyBpbiB0aGUgaW5wdXRcbiAgICAgICAgICAgIHZhciB3b3Jkc0ZvdW5kID0gW11cbiAgICAgICAgICAgIGZpbHRlcmluZ1N0cmluZ1dvcmRzLmZvckVhY2goZnVuY3Rpb24gKHdvcmQpIHtcbiAgICAgICAgICAgICAgICB3b3Jkc0ZvdW5kLnB1c2gobG93ZXJjYXNlRGF0YVN0cmluZy5jb250YWlucyh3b3JkKSAmJiAhZXhjbHVkZWREYXRhLmNvbnRhaW5zKGRhdGFTdHJpbmcpKVxuICAgICAgICAgICAgfSlcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgLy8gT25seSBzaG93IHRoZSBkYXRhU3RyaW5nIGlmIGl0IG1hdGNoZXMgYWxsIG9mIHRoZW1cbiAgICAgICAgICAgIC8vIEB0cy1pZ25vcmVcbiAgICAgICAgICAgIGlmICh3b3Jkc0ZvdW5kLmNvbnRhaW5zKHRydWUpICYmICF3b3Jkc0ZvdW5kLmNvbnRhaW5zKGZhbHNlKSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFTdHJpbmcpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgZWxzZSBpZiAoZXhjbHVkZWREYXRhLmxlbmd0aCkge1xuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIGZpbHRlcmVkRGF0YSA9IGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YVN0cmluZywgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGlmIChleGNsdWRlZERhdGEuaW5kZXhPZihkYXRhU3RyaW5nKSA9PSAtMSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFTdHJpbmcpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgfVxuICAgIGVsc2Uge1xuICAgICAgICBcbiAgICAgICAgZmlsdGVyZWREYXRhID0gZGF0YVxuICAgICAgICBcbiAgICAgICAgZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChzdHJpbmcsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgXG4gICAgXG4gICAgcmV0dXJuIHsgXCJmaWx0ZXJlZERhdGFcIjogZmlsdGVyZWREYXRhLCBcImZpbHRlcmVkSW5kZXhlc1wiOiBmaWx0ZXJlZEluZGV4ZXMgfVxuICAgIFxuICAgIFxuICAgIFxufVxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuIl0sCiAgIm1hcHBpbmdzIjogIkFBRUksYUFBYyxNQUFNLFlBR3BCLE1BQU0sVUFBVSxTQUFXLFNBQVVBLEVBQVMsQ0FFMUMsSUFBSUMsRUFBVSxLQUFLLFFBQVFELENBQU8sR0FBSyxHQUN2QyxPQUFPQyxDQUVYLEdBSUEsYUFBYyxPQUFPLFlBR3JCLE9BQU8sVUFBVSxTQUFXLFNBQVVDLEVBQVEsQ0FFMUMsSUFBSUQsRUFBVSxLQUFLLFFBQVFDLENBQU0sR0FBSyxHQUN0QyxPQUFPRCxDQUVYLEdBUUosVUFBWSxTQUFVRSxFQUFPLENBR3pCLElBQUlDLEVBQWVDLEVBQVdGLEVBQU0sS0FBSyxnQkFBaUJBLEVBQU0sS0FBSyxLQUFNQSxFQUFNLEtBQUssWUFBWSxFQUdsR0MsRUFBYSxXQUFhRCxFQUFNLEtBQUssV0FFckNDLEVBQWEsbUJBQXFCRCxFQUFNLEtBQUssbUJBRzdDLFlBQVlDLENBQVksQ0FFNUIsRUFNQSxTQUFTQyxFQUFXQyxFQUFpQkMsRUFBTUMsRUFBYyxDQUVyRCxJQUFJQyxFQUFlLENBQUMsRUFDaEJDLEVBQWtCLENBQUMsRUFFdkIsR0FBSUosRUFBaUIsQ0FFakIsSUFBSUssRUFBdUIsQ0FBQyxFQUM1QkwsRUFBZ0IsTUFBTSxHQUFHLEVBQUUsUUFBUSxTQUFVTSxFQUFNQyxFQUFPQyxFQUFPLENBQ3pERixHQUNBRCxFQUFxQixLQUFLQyxFQUFLLFlBQVksQ0FBQyxDQUVwRCxDQUFDLEVBRURMLEVBQUssUUFBUSxTQUFVUSxFQUFZRixFQUFPQyxFQUFPLENBRTdDLElBQUlFLEVBQXNCRCxFQUFXLFlBQVksRUFHN0NFLEVBQWEsQ0FBQyxFQUNsQk4sRUFBcUIsUUFBUSxTQUFVQyxFQUFNLENBQ3pDSyxFQUFXLEtBQUtELEVBQW9CLFNBQVNKLENBQUksR0FBSyxDQUFDSixFQUFhLFNBQVNPLENBQVUsQ0FBQyxDQUM1RixDQUFDLEVBSUdFLEVBQVcsU0FBUyxFQUFJLEdBQUssQ0FBQ0EsRUFBVyxTQUFTLEVBQUssSUFFdkRSLEVBQWEsS0FBS00sQ0FBVSxFQUM1QkwsRUFBZ0IsS0FBS0csQ0FBSyxFQUlsQyxDQUFDLENBSUwsTUFDU0wsRUFBYSxPQUdsQkMsRUFBZUYsRUFBSyxRQUFRLFNBQVVRLEVBQVlGLEVBQU9DLEVBQU8sQ0FFeEROLEVBQWEsUUFBUU8sQ0FBVSxHQUFLLEtBRXBDTixFQUFhLEtBQUtNLENBQVUsRUFDNUJMLEVBQWdCLEtBQUtHLENBQUssRUFJbEMsQ0FBQyxHQUtESixFQUFlRixFQUVmQSxFQUFLLFFBQVEsU0FBVUwsRUFBUVcsRUFBT0MsRUFBTyxDQUV6Q0osRUFBZ0IsS0FBS0csQ0FBSyxDQUU5QixDQUFDLEdBTUwsTUFBTyxDQUFFLGFBQWdCSixFQUFjLGdCQUFtQkMsQ0FBZ0IsQ0FJOUUiLAogICJuYW1lcyI6IFsiZWxlbWVudCIsICJyZXN1bHQiLCAic3RyaW5nIiwgImV2ZW50IiwgIndvcmtlclJlc3VsdCIsICJmaWx0ZXJEYXRhIiwgImZpbHRlcmluZ1N0cmluZyIsICJkYXRhIiwgImV4Y2x1ZGVkRGF0YSIsICJmaWx0ZXJlZERhdGEiLCAiZmlsdGVyZWRJbmRleGVzIiwgImZpbHRlcmluZ1N0cmluZ1dvcmRzIiwgIndvcmQiLCAiaW5kZXgiLCAiYXJyYXkiLCAiZGF0YVN0cmluZyIsICJsb3dlcmNhc2VEYXRhU3RyaW5nIiwgIndvcmRzRm91bmQiXQp9Cg==\n');
+  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(t){var n=this.indexOf(t)!=-1;return n});"contains"in String.prototype||(String.prototype.contains=function(t){var n=this.indexOf(t)!=-1;return n});onmessage=function(t){let n=l(t.data.filteringString,t.data.data,t.data.excludedData);n.identifier=t.data.identifier,n.instanceIdentifier=t.data.instanceIdentifier,postMessage(n)};function l(t,n,o){let s=[],r=[];if(t){let e=[];t.split(" ").forEach(i=>{i&&e.push(i.toLowerCase())}),n.forEach((i,f)=>{let c=i.toLowerCase(),a=[];e.forEach(function(u){a.push(c.contains(u)&&!o.contains(i))}),a.contains(!0)&&!a.contains(!1)&&(s.push(i),r.push(f))})}else o.length?n.forEach((e,i)=>{o.indexOf(e)==-1&&(s.push(e),r.push(i))}):(s=n,n.forEach((e,i)=>r.push(i)));return{filteredData:s,filteredIndexes:r}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlTdHJpbmdGaWx0ZXJXZWJXb3JrZXIud29ya2VyLnRzIl0sCiAgInNvdXJjZXNDb250ZW50IjogWyIvLyBAdHMtY2hlY2tcblxuaWYgKFwiY29udGFpbnNcIiBpbiBBcnJheS5wcm90b3R5cGUgPT0gZmFsc2UpIHtcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgQXJyYXkucHJvdG90eXBlLmNvbnRhaW5zID0gZnVuY3Rpb24gKGVsZW1lbnQpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSAodGhpcy5pbmRleE9mKGVsZW1lbnQpICE9IC0xKVxuICAgICAgICByZXR1cm4gcmVzdWx0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbn1cblxuaWYgKFwiY29udGFpbnNcIiBpbiBTdHJpbmcucHJvdG90eXBlID09IGZhbHNlKSB7XG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIFN0cmluZy5wcm90b3R5cGUuY29udGFpbnMgPSBmdW5jdGlvbiAoc3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgcmVzdWx0ID0gKHRoaXMuaW5kZXhPZihzdHJpbmcpICE9IC0xKVxuICAgICAgICByZXR1cm4gcmVzdWx0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbn1cblxuXG5vbm1lc3NhZ2UgPSBmdW5jdGlvbiAoZXZlbnQpIHtcbiAgICBcbiAgICAvL2NvbnNvbGUubG9nKCdNZXNzYWdlIHJlY2VpdmVkIGZyb20gbWFpbiBzY3JpcHQnKTtcbiAgICBjb25zdCB3b3JrZXJSZXN1bHQgPSBmaWx0ZXJEYXRhKGV2ZW50LmRhdGEuZmlsdGVyaW5nU3RyaW5nLCBldmVudC5kYXRhLmRhdGEsIGV2ZW50LmRhdGEuZXhjbHVkZWREYXRhKVxuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICB3b3JrZXJSZXN1bHQuaWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaWRlbnRpZmllclxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICB3b3JrZXJSZXN1bHQuaW5zdGFuY2VJZGVudGlmaWVyID0gZXZlbnQuZGF0YS5pbnN0YW5jZUlkZW50aWZpZXJcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgcG9zdE1lc3NhZ2Uod29ya2VyUmVzdWx0KVxuICAgIFxufVxuXG5cbmZ1bmN0aW9uIGZpbHRlckRhdGEoZmlsdGVyaW5nU3RyaW5nOiBzdHJpbmcsIGRhdGE6IGFueVtdLCBleGNsdWRlZERhdGE6IHN0cmluZyB8IGFueVtdKSB7XG4gICAgXG4gICAgbGV0IGZpbHRlcmVkRGF0YSA9IFtdXG4gICAgY29uc3QgZmlsdGVyZWRJbmRleGVzOiBudW1iZXJbXSA9IFtdXG4gICAgXG4gICAgaWYgKGZpbHRlcmluZ1N0cmluZykge1xuICAgICAgICBcbiAgICAgICAgY29uc3QgZmlsdGVyaW5nU3RyaW5nV29yZHM6IHN0cmluZ1tdID0gW11cbiAgICAgICAgZmlsdGVyaW5nU3RyaW5nLnNwbGl0KFwiIFwiKS5mb3JFYWNoKHdvcmQgPT4ge1xuICAgICAgICAgICAgaWYgKHdvcmQpIHtcbiAgICAgICAgICAgICAgICBmaWx0ZXJpbmdTdHJpbmdXb3Jkcy5wdXNoKHdvcmQudG9Mb3dlckNhc2UoKSlcbiAgICAgICAgICAgIH1cbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIGRhdGEuZm9yRWFjaCgoZGF0YVN0cmluZywgaW5kZXgpID0+IHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgY29uc3QgbG93ZXJjYXNlRGF0YVN0cmluZyA9IGRhdGFTdHJpbmcudG9Mb3dlckNhc2UoKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBMb29rIHRocm91Z2ggYWxsIHRoZSB3b3JkcyBpbiB0aGUgaW5wdXRcbiAgICAgICAgICAgIGNvbnN0IHdvcmRzRm91bmQ6IGJvb2xlYW5bXSA9IFtdXG4gICAgICAgICAgICBmaWx0ZXJpbmdTdHJpbmdXb3Jkcy5mb3JFYWNoKGZ1bmN0aW9uICh3b3JkKSB7XG4gICAgICAgICAgICAgICAgd29yZHNGb3VuZC5wdXNoKGxvd2VyY2FzZURhdGFTdHJpbmcuY29udGFpbnMod29yZCkgJiYgIWV4Y2x1ZGVkRGF0YS5jb250YWlucyhkYXRhU3RyaW5nKSlcbiAgICAgICAgICAgIH0pXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIC8vIE9ubHkgc2hvdyB0aGUgZGF0YVN0cmluZyBpZiBpdCBtYXRjaGVzIGFsbCBvZiB0aGVtXG4gICAgICAgICAgICBpZiAod29yZHNGb3VuZC5jb250YWlucyh0cnVlKSAmJiAhd29yZHNGb3VuZC5jb250YWlucyhmYWxzZSkpIHtcbiAgICAgICAgICAgICAgICBmaWx0ZXJlZERhdGEucHVzaChkYXRhU3RyaW5nKVxuICAgICAgICAgICAgICAgIGZpbHRlcmVkSW5kZXhlcy5wdXNoKGluZGV4KVxuICAgICAgICAgICAgfVxuICAgICAgICAgICAgXG4gICAgICAgIH0pXG4gICAgICAgIFxuICAgIH1cbiAgICBlbHNlIGlmIChleGNsdWRlZERhdGEubGVuZ3RoKSB7XG4gICAgICAgIFxuICAgICAgICBkYXRhLmZvckVhY2goKGRhdGFTdHJpbmcsIGluZGV4KSA9PiB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGlmIChleGNsdWRlZERhdGEuaW5kZXhPZihkYXRhU3RyaW5nKSA9PSAtMSkge1xuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFTdHJpbmcpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgfVxuICAgIGVsc2Uge1xuICAgICAgICBcbiAgICAgICAgZmlsdGVyZWREYXRhID0gZGF0YVxuICAgICAgICBkYXRhLmZvckVhY2goKHN0cmluZywgaW5kZXgpID0+IGZpbHRlcmVkSW5kZXhlcy5wdXNoKGluZGV4KSlcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIHJldHVybiB7IFwiZmlsdGVyZWREYXRhXCI6IGZpbHRlcmVkRGF0YSwgXCJmaWx0ZXJlZEluZGV4ZXNcIjogZmlsdGVyZWRJbmRleGVzIH1cbiAgICBcbn1cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cbiJdLAogICJtYXBwaW5ncyI6ICJBQUVJLGFBQWMsTUFBTSxZQUdwQixNQUFNLFVBQVUsU0FBVyxTQUFVQSxFQUFTLENBRTFDLElBQUlDLEVBQVUsS0FBSyxRQUFRRCxDQUFPLEdBQUssR0FDdkMsT0FBT0MsQ0FFWCxHQUlBLGFBQWMsT0FBTyxZQUdyQixPQUFPLFVBQVUsU0FBVyxTQUFVQyxFQUFRLENBRTFDLElBQUlELEVBQVUsS0FBSyxRQUFRQyxDQUFNLEdBQUssR0FDdEMsT0FBT0QsQ0FFWCxHQUtKLFVBQVksU0FBVUUsRUFBTyxDQUd6QixJQUFNQyxFQUFlQyxFQUFXRixFQUFNLEtBQUssZ0JBQWlCQSxFQUFNLEtBQUssS0FBTUEsRUFBTSxLQUFLLFlBQVksRUFHcEdDLEVBQWEsV0FBYUQsRUFBTSxLQUFLLFdBRXJDQyxFQUFhLG1CQUFxQkQsRUFBTSxLQUFLLG1CQUc3QyxZQUFZQyxDQUFZLENBRTVCLEVBR0EsU0FBU0MsRUFBV0MsRUFBeUJDLEVBQWFDLEVBQThCLENBRXBGLElBQUlDLEVBQWUsQ0FBQyxFQUNkQyxFQUE0QixDQUFDLEVBRW5DLEdBQUlKLEVBQWlCLENBRWpCLElBQU1LLEVBQWlDLENBQUMsRUFDeENMLEVBQWdCLE1BQU0sR0FBRyxFQUFFLFFBQVFNLEdBQVEsQ0FDbkNBLEdBQ0FELEVBQXFCLEtBQUtDLEVBQUssWUFBWSxDQUFDLENBRXBELENBQUMsRUFFREwsRUFBSyxRQUFRLENBQUNNLEVBQVlDLElBQVUsQ0FFaEMsSUFBTUMsRUFBc0JGLEVBQVcsWUFBWSxFQUc3Q0csRUFBd0IsQ0FBQyxFQUMvQkwsRUFBcUIsUUFBUSxTQUFVQyxFQUFNLENBQ3pDSSxFQUFXLEtBQUtELEVBQW9CLFNBQVNILENBQUksR0FBSyxDQUFDSixFQUFhLFNBQVNLLENBQVUsQ0FBQyxDQUM1RixDQUFDLEVBR0dHLEVBQVcsU0FBUyxFQUFJLEdBQUssQ0FBQ0EsRUFBVyxTQUFTLEVBQUssSUFDdkRQLEVBQWEsS0FBS0ksQ0FBVSxFQUM1QkgsRUFBZ0IsS0FBS0ksQ0FBSyxFQUdsQyxDQUFDLENBRUwsTUFDU04sRUFBYSxPQUVsQkQsRUFBSyxRQUFRLENBQUNNLEVBQVlDLElBQVUsQ0FFNUJOLEVBQWEsUUFBUUssQ0FBVSxHQUFLLEtBQ3BDSixFQUFhLEtBQUtJLENBQVUsRUFDNUJILEVBQWdCLEtBQUtJLENBQUssRUFHbEMsQ0FBQyxHQUtETCxFQUFlRixFQUNmQSxFQUFLLFFBQVEsQ0FBQ0wsRUFBUVksSUFBVUosRUFBZ0IsS0FBS0ksQ0FBSyxDQUFDLEdBSS9ELE1BQU8sQ0FBRSxhQUFnQkwsRUFBYyxnQkFBbUJDLENBQWdCLENBRTlFIiwKICAibmFtZXMiOiBbImVsZW1lbnQiLCAicmVzdWx0IiwgInN0cmluZyIsICJldmVudCIsICJ3b3JrZXJSZXN1bHQiLCAiZmlsdGVyRGF0YSIsICJmaWx0ZXJpbmdTdHJpbmciLCAiZGF0YSIsICJleGNsdWRlZERhdGEiLCAiZmlsdGVyZWREYXRhIiwgImZpbHRlcmVkSW5kZXhlcyIsICJmaWx0ZXJpbmdTdHJpbmdXb3JkcyIsICJ3b3JkIiwgImRhdGFTdHJpbmciLCAiaW5kZXgiLCAibG93ZXJjYXNlRGF0YVN0cmluZyIsICJ3b3Jkc0ZvdW5kIl0KfQo=\n');
 }
 var init_UIStringFilterWebWorker_worker = __esm({
   "node_modules/uicore-ts/compiledScripts/UIStringFilterWebWorker.worker.js"() {
     init_inline_worker();
+    __name(Worker2, "Worker");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIStringFilter.js
 var require_UIStringFilter = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIStringFilter.js"(exports, module) {
+    "use strict";
     var __create2 = Object.create;
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    }, "__copyProps");
+    var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
-    ));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    )), "__toESM");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIStringFilter_exports = {};
     __export2(UIStringFilter_exports, {
       UIStringFilter: () => UIStringFilter
@@ -5496,14 +5507,17 @@ var require_UIStringFilter = __commonJS({
     module.exports = __toCommonJS2(UIStringFilter_exports);
     var import_UIObject = require_UIObject();
     var import_UIStringFilterWebWorker_worker = __toESM2((init_UIStringFilterWebWorker_worker(), __toCommonJS(UIStringFilterWebWorker_worker_exports)));
-    var _UIStringFilter = class extends import_UIObject.UIObject {
+    var _UIStringFilter = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(useSeparateWebWorkerHolder = import_UIObject.NO) {
         super();
         this._isThreadClosed = import_UIObject.NO;
         this._webWorkerHolder = _UIStringFilter._sharedWebWorkerHolder;
         if (useSeparateWebWorkerHolder) {
           this._webWorkerHolder = {
-            webWorker: new import_UIStringFilterWebWorker_worker.default()
+            webWorker: new import_UIStringFilterWebWorker_worker.default(),
+            UICore_isWorking: false,
+            UICore_messagesToPost: void 0,
+            UICore_completionFunctions: {}
           };
         }
         _UIStringFilter._instanceNumber = _UIStringFilter._instanceNumber + 1;
@@ -5518,7 +5532,6 @@ var require_UIStringFilter = __commonJS({
               completionFunction(message.data.filteredData, message.data.filteredIndexes, message.data.identifier);
             }
             delete this.completionFunctions[key];
-            var asd = 1;
           };
         }
       }
@@ -5526,17 +5539,16 @@ var require_UIStringFilter = __commonJS({
         return this._instanceNumber;
       }
       get completionFunctions() {
-        const key = "UICore_completionFunctions";
-        var result = this._webWorkerHolder[key];
+        let result = this._webWorkerHolder.UICore_completionFunctions;
         if ((0, import_UIObject.IS_NOT)(result)) {
           result = {};
-          this._webWorkerHolder[key] = result;
+          this._webWorkerHolder.UICore_completionFunctions = result;
         }
         return result;
       }
       get messagesToPost() {
         const key = "UICore_messagesToPost";
-        var result = this._webWorkerHolder[key];
+        let result = this._webWorkerHolder[key];
         if ((0, import_UIObject.IS_NOT)(result)) {
           result = [];
           this._webWorkerHolder[key] = result;
@@ -5544,10 +5556,10 @@ var require_UIStringFilter = __commonJS({
         return result;
       }
       set isWorkerBusy(isWorkerBusy) {
-        this._webWorkerHolder["UICore_isWorking"] = isWorkerBusy;
+        this._webWorkerHolder.UICore_isWorking = isWorkerBusy;
       }
       get isWorkerBusy() {
-        return (0, import_UIObject.IS)(this._webWorkerHolder["UICore_isWorking"]);
+        return (0, import_UIObject.IS)(this._webWorkerHolder.UICore_isWorking);
       }
       postNextMessageIfNeeded() {
         if (this.messagesToPost.length && (0, import_UIObject.IS_NOT)(this.isWorkerBusy)) {
@@ -5598,9 +5610,14 @@ var require_UIStringFilter = __commonJS({
           this._webWorkerHolder.webWorker.terminate();
         }
       }
-    };
+    }, "_UIStringFilter");
     var UIStringFilter = _UIStringFilter;
-    UIStringFilter._sharedWebWorkerHolder = { webWorker: new import_UIStringFilterWebWorker_worker.default() };
+    UIStringFilter._sharedWebWorkerHolder = {
+      webWorker: new import_UIStringFilterWebWorker_worker.default(),
+      UICore_isWorking: false,
+      UICore_messagesToPost: void 0,
+      UICore_completionFunctions: {}
+    };
     UIStringFilter._instanceNumber = -1;
   }
 });
@@ -5608,23 +5625,24 @@ var require_UIStringFilter = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIScrollView.js
 var require_UIScrollView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIScrollView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIScrollView_exports = {};
     __export2(UIScrollView_exports, {
       UIScrollView: () => UIScrollView
@@ -5639,21 +5657,22 @@ var require_UIScrollView = __commonJS({
         this._contentOffset = new import_UIPoint.UIPoint(0, 0);
         this._contentScale = 1;
         this._scrollEnabled = import_UIObject.YES;
+        this._previousClientPoint = import_UIObject.nil;
+        this._intrinsicContentFrame = import_UIObject.nil;
         this.containerView = new import_UIView.UIView(elementID + "ContainerView");
         super.addSubview(this.containerView);
         this.style.overflow = "hidden";
         this.pausesPointerEvents = import_UIObject.NO;
-        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerDown, function() {
-          this._pointerDown = import_UIObject.YES;
-        }.bind(this));
-        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerUp, function() {
+        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerDown, () => this._pointerDown = import_UIObject.YES);
+        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerUp, () => {
           this._pointerDown = import_UIObject.NO;
-          this._previousClientPoint = null;
+          this._previousClientPoint = import_UIObject.nil;
           scrollStopped();
-        }.bind(this));
+        });
         function scrollStopped() {
         }
-        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerMove, function(sender, event2) {
+        __name(scrollStopped, "scrollStopped");
+        this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerMove, (sender, event2) => {
           if (!(this._pointerDown && this._scrollEnabled && this._enabled)) {
             return;
           }
@@ -5666,14 +5685,14 @@ var require_UIScrollView = __commonJS({
             const touchEvent = event2;
             if (touchEvent.touches.length != 1) {
               this._pointerDown = import_UIObject.NO;
-              this._previousClientPoint = null;
+              this._previousClientPoint = import_UIObject.nil;
               scrollStopped();
               return;
             }
             currentClientPoint.x = touchEvent.touches[0].clientX;
             currentClientPoint.y = touchEvent.touches[0].clientY;
           }
-          if (!this._previousClientPoint) {
+          if ((0, import_UIObject.IS_NOT)(this._previousClientPoint)) {
             this._previousClientPoint = currentClientPoint;
             return;
           }
@@ -5698,7 +5717,7 @@ var require_UIScrollView = __commonJS({
           }
           this.contentOffset = this.contentOffset.add(changePoint);
           this._previousClientPoint = currentClientPoint;
-        }.bind(this));
+        });
       }
       invalidateIntrinsicContentFrame() {
         this._intrinsicContentFrame = import_UIObject.nil;
@@ -5722,29 +5741,31 @@ var require_UIScrollView = __commonJS({
         this.invalidateIntrinsicContentFrame();
       }
     };
+    __name(UIScrollView, "UIScrollView");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UISlideScrollerView.js
 var require_UISlideScrollerView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UISlideScrollerView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UISlideScrollerView_exports = {};
     __export2(UISlideScrollerView_exports, {
       UISlideScrollerView: () => UISlideScrollerView
@@ -5775,30 +5796,30 @@ var require_UISlideScrollerView = __commonJS({
         this._scrollView._scrollEnabled = import_UIObject.NO;
         this._scrollView.addTargetForControlEvent(
           import_UIView.UIView.controlEvent.PointerMove,
-          function(sender, event2) {
+          (sender, event2) => {
             if (event2 instanceof MouseEvent) {
               this._animationTimer.invalidate();
             }
-          }.bind(this)
+          }
         );
-        this._scrollView.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerLeave, function() {
+        this._scrollView.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerLeave, () => {
           if (this._isAnimating && event instanceof MouseEvent) {
             this.startAnimating();
           }
-        }.bind(this));
-        this._scrollView.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerDown, function(sender, event2) {
+        });
+        this._scrollView.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerDown, (sender, event2) => {
           if (event2 instanceof TouchEvent) {
             this._animationTimer.invalidate();
           }
-        }.bind(this));
+        });
         this._scrollView.addTargetForControlEvents([
           import_UIView.UIView.controlEvent.PointerUp,
           import_UIView.UIView.controlEvent.PointerCancel
-        ], function(sender, event2) {
+        ], (sender, event2) => {
           if (event2 instanceof TouchEvent && this._isAnimating) {
             this.startAnimating();
           }
-        }.bind(this));
+        });
         this.pageIndicatorsView = new import_UIView.UIView(elementID + "PageIndicatorsView");
         this.addSubview(this.pageIndicatorsView);
       }
@@ -5807,16 +5828,16 @@ var require_UISlideScrollerView = __commonJS({
         result.addTargetForControlEvents([
           import_UIView.UIView.controlEvent.PointerUpInside,
           import_UIView.UIView.controlEvent.EnterUp
-        ], function(sender, event2) {
+        ], (sender, event2) => {
           this.scrollToPageWithIndex(index, import_UIObject.YES);
           if (this._isAnimating) {
             this.startAnimating();
           }
-        }.bind(this));
-        result.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerMove, function() {
+        });
+        result.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerMove, () => {
           this._animationTimer.invalidate();
-        }.bind(this));
-        result.updateContentForNormalState = function() {
+        });
+        result.updateContentForNormalState = () => {
           result.backgroundColor = import_UIColor.UIColor.blueColor;
           result.titleLabel.textColor = import_UIColor.UIColor.whiteColor;
         };
@@ -5837,16 +5858,13 @@ var require_UISlideScrollerView = __commonJS({
         return this._slideViews;
       }
       get currentPageIndex() {
-        const result = this._currentPageIndex;
-        return result;
+        return this._currentPageIndex;
       }
       set currentPageIndex(index) {
         this._currentPageIndex = index;
         this._slideViews[index].willAppear();
         this._scrollView.contentOffset = this._scrollView.contentOffset.pointWithX(-this._slideViews[index].frame.min.x);
-        this.pageIndicatorsView.subviews.forEach(function(button, index2, array) {
-          button.selected = import_UIObject.NO;
-        });
+        this.pageIndicatorsView.subviews.everyElement.selected = import_UIObject.NO;
         this.pageIndicatorsView.subviews[index].selected = import_UIObject.YES;
       }
       scrollToPreviousPage(animated) {
@@ -5911,9 +5929,9 @@ var require_UISlideScrollerView = __commonJS({
       startAnimating() {
         this._isAnimating = import_UIObject.YES;
         this._animationTimer.invalidate();
-        this._animationTimer = new import_UITimer.UITimer(this.animationDelay + this.animationDuration, import_UIObject.YES, function() {
+        this._animationTimer = new import_UITimer.UITimer(this.animationDelay + this.animationDuration, import_UIObject.YES, () => {
           this.scrollToNextPage(import_UIObject.YES);
-        }.bind(this));
+        });
       }
       stopAnimating() {
         this._isAnimating = import_UIObject.NO;
@@ -5926,10 +5944,10 @@ var require_UISlideScrollerView = __commonJS({
         this.pageIndicatorsView.subviews.slice().forEach(function(subview, index, array) {
           subview.removeFromSuperview();
         });
-        this._slideViews.forEach(function(view, index, array) {
+        this._slideViews.forEach((view, index) => {
           this._scrollView.addSubview(view);
           this.pageIndicatorsView.addSubview(this.buttonForPageIndicatorWithIndex(index));
-        }.bind(this));
+        });
       }
       didReceiveBroadcastEvent(event2) {
         super.didReceiveBroadcastEvent(event2);
@@ -5956,9 +5974,9 @@ var require_UISlideScrollerView = __commonJS({
           self2.offsetByPoint(this._scrollView.contentOffset);
           return self2;
         }.bind(this));
-        this._slideViews.forEach(function(view, index, array) {
+        this._slideViews.forEach((view, index) => {
           view.frame = bounds.rectangleWithX((this.bounds.width + 1) * index);
-        }.bind(this));
+        });
         this.layoutPageIndicators();
       }
       layoutPageIndicators() {
@@ -5972,29 +5990,31 @@ var require_UISlideScrollerView = __commonJS({
         this.stopAnimating();
       }
     };
+    __name(UISlideScrollerView, "UISlideScrollerView");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UILink.js
 var require_UILink = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UILink.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UILink_exports = {};
     __export2(UILink_exports, {
       UILink: () => UILink
@@ -6009,11 +6029,7 @@ var require_UILink = __commonJS({
         super(elementID, "a", initViewData);
         this.stopsPointerEventPropagation = import_UIObject.NO;
         this.pausesPointerEvents = import_UIObject.NO;
-      }
-      initView(elementID, viewHTMLElement, initViewData) {
-        super.initView(elementID, viewHTMLElement, initViewData);
-        this.class.superclass = import_UIBaseButton.UIBaseButton;
-        viewHTMLElement.onclick = this.blur.bind(this);
+        this.viewHTMLElement.onclick = this.blur.bind(this);
       }
       get colors() {
         return this._colors;
@@ -6028,14 +6044,15 @@ var require_UILink = __commonJS({
         this.viewHTMLElement.textContent = text;
       }
       get text() {
-        return this.viewHTMLElement.textContent;
+        var _a;
+        return (_a = this.viewHTMLElement.textContent) != null ? _a : "";
       }
       set target(target) {
         this.viewHTMLElement.setAttribute("href", target);
       }
       get target() {
-        const result = this.viewHTMLElement.getAttribute("href");
-        return result;
+        var _a;
+        return (_a = this.viewHTMLElement.getAttribute("href")) != null ? _a : "";
       }
       set targetRouteForCurrentState(targetRouteForCurrentState) {
         this._targetRouteForCurrentState = targetRouteForCurrentState;
@@ -6045,8 +6062,7 @@ var require_UILink = __commonJS({
         return this._targetRouteForCurrentState;
       }
       _targetRouteForCurrentState() {
-        const result = import_UIRoute.UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"]);
-        return result;
+        return import_UIRoute.UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"]);
       }
       didReceiveBroadcastEvent(event2) {
         super.didReceiveBroadcastEvent(event2);
@@ -6071,29 +6087,31 @@ var require_UILink = __commonJS({
         const bounds = this.bounds;
       }
     };
+    __name(UILink, "UILink");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UILinkButton.js
 var require_UILinkButton = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UILinkButton.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UILinkButton_exports = {};
     __export2(UILinkButton_exports, {
       UILinkButton: () => UILinkButton
@@ -6104,19 +6122,10 @@ var require_UILinkButton = __commonJS({
     var UILinkButton = class extends import_UILink.UILink {
       constructor(elementID, elementType, titleType) {
         super(elementID, { "elementType": elementType, "titleType": titleType });
-        this.button.addTargetForControlEvents([
-          import_UIButton.UIButton.controlEvent.EnterDown,
-          import_UIButton.UIButton.controlEvent.PointerUpInside
-        ], function(sender, event2) {
-          window.location = this.target;
-        }.bind(this));
-      }
-      initView(elementID, viewHTMLElement, initViewData) {
-        super.initView(elementID, viewHTMLElement, initViewData);
-        this.class.superclass = import_UILink.UILink;
-        this.button = new import_UIButton.UIButton(this.elementID + "Button", initViewData.elementType, initViewData.titleType);
+        this.button = new import_UIButton.UIButton(this.elementID + "Button", elementType, titleType);
         this.addSubview(this.button);
         this.style.position = "absolute";
+        this.button.controlEventTargetAccumulator.EnterDown.PointerUpInside = () => window.location = this.target;
       }
       get titleLabel() {
         return this.button.titleLabel;
@@ -6137,8 +6146,8 @@ var require_UILinkButton = __commonJS({
         this.viewHTMLElement.setAttribute("href", target);
       }
       get target() {
-        const result = this.viewHTMLElement.getAttribute("href");
-        return result;
+        var _a;
+        return (_a = this.viewHTMLElement.getAttribute("href")) != null ? _a : "";
       }
       layoutSubviews() {
         super.layoutSubviews();
@@ -6147,29 +6156,31 @@ var require_UILinkButton = __commonJS({
         this.button.layoutSubviews();
       }
     };
+    __name(UILinkButton, "UILinkButton");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UILayoutGrid.js
 var require_UILayoutGrid = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UILayoutGrid.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UILayoutGrid_exports = {};
     __export2(UILayoutGrid_exports, {
       UILayoutGrid: () => UILayoutGrid
@@ -6190,6 +6201,7 @@ var require_UILayoutGrid = __commonJS({
         }
       }
     };
+    __name(UILayoutGrid, "UILayoutGrid");
   }
 });
 
@@ -6199,40 +6211,42 @@ __export(UIKeyValueStringFilterWebWorker_worker_exports, {
   default: () => Worker3
 });
 function Worker3() {
-  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});"contains"in String.prototype||(String.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});onmessage=function(a){var r=y(a.data.filteringString,a.data.data,a.data.excludedData,a.data.dataKeyPath);r.identifier=a.data.identifier,r.instanceIdentifier=a.data.instanceIdentifier,postMessage(r)};function y(a,r,u,d){function l(t,n){var o=t.split("."),i=n;return o.forEach(function(c,f,p){i=i[c]}),i}var e=[],s=[];if(a){var h=[];a.split(" ").forEach(function(t,n,o){t&&h.push(t.toLowerCase())}),r.forEach(function(t,n,o){var i=l(d,t),c=i.toLowerCase(),f=[];h.forEach(function(p){f.push(c.contains(p)&&!u.contains(i))}),f.contains(!0)&&!f.contains(!1)&&(e.push(t),s.push(n))})}else u.length?e=r.forEach(function(t,n,o){u.indexOf(t)==-1&&(e.push(t),s.push(n))}):(e=r,r.forEach(function(t,n,o){s.push(n)}));return{filteredData:e,filteredIndexes:s}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlLZXlWYWx1ZVN0cmluZ0ZpbHRlcldlYldvcmtlci53b3JrZXIudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbIi8vIEB0cy1jaGVja1xuXG5pZiAoXCJjb250YWluc1wiIGluIEFycmF5LnByb3RvdHlwZSA9PSBmYWxzZSkge1xuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBBcnJheS5wcm90b3R5cGUuY29udGFpbnMgPSBmdW5jdGlvbiAoZWxlbWVudCkge1xuICAgICAgICBcbiAgICAgICAgdmFyIHJlc3VsdCA9ICh0aGlzLmluZGV4T2YoZWxlbWVudCkgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5pZiAoXCJjb250YWluc1wiIGluIFN0cmluZy5wcm90b3R5cGUgPT0gZmFsc2UpIHtcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgU3RyaW5nLnByb3RvdHlwZS5jb250YWlucyA9IGZ1bmN0aW9uIChzdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSAodGhpcy5pbmRleE9mKHN0cmluZykgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5cblxuXG5cbm9ubWVzc2FnZSA9IGZ1bmN0aW9uIChldmVudCkge1xuICAgIFxuICAgIC8vY29uc29sZS5sb2coJ01lc3NhZ2UgcmVjZWl2ZWQgZnJvbSBtYWluIHNjcmlwdCcpO1xuICAgIHZhciB3b3JrZXJSZXN1bHQgPSBmaWx0ZXJLZXlWYWx1ZVBhdGhEYXRhKFxuICAgICAgICBldmVudC5kYXRhLmZpbHRlcmluZ1N0cmluZyxcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhLFxuICAgICAgICBldmVudC5kYXRhLmV4Y2x1ZGVkRGF0YSxcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhS2V5UGF0aFxuICAgIClcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0LmlkZW50aWZpZXIgPSBldmVudC5kYXRhLmlkZW50aWZpZXJcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0Lmluc3RhbmNlSWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaW5zdGFuY2VJZGVudGlmaWVyXG4gICAgXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHBvc3RNZXNzYWdlKHdvcmtlclJlc3VsdClcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiBmaWx0ZXJLZXlWYWx1ZVBhdGhEYXRhKGZpbHRlcmluZ1N0cmluZywgZGF0YSwgZXhjbHVkZWREYXRhLCBkYXRhS2V5UGF0aCkge1xuICAgIFxuICAgIGZ1bmN0aW9uIHZhbHVlRm9yS2V5UGF0aChrZXlQYXRoLCBvYmplY3QpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciBrZXlzID0ga2V5UGF0aC5zcGxpdChcIi5cIilcbiAgICAgICAgdmFyIGN1cnJlbnRPYmplY3QgPSBvYmplY3RcbiAgICAgICAgXG4gICAgICAgIGtleXMuZm9yRWFjaChmdW5jdGlvbiAoa2V5LCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIGN1cnJlbnRPYmplY3QgPSBjdXJyZW50T2JqZWN0W2tleV1cbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIHJldHVybiBjdXJyZW50T2JqZWN0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICB2YXIgZmlsdGVyZWREYXRhID0gW11cbiAgICB2YXIgZmlsdGVyZWRJbmRleGVzID0gW11cbiAgICBcbiAgICBpZiAoZmlsdGVyaW5nU3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgZmlsdGVyaW5nU3RyaW5nV29yZHMgPSBbXVxuICAgICAgICBmaWx0ZXJpbmdTdHJpbmcuc3BsaXQoXCIgXCIpLmZvckVhY2goZnVuY3Rpb24gKHdvcmQsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgaWYgKHdvcmQpIHtcbiAgICAgICAgICAgICAgICBmaWx0ZXJpbmdTdHJpbmdXb3Jkcy5wdXNoKHdvcmQudG9Mb3dlckNhc2UoKSlcbiAgICAgICAgICAgIH1cbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YU9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciBkYXRhU3RyaW5nID0gdmFsdWVGb3JLZXlQYXRoKGRhdGFLZXlQYXRoLCBkYXRhT2JqZWN0KVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgbG93ZXJjYXNlRGF0YVN0cmluZyA9IGRhdGFTdHJpbmcudG9Mb3dlckNhc2UoKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBMb29rIHRocm91Z2ggYWxsIHRoZSB3b3JkcyBpbiB0aGUgaW5wdXRcbiAgICAgICAgICAgIHZhciB3b3Jkc0ZvdW5kID0gW11cbiAgICAgICAgICAgIGZpbHRlcmluZ1N0cmluZ1dvcmRzLmZvckVhY2goZnVuY3Rpb24gKHdvcmQpIHtcbiAgICAgICAgICAgICAgICB3b3Jkc0ZvdW5kLnB1c2gobG93ZXJjYXNlRGF0YVN0cmluZy5jb250YWlucyh3b3JkKSAmJiAhZXhjbHVkZWREYXRhLmNvbnRhaW5zKGRhdGFTdHJpbmcpKVxuICAgICAgICAgICAgfSlcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgLy8gT25seSBzaG93IHRoZSBkYXRhU3RyaW5nIGlmIGl0IG1hdGNoZXMgYWxsIG9mIHRoZW1cbiAgICAgICAgICAgIC8vIEB0cy1pZ25vcmVcbiAgICAgICAgICAgIGlmICh3b3Jkc0ZvdW5kLmNvbnRhaW5zKHRydWUpICYmICF3b3Jkc0ZvdW5kLmNvbnRhaW5zKGZhbHNlKSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFPYmplY3QpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgZWxzZSBpZiAoZXhjbHVkZWREYXRhLmxlbmd0aCkge1xuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIGZpbHRlcmVkRGF0YSA9IGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YU9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGlmIChleGNsdWRlZERhdGEuaW5kZXhPZihkYXRhT2JqZWN0KSA9PSAtMSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFPYmplY3QpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgfVxuICAgIGVsc2Uge1xuICAgICAgICBcbiAgICAgICAgZmlsdGVyZWREYXRhID0gZGF0YVxuICAgICAgICBcbiAgICAgICAgZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChvYmplY3QsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgXG4gICAgXG4gICAgcmV0dXJuIHsgXCJmaWx0ZXJlZERhdGFcIjogZmlsdGVyZWREYXRhLCBcImZpbHRlcmVkSW5kZXhlc1wiOiBmaWx0ZXJlZEluZGV4ZXMgfVxuICAgIFxuICAgIFxuICAgIFxufVxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuIl0sCiAgIm1hcHBpbmdzIjogIkFBRUksYUFBYyxNQUFNLFlBR3BCLE1BQU0sVUFBVSxTQUFXLFNBQVVBLEVBQVMsQ0FFMUMsSUFBSUMsRUFBVSxLQUFLLFFBQVFELENBQU8sR0FBSyxHQUN2QyxPQUFPQyxDQUVYLEdBSUEsYUFBYyxPQUFPLFlBR3JCLE9BQU8sVUFBVSxTQUFXLFNBQVVDLEVBQVEsQ0FFMUMsSUFBSUQsRUFBVSxLQUFLLFFBQVFDLENBQU0sR0FBSyxHQUN0QyxPQUFPRCxDQUVYLEdBUUosVUFBWSxTQUFVRSxFQUFPLENBR3pCLElBQUlDLEVBQWVDLEVBQ2ZGLEVBQU0sS0FBSyxnQkFDWEEsRUFBTSxLQUFLLEtBQ1hBLEVBQU0sS0FBSyxhQUNYQSxFQUFNLEtBQUssV0FDZixFQUdBQyxFQUFhLFdBQWFELEVBQU0sS0FBSyxXQUVyQ0MsRUFBYSxtQkFBcUJELEVBQU0sS0FBSyxtQkFJN0MsWUFBWUMsQ0FBWSxDQUU1QixFQU1BLFNBQVNDLEVBQXVCQyxFQUFpQkMsRUFBTUMsRUFBY0MsRUFBYSxDQUU5RSxTQUFTQyxFQUFnQkMsRUFBU0MsRUFBUSxDQUV0QyxJQUFJQyxFQUFPRixFQUFRLE1BQU0sR0FBRyxFQUN4QkcsRUFBZ0JGLEVBRXBCLE9BQUFDLEVBQUssUUFBUSxTQUFVRSxFQUFLQyxFQUFPQyxFQUFPLENBQ3RDSCxFQUFnQkEsRUFBY0MsRUFDbEMsQ0FBQyxFQUVNRCxDQUVYLENBRUEsSUFBSUksRUFBZSxDQUFDLEVBQ2hCQyxFQUFrQixDQUFDLEVBRXZCLEdBQUliLEVBQWlCLENBRWpCLElBQUljLEVBQXVCLENBQUMsRUFDNUJkLEVBQWdCLE1BQU0sR0FBRyxFQUFFLFFBQVEsU0FBVWUsRUFBTUwsRUFBT0MsRUFBTyxDQUN6REksR0FDQUQsRUFBcUIsS0FBS0MsRUFBSyxZQUFZLENBQUMsQ0FFcEQsQ0FBQyxFQUVEZCxFQUFLLFFBQVEsU0FBVWUsRUFBWU4sRUFBT0MsRUFBTyxDQUU3QyxJQUFJTSxFQUFhYixFQUFnQkQsRUFBYWEsQ0FBVSxFQUVwREUsRUFBc0JELEVBQVcsWUFBWSxFQUc3Q0UsRUFBYSxDQUFDLEVBQ2xCTCxFQUFxQixRQUFRLFNBQVVDLEVBQU0sQ0FDekNJLEVBQVcsS0FBS0QsRUFBb0IsU0FBU0gsQ0FBSSxHQUFLLENBQUNiLEVBQWEsU0FBU2UsQ0FBVSxDQUFDLENBQzVGLENBQUMsRUFJR0UsRUFBVyxTQUFTLEVBQUksR0FBSyxDQUFDQSxFQUFXLFNBQVMsRUFBSyxJQUV2RFAsRUFBYSxLQUFLSSxDQUFVLEVBQzVCSCxFQUFnQixLQUFLSCxDQUFLLEVBSWxDLENBQUMsQ0FJTCxNQUNTUixFQUFhLE9BR2xCVSxFQUFlWCxFQUFLLFFBQVEsU0FBVWUsRUFBWU4sRUFBT0MsRUFBTyxDQUV4RFQsRUFBYSxRQUFRYyxDQUFVLEdBQUssS0FFcENKLEVBQWEsS0FBS0ksQ0FBVSxFQUM1QkgsRUFBZ0IsS0FBS0gsQ0FBSyxFQUlsQyxDQUFDLEdBS0RFLEVBQWVYLEVBRWZBLEVBQUssUUFBUSxTQUFVSyxFQUFRSSxFQUFPQyxFQUFPLENBRXpDRSxFQUFnQixLQUFLSCxDQUFLLENBRTlCLENBQUMsR0FNTCxNQUFPLENBQUUsYUFBZ0JFLEVBQWMsZ0JBQW1CQyxDQUFnQixDQUk5RSIsCiAgIm5hbWVzIjogWyJlbGVtZW50IiwgInJlc3VsdCIsICJzdHJpbmciLCAiZXZlbnQiLCAid29ya2VyUmVzdWx0IiwgImZpbHRlcktleVZhbHVlUGF0aERhdGEiLCAiZmlsdGVyaW5nU3RyaW5nIiwgImRhdGEiLCAiZXhjbHVkZWREYXRhIiwgImRhdGFLZXlQYXRoIiwgInZhbHVlRm9yS2V5UGF0aCIsICJrZXlQYXRoIiwgIm9iamVjdCIsICJrZXlzIiwgImN1cnJlbnRPYmplY3QiLCAia2V5IiwgImluZGV4IiwgImFycmF5IiwgImZpbHRlcmVkRGF0YSIsICJmaWx0ZXJlZEluZGV4ZXMiLCAiZmlsdGVyaW5nU3RyaW5nV29yZHMiLCAid29yZCIsICJkYXRhT2JqZWN0IiwgImRhdGFTdHJpbmciLCAibG93ZXJjYXNlRGF0YVN0cmluZyIsICJ3b3Jkc0ZvdW5kIl0KfQo=\n');
+  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});"contains"in String.prototype||(String.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});onmessage=function(a){var r=y(a.data.filteringString,a.data.data,a.data.excludedData,a.data.dataKeyPath);r.identifier=a.data.identifier,r.instanceIdentifier=a.data.instanceIdentifier,postMessage(r)};function y(a,r,u,d){function l(t,n){var e=t.split("."),i=n;return e.forEach(function(c,f,p){i=i[c]}),i}var o=[],s=[];if(a){var h=[];a.split(" ").forEach(function(t,n,e){t&&h.push(t.toLowerCase())}),r.forEach(function(t,n,e){var i=l(d,t),c=i.toLowerCase(),f=[];h.forEach(function(p){f.push(c.contains(p)&&!u.contains(i))}),f.contains(!0)&&!f.contains(!1)&&(o.push(t),s.push(n))})}else u.length?r.forEach(function(t,n,e){u.indexOf(t)==-1&&(o.push(t),s.push(n))}):(o=r,r.forEach(function(t,n,e){s.push(n)}));return{filteredData:o,filteredIndexes:s}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlLZXlWYWx1ZVN0cmluZ0ZpbHRlcldlYldvcmtlci53b3JrZXIudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbIi8vIEB0cy1jaGVja1xuXG5pZiAoXCJjb250YWluc1wiIGluIEFycmF5LnByb3RvdHlwZSA9PSBmYWxzZSkge1xuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBBcnJheS5wcm90b3R5cGUuY29udGFpbnMgPSBmdW5jdGlvbiAoZWxlbWVudCkge1xuICAgICAgICBcbiAgICAgICAgdmFyIHJlc3VsdCA9ICh0aGlzLmluZGV4T2YoZWxlbWVudCkgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5pZiAoXCJjb250YWluc1wiIGluIFN0cmluZy5wcm90b3R5cGUgPT0gZmFsc2UpIHtcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgU3RyaW5nLnByb3RvdHlwZS5jb250YWlucyA9IGZ1bmN0aW9uIChzdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSAodGhpcy5pbmRleE9mKHN0cmluZykgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5cbm9ubWVzc2FnZSA9IGZ1bmN0aW9uIChldmVudCkge1xuICAgIFxuICAgIC8vY29uc29sZS5sb2coJ01lc3NhZ2UgcmVjZWl2ZWQgZnJvbSBtYWluIHNjcmlwdCcpO1xuICAgIHZhciB3b3JrZXJSZXN1bHQgPSBmaWx0ZXJLZXlWYWx1ZVBhdGhEYXRhKFxuICAgICAgICBldmVudC5kYXRhLmZpbHRlcmluZ1N0cmluZyxcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhLFxuICAgICAgICBldmVudC5kYXRhLmV4Y2x1ZGVkRGF0YSxcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhS2V5UGF0aFxuICAgIClcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0LmlkZW50aWZpZXIgPSBldmVudC5kYXRhLmlkZW50aWZpZXJcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0Lmluc3RhbmNlSWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaW5zdGFuY2VJZGVudGlmaWVyXG4gICAgXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHBvc3RNZXNzYWdlKHdvcmtlclJlc3VsdClcbiAgICBcbn1cblxuXG5mdW5jdGlvbiBmaWx0ZXJLZXlWYWx1ZVBhdGhEYXRhKGZpbHRlcmluZ1N0cmluZzogc3RyaW5nLCBkYXRhOiBhbnlbXSwgZXhjbHVkZWREYXRhOiBzdHJpbmcgfCBhbnlbXSwgZGF0YUtleVBhdGg6IGFueSkge1xuICAgIFxuICAgIGZ1bmN0aW9uIHZhbHVlRm9yS2V5UGF0aChrZXlQYXRoOiBzdHJpbmcsIG9iamVjdDogYW55KSB7XG4gICAgICAgIFxuICAgICAgICB2YXIga2V5cyA9IGtleVBhdGguc3BsaXQoXCIuXCIpXG4gICAgICAgIHZhciBjdXJyZW50T2JqZWN0ID0gb2JqZWN0XG4gICAgICAgIFxuICAgICAgICBrZXlzLmZvckVhY2goZnVuY3Rpb24gKGtleTogc3RyaW5nIHwgbnVtYmVyLCBpbmRleDogYW55LCBhcnJheTogYW55KSB7XG4gICAgICAgICAgICBjdXJyZW50T2JqZWN0ID0gY3VycmVudE9iamVjdFtrZXldXG4gICAgICAgIH0pXG4gICAgICAgIFxuICAgICAgICByZXR1cm4gY3VycmVudE9iamVjdFxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgdmFyIGZpbHRlcmVkRGF0YSA9IFtdXG4gICAgdmFyIGZpbHRlcmVkSW5kZXhlczogYW55W10gPSBbXVxuICAgIFxuICAgIGlmIChmaWx0ZXJpbmdTdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciBmaWx0ZXJpbmdTdHJpbmdXb3JkczogYW55W10gPSBbXVxuICAgICAgICBmaWx0ZXJpbmdTdHJpbmcuc3BsaXQoXCIgXCIpLmZvckVhY2goZnVuY3Rpb24gKHdvcmQ6IHN0cmluZywgaW5kZXg6IGFueSwgYXJyYXk6IGFueSkge1xuICAgICAgICAgICAgaWYgKHdvcmQpIHtcbiAgICAgICAgICAgICAgICBmaWx0ZXJpbmdTdHJpbmdXb3Jkcy5wdXNoKHdvcmQudG9Mb3dlckNhc2UoKSlcbiAgICAgICAgICAgIH1cbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YU9iamVjdDogYW55LCBpbmRleDogYW55LCBhcnJheTogYW55KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciBkYXRhU3RyaW5nID0gdmFsdWVGb3JLZXlQYXRoKGRhdGFLZXlQYXRoLCBkYXRhT2JqZWN0KVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgbG93ZXJjYXNlRGF0YVN0cmluZyA9IGRhdGFTdHJpbmcudG9Mb3dlckNhc2UoKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBMb29rIHRocm91Z2ggYWxsIHRoZSB3b3JkcyBpbiB0aGUgaW5wdXRcbiAgICAgICAgICAgIHZhciB3b3Jkc0ZvdW5kOiBib29sZWFuW10gPSBbXVxuICAgICAgICAgICAgZmlsdGVyaW5nU3RyaW5nV29yZHMuZm9yRWFjaChmdW5jdGlvbiAod29yZCkge1xuICAgICAgICAgICAgICAgIHdvcmRzRm91bmQucHVzaChsb3dlcmNhc2VEYXRhU3RyaW5nLmNvbnRhaW5zKHdvcmQpICYmICFleGNsdWRlZERhdGEuY29udGFpbnMoZGF0YVN0cmluZykpXG4gICAgICAgICAgICB9KVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBPbmx5IHNob3cgdGhlIGRhdGFTdHJpbmcgaWYgaXQgbWF0Y2hlcyBhbGwgb2YgdGhlbVxuICAgICAgICAgICAgLy8gQHRzLWlnbm9yZVxuICAgICAgICAgICAgaWYgKHdvcmRzRm91bmQuY29udGFpbnModHJ1ZSkgJiYgIXdvcmRzRm91bmQuY29udGFpbnMoZmFsc2UpKSB7XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgZmlsdGVyZWREYXRhLnB1c2goZGF0YU9iamVjdClcbiAgICAgICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH1cbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIFxuICAgIH1cbiAgICBlbHNlIGlmIChleGNsdWRlZERhdGEubGVuZ3RoKSB7XG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChkYXRhT2JqZWN0OiBhbnksIGluZGV4OiBhbnksIGFycmF5OiBhbnkpIHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgaWYgKGV4Y2x1ZGVkRGF0YS5pbmRleE9mKGRhdGFPYmplY3QpID09IC0xKSB7XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgZmlsdGVyZWREYXRhLnB1c2goZGF0YU9iamVjdClcbiAgICAgICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH1cbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICB9XG4gICAgZWxzZSB7XG4gICAgICAgIFxuICAgICAgICBmaWx0ZXJlZERhdGEgPSBkYXRhXG4gICAgICAgIFxuICAgICAgICBkYXRhLmZvckVhY2goZnVuY3Rpb24gKG9iamVjdDogYW55LCBpbmRleDogYW55LCBhcnJheTogYW55KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGZpbHRlcmVkSW5kZXhlcy5wdXNoKGluZGV4KVxuICAgICAgICAgICAgXG4gICAgICAgIH0pXG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICBcbiAgICBcbiAgICByZXR1cm4geyBcImZpbHRlcmVkRGF0YVwiOiBmaWx0ZXJlZERhdGEsIFwiZmlsdGVyZWRJbmRleGVzXCI6IGZpbHRlcmVkSW5kZXhlcyB9XG4gICAgXG4gICAgXG4gICAgXG59XG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG4iXSwKICAibWFwcGluZ3MiOiAiQUFFSSxhQUFjLE1BQU0sWUFHcEIsTUFBTSxVQUFVLFNBQVcsU0FBVUEsRUFBUyxDQUUxQyxJQUFJQyxFQUFVLEtBQUssUUFBUUQsQ0FBTyxHQUFLLEdBQ3ZDLE9BQU9DLENBRVgsR0FJQSxhQUFjLE9BQU8sWUFHckIsT0FBTyxVQUFVLFNBQVcsU0FBVUMsRUFBUSxDQUUxQyxJQUFJRCxFQUFVLEtBQUssUUFBUUMsQ0FBTSxHQUFLLEdBQ3RDLE9BQU9ELENBRVgsR0FLSixVQUFZLFNBQVVFLEVBQU8sQ0FHekIsSUFBSUMsRUFBZUMsRUFDZkYsRUFBTSxLQUFLLGdCQUNYQSxFQUFNLEtBQUssS0FDWEEsRUFBTSxLQUFLLGFBQ1hBLEVBQU0sS0FBSyxXQUNmLEVBR0FDLEVBQWEsV0FBYUQsRUFBTSxLQUFLLFdBRXJDQyxFQUFhLG1CQUFxQkQsRUFBTSxLQUFLLG1CQUk3QyxZQUFZQyxDQUFZLENBRTVCLEVBR0EsU0FBU0MsRUFBdUJDLEVBQXlCQyxFQUFhQyxFQUE4QkMsRUFBa0IsQ0FFbEgsU0FBU0MsRUFBZ0JDLEVBQWlCQyxFQUFhLENBRW5ELElBQUlDLEVBQU9GLEVBQVEsTUFBTSxHQUFHLEVBQ3hCRyxFQUFnQkYsRUFFcEIsT0FBQUMsRUFBSyxRQUFRLFNBQVVFLEVBQXNCQyxFQUFZQyxFQUFZLENBQ2pFSCxFQUFnQkEsRUFBY0MsRUFDbEMsQ0FBQyxFQUVNRCxDQUVYLENBRUEsSUFBSUksRUFBZSxDQUFDLEVBQ2hCQyxFQUF5QixDQUFDLEVBRTlCLEdBQUliLEVBQWlCLENBRWpCLElBQUljLEVBQThCLENBQUMsRUFDbkNkLEVBQWdCLE1BQU0sR0FBRyxFQUFFLFFBQVEsU0FBVWUsRUFBY0wsRUFBWUMsRUFBWSxDQUMzRUksR0FDQUQsRUFBcUIsS0FBS0MsRUFBSyxZQUFZLENBQUMsQ0FFcEQsQ0FBQyxFQUVEZCxFQUFLLFFBQVEsU0FBVWUsRUFBaUJOLEVBQVlDLEVBQVksQ0FFNUQsSUFBSU0sRUFBYWIsRUFBZ0JELEVBQWFhLENBQVUsRUFFcERFLEVBQXNCRCxFQUFXLFlBQVksRUFHN0NFLEVBQXdCLENBQUMsRUFDN0JMLEVBQXFCLFFBQVEsU0FBVUMsRUFBTSxDQUN6Q0ksRUFBVyxLQUFLRCxFQUFvQixTQUFTSCxDQUFJLEdBQUssQ0FBQ2IsRUFBYSxTQUFTZSxDQUFVLENBQUMsQ0FDNUYsQ0FBQyxFQUlHRSxFQUFXLFNBQVMsRUFBSSxHQUFLLENBQUNBLEVBQVcsU0FBUyxFQUFLLElBRXZEUCxFQUFhLEtBQUtJLENBQVUsRUFDNUJILEVBQWdCLEtBQUtILENBQUssRUFJbEMsQ0FBQyxDQUlMLE1BQ1NSLEVBQWEsT0FHbEJELEVBQUssUUFBUSxTQUFVZSxFQUFpQk4sRUFBWUMsRUFBWSxDQUV4RFQsRUFBYSxRQUFRYyxDQUFVLEdBQUssS0FFcENKLEVBQWEsS0FBS0ksQ0FBVSxFQUM1QkgsRUFBZ0IsS0FBS0gsQ0FBSyxFQUlsQyxDQUFDLEdBS0RFLEVBQWVYLEVBRWZBLEVBQUssUUFBUSxTQUFVSyxFQUFhSSxFQUFZQyxFQUFZLENBRXhERSxFQUFnQixLQUFLSCxDQUFLLENBRTlCLENBQUMsR0FNTCxNQUFPLENBQUUsYUFBZ0JFLEVBQWMsZ0JBQW1CQyxDQUFnQixDQUk5RSIsCiAgIm5hbWVzIjogWyJlbGVtZW50IiwgInJlc3VsdCIsICJzdHJpbmciLCAiZXZlbnQiLCAid29ya2VyUmVzdWx0IiwgImZpbHRlcktleVZhbHVlUGF0aERhdGEiLCAiZmlsdGVyaW5nU3RyaW5nIiwgImRhdGEiLCAiZXhjbHVkZWREYXRhIiwgImRhdGFLZXlQYXRoIiwgInZhbHVlRm9yS2V5UGF0aCIsICJrZXlQYXRoIiwgIm9iamVjdCIsICJrZXlzIiwgImN1cnJlbnRPYmplY3QiLCAia2V5IiwgImluZGV4IiwgImFycmF5IiwgImZpbHRlcmVkRGF0YSIsICJmaWx0ZXJlZEluZGV4ZXMiLCAiZmlsdGVyaW5nU3RyaW5nV29yZHMiLCAid29yZCIsICJkYXRhT2JqZWN0IiwgImRhdGFTdHJpbmciLCAibG93ZXJjYXNlRGF0YVN0cmluZyIsICJ3b3Jkc0ZvdW5kIl0KfQo=\n');
 }
 var init_UIKeyValueStringFilterWebWorker_worker = __esm({
   "node_modules/uicore-ts/compiledScripts/UIKeyValueStringFilterWebWorker.worker.js"() {
     init_inline_worker();
+    __name(Worker3, "Worker");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIKeyValueStringFilter.js
 var require_UIKeyValueStringFilter = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIKeyValueStringFilter.js"(exports, module) {
+    "use strict";
     var __create2 = Object.create;
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    }, "__copyProps");
+    var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
-    ));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    )), "__toESM");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIKeyValueStringFilter_exports = {};
     __export2(UIKeyValueStringFilter_exports, {
       UIKeyValueStringFilter: () => UIKeyValueStringFilter2
@@ -6240,13 +6254,18 @@ var require_UIKeyValueStringFilter = __commonJS({
     module.exports = __toCommonJS2(UIKeyValueStringFilter_exports);
     var import_UIObject = require_UIObject();
     var import_UIKeyValueStringFilterWebWorker_worker = __toESM2((init_UIKeyValueStringFilterWebWorker_worker(), __toCommonJS(UIKeyValueStringFilterWebWorker_worker_exports)));
-    var _UIKeyValueStringFilter = class extends import_UIObject.UIObject {
+    var _UIKeyValueStringFilter = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(useSeparateWebWorkerHolder = import_UIObject.NO) {
         super();
         this._isThreadClosed = import_UIObject.NO;
         this._webWorkerHolder = _UIKeyValueStringFilter._sharedWebWorkerHolder;
         if (useSeparateWebWorkerHolder) {
-          this._webWorkerHolder = { webWorker: new import_UIKeyValueStringFilterWebWorker_worker.default() };
+          this._webWorkerHolder = {
+            webWorker: new import_UIKeyValueStringFilterWebWorker_worker.default(),
+            UICore_isWorking: false,
+            UICore_messagesToPost: void 0,
+            UICore_completionFunctions: {}
+          };
         }
         _UIKeyValueStringFilter._instanceNumber = _UIKeyValueStringFilter._instanceNumber + 1;
         this._instanceNumber = _UIKeyValueStringFilter._instanceNumber;
@@ -6269,7 +6288,7 @@ var require_UIKeyValueStringFilter = __commonJS({
       }
       get completionFunctions() {
         const key = "UICore_completionFunctions";
-        var result = this._webWorkerHolder[key];
+        let result = this._webWorkerHolder[key];
         if ((0, import_UIObject.IS_NOT)(result)) {
           result = {};
           this._webWorkerHolder[key] = result;
@@ -6325,9 +6344,14 @@ var require_UIKeyValueStringFilter = __commonJS({
           this._webWorkerHolder.webWorker.terminate();
         }
       }
-    };
+    }, "_UIKeyValueStringFilter");
     var UIKeyValueStringFilter2 = _UIKeyValueStringFilter;
-    UIKeyValueStringFilter2._sharedWebWorkerHolder = { webWorker: new import_UIKeyValueStringFilterWebWorker_worker.default() };
+    UIKeyValueStringFilter2._sharedWebWorkerHolder = {
+      webWorker: new import_UIKeyValueStringFilterWebWorker_worker.default(),
+      UICore_isWorking: false,
+      UICore_messagesToPost: void 0,
+      UICore_completionFunctions: {}
+    };
     UIKeyValueStringFilter2._instanceNumber = -1;
   }
 });
@@ -6338,40 +6362,42 @@ __export(UIKeyValueStringSorterWebWorker_worker_exports, {
   default: () => Worker4
 });
 function Worker4() {
-  return inlineWorker('onmessage=function(e){var a=g(e.data.data,e.data.sortingInstructions);a.identifier=e.data.identifier,a.instanceIdentifier=e.data.instanceIdentifier,postMessage(a)};function v(e,a){for(var i=e.split("."),r=a,n=0;n<i.length;n++){var u=i[n];if(u.substring(0,2)=="[]"){r=r[u.substring(2)];var t=i.slice(n+1).join("."),o=r;r=o.map(function(d,s,f){var c=v(t,d);return c});break}r=(r||{})[u]}return r}function l(e,a,i){if(i.length==0)return 0;var r=i[0],n=1;r.direction=="descending"&&(n=-1);var u=e[r.keyPath],t=a[r.keyPath];if(u<t)return-1*n;if(u>t)return 1*n;if(i.length>1){var o=i.slice(1);return l(e,a,o)}return 0}function g(e,a){var i=e.map(function(t,o,d){var s={_UIKeyValueStringSorterWebWorkerSortingObjectIndex:o};return a.forEach(function(f,c,y){s[f.keyPath]=JSON.stringify(v(f.keyPath,t)||{}).toLowerCase()}),s}),r=i.sort(function(t,o){return l(t,o,a)}),n=r.map(function(t,o,d){var s=t._UIKeyValueStringSorterWebWorkerSortingObjectIndex;return s}),u={sortedData:n.map(function(t,o,d){return e[t]}),sortedIndexes:n};return u}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlLZXlWYWx1ZVN0cmluZ1NvcnRlcldlYldvcmtlci53b3JrZXIudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbIm9ubWVzc2FnZSA9IGZ1bmN0aW9uIChldmVudCkge1xuICAgIFxuICAgIC8vY29uc29sZS5sb2coJ01lc3NhZ2UgcmVjZWl2ZWQgZnJvbSBtYWluIHNjcmlwdCcpO1xuICAgIHZhciB3b3JrZXJSZXN1bHQgPSBzb3J0RGF0YShcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhLFxuICAgICAgICBldmVudC5kYXRhLnNvcnRpbmdJbnN0cnVjdGlvbnNcbiAgICApXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHdvcmtlclJlc3VsdC5pZGVudGlmaWVyID0gZXZlbnQuZGF0YS5pZGVudGlmaWVyXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHdvcmtlclJlc3VsdC5pbnN0YW5jZUlkZW50aWZpZXIgPSBldmVudC5kYXRhLmluc3RhbmNlSWRlbnRpZmllclxuICAgIFxuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBwb3N0TWVzc2FnZSh3b3JrZXJSZXN1bHQpXG4gICAgXG59XG5cblxuXG5cblxuZnVuY3Rpb24gdmFsdWVGb3JLZXlQYXRoKGtleVBhdGgsIG9iamVjdCkge1xuICAgIFxuICAgIHZhciBrZXlzID0ga2V5UGF0aC5zcGxpdChcIi5cIilcbiAgICB2YXIgY3VycmVudE9iamVjdCA9IG9iamVjdFxuICAgIFxuICAgIGZvciAodmFyIGkgPSAwOyBpIDwga2V5cy5sZW5ndGg7IGkrKykge1xuICAgICAgICBcbiAgICAgICAgdmFyIGtleSA9IGtleXNbaV1cbiAgICAgICAgXG4gICAgICAgIGlmIChrZXkuc3Vic3RyaW5nKDAsIDIpID09IFwiW11cIikge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBUaGlzIG5leHQgb2JqZWN0IHdpbGwgYmUgYW4gYXJyYXkgYW5kIHRoZSByZXN0IG9mIHRoZSBrZXlzIG5lZWQgdG8gYmUgcnVuIGZvciBlYWNoIG9mIHRoZSBlbGVtZW50c1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBjdXJyZW50T2JqZWN0ID0gY3VycmVudE9iamVjdFtrZXkuc3Vic3RyaW5nKDIpXVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBDdXJyZW50T2JqZWN0IGlzIG5vdyBhbiBhcnJheVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgcmVtYWluaW5nS2V5UGF0aCA9IGtleXMuc2xpY2UoaSArIDEpLmpvaW4oXCIuXCIpXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciBjdXJyZW50QXJyYXkgPSBjdXJyZW50T2JqZWN0XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGN1cnJlbnRPYmplY3QgPSBjdXJyZW50QXJyYXkubWFwKGZ1bmN0aW9uIChzdWJPYmplY3QsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIHZhciByZXN1bHQgPSB2YWx1ZUZvcktleVBhdGgocmVtYWluaW5nS2V5UGF0aCwgc3ViT2JqZWN0KVxuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH0pXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGJyZWFrXG4gICAgICAgICAgICBcbiAgICAgICAgfVxuICAgICAgICBcbiAgICAgICAgY3VycmVudE9iamVjdCA9IChjdXJyZW50T2JqZWN0IHx8IHt9KVtrZXldXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgcmV0dXJuIGN1cnJlbnRPYmplY3RcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiBjb21wYXJlKGZpcnN0T2JqZWN0LCBzZWNvbmRPYmplY3QsIHNvcnRpbmdJbnN0cnVjdGlvbnMpIHtcbiAgICBcbiAgICBcbiAgICBpZiAoc29ydGluZ0luc3RydWN0aW9ucy5sZW5ndGggPT0gMCkge1xuICAgICAgICByZXR1cm4gMFxuICAgIH1cbiAgICBcbiAgICBcbiAgICB2YXIgc29ydGluZ0luc3RydWN0aW9uID0gc29ydGluZ0luc3RydWN0aW9uc1swXVxuICAgIFxuICAgIFxuICAgIHZhciBkaXJlY3Rpb25NdWx0aXBsaWVyID0gMVxuICAgIGlmIChzb3J0aW5nSW5zdHJ1Y3Rpb24uZGlyZWN0aW9uID09IFwiZGVzY2VuZGluZ1wiKSB7XG4gICAgICAgIGRpcmVjdGlvbk11bHRpcGxpZXIgPSAtMVxuICAgIH1cbiAgICBcbiAgICBcbiAgICB2YXIgZmlyc3REYXRhU3RyaW5nID0gZmlyc3RPYmplY3Rbc29ydGluZ0luc3RydWN0aW9uLmtleVBhdGhdXG4gICAgXG4gICAgdmFyIHNlY29uZERhdGFTdHJpbmcgPSBzZWNvbmRPYmplY3Rbc29ydGluZ0luc3RydWN0aW9uLmtleVBhdGhdXG4gICAgXG4gICAgXG4gICAgXG4gICAgXG4gICAgaWYgKGZpcnN0RGF0YVN0cmluZyA8IHNlY29uZERhdGFTdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHJldHVybiAtMSAqIGRpcmVjdGlvbk11bHRpcGxpZXJcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIGlmIChmaXJzdERhdGFTdHJpbmcgPiBzZWNvbmREYXRhU3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICByZXR1cm4gMSAqIGRpcmVjdGlvbk11bHRpcGxpZXJcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIGlmIChzb3J0aW5nSW5zdHJ1Y3Rpb25zLmxlbmd0aCA+IDEpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZW1haW5pbmdTb3J0aW5nSW5zdHJ1Y3Rpb25zID0gc29ydGluZ0luc3RydWN0aW9ucy5zbGljZSgxKVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICByZXR1cm4gY29tcGFyZShmaXJzdE9iamVjdCwgc2Vjb25kT2JqZWN0LCByZW1haW5pbmdTb3J0aW5nSW5zdHJ1Y3Rpb25zKVxuICAgICAgICBcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIHJldHVybiAwXG4gICAgXG59XG5cblxuXG5cblxuZnVuY3Rpb24gc29ydERhdGEoZGF0YSwgc29ydGluZ0luc3RydWN0aW9ucykge1xuICAgIFxuICAgIFxuICAgIHZhciBzb3J0aW5nT2JqZWN0cyA9IGRhdGEubWFwKGZ1bmN0aW9uIChkYXRhSXRlbSwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgcmVzdWx0ID0ge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBcIl9VSUtleVZhbHVlU3RyaW5nU29ydGVyV2ViV29ya2VyU29ydGluZ09iamVjdEluZGV4XCI6IGluZGV4XG4gICAgICAgICAgICBcbiAgICAgICAgfVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIHNvcnRpbmdJbnN0cnVjdGlvbnMuZm9yRWFjaChmdW5jdGlvbiAoaW5zdHJ1Y3Rpb24sIGluZGV4LCBpbnN0cnVjdGlvbnNBcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICByZXN1bHRbaW5zdHJ1Y3Rpb24ua2V5UGF0aF0gPSBKU09OLnN0cmluZ2lmeSh2YWx1ZUZvcktleVBhdGgoaW5zdHJ1Y3Rpb24ua2V5UGF0aCwgZGF0YUl0ZW0pIHx8IHt9KVxuICAgICAgICAgICAgICAgIC50b0xvd2VyQ2FzZSgpXG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgICAgIFxuICAgIH0pXG4gICAgXG4gICAgXG4gICAgdmFyIHNvcnRlZERhdGEgPSBzb3J0aW5nT2JqZWN0cy5zb3J0KGZ1bmN0aW9uIChmaXJzdE9iamVjdCwgc2Vjb25kT2JqZWN0KSB7XG4gICAgICAgIFxuICAgICAgICByZXR1cm4gY29tcGFyZShmaXJzdE9iamVjdCwgc2Vjb25kT2JqZWN0LCBzb3J0aW5nSW5zdHJ1Y3Rpb25zKVxuICAgICAgICBcbiAgICB9KVxuICAgIFxuICAgIHZhciBzb3J0ZWRJbmRleGVzID0gc29ydGVkRGF0YS5tYXAoZnVuY3Rpb24gKG9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgc29ydGVkSW5kZXggPSBvYmplY3QuX1VJS2V5VmFsdWVTdHJpbmdTb3J0ZXJXZWJXb3JrZXJTb3J0aW5nT2JqZWN0SW5kZXhcbiAgICAgICAgXG4gICAgICAgIHJldHVybiBzb3J0ZWRJbmRleFxuICAgICAgICBcbiAgICB9KVxuICAgIFxuICAgIHZhciByZXN1bHQgPSB7XG4gICAgICAgIFxuICAgICAgICBcInNvcnRlZERhdGFcIjogc29ydGVkSW5kZXhlcy5tYXAoZnVuY3Rpb24gKHNvcnRlZEluZGV4LCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgcmV0dXJuIGRhdGFbc29ydGVkSW5kZXhdXG4gICAgICAgICAgICBcbiAgICAgICAgfSksXG4gICAgICAgIFwic29ydGVkSW5kZXhlc1wiOiBzb3J0ZWRJbmRleGVzXG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICBcbiAgICByZXR1cm4gcmVzdWx0XG4gICAgXG4gICAgXG59XG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG4iXSwKICAibWFwcGluZ3MiOiAiQUFBQSxVQUFZLFNBQVVBLEVBQU8sQ0FHekIsSUFBSUMsRUFBZUMsRUFDZkYsRUFBTSxLQUFLLEtBQ1hBLEVBQU0sS0FBSyxtQkFDZixFQUdBQyxFQUFhLFdBQWFELEVBQU0sS0FBSyxXQUVyQ0MsRUFBYSxtQkFBcUJELEVBQU0sS0FBSyxtQkFJN0MsWUFBWUMsQ0FBWSxDQUU1QixFQU1BLFNBQVNFLEVBQWdCQyxFQUFTQyxFQUFRLENBS3RDLFFBSElDLEVBQU9GLEVBQVEsTUFBTSxHQUFHLEVBQ3hCRyxFQUFnQkYsRUFFWEcsRUFBSSxFQUFHQSxFQUFJRixFQUFLLE9BQVFFLElBQUssQ0FFbEMsSUFBSUMsRUFBTUgsRUFBS0UsR0FFZixHQUFJQyxFQUFJLFVBQVUsRUFBRyxDQUFDLEdBQUssS0FBTSxDQUk3QkYsRUFBZ0JBLEVBQWNFLEVBQUksVUFBVSxDQUFDLEdBSTdDLElBQUlDLEVBQW1CSixFQUFLLE1BQU1FLEVBQUksQ0FBQyxFQUFFLEtBQUssR0FBRyxFQUU3Q0csRUFBZUosRUFFbkJBLEVBQWdCSSxFQUFhLElBQUksU0FBVUMsRUFBV0MsRUFBT0MsRUFBTyxDQUVoRSxJQUFJQyxFQUFTWixFQUFnQk8sRUFBa0JFLENBQVMsRUFFeEQsT0FBT0csQ0FFWCxDQUFDLEVBRUQsS0FFSixDQUVBUixHQUFpQkEsR0FBaUIsQ0FBQyxHQUFHRSxFQUcxQyxDQUVBLE9BQU9GLENBRVgsQ0FNQSxTQUFTUyxFQUFRQyxFQUFhQyxFQUFjQyxFQUFxQixDQUc3RCxHQUFJQSxFQUFvQixRQUFVLEVBQzlCLE1BQU8sR0FJWCxJQUFJQyxFQUFxQkQsRUFBb0IsR0FHekNFLEVBQXNCLEVBQ3RCRCxFQUFtQixXQUFhLGVBQ2hDQyxFQUFzQixJQUkxQixJQUFJQyxFQUFrQkwsRUFBWUcsRUFBbUIsU0FFakRHLEVBQW1CTCxFQUFhRSxFQUFtQixTQUt2RCxHQUFJRSxFQUFrQkMsRUFFbEIsTUFBTyxHQUFLRixFQUloQixHQUFJQyxFQUFrQkMsRUFFbEIsTUFBTyxHQUFJRixFQUlmLEdBQUlGLEVBQW9CLE9BQVMsRUFBRyxDQUVoQyxJQUFJSyxFQUErQkwsRUFBb0IsTUFBTSxDQUFDLEVBSTlELE9BQU9ILEVBQVFDLEVBQWFDLEVBQWNNLENBQTRCLENBRzFFLENBRUEsTUFBTyxFQUVYLENBTUEsU0FBU3RCLEVBQVN1QixFQUFNTixFQUFxQixDQUd6QyxJQUFJTyxFQUFpQkQsRUFBSyxJQUFJLFNBQVVFLEVBQVVkLEVBQU9DLEVBQU8sQ0FFNUQsSUFBSUMsRUFBUyxDQUVULG1EQUFzREYsQ0FFMUQsRUFHQSxPQUFBTSxFQUFvQixRQUFRLFNBQVVTLEVBQWFmLEVBQU9nQixFQUFtQixDQUV6RWQsRUFBT2EsRUFBWSxTQUFXLEtBQUssVUFBVXpCLEVBQWdCeUIsRUFBWSxRQUFTRCxDQUFRLEdBQUssQ0FBQyxDQUFDLEVBQzVGLFlBQVksQ0FFckIsQ0FBQyxFQUtNWixDQUdYLENBQUMsRUFHR2UsRUFBYUosRUFBZSxLQUFLLFNBQVVULEVBQWFDLEVBQWMsQ0FFdEUsT0FBT0YsRUFBUUMsRUFBYUMsRUFBY0MsQ0FBbUIsQ0FFakUsQ0FBQyxFQUVHWSxFQUFnQkQsRUFBVyxJQUFJLFNBQVV6QixFQUFRUSxFQUFPQyxFQUFPLENBRS9ELElBQUlrQixFQUFjM0IsRUFBTyxtREFFekIsT0FBTzJCLENBRVgsQ0FBQyxFQUVHakIsRUFBUyxDQUVULFdBQWNnQixFQUFjLElBQUksU0FBVUMsRUFBYW5CLEVBQU9DLEVBQU8sQ0FFakUsT0FBT1csRUFBS08sRUFFaEIsQ0FBQyxFQUNELGNBQWlCRCxDQUVyQixFQUdBLE9BQU9oQixDQUdYIiwKICAibmFtZXMiOiBbImV2ZW50IiwgIndvcmtlclJlc3VsdCIsICJzb3J0RGF0YSIsICJ2YWx1ZUZvcktleVBhdGgiLCAia2V5UGF0aCIsICJvYmplY3QiLCAia2V5cyIsICJjdXJyZW50T2JqZWN0IiwgImkiLCAia2V5IiwgInJlbWFpbmluZ0tleVBhdGgiLCAiY3VycmVudEFycmF5IiwgInN1Yk9iamVjdCIsICJpbmRleCIsICJhcnJheSIsICJyZXN1bHQiLCAiY29tcGFyZSIsICJmaXJzdE9iamVjdCIsICJzZWNvbmRPYmplY3QiLCAic29ydGluZ0luc3RydWN0aW9ucyIsICJzb3J0aW5nSW5zdHJ1Y3Rpb24iLCAiZGlyZWN0aW9uTXVsdGlwbGllciIsICJmaXJzdERhdGFTdHJpbmciLCAic2Vjb25kRGF0YVN0cmluZyIsICJyZW1haW5pbmdTb3J0aW5nSW5zdHJ1Y3Rpb25zIiwgImRhdGEiLCAic29ydGluZ09iamVjdHMiLCAiZGF0YUl0ZW0iLCAiaW5zdHJ1Y3Rpb24iLCAiaW5zdHJ1Y3Rpb25zQXJyYXkiLCAic29ydGVkRGF0YSIsICJzb3J0ZWRJbmRleGVzIiwgInNvcnRlZEluZGV4Il0KfQo=\n');
+  return inlineWorker('onmessage=function(r){var n=l(r.data.data,r.data.sortingInstructions);n.identifier=r.data.identifier,n.instanceIdentifier=r.data.instanceIdentifier,postMessage(n)};function d(r,n){for(var i=r.split("."),e=n,a=0;a<i.length;a++){var t=i[a];if(t.substring(0,2)=="[]"){e=e[t.substring(2)];var o=i.slice(a+1).join("."),s=e;e=s.map(function(c,u,S){var g=d(o,c);return g});break}e=(e||{})[t]}return e}function f(r,n,i){if(i.length==0)return 0;let e=i[0],a=1;e.direction=="descending"&&(a=-1);let t=r[e.keyPath],o=n[e.keyPath];if(t<o)return-1*a;if(t>o)return a;if(i.length>1){let s=i.slice(1);return f(r,n,s)}return 0}function l(r,n){let a=r.map(function(t,o,s){let c={_UIKeyValueStringSorterWebWorkerSortingObjectIndex:o};return n.forEach(u=>{c[u.keyPath]=JSON.stringify(d(""+u.keyPath,t)||{}).toLowerCase()}),c}).sort((t,o)=>f(t,o,n)).map(t=>t._UIKeyValueStringSorterWebWorkerSortingObjectIndex);return{sortedData:a.map(t=>r[t]),sortedIndexes:a}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlLZXlWYWx1ZVN0cmluZ1NvcnRlcldlYldvcmtlci53b3JrZXIudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbIm9ubWVzc2FnZSA9IGZ1bmN0aW9uIChldmVudCkge1xuICAgIFxuICAgIC8vY29uc29sZS5sb2coJ01lc3NhZ2UgcmVjZWl2ZWQgZnJvbSBtYWluIHNjcmlwdCcpO1xuICAgIHZhciB3b3JrZXJSZXN1bHQgPSBzb3J0RGF0YShcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhLFxuICAgICAgICBldmVudC5kYXRhLnNvcnRpbmdJbnN0cnVjdGlvbnNcbiAgICApXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHdvcmtlclJlc3VsdC5pZGVudGlmaWVyID0gZXZlbnQuZGF0YS5pZGVudGlmaWVyXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHdvcmtlclJlc3VsdC5pbnN0YW5jZUlkZW50aWZpZXIgPSBldmVudC5kYXRhLmluc3RhbmNlSWRlbnRpZmllclxuICAgIFxuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBwb3N0TWVzc2FnZSh3b3JrZXJSZXN1bHQpXG4gICAgXG59XG5cblxuZnVuY3Rpb24gdmFsdWVGb3JLZXlQYXRoKGtleVBhdGg6IHN0cmluZywgb2JqZWN0OiBhbnkpIHtcbiAgICBcbiAgICB2YXIga2V5cyA9IGtleVBhdGguc3BsaXQoXCIuXCIpXG4gICAgdmFyIGN1cnJlbnRPYmplY3QgPSBvYmplY3RcbiAgICBcbiAgICBmb3IgKHZhciBpID0gMDsgaSA8IGtleXMubGVuZ3RoOyBpKyspIHtcbiAgICAgICAgXG4gICAgICAgIHZhciBrZXkgPSBrZXlzW2ldXG4gICAgICAgIFxuICAgICAgICBpZiAoa2V5LnN1YnN0cmluZygwLCAyKSA9PSBcIltdXCIpIHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgLy8gVGhpcyBuZXh0IG9iamVjdCB3aWxsIGJlIGFuIGFycmF5IGFuZCB0aGUgcmVzdCBvZiB0aGUga2V5cyBuZWVkIHRvIGJlIHJ1biBmb3IgZWFjaCBvZiB0aGUgZWxlbWVudHNcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgY3VycmVudE9iamVjdCA9IGN1cnJlbnRPYmplY3Rba2V5LnN1YnN0cmluZygyKV1cbiAgICAgICAgICAgIFxuICAgICAgICAgICAgLy8gQ3VycmVudE9iamVjdCBpcyBub3cgYW4gYXJyYXlcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgdmFyIHJlbWFpbmluZ0tleVBhdGggPSBrZXlzLnNsaWNlKGkgKyAxKS5qb2luKFwiLlwiKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgY3VycmVudEFycmF5ID0gY3VycmVudE9iamVjdFxuICAgICAgICAgICAgXG4gICAgICAgICAgICBjdXJyZW50T2JqZWN0ID0gY3VycmVudEFycmF5Lm1hcChmdW5jdGlvbiAoc3ViT2JqZWN0OiBhbnksIGluZGV4OiBhbnksIGFycmF5OiBhbnkpIHtcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICB2YXIgcmVzdWx0ID0gdmFsdWVGb3JLZXlQYXRoKHJlbWFpbmluZ0tleVBhdGgsIHN1Yk9iamVjdClcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICByZXR1cm4gcmVzdWx0XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9KVxuICAgICAgICAgICAgXG4gICAgICAgICAgICBicmVha1xuICAgICAgICAgICAgXG4gICAgICAgIH1cbiAgICAgICAgXG4gICAgICAgIGN1cnJlbnRPYmplY3QgPSAoY3VycmVudE9iamVjdCB8fCB7fSlba2V5XVxuICAgICAgICBcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIHJldHVybiBjdXJyZW50T2JqZWN0XG4gICAgXG59XG5cblxuZnVuY3Rpb24gY29tcGFyZShcbiAgICBmaXJzdE9iamVjdDogeyBbeDogc3RyaW5nXTogYW55IH0sXG4gICAgc2Vjb25kT2JqZWN0OiB7IFt4OiBzdHJpbmddOiBhbnkgfSxcbiAgICBzb3J0aW5nSW5zdHJ1Y3Rpb25zOiBzdHJpbmcgfCBhbnlbXVxuKTogbnVtYmVyIHtcbiAgICBcbiAgICBpZiAoc29ydGluZ0luc3RydWN0aW9ucy5sZW5ndGggPT0gMCkge1xuICAgICAgICByZXR1cm4gMFxuICAgIH1cbiAgICBcbiAgICBjb25zdCBzb3J0aW5nSW5zdHJ1Y3Rpb24gPSBzb3J0aW5nSW5zdHJ1Y3Rpb25zWzBdXG4gICAgXG4gICAgbGV0IGRpcmVjdGlvbk11bHRpcGxpZXIgPSAxXG4gICAgaWYgKHNvcnRpbmdJbnN0cnVjdGlvbi5kaXJlY3Rpb24gPT0gXCJkZXNjZW5kaW5nXCIpIHtcbiAgICAgICAgZGlyZWN0aW9uTXVsdGlwbGllciA9IC0xXG4gICAgfVxuICAgIFxuICAgIGNvbnN0IGZpcnN0RGF0YVN0cmluZyA9IGZpcnN0T2JqZWN0W3NvcnRpbmdJbnN0cnVjdGlvbi5rZXlQYXRoXVxuICAgIGNvbnN0IHNlY29uZERhdGFTdHJpbmcgPSBzZWNvbmRPYmplY3Rbc29ydGluZ0luc3RydWN0aW9uLmtleVBhdGhdXG4gICAgXG4gICAgaWYgKGZpcnN0RGF0YVN0cmluZyA8IHNlY29uZERhdGFTdHJpbmcpIHtcbiAgICAgICAgcmV0dXJuIC0xICogZGlyZWN0aW9uTXVsdGlwbGllclxuICAgIH1cbiAgICBcbiAgICBpZiAoZmlyc3REYXRhU3RyaW5nID4gc2Vjb25kRGF0YVN0cmluZykge1xuICAgICAgICByZXR1cm4gZGlyZWN0aW9uTXVsdGlwbGllclxuICAgIH1cbiAgICBcbiAgICBpZiAoc29ydGluZ0luc3RydWN0aW9ucy5sZW5ndGggPiAxKSB7XG4gICAgICAgIGNvbnN0IHJlbWFpbmluZ1NvcnRpbmdJbnN0cnVjdGlvbnMgPSBzb3J0aW5nSW5zdHJ1Y3Rpb25zLnNsaWNlKDEpXG4gICAgICAgIHJldHVybiBjb21wYXJlKGZpcnN0T2JqZWN0LCBzZWNvbmRPYmplY3QsIHJlbWFpbmluZ1NvcnRpbmdJbnN0cnVjdGlvbnMpXG4gICAgfVxuICAgIFxuICAgIHJldHVybiAwXG4gICAgXG59XG5cblxuZnVuY3Rpb24gc29ydERhdGEoZGF0YTogYW55W10sIHNvcnRpbmdJbnN0cnVjdGlvbnM6IGFueVtdKSB7XG4gICAgXG4gICAgXG4gICAgY29uc3Qgc29ydGluZ09iamVjdHMgPSBkYXRhLm1hcChmdW5jdGlvbiAoZGF0YUl0ZW06IGFueSwgaW5kZXg6IGFueSwgYXJyYXk6IGFueSkge1xuICAgICAgICBcbiAgICAgICAgY29uc3QgcmVzdWx0OiB7IF9VSUtleVZhbHVlU3RyaW5nU29ydGVyV2ViV29ya2VyU29ydGluZ09iamVjdEluZGV4OiBhbnkgfSAmIFJlY29yZDxzdHJpbmcsIHN0cmluZz4gPSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIFwiX1VJS2V5VmFsdWVTdHJpbmdTb3J0ZXJXZWJXb3JrZXJTb3J0aW5nT2JqZWN0SW5kZXhcIjogaW5kZXhcbiAgICAgICAgICAgIFxuICAgICAgICB9XG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgc29ydGluZ0luc3RydWN0aW9ucy5mb3JFYWNoKChpbnN0cnVjdGlvbjogeyBrZXlQYXRoOiBzdHJpbmcgfCBudW1iZXIgfSkgPT4ge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICByZXN1bHRbaW5zdHJ1Y3Rpb24ua2V5UGF0aF0gPSBKU09OLnN0cmluZ2lmeSh2YWx1ZUZvcktleVBhdGgoXCJcIiArIGluc3RydWN0aW9uLmtleVBhdGgsIGRhdGFJdGVtKSB8fCB7fSlcbiAgICAgICAgICAgICAgICAudG9Mb3dlckNhc2UoKVxuICAgICAgICB9KVxuICAgICAgICBcbiAgICAgICAgcmV0dXJuIHJlc3VsdFxuICAgICAgICBcbiAgICB9KVxuICAgIFxuICAgIFxuICAgIGNvbnN0IHNvcnRlZERhdGEgPSBzb3J0aW5nT2JqZWN0cy5zb3J0KChmaXJzdE9iamVjdDogYW55LCBzZWNvbmRPYmplY3Q6IGFueSkgPT4gY29tcGFyZShcbiAgICAgICAgZmlyc3RPYmplY3QsXG4gICAgICAgIHNlY29uZE9iamVjdCxcbiAgICAgICAgc29ydGluZ0luc3RydWN0aW9uc1xuICAgICkpXG4gICAgXG4gICAgY29uc3Qgc29ydGVkSW5kZXhlcyA9IHNvcnRlZERhdGEubWFwKChcbiAgICAgICAgb2JqZWN0OiB7IF9VSUtleVZhbHVlU3RyaW5nU29ydGVyV2ViV29ya2VyU29ydGluZ09iamVjdEluZGV4OiBhbnkgfVxuICAgICkgPT4gb2JqZWN0Ll9VSUtleVZhbHVlU3RyaW5nU29ydGVyV2ViV29ya2VyU29ydGluZ09iamVjdEluZGV4KVxuICAgIFxuICAgIHJldHVybiB7XG4gICAgICAgIFxuICAgICAgICBcInNvcnRlZERhdGFcIjogc29ydGVkSW5kZXhlcy5tYXAoc29ydGVkSW5kZXggPT4gZGF0YVtzb3J0ZWRJbmRleF0pLFxuICAgICAgICBcInNvcnRlZEluZGV4ZXNcIjogc29ydGVkSW5kZXhlc1xuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgXG59XG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG4iXSwKICAibWFwcGluZ3MiOiAiQUFBQSxVQUFZLFNBQVVBLEVBQU8sQ0FHekIsSUFBSUMsRUFBZUMsRUFDZkYsRUFBTSxLQUFLLEtBQ1hBLEVBQU0sS0FBSyxtQkFDZixFQUdBQyxFQUFhLFdBQWFELEVBQU0sS0FBSyxXQUVyQ0MsRUFBYSxtQkFBcUJELEVBQU0sS0FBSyxtQkFJN0MsWUFBWUMsQ0FBWSxDQUU1QixFQUdBLFNBQVNFLEVBQWdCQyxFQUFpQkMsRUFBYSxDQUtuRCxRQUhJQyxFQUFPRixFQUFRLE1BQU0sR0FBRyxFQUN4QkcsRUFBZ0JGLEVBRVhHLEVBQUksRUFBR0EsRUFBSUYsRUFBSyxPQUFRRSxJQUFLLENBRWxDLElBQUlDLEVBQU1ILEVBQUtFLEdBRWYsR0FBSUMsRUFBSSxVQUFVLEVBQUcsQ0FBQyxHQUFLLEtBQU0sQ0FJN0JGLEVBQWdCQSxFQUFjRSxFQUFJLFVBQVUsQ0FBQyxHQUk3QyxJQUFJQyxFQUFtQkosRUFBSyxNQUFNRSxFQUFJLENBQUMsRUFBRSxLQUFLLEdBQUcsRUFFN0NHLEVBQWVKLEVBRW5CQSxFQUFnQkksRUFBYSxJQUFJLFNBQVVDLEVBQWdCQyxFQUFZQyxFQUFZLENBRS9FLElBQUlDLEVBQVNaLEVBQWdCTyxFQUFrQkUsQ0FBUyxFQUV4RCxPQUFPRyxDQUVYLENBQUMsRUFFRCxLQUVKLENBRUFSLEdBQWlCQSxHQUFpQixDQUFDLEdBQUdFLEVBRzFDLENBRUEsT0FBT0YsQ0FFWCxDQUdBLFNBQVNTLEVBQ0xDLEVBQ0FDLEVBQ0FDLEVBQ00sQ0FFTixHQUFJQSxFQUFvQixRQUFVLEVBQzlCLE1BQU8sR0FHWCxJQUFNQyxFQUFxQkQsRUFBb0IsR0FFM0NFLEVBQXNCLEVBQ3RCRCxFQUFtQixXQUFhLGVBQ2hDQyxFQUFzQixJQUcxQixJQUFNQyxFQUFrQkwsRUFBWUcsRUFBbUIsU0FDakRHLEVBQW1CTCxFQUFhRSxFQUFtQixTQUV6RCxHQUFJRSxFQUFrQkMsRUFDbEIsTUFBTyxHQUFLRixFQUdoQixHQUFJQyxFQUFrQkMsRUFDbEIsT0FBT0YsRUFHWCxHQUFJRixFQUFvQixPQUFTLEVBQUcsQ0FDaEMsSUFBTUssRUFBK0JMLEVBQW9CLE1BQU0sQ0FBQyxFQUNoRSxPQUFPSCxFQUFRQyxFQUFhQyxFQUFjTSxDQUE0QixDQUMxRSxDQUVBLE1BQU8sRUFFWCxDQUdBLFNBQVN0QixFQUFTdUIsRUFBYU4sRUFBNEIsQ0E2QnZELElBQU1PLEVBMUJpQkQsRUFBSyxJQUFJLFNBQVVFLEVBQWVkLEVBQVlDLEVBQVksQ0FFN0UsSUFBTUMsRUFBK0YsQ0FFakcsbURBQXNERixDQUUxRCxFQUdBLE9BQUFNLEVBQW9CLFFBQVNTLEdBQThDLENBRXZFYixFQUFPYSxFQUFZLFNBQVcsS0FBSyxVQUFVekIsRUFBZ0IsR0FBS3lCLEVBQVksUUFBU0QsQ0FBUSxHQUFLLENBQUMsQ0FBQyxFQUNqRyxZQUFZLENBQ3JCLENBQUMsRUFFTVosQ0FFWCxDQUFDLEVBR2lDLEtBQUssQ0FBQ0UsRUFBa0JDLElBQXNCRixFQUM1RUMsRUFDQUMsRUFDQUMsQ0FDSixDQUFDLEVBRWdDLElBQzdCZCxHQUNDQSxFQUFPLGtEQUFrRCxFQUU5RCxNQUFPLENBRUgsV0FBY3FCLEVBQWMsSUFBSUcsR0FBZUosRUFBS0ksRUFBWSxFQUNoRSxjQUFpQkgsQ0FFckIsQ0FHSiIsCiAgIm5hbWVzIjogWyJldmVudCIsICJ3b3JrZXJSZXN1bHQiLCAic29ydERhdGEiLCAidmFsdWVGb3JLZXlQYXRoIiwgImtleVBhdGgiLCAib2JqZWN0IiwgImtleXMiLCAiY3VycmVudE9iamVjdCIsICJpIiwgImtleSIsICJyZW1haW5pbmdLZXlQYXRoIiwgImN1cnJlbnRBcnJheSIsICJzdWJPYmplY3QiLCAiaW5kZXgiLCAiYXJyYXkiLCAicmVzdWx0IiwgImNvbXBhcmUiLCAiZmlyc3RPYmplY3QiLCAic2Vjb25kT2JqZWN0IiwgInNvcnRpbmdJbnN0cnVjdGlvbnMiLCAic29ydGluZ0luc3RydWN0aW9uIiwgImRpcmVjdGlvbk11bHRpcGxpZXIiLCAiZmlyc3REYXRhU3RyaW5nIiwgInNlY29uZERhdGFTdHJpbmciLCAicmVtYWluaW5nU29ydGluZ0luc3RydWN0aW9ucyIsICJkYXRhIiwgInNvcnRlZEluZGV4ZXMiLCAiZGF0YUl0ZW0iLCAiaW5zdHJ1Y3Rpb24iLCAic29ydGVkSW5kZXgiXQp9Cg==\n');
 }
 var init_UIKeyValueStringSorterWebWorker_worker = __esm({
   "node_modules/uicore-ts/compiledScripts/UIKeyValueStringSorterWebWorker.worker.js"() {
     init_inline_worker();
+    __name(Worker4, "Worker");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIKeyValueStringSorter.js
 var require_UIKeyValueStringSorter = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIKeyValueStringSorter.js"(exports, module) {
+    "use strict";
     var __create2 = Object.create;
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    }, "__copyProps");
+    var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
-    ));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    )), "__toESM");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIKeyValueStringSorter_exports = {};
     __export2(UIKeyValueStringSorter_exports, {
       UIKeyValueStringSorter: () => UIKeyValueStringSorter
@@ -6379,13 +6405,18 @@ var require_UIKeyValueStringSorter = __commonJS({
     module.exports = __toCommonJS2(UIKeyValueStringSorter_exports);
     var import_UIObject = require_UIObject();
     var import_UIKeyValueStringSorterWebWorker_worker = __toESM2((init_UIKeyValueStringSorterWebWorker_worker(), __toCommonJS(UIKeyValueStringSorterWebWorker_worker_exports)));
-    var _UIKeyValueStringSorter = class extends import_UIObject.UIObject {
+    var _UIKeyValueStringSorter = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(useSeparateWebWorkerHolder = import_UIObject.NO) {
         super();
         this._isThreadClosed = import_UIObject.NO;
         this._webWorkerHolder = _UIKeyValueStringSorter._sharedWebWorkerHolder;
         if (useSeparateWebWorkerHolder) {
-          this._webWorkerHolder = { webWorker: new import_UIKeyValueStringSorterWebWorker_worker.default() };
+          this._webWorkerHolder = {
+            webWorker: new import_UIKeyValueStringSorterWebWorker_worker.default(),
+            UICore_isWorking: false,
+            UICore_messagesToPost: void 0,
+            UICore_completionFunctions: {}
+          };
         }
         _UIKeyValueStringSorter._instanceNumber = _UIKeyValueStringSorter._instanceNumber + 1;
         this._instanceNumber = _UIKeyValueStringSorter._instanceNumber;
@@ -6476,9 +6507,14 @@ var require_UIKeyValueStringSorter = __commonJS({
           this._webWorkerHolder.webWorker.terminate();
         }
       }
-    };
+    }, "_UIKeyValueStringSorter");
     var UIKeyValueStringSorter = _UIKeyValueStringSorter;
-    UIKeyValueStringSorter._sharedWebWorkerHolder = { webWorker: new import_UIKeyValueStringSorterWebWorker_worker.default() };
+    UIKeyValueStringSorter._sharedWebWorkerHolder = {
+      UICore_completionFunctions: {},
+      UICore_isWorking: false,
+      UICore_messagesToPost: void 0,
+      webWorker: new import_UIKeyValueStringSorterWebWorker_worker.default()
+    };
     UIKeyValueStringSorter._instanceNumber = -1;
     UIKeyValueStringSorter.dataType = {
       "string": "string"
@@ -6493,23 +6529,24 @@ var require_UIKeyValueStringSorter = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIDialogView.js
 var require_UIDialogView = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIDialogView.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIDialogView_exports = {};
     __export2(UIDialogView_exports, {
       UIDialogView: () => UIDialogView3
@@ -6563,7 +6600,7 @@ var require_UIDialogView = __commonJS({
           this.style.opacity = "0";
         }
         this.style.height = "";
-        this._frame = null;
+        this._frame = import_UIObject.nil;
       }
       animateAppearing() {
         this.style.opacity = "1";
@@ -6583,9 +6620,7 @@ var require_UIDialogView = __commonJS({
             this.animationDuration,
             0,
             void 0,
-            function() {
-              this.animateAppearing();
-            }.bind(this),
+            () => this.animateAppearing(),
             import_UIObject.nil
           );
         } else {
@@ -6610,14 +6645,14 @@ var require_UIDialogView = __commonJS({
             this.animationDuration,
             0,
             void 0,
-            function() {
+            (() => {
               this.animateDisappearing();
-            }.bind(this),
-            function() {
+            }).bind(this),
+            () => {
               if (this.isVisible == import_UIObject.NO) {
                 this.removeFromSuperview();
               }
-            }.bind(this)
+            }
           );
         } else {
           this.removeFromSuperview();
@@ -6642,29 +6677,31 @@ var require_UIDialogView = __commonJS({
         super.layoutSubviews();
       }
     };
+    __name(UIDialogView3, "UIDialogView");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIDateTimeInput.js
 var require_UIDateTimeInput = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIDateTimeInput.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIDateTimeInput_exports = {};
     __export2(UIDateTimeInput_exports, {
       UIDateTimeInput: () => UIDateTimeInput
@@ -6672,7 +6709,7 @@ var require_UIDateTimeInput = __commonJS({
     module.exports = __toCommonJS2(UIDateTimeInput_exports);
     var import_UIObject = require_UIObject();
     var import_UIView = require_UIView();
-    var _UIDateTimeInput = class extends import_UIView.UIView {
+    var _UIDateTimeInput = /* @__PURE__ */ __name(class extends import_UIView.UIView {
       constructor(elementID, type = _UIDateTimeInput.type.DateTime) {
         super(elementID, import_UIObject.nil, "input");
         this.viewHTMLElement.setAttribute("type", type);
@@ -6680,14 +6717,14 @@ var require_UIDateTimeInput = __commonJS({
           this.sendControlEventForKey(_UIDateTimeInput.controlEvent.ValueChange, event2);
         };
       }
-      get addControlEventTarget() {
-        return super.addControlEventTarget;
+      get controlEventTargetAccumulator() {
+        return super.controlEventTargetAccumulator;
       }
       get date() {
         const result = new Date(this.viewHTMLElement.value);
         return result;
       }
-    };
+    }, "_UIDateTimeInput");
     var UIDateTimeInput = _UIDateTimeInput;
     UIDateTimeInput.controlEvent = Object.assign({}, import_UIView.UIView.controlEvent, {
       "ValueChange": "ValueChange"
@@ -6708,23 +6745,24 @@ var require_UIDateTimeInput = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIActionIndicator.js
 var require_UIActionIndicator = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIActionIndicator.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIActionIndicator_exports = {};
     __export2(UIActionIndicator_exports, {
       UIActionIndicator: () => UIActionIndicator2
@@ -6775,25 +6813,27 @@ var require_UIActionIndicator = __commonJS({
         this.indicatorView.style.top = "" + ((bounds.height - size) * 0.5 - 11).integerValue + "px";
       }
     };
+    __name(UIActionIndicator2, "UIActionIndicator");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/UIInterfaces.js
 var require_UIInterfaces = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIInterfaces.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __copyProps2 = (to, from, except, desc) => {
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIInterfaces_exports = {};
     module.exports = __toCommonJS2(UIInterfaces_exports);
   }
@@ -6802,46 +6842,47 @@ var require_UIInterfaces = __commonJS({
 // node_modules/uicore-ts/compiledScripts/UIRootViewController.js
 var require_UIRootViewController = __commonJS({
   "node_modules/uicore-ts/compiledScripts/UIRootViewController.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
     var __reflectGet2 = Reflect.get;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
-    var __superGet2 = (cls, obj, key) => __reflectGet2(__getProtoOf2(cls), key, obj);
-    var __async2 = (__this, __arguments, generator) => {
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
+    var __superGet2 = /* @__PURE__ */ __name((cls, obj, key) => __reflectGet2(__getProtoOf2(cls), key, obj), "__superGet");
+    var __async2 = /* @__PURE__ */ __name((__this, __arguments, generator) => {
       return new Promise((resolve, reject) => {
-        var fulfilled = (value) => {
+        var fulfilled = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.next(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var rejected = (value) => {
+        }, "fulfilled");
+        var rejected = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.throw(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+        }, "rejected");
+        var step = /* @__PURE__ */ __name((x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected), "step");
         step((generator = generator.apply(__this, __arguments)).next());
       });
-    };
+    }, "__async");
     var UIRootViewController_exports = {};
     __export2(UIRootViewController_exports, {
       UIRootViewController: () => UIRootViewController2
@@ -6872,7 +6913,7 @@ var require_UIRootViewController = __commonJS({
         };
         this._detailsDialogView = new import_UIDialogView.UIDialogView(this.view.elementID + "DetailsDialogView").configuredWithObject({
           dismiss: (0, import_UIObject.EXTEND)(
-            (animated) => {
+            () => {
               const route = import_UIRoute.UIRoute.currentRoute;
               this.detailsViewControllers.allValues.forEach(
                 (value) => route.routeByRemovingComponentNamed(value.class.routeComponentName)
@@ -6881,6 +6922,7 @@ var require_UIRootViewController = __commonJS({
             }
           )
         });
+        this._detailsViewController = import_UIObject.nil;
         this.detailsViewControllers = {};
         this.view.addSubview(this.backgroundView);
       }
@@ -6905,7 +6947,7 @@ var require_UIRootViewController = __commonJS({
       }
       handleRoute(route) {
         return __async2(this, null, function* () {
-          __superGet2(UIRootViewController2.prototype, this, "handleRoute").call(this, route);
+          yield __superGet2(UIRootViewController2.prototype, this, "handleRoute").call(this, route);
           import_UICore.UICore.languageService.updateCurrentLanguageKey();
           yield this.setContentViewControllerForRoute(route);
           yield this.setDetailsViewControllerForRoute(route);
@@ -6965,7 +7007,7 @@ var require_UIRootViewController = __commonJS({
         if (this.detailsViewController == controller) {
           return;
         }
-        if (this.detailsViewController) {
+        if ((0, import_UIObject.IS)(this.detailsViewController)) {
           this.removeChildViewController(this.detailsViewController);
         }
         this._detailsViewController = controller;
@@ -6977,75 +7019,82 @@ var require_UIRootViewController = __commonJS({
         this.detailsViewController.view.style.borderRadius = "5px";
         this._detailsDialogView.showInView(this.view, import_UIObject.YES);
       }
-      updatePageScale() {
+      updatePageScale({
+        minScaleWidth = 700,
+        maxScaleWidth = 1500,
+        minScale = 0.7,
+        maxScale = 1
+      } = {}) {
         const actualPageWidth = (import_UIView.UIView.pageWidth * import_UIView.UIView.pageScale).integerValue;
-        const minScaleWidth = 700;
-        const maxScaleWidth = 1500;
-        const minScale = 0.7;
-        const maxScale = 1;
         let scale = minScale + (maxScale - minScale) * ((actualPageWidth - minScaleWidth) / (maxScaleWidth - minScaleWidth));
         scale = Math.min(scale, maxScale);
         scale = Math.max(scale, minScale);
         import_UIView.UIView.pageScale = scale;
       }
-      performDefaultLayout(paddingLength = 20, contentViewMaxWidth = 1e3, topBarHeight = 65, bottomBarMinHeight = 100) {
+      performDefaultLayout({
+        paddingLength = 20,
+        contentViewMaxWidth = 1e3,
+        topBarHeight = 65,
+        bottomBarMinHeight = 100
+      } = {}) {
         const bounds = this.view.bounds;
         this.topBarView.frame = new import_UIRectangle.UIRectangle(0, 0, topBarHeight, bounds.width);
         this.backgroundView.style.top = "" + this.topBarView.frame.height.integerValue + "px";
         this.backgroundView.style.width = "100%";
         this.backgroundView.style.height = "fit-content";
         this.backgroundView.style.minHeight = "" + (bounds.height - this.topBarView.frame.height - this.bottomBarView.frame.height).integerValue + "px";
-        this.contentViewController.view.style.position = "relative";
-        this.contentViewController.view.style.bottom = "0";
-        this.contentViewController.view.style.top = "0";
-        this.contentViewController.view.style.width = "100%";
-        this.contentViewController.view.setPaddings(import_UIObject.nil, import_UIObject.nil, paddingLength, import_UIObject.nil);
-        this.contentViewController.view.setNeedsLayout();
+        const contentView = this.contentViewController.view;
+        contentView.style.position = "relative";
+        contentView.style.bottom = "0";
+        contentView.style.top = "0";
+        contentView.style.width = "100%";
+        contentView.setPaddings(import_UIObject.nil, import_UIObject.nil, paddingLength, import_UIObject.nil);
+        contentView.setNeedsLayout();
         if (contentViewMaxWidth < this.backgroundView.bounds.width) {
-          this.contentViewController.view.style.marginBottom = "" + Math.min(
+          contentView.style.marginBottom = "" + Math.min(
             (this.backgroundView.bounds.width - contentViewMaxWidth) * 0.5,
             paddingLength
           ).integerValue + "px";
-          this.contentViewController.view.style.marginTop = "" + Math.min(
+          contentView.style.marginTop = "" + Math.min(
             (this.backgroundView.bounds.width - contentViewMaxWidth) * 0.5,
             paddingLength
           ).integerValue + "px";
-          this.contentViewController.view.style.maxWidth = contentViewMaxWidth + "px";
-          this.contentViewController.view.style.left = "" + ((this.backgroundView.bounds.width - this.contentViewController.view.bounds.width) * 0.5).integerValue + "px";
+          contentView.style.maxWidth = contentViewMaxWidth + "px";
+          contentView.style.left = "" + ((this.backgroundView.bounds.width - contentView.bounds.width) * 0.5).integerValue + "px";
         } else {
-          this.contentViewController.view.style.margin = "";
-          this.contentViewController.view.style.left = "";
-          this.contentViewController.view.style.maxWidth = "";
+          contentView.style.margin = "";
+          contentView.style.left = "";
+          contentView.style.maxWidth = "";
         }
         this.contentViewController._triggerLayoutViewSubviews();
-        let contentViewControllerViewHeight = this.contentViewController.view.intrinsicContentHeight(
-          this.contentViewController.view.bounds.width
+        let contentViewControllerViewHeight = contentView.intrinsicContentHeight(
+          contentView.bounds.width
         );
         const detailsViewControllerViewHeight = (0, import_UIObject.FIRST_OR_NIL)(this.detailsViewController).view.intrinsicContentHeight(
-          this.contentViewController.view.bounds.width
+          contentView.bounds.width
         );
         if (detailsViewControllerViewHeight > contentViewControllerViewHeight) {
           contentViewControllerViewHeight = detailsViewControllerViewHeight;
         }
-        this.contentViewController.view.style.height = "" + contentViewControllerViewHeight.integerValue + "px";
-        this.contentViewController.view.setNeedsLayout();
+        contentView.style.height = "" + contentViewControllerViewHeight.integerValue + "px";
+        contentView.setNeedsLayout();
         if ((0, import_UIObject.IS)(this.detailsViewController)) {
-          this.contentViewController.view.style.transform = "translateX(" + 0 + "px)";
+          contentView.style.transform = "translateX(" + 0 + "px)";
           this.detailsViewController.view.frame = this.backgroundView.frame.rectangleWithInset(
             paddingLength
           ).rectangleWithWidth(
-            this.contentViewController.view.bounds.width,
+            contentView.bounds.width,
             0.5
           ).rectangleWithHeight(
             Math.max(
               this.detailsViewController.view.intrinsicContentHeight(
                 this.detailsViewController.view.bounds.width
               ),
-              this.contentViewController.view.bounds.height
+              contentView.bounds.height
             )
           );
         } else {
-          this.contentViewController.view.style.transform = "translateX(" + 0 + "px)";
+          contentView.style.transform = "translateX(" + 0 + "px)";
         }
         this.bottomBarView.frame = this.backgroundView.frame.rectangleWithY(
           this.backgroundView.frame.max.y
@@ -7055,26 +7104,28 @@ var require_UIRootViewController = __commonJS({
         (0, import_UIObject.wrapInNil)(this._detailsDialogView).setMaxSizes(this.bottomBarView.frame.max.y);
       }
     };
+    __name(UIRootViewController2, "UIRootViewController");
   }
 });
 
 // node_modules/uicore-ts/compiledScripts/index.js
 var require_compiledScripts = __commonJS({
   "node_modules/uicore-ts/compiledScripts/index.js"(exports, module) {
+    "use strict";
     var __defProp2 = Object.defineProperty;
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __copyProps2 = (to, from, except, desc) => {
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __reExport = (target, mod, secondTarget) => (__copyProps2(target, mod, "default"), secondTarget && __copyProps2(secondTarget, mod, "default"));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __reExport = /* @__PURE__ */ __name((target, mod, secondTarget) => (__copyProps2(target, mod, "default"), secondTarget && __copyProps2(secondTarget, mod, "default")), "__reExport");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var scripts_exports = {};
     module.exports = __toCommonJS2(scripts_exports);
     __reExport(scripts_exports, require_UIObject(), module.exports);
@@ -7121,19 +7172,19 @@ var require_UICoreExtensionValueObject2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UICoreExtensionValueObject_exports = {};
     __export2(UICoreExtensionValueObject_exports, {
       UICoreExtensionValueObject: () => UICoreExtensionValueObject
@@ -7145,6 +7196,7 @@ var require_UICoreExtensionValueObject2 = __commonJS({
         this.value = value;
       }
     };
+    __name(UICoreExtensionValueObject, "UICoreExtensionValueObject");
   }
 });
 
@@ -7155,26 +7207,26 @@ var require_UITimer2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITimer_exports = {};
     __export2(UITimer_exports, {
       UITimer: () => UITimer
     });
     module.exports = __toCommonJS2(UITimer_exports);
     var YES9 = true;
-    var NO9 = false;
+    var NO10 = false;
     var UITimer = class {
       constructor(interval, repeats, target) {
         this.interval = interval;
@@ -7185,7 +7237,7 @@ var require_UITimer2 = __commonJS({
       }
       schedule() {
         const callback = function() {
-          if (this.repeats == NO9) {
+          if (this.repeats == NO10) {
             this.invalidate();
           }
           this.target();
@@ -7197,7 +7249,7 @@ var require_UITimer2 = __commonJS({
         this.schedule();
       }
       fire() {
-        if (this.repeats == NO9) {
+        if (this.repeats == NO10) {
           this.invalidate();
         } else {
           this.reschedule();
@@ -7207,10 +7259,11 @@ var require_UITimer2 = __commonJS({
       invalidate() {
         if (this.isValid) {
           clearInterval(this._intervalID);
-          this.isValid = NO9;
+          this.isValid = NO10;
         }
       }
     };
+    __name(UITimer, "UITimer");
   }
 });
 
@@ -7221,38 +7274,38 @@ var require_UIObject2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIObject_exports = {};
     __export2(UIObject_exports, {
-      CALL: () => CALL,
+      CALL: () => CALL2,
       EXTEND: () => EXTEND,
       FIRST: () => FIRST3,
       FIRST_OR_NIL: () => FIRST_OR_NIL2,
       IF: () => IF3,
-      IS: () => IS10,
+      IS: () => IS11,
       IS_AN_EMAIL_ADDRESS: () => IS_AN_EMAIL_ADDRESS,
       IS_DEFINED: () => IS_DEFINED3,
       IS_LIKE_NULL: () => IS_LIKE_NULL,
       IS_NIL: () => IS_NIL,
-      IS_NOT: () => IS_NOT7,
+      IS_NOT: () => IS_NOT8,
       IS_NOT_LIKE_NULL: () => IS_NOT_LIKE_NULL,
       IS_NOT_NIL: () => IS_NOT_NIL2,
       IS_UNDEFINED: () => IS_UNDEFINED2,
       LAZY_VALUE: () => LAZY_VALUE,
       MAKE_ID: () => MAKE_ID4,
-      NO: () => NO9,
+      NO: () => NO10,
       NilFunction: () => NilFunction,
       RETURNER: () => RETURNER2,
       UIFunctionCall: () => UIFunctionCall,
@@ -7260,16 +7313,17 @@ var require_UIObject2 = __commonJS({
       UILazyPropertyValue: () => UILazyPropertyValue,
       UIObject: () => UIObject2,
       YES: () => YES9,
-      nil: () => nil12,
+      nil: () => nil13,
       wrapInNil: () => wrapInNil
     });
     module.exports = __toCommonJS2(UIObject_exports);
     var import_UICoreExtensionValueObject = require_UICoreExtensionValueObject2();
     var import_UITimer = require_UITimer2();
     function NilFunction() {
-      return nil12;
+      return nil13;
     }
-    var nil12 = new Proxy(Object.assign(NilFunction, { "class": nil12, "className": "Nil" }), {
+    __name(NilFunction, "NilFunction");
+    var nil13 = new Proxy(Object.assign(NilFunction, { "class": nil13, "className": "Nil" }), {
       get(target, name) {
         if (name == Symbol.toPrimitive) {
           return function(hint) {
@@ -7283,9 +7337,9 @@ var require_UIObject2 = __commonJS({
           };
         }
         if (name == "toString") {
-          return function toString() {
+          return /* @__PURE__ */ __name(function toString() {
             return "";
-          };
+          }, "toString");
         }
         return NilFunction();
       },
@@ -7308,10 +7362,10 @@ var require_UIObject2 = __commonJS({
             if (IS_NOT_LIKE_NULL(value)) {
               return value;
             }
-            return nil12;
+            return nil13;
           },
           set(target, name, value) {
-            if (IS10(target)) {
+            if (IS11(target)) {
               target[name] = value;
             }
             return YES9;
@@ -7320,57 +7374,69 @@ var require_UIObject2 = __commonJS({
       }
       return result;
     }
+    __name(wrapInNil, "wrapInNil");
     var YES9 = true;
-    var NO9 = false;
-    function IS10(object) {
-      if (object && object !== nil12) {
+    var NO10 = false;
+    function IS11(object) {
+      if (object && object !== nil13) {
         return YES9;
       }
-      return NO9;
+      return NO10;
     }
-    function IS_NOT7(object) {
-      return !IS10(object);
+    __name(IS11, "IS");
+    function IS_NOT8(object) {
+      return !IS11(object);
     }
+    __name(IS_NOT8, "IS_NOT");
     function IS_DEFINED3(object) {
       if (object != void 0) {
         return YES9;
       }
-      return NO9;
+      return NO10;
     }
+    __name(IS_DEFINED3, "IS_DEFINED");
     function IS_UNDEFINED2(object) {
       return !IS_DEFINED3(object);
     }
+    __name(IS_UNDEFINED2, "IS_UNDEFINED");
     function IS_NIL(object) {
-      if (object === nil12) {
+      if (object === nil13) {
         return YES9;
       }
-      return NO9;
+      return NO10;
     }
+    __name(IS_NIL, "IS_NIL");
     function IS_NOT_NIL2(object) {
       return !IS_NIL(object);
     }
+    __name(IS_NOT_NIL2, "IS_NOT_NIL");
     function IS_LIKE_NULL(object) {
       return IS_UNDEFINED2(object) || IS_NIL(object) || object == null;
     }
+    __name(IS_LIKE_NULL, "IS_LIKE_NULL");
     function IS_NOT_LIKE_NULL(object) {
       return !IS_LIKE_NULL(object);
     }
+    __name(IS_NOT_LIKE_NULL, "IS_NOT_LIKE_NULL");
     function IS_AN_EMAIL_ADDRESS(email) {
       const re = /\S+@\S+\.\S+/;
       return re.test(email);
     }
+    __name(IS_AN_EMAIL_ADDRESS, "IS_AN_EMAIL_ADDRESS");
     function FIRST_OR_NIL2(...objects) {
       const result = objects.find(function(object, index, array) {
-        return IS10(object);
+        return IS11(object);
       });
-      return result || nil12;
+      return result || nil13;
     }
+    __name(FIRST_OR_NIL2, "FIRST_OR_NIL");
     function FIRST3(...objects) {
       const result = objects.find(function(object, index, array) {
-        return IS10(object);
+        return IS11(object);
       });
       return result || IF3(IS_DEFINED3(objects.lastElement))(RETURNER2(objects.lastElement))();
     }
+    __name(FIRST3, "FIRST");
     function MAKE_ID4(randomPartLength = 15) {
       let result = "";
       const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -7380,18 +7446,20 @@ var require_UIObject2 = __commonJS({
       result = result + Date.now();
       return result;
     }
+    __name(MAKE_ID4, "MAKE_ID");
     function RETURNER2(value) {
       return (...objects) => value;
     }
+    __name(RETURNER2, "RETURNER");
     function IF3(value) {
-      let thenFunction = nil12;
-      let elseFunction = nil12;
-      const result = function(functionToCall) {
+      let thenFunction = nil13;
+      let elseFunction = nil13;
+      const result = /* @__PURE__ */ __name(function(functionToCall) {
         thenFunction = functionToCall;
         return result.evaluateConditions;
-      };
+      }, "result");
       result.evaluateConditions = function() {
-        if (IS10(value)) {
+        if (IS11(value)) {
           return thenFunction();
         }
         return elseFunction();
@@ -7399,9 +7467,9 @@ var require_UIObject2 = __commonJS({
       result.evaluateConditions.ELSE_IF = function(otherValue) {
         const functionResult = IF3(otherValue);
         elseFunction = functionResult.evaluateConditions;
-        const functionResultEvaluateConditionsFunction = function() {
+        const functionResultEvaluateConditionsFunction = /* @__PURE__ */ __name(function() {
           return result.evaluateConditions();
-        };
+        }, "functionResultEvaluateConditionsFunction");
         functionResultEvaluateConditionsFunction.ELSE_IF = functionResult.evaluateConditions.ELSE_IF;
         functionResultEvaluateConditionsFunction.ELSE = functionResult.evaluateConditions.ELSE;
         functionResult.evaluateConditions = functionResultEvaluateConditionsFunction;
@@ -7413,6 +7481,7 @@ var require_UIObject2 = __commonJS({
       };
       return result;
     }
+    __name(IF3, "IF");
     var UIFunctionCall = class {
       constructor(...parameters) {
         this.isAUIFunctionCallObject = YES9;
@@ -7423,10 +7492,12 @@ var require_UIObject2 = __commonJS({
         functionToCall(...parameters);
       }
     };
-    function CALL(...objects) {
+    __name(UIFunctionCall, "UIFunctionCall");
+    function CALL2(...objects) {
       const result = new UIFunctionCall(...objects);
       return result;
     }
+    __name(CALL2, "CALL");
     var UIFunctionExtender = class {
       constructor(extendingFunction) {
         this.isAUIFunctionExtenderObject = YES9;
@@ -7440,30 +7511,33 @@ var require_UIObject2 = __commonJS({
           const boundExtendingFunction = extendingFunction.bind(this);
           boundExtendingFunction(...objects);
         }
+        __name(extendedFunction, "extendedFunction");
         return extendedFunction;
       }
     };
+    __name(UIFunctionExtender, "UIFunctionExtender");
     function EXTEND(extendingFunction) {
       const result = new UIFunctionExtender(extendingFunction);
       return result;
     }
+    __name(EXTEND, "EXTEND");
     var UILazyPropertyValue = class {
       constructor(initFunction) {
         this.isAUILazyPropertyValueObject = YES9;
         this.initFunction = initFunction;
       }
       setLazyPropertyValue(key, target) {
-        let isValueInitialized = NO9;
-        let _value = nil12;
-        const initValue = () => {
+        let isValueInitialized = NO10;
+        let _value = nil13;
+        const initValue = /* @__PURE__ */ __name(() => {
           _value = this.initFunction();
           isValueInitialized = YES9;
-          this.initFunction = nil12;
-        };
+          this.initFunction = nil13;
+        }, "initValue");
         if (delete target[key]) {
           Object.defineProperty(target, key, {
             get: function() {
-              if (IS_NOT7(isValueInitialized)) {
+              if (IS_NOT8(isValueInitialized)) {
                 initValue();
               }
               return _value;
@@ -7477,10 +7551,12 @@ var require_UIObject2 = __commonJS({
         }
       }
     };
+    __name(UILazyPropertyValue, "UILazyPropertyValue");
     function LAZY_VALUE(initFunction) {
       const result = new UILazyPropertyValue(initFunction);
       return result;
     }
+    __name(LAZY_VALUE, "LAZY_VALUE");
     var UIObject2 = class {
       constructor() {
       }
@@ -7491,8 +7567,8 @@ var require_UIObject2 = __commonJS({
         return Object.getPrototypeOf(Object.getPrototypeOf(this)).constructor;
       }
       static wrapObject(object) {
-        if (IS_NOT7(object)) {
-          return nil12;
+        if (IS_NOT8(object)) {
+          return nil13;
         }
         if (object instanceof UIObject2) {
           return object;
@@ -7503,12 +7579,12 @@ var require_UIObject2 = __commonJS({
         if (this.isMemberOfClass(classObject)) {
           return YES9;
         }
-        for (let superclassObject = this.superclass; IS10(superclassObject); superclassObject = superclassObject.superclass) {
+        for (let superclassObject = this.superclass; IS11(superclassObject); superclassObject = superclassObject.superclass) {
           if (superclassObject == classObject) {
             return YES9;
           }
         }
-        return NO9;
+        return NO10;
       }
       isMemberOfClass(classObject) {
         return this.class == classObject;
@@ -7520,7 +7596,7 @@ var require_UIObject2 = __commonJS({
         return UIObject2.valueForKeyPath(keyPath, this);
       }
       static valueForKeyPath(keyPath, object) {
-        if (IS_NOT7(keyPath)) {
+        if (IS_NOT8(keyPath)) {
           return object;
         }
         const keys = keyPath.split(".");
@@ -7537,8 +7613,8 @@ var require_UIObject2 = __commonJS({
             break;
           }
           currentObject = currentObject[key];
-          if (IS_NOT7(currentObject)) {
-            currentObject = nil12;
+          if (IS_NOT8(currentObject)) {
+            currentObject = nil13;
           }
         }
         return currentObject;
@@ -7548,13 +7624,13 @@ var require_UIObject2 = __commonJS({
       }
       static setValueForKeyPath(keyPath, value, currentObject, createPath) {
         const keys = keyPath.split(".");
-        let didSetValue = NO9;
+        let didSetValue = NO10;
         keys.forEach(function(key, index, array) {
           if (index == array.length - 1 && IS_NOT_LIKE_NULL(currentObject)) {
             currentObject[key] = value;
             didSetValue = YES9;
             return;
-          } else if (IS_NOT7(currentObject)) {
+          } else if (IS_NOT8(currentObject)) {
             return;
           }
           const currentObjectValue = currentObject[key];
@@ -7572,12 +7648,13 @@ var require_UIObject2 = __commonJS({
         return UIObject2.configureWithObject(this, object);
       }
       static configureWithObject(configurationTarget, object) {
-        const isAnObject = (item) => item && typeof item === "object" && !Array.isArray(item) && !(item instanceof import_UICoreExtensionValueObject.UICoreExtensionValueObject);
+        const isAnObject = /* @__PURE__ */ __name((item) => item && typeof item === "object" && !Array.isArray(item) && !(item instanceof import_UICoreExtensionValueObject.UICoreExtensionValueObject), "isAnObject");
         function isAClass(funcOrClass) {
-          const isFunction = (functionToCheck) => functionToCheck && {}.toString.call(functionToCheck) === "[object Function]";
+          const isFunction = /* @__PURE__ */ __name((functionToCheck) => functionToCheck && {}.toString.call(functionToCheck) === "[object Function]", "isFunction");
           const propertyNames = Object.getOwnPropertyNames(funcOrClass);
           return isFunction(funcOrClass) && !propertyNames.includes("arguments") && propertyNames.includes("prototype");
         }
+        __name(isAClass, "isAClass");
         let keyPathsAndValues = [];
         function prepareKeyPathsAndValues(target, source, keyPath = "") {
           if ((isAnObject(target) || isAClass(target)) && isAnObject(source)) {
@@ -7589,6 +7666,7 @@ var require_UIObject2 = __commonJS({
                   keyPath: valueKeyPath.replace(".", "")
                 });
               }
+              __name(addValueAndKeyPath, "addValueAndKeyPath");
               if (isAnObject(sourceValue) || isAClass(sourceValue)) {
                 if (!(key in target) || target[key] instanceof Function) {
                   addValueAndKeyPath(sourceValue);
@@ -7603,6 +7681,7 @@ var require_UIObject2 = __commonJS({
             });
           }
         }
+        __name(prepareKeyPathsAndValues, "prepareKeyPathsAndValues");
         prepareKeyPathsAndValues(configurationTarget, object);
         keyPathsAndValues = keyPathsAndValues.sort((a, b) => {
           const firstKeyPath = a.keyPath.split(".").length;
@@ -7618,7 +7697,7 @@ var require_UIObject2 = __commonJS({
         keyPathsAndValues.forEach((valueAndKeyPath) => {
           const keyPath = valueAndKeyPath.keyPath;
           let value = valueAndKeyPath.value;
-          const getTargetFunction = (bindThis = NO9) => {
+          const getTargetFunction = /* @__PURE__ */ __name((bindThis = NO10) => {
             let result = UIObject2.valueForKeyPath(keyPath, configurationTarget);
             if (bindThis) {
               const indexOfDot = keyPath.lastIndexOf(".");
@@ -7626,7 +7705,7 @@ var require_UIObject2 = __commonJS({
               result = result.bind(thisObject);
             }
             return result;
-          };
+          }, "getTargetFunction");
           if (value instanceof UILazyPropertyValue) {
             const indexOfDot = keyPath.lastIndexOf(".");
             const thisObject = UIObject2.valueForKeyPath(keyPath.substring(0, indexOfDot), configurationTarget);
@@ -7653,9 +7732,10 @@ var require_UIObject2 = __commonJS({
         return this;
       }
       performFunctionWithDelay(delay, functionToCall) {
-        new import_UITimer.UITimer(delay, NO9, functionToCall);
+        new import_UITimer.UITimer(delay, NO10, functionToCall);
       }
     };
+    __name(UIObject2, "UIObject");
   }
 });
 
@@ -7666,19 +7746,19 @@ var require_ClientCheckers2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var ClientCheckers_exports = {};
     __export2(ClientCheckers_exports, {
       IS_FIREFOX: () => IS_FIREFOX,
@@ -7697,19 +7777,19 @@ var require_UIColor2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIColor_exports = {};
     __export2(UIColor_exports, {
       UIColor: () => UIColor16
@@ -7986,6 +8066,7 @@ var require_UIColor2 = __commonJS({
         return result;
       }
     };
+    __name(UIColor16, "UIColor");
   }
 });
 
@@ -7996,39 +8077,39 @@ var require_UICoreExtensions2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
-    var __async2 = (__this, __arguments, generator) => {
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
+    var __async2 = /* @__PURE__ */ __name((__this, __arguments, generator) => {
       return new Promise((resolve, reject) => {
-        var fulfilled = (value) => {
+        var fulfilled = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.next(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var rejected = (value) => {
+        }, "fulfilled");
+        var rejected = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.throw(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+        }, "rejected");
+        var step = /* @__PURE__ */ __name((x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected), "step");
         step((generator = generator.apply(__this, __arguments)).next());
       });
-    };
+    }, "__async");
     var UICoreExtensions_exports = {};
     __export2(UICoreExtensions_exports, {
       PrimitiveNumber: () => PrimitiveNumber,
@@ -8038,39 +8119,39 @@ var require_UICoreExtensions2 = __commonJS({
     var import_UICoreExtensionValueObject = require_UICoreExtensionValueObject2();
     var import_UIObject = require_UIObject2();
     var YES9 = true;
-    var NO9 = false;
-    if ("removeElementAtIndex" in Array.prototype == NO9) {
+    var NO10 = false;
+    if ("removeElementAtIndex" in Array.prototype == NO10) {
       Array.prototype.removeElementAtIndex = function(index) {
         if (index >= 0 && index < this.length) {
           this.splice(index, 1);
         }
       };
     }
-    if ("removeElement" in Array.prototype == NO9) {
+    if ("removeElement" in Array.prototype == NO10) {
       Array.prototype.removeElement = function(element) {
         this.removeElementAtIndex(this.indexOf(element));
       };
     }
-    if ("insertElementAtIndex" in Array.prototype == NO9) {
+    if ("insertElementAtIndex" in Array.prototype == NO10) {
       Array.prototype.insertElementAtIndex = function(index, element) {
         if (index >= 0 && index <= this.length) {
           this.splice(index, 0, element);
         }
       };
     }
-    if ("replaceElementAtIndex" in Array.prototype == NO9) {
+    if ("replaceElementAtIndex" in Array.prototype == NO10) {
       Array.prototype.replaceElementAtIndex = function(index, element) {
         this.removeElementAtIndex(index);
         this.insertElementAtIndex(index, element);
       };
     }
-    if ("contains" in Array.prototype == NO9) {
+    if ("contains" in Array.prototype == NO10) {
       Array.prototype.contains = function(element) {
         const result = this.indexOf(element) != -1;
         return result;
       };
     }
-    if ("containsAny" in Array.prototype == NO9) {
+    if ("containsAny" in Array.prototype == NO10) {
       Array.prototype.containsAny = function(elements) {
         const result = this.anyMatch(function(element, index, array) {
           return elements.contains(element);
@@ -8078,28 +8159,29 @@ var require_UICoreExtensions2 = __commonJS({
         return result;
       };
     }
-    if ("anyMatch" in Array.prototype == NO9) {
+    if ("anyMatch" in Array.prototype == NO10) {
       Array.prototype.anyMatch = function(functionToCall) {
         const result = this.findIndex(functionToCall) > -1;
         return result;
       };
     }
-    if ("noneMatch" in Array.prototype == NO9) {
+    if ("noneMatch" in Array.prototype == NO10) {
       Array.prototype.noneMatch = function(functionToCall) {
         const result = this.findIndex(functionToCall) == -1;
         return result;
       };
     }
-    if ("allMatch" in Array.prototype == NO9) {
+    if ("allMatch" in Array.prototype == NO10) {
       Array.prototype.allMatch = function(functionToCall) {
         function reversedFunction(value, index, array) {
           return !functionToCall(value, index, array);
         }
+        __name(reversedFunction, "reversedFunction");
         const result = this.findIndex(reversedFunction) == -1;
         return result;
       };
     }
-    if ("findAsyncSequential" in Array.prototype == NO9) {
+    if ("findAsyncSequential" in Array.prototype == NO10) {
       Array.prototype.findAsyncSequential = function(functionToCall) {
         function findAsyncSequential(array, predicate) {
           return __async2(this, null, function* () {
@@ -8111,11 +8193,12 @@ var require_UICoreExtensions2 = __commonJS({
             return void 0;
           });
         }
+        __name(findAsyncSequential, "findAsyncSequential");
         const result = findAsyncSequential(this, functionToCall);
         return result;
       };
     }
-    if ("groupedBy" in Array.prototype == NO9) {
+    if ("groupedBy" in Array.prototype == NO10) {
       Array.prototype.groupedBy = function(funcProp) {
         return this.reduce(function(acc, val) {
           (acc[funcProp(val)] = acc[funcProp(val)] || []).push(val);
@@ -8123,12 +8206,12 @@ var require_UICoreExtensions2 = __commonJS({
         }, {});
       };
     }
-    if ("firstElement" in Array.prototype == NO9) {
+    if ("firstElement" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "firstElement", {
-        get: function firstElement() {
+        get: /* @__PURE__ */ __name(function firstElement() {
           const result = this[0];
           return result;
-        },
+        }, "firstElement"),
         set: function(element) {
           if (this.length == 0) {
             this.push(element);
@@ -8138,12 +8221,12 @@ var require_UICoreExtensions2 = __commonJS({
         }
       });
     }
-    if ("lastElement" in Array.prototype == NO9) {
+    if ("lastElement" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "lastElement", {
-        get: function lastElement() {
+        get: /* @__PURE__ */ __name(function lastElement() {
           const result = this[this.length - 1];
           return result;
-        },
+        }, "lastElement"),
         set: function(element) {
           if (this.length == 0) {
             this.push(element);
@@ -8153,24 +8236,19 @@ var require_UICoreExtensions2 = __commonJS({
         }
       });
     }
-    if ("everyElement" in Array.prototype == NO9) {
+    if ("everyElement" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "everyElement", {
-        get: function everyElement() {
-          const valueKeys = [];
-          const targetFunction = (objects) => {
-            const result2 = this.map((element, index, array) => {
-              const thisObject = import_UIObject.UIObject.valueForKeyPath(
-                valueKeys.arrayByTrimmingToLengthIfLonger(valueKeys.length - 1).join("."),
-                element
-              ) || element;
-              const elementFunction = import_UIObject.UIObject.valueForKeyPath(valueKeys.join("."), element).bind(
-                thisObject,
+        get: /* @__PURE__ */ __name(function everyElement() {
+          var valueKeys = [];
+          const targetFunction = /* @__PURE__ */ __name((objects) => {
+            return this.map((element, index, array) => {
+              var elementFunction = import_UIObject.UIObject.valueForKeyPath(valueKeys.join("."), element).bind(
+                element,
                 objects
               );
               return elementFunction();
             });
-            return result2;
-          };
+          }, "targetFunction");
           const result = new Proxy(
             targetFunction,
             {
@@ -8194,7 +8272,7 @@ var require_UICoreExtensions2 = __commonJS({
             }
           );
           return result;
-        },
+        }, "everyElement"),
         set: function(element) {
           for (var i = 0; i < this.length; ++i) {
             this[i] = element;
@@ -8202,13 +8280,13 @@ var require_UICoreExtensions2 = __commonJS({
         }
       });
     }
-    if ("copy" in Array.prototype == NO9) {
+    if ("copy" in Array.prototype == NO10) {
       Array.prototype.copy = function() {
         const result = this.slice(0);
         return result;
       };
     }
-    if ("arrayByRepeating" in Array.prototype == NO9) {
+    if ("arrayByRepeating" in Array.prototype == NO10) {
       Array.prototype.arrayByRepeating = function(numberOfRepetitions) {
         const result = [];
         for (var i = 0; i < numberOfRepetitions; i++) {
@@ -8219,7 +8297,7 @@ var require_UICoreExtensions2 = __commonJS({
         return result;
       };
     }
-    if ("arrayByTrimmingToLengthIfLonger" in Array.prototype == NO9) {
+    if ("arrayByTrimmingToLengthIfLonger" in Array.prototype == NO10) {
       Array.prototype.arrayByTrimmingToLengthIfLonger = function(maxLength) {
         const result = [];
         for (var i = 0; i < maxLength && i < this.length; i++) {
@@ -8228,14 +8306,14 @@ var require_UICoreExtensions2 = __commonJS({
         return result;
       };
     }
-    if ("summedValue" in Array.prototype == NO9) {
+    if ("summedValue" in Array.prototype == NO10) {
       Object.defineProperty(Array.prototype, "summedValue", {
-        get: function summedValue() {
+        get: /* @__PURE__ */ __name(function summedValue() {
           const result = this.reduce(function(a, b) {
             return a + b;
           }, 0);
           return result;
-        }
+        }, "summedValue")
       });
     }
     Array.prototype.max = function() {
@@ -8244,35 +8322,35 @@ var require_UICoreExtensions2 = __commonJS({
     Array.prototype.min = function() {
       return Math.min.apply(null, this);
     };
-    if ("isEqualToArray" in Array.prototype == NO9) {
-      Array.prototype.isEqualToArray = function(array, keyPath) {
-        if (!array) {
-          return false;
-        }
-        if (this.length != array.length) {
-          return false;
-        }
-        var i = 0;
-        const l = this.length;
-        for (; i < l; i++) {
-          if (this[i] instanceof Array && array[i] instanceof Array && !keyPath) {
-            if (!this[i].isEqualToArray(array[i])) {
-              return false;
-            }
-          } else if (keyPath && import_UIObject.UIObject.valueForKeyPath(keyPath, this[i]) != import_UIObject.UIObject.valueForKeyPath(
-            keyPath,
-            array[i]
-          )) {
-            return false;
-          } else if (this[i] != array[i]) {
+    if ("isEqualToArray" in Array.prototype == YES9) {
+      console.warn(
+        "Overriding existing Array.prototype.isEqualToArray. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code."
+      );
+    }
+    Array.prototype.isEqualToArray = function(array, keyPath) {
+      if (!array) {
+        return false;
+      }
+      if (this.length != array.length) {
+        return false;
+      }
+      var i = 0;
+      const l = this.length;
+      for (; i < l; i++) {
+        if (this[i] instanceof Array && array[i] instanceof Array && !keyPath) {
+          if (!this[i].isEqualToArray(array[i])) {
             return false;
           }
+        } else if (keyPath && import_UIObject.UIObject.valueForKeyPath(keyPath, this[i]) != import_UIObject.UIObject.valueForKeyPath(keyPath, array[i])) {
+          return false;
+        } else if (this[i] != array[i]) {
+          return false;
         }
-        return true;
-      };
-      Object.defineProperty(Array.prototype, "isEqualToArray", { enumerable: false });
-    }
-    if ("forEach" in Object.prototype == NO9) {
+      }
+      return true;
+    };
+    Object.defineProperty(Array.prototype, "isEqualToArray", { enumerable: false });
+    if ("forEach" in Object.prototype == NO10) {
       Object.prototype.forEach = function(callbackFunction) {
         const keys = Object.keys(this);
         keys.forEach(function(key, index, array) {
@@ -8281,7 +8359,7 @@ var require_UICoreExtensions2 = __commonJS({
       };
       Object.defineProperty(Object.prototype, "forEach", { enumerable: false });
     }
-    if ("allValues" in Object.prototype == NO9) {
+    if ("allValues" in Object.prototype == NO10) {
       Object.defineProperty(Object.prototype, "allValues", {
         get: function() {
           const values = [];
@@ -8292,7 +8370,7 @@ var require_UICoreExtensions2 = __commonJS({
         }
       });
     }
-    if ("allKeys" in Object.prototype == NO9) {
+    if ("allKeys" in Object.prototype == NO10) {
       Object.defineProperty(Object.prototype, "allKeys", {
         get: function() {
           const values = Object.keys(this);
@@ -8300,11 +8378,12 @@ var require_UICoreExtensions2 = __commonJS({
         }
       });
     }
-    if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO9) {
+    if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO10) {
       Object.prototype.objectByCopyingValuesRecursivelyFromObject = function(object) {
         function isAnObject(item) {
           return item && typeof item === "object" && !Array.isArray(item);
         }
+        __name(isAnObject, "isAnObject");
         function mergeRecursively(target, source) {
           const output = Object.assign({}, target);
           if (isAnObject(target) && isAnObject(source)) {
@@ -8318,12 +8397,13 @@ var require_UICoreExtensions2 = __commonJS({
           }
           return output;
         }
+        __name(mergeRecursively, "mergeRecursively");
         const result = mergeRecursively(this, object);
         return result;
       };
       Object.defineProperty(Object.prototype, "objectByCopyingValuesRecursivelyFromObject", { enumerable: false });
     }
-    if ("asValueObject" in Object.prototype == NO9) {
+    if ("asValueObject" in Object.prototype == NO10) {
       Object.prototype.asValueObject = function() {
         const result = new import_UICoreExtensionValueObject.UICoreExtensionValueObject(this);
         return result;
@@ -8341,14 +8421,15 @@ var require_UICoreExtensions2 = __commonJS({
         }, object);
       });
     }
-    if ("contains" in String.prototype == NO9) {
+    __name(promisedProperties, "promisedProperties");
+    if ("contains" in String.prototype == NO10) {
       String.prototype.contains = function(string) {
         const result = this.indexOf(string) != -1;
         return result;
       };
       Object.defineProperty(Object.prototype, "contains", { enumerable: false });
     }
-    if ("capitalizedString" in String.prototype == NO9) {
+    if ("capitalizedString" in String.prototype == NO10) {
       Object.defineProperty(Object.prototype, "capitalizedString", {
         get: function() {
           const result = this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
@@ -8356,21 +8437,21 @@ var require_UICoreExtensions2 = __commonJS({
         }
       });
     }
-    if ("numericalValue" in String.prototype == NO9) {
+    if ("numericalValue" in String.prototype == NO10) {
       Object.defineProperty(String.prototype, "numericalValue", {
-        get: function numericalValue() {
+        get: /* @__PURE__ */ __name(function numericalValue() {
           const result = Number(this);
           return result;
-        }
+        }, "numericalValue")
       });
     }
-    if ("isAString" in String.prototype == NO9) {
+    if ("isAString" in String.prototype == NO10) {
       String.prototype.isAString = YES9;
     }
-    if ("isANumber" in Number.prototype == NO9) {
+    if ("isANumber" in Number.prototype == NO10) {
       Number.prototype.isANumber = YES9;
     }
-    if ("integerValue" in Number.prototype == NO9) {
+    if ("integerValue" in Number.prototype == NO10) {
       Object.defineProperty(Number.prototype, "integerValue", {
         get: function() {
           const result = parseInt("" + (Math.round(this) + 0.5));
@@ -8383,7 +8464,8 @@ var require_UICoreExtensions2 = __commonJS({
         return;
       }
     };
-    if ("integerValue" in Boolean.prototype == NO9) {
+    __name(PrimitiveNumber, "PrimitiveNumber");
+    if ("integerValue" in Boolean.prototype == NO10) {
       Object.defineProperty(Boolean.prototype, "integerValue", {
         get: function() {
           if (this == true) {
@@ -8393,12 +8475,12 @@ var require_UICoreExtensions2 = __commonJS({
         }
       });
     }
-    if ("dateString" in Date.prototype == NO9) {
+    if ("dateString" in Date.prototype == NO10) {
       Object.defineProperty(Date.prototype, "dateString", {
-        get: function dateString() {
+        get: /* @__PURE__ */ __name(function dateString() {
           const result = ("0" + this.getDate()).slice(-2) + "-" + ("0" + (this.getMonth() + 1)).slice(-2) + "-" + this.getFullYear() + " " + ("0" + this.getHours()).slice(-2) + ":" + ("0" + this.getMinutes()).slice(-2);
           return result;
-        }
+        }, "dateString")
       });
     }
   }
@@ -8411,26 +8493,26 @@ var require_UIRoute2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIRoute_exports = {};
     __export2(UIRoute_exports, {
-      UIRoute: () => UIRoute7
+      UIRoute: () => UIRoute8
     });
     module.exports = __toCommonJS2(UIRoute_exports);
     var import_UIObject = require_UIObject2();
-    var UIRoute7 = class extends Array {
+    var UIRoute8 = class extends Array {
       constructor(hash) {
         super();
         if (!hash || !hash.startsWith) {
@@ -8464,7 +8546,7 @@ var require_UIRoute2 = __commonJS({
         }, this);
       }
       static get currentRoute() {
-        return new UIRoute7(window.location.hash);
+        return new UIRoute8(window.location.hash);
       }
       apply() {
         window.location.hash = this.stringRepresentation;
@@ -8473,7 +8555,7 @@ var require_UIRoute2 = __commonJS({
         window.location.replace(this.linkRepresentation);
       }
       copy() {
-        var result = new UIRoute7();
+        var result = new UIRoute8();
         result = Object.assign(result, this);
         return result;
       }
@@ -8584,6 +8666,7 @@ var require_UIRoute2 = __commonJS({
         return result;
       }
     };
+    __name(UIRoute8, "UIRoute");
   }
 });
 
@@ -8594,47 +8677,47 @@ var require_UIViewController2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
-    var __async2 = (__this, __arguments, generator) => {
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
+    var __async2 = /* @__PURE__ */ __name((__this, __arguments, generator) => {
       return new Promise((resolve, reject) => {
-        var fulfilled = (value) => {
+        var fulfilled = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.next(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var rejected = (value) => {
+        }, "fulfilled");
+        var rejected = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.throw(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+        }, "rejected");
+        var step = /* @__PURE__ */ __name((x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected), "step");
         step((generator = generator.apply(__this, __arguments)).next());
       });
-    };
+    }, "__async");
     var UIViewController_exports = {};
     __export2(UIViewController_exports, {
-      UIViewController: () => UIViewController6
+      UIViewController: () => UIViewController7
     });
     module.exports = __toCommonJS2(UIViewController_exports);
     var import_UIObject = require_UIObject2();
     var import_UIRoute = require_UIRoute2();
-    var UIViewController6 = class extends import_UIObject.UIObject {
+    var UIViewController7 = class extends import_UIObject.UIObject {
       constructor(view) {
         super();
         this.view = view;
@@ -8756,6 +8839,7 @@ var require_UIViewController2 = __commonJS({
         controller.handleRouteRecursively(import_UIRoute.UIRoute.currentRoute);
       }
     };
+    __name(UIViewController7, "UIViewController");
   }
 });
 
@@ -8766,19 +8850,19 @@ var require_UICore2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UICore_exports = {};
     __export2(UICore_exports, {
       UICore: () => UICore5
@@ -8789,7 +8873,7 @@ var require_UICore2 = __commonJS({
     var import_UIRoute = require_UIRoute2();
     var import_UIView = require_UIView2();
     var import_UIViewController = require_UIViewController2();
-    var _UICore = class extends import_UIObject.UIObject {
+    var _UICore = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(rootDivElementID, rootViewControllerClass) {
         super();
         this.rootViewController = import_UIObject.nil;
@@ -8819,7 +8903,7 @@ var require_UICore2 = __commonJS({
             document.activeElement.blur();
           }
         );
-        const windowDidResize = function() {
+        const windowDidResize = /* @__PURE__ */ __name(function() {
           this.rootViewController._triggerLayoutViewSubviews();
           import_UIView.UIView.layoutViewsIfNeeded();
           this.rootViewController._triggerLayoutViewSubviews();
@@ -8827,7 +8911,7 @@ var require_UICore2 = __commonJS({
             name: _UICore.broadcastEventName.WindowDidResize,
             parameters: import_UIObject.nil
           });
-        };
+        }, "windowDidResize");
         window.addEventListener("resize", windowDidResize.bind(this));
         const didScroll = function() {
           this.rootViewController.view.broadcastEventInSubtree({
@@ -8846,7 +8930,7 @@ var require_UICore2 = __commonJS({
         window.addEventListener("hashchange", hashDidChange.bind(this), false);
         hashDidChange();
       }
-    };
+    }, "_UICore");
     var UICore5 = _UICore;
     UICore5.RootViewControllerClass = import_UIObject.nil;
     UICore5.languageService = import_UIObject.nil;
@@ -8886,33 +8970,33 @@ var require_UIPoint2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIPoint_exports = {};
     __export2(UIPoint_exports, {
-      UIPoint: () => UIPoint
+      UIPoint: () => UIPoint2
     });
     module.exports = __toCommonJS2(UIPoint_exports);
     var import_UIObject = require_UIObject2();
-    var UIPoint = class extends import_UIObject.UIObject {
+    var UIPoint2 = class extends import_UIObject.UIObject {
       constructor(x, y) {
         super();
         this.x = x;
         this.y = y;
       }
       copy() {
-        return new UIPoint(this.x, this.y);
+        return new UIPoint2(this.x, this.y);
       }
       isEqualTo(point) {
         const result = this.x == point.x && this.y == point.y;
@@ -8964,6 +9048,7 @@ var require_UIPoint2 = __commonJS({
       didChange(b) {
       }
     };
+    __name(UIPoint2, "UIPoint");
   }
 });
 
@@ -8974,27 +9059,27 @@ var require_UIRectangle2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIRectangle_exports = {};
     __export2(UIRectangle_exports, {
-      UIRectangle: () => UIRectangle4
+      UIRectangle: () => UIRectangle5
     });
     module.exports = __toCommonJS2(UIRectangle_exports);
     var import_UIObject = require_UIObject2();
     var import_UIPoint = require_UIPoint2();
-    var UIRectangle4 = class extends import_UIObject.UIObject {
+    var UIRectangle5 = class extends import_UIObject.UIObject {
       constructor(x = 0, y = 0, height = 0, width = 0) {
         super();
         this.min = new import_UIPoint.UIPoint(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
@@ -9012,7 +9097,7 @@ var require_UIRectangle2 = __commonJS({
         }
       }
       copy() {
-        const result = new UIRectangle4(this.x, this.y, this.height, this.width);
+        const result = new UIRectangle5(this.x, this.y, this.height, this.width);
         return result;
       }
       isEqualTo(rectangle) {
@@ -9020,7 +9105,7 @@ var require_UIRectangle2 = __commonJS({
         return result;
       }
       static zero() {
-        const result = new UIRectangle4(0, 0, 0, 0);
+        const result = new UIRectangle5(0, 0, 0, 0);
         return result;
       }
       containsPoint(point) {
@@ -9377,7 +9462,7 @@ var require_UIRectangle2 = __commonJS({
         return result;
       }
       static boundingBoxForPoints(points) {
-        const result = new UIRectangle4();
+        const result = new UIRectangle5();
         for (var i = 0; i < points.length; i++) {
           result.updateByAddingPoint(points[i]);
         }
@@ -9398,6 +9483,7 @@ var require_UIRectangle2 = __commonJS({
         }
       }
     };
+    __name(UIRectangle5, "UIRectangle");
   }
 });
 
@@ -9408,22 +9494,22 @@ var require_UIView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIView_exports = {};
     __export2(UIView_exports, {
-      UIView: () => UIView14
+      UIView: () => UIView17
     });
     module.exports = __toCommonJS2(UIView_exports);
     var import_ClientCheckers = require_ClientCheckers2();
@@ -9436,7 +9522,7 @@ var require_UIView2 = __commonJS({
     if (!window.AutoLayout) {
       window.AutoLayout = import_UIObject.nil;
     }
-    var _UIView = class extends import_UIObject.UIObject {
+    var _UIView = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(elementID = "UIView" + _UIView.nextIndex, viewHTMLElement = null, elementType = null, initViewData) {
         super();
         this._nativeSelectionEnabled = import_UIObject.YES;
@@ -9978,6 +10064,7 @@ var require_UIView2 = __commonJS({
             view2.animationDidFinish();
           });
         }
+        __name(callTransitioncompletionFunction, "callTransitioncompletionFunction");
         if (import_ClientCheckers.IS_FIREFOX) {
           new import_UIObject.UIObject().performFunctionWithDelay(delay + duration, callTransitioncompletionFunction);
         }
@@ -10025,6 +10112,7 @@ var require_UIView2 = __commonJS({
             view2.style.transitionTimingFunction = transitionTimings[i2];
           }
         }
+        __name(finishTransitionImmediately, "finishTransitionImmediately");
         function transitionDidFinish(event2) {
           var view2 = event2.srcElement;
           if (!view2) {
@@ -10040,6 +10128,7 @@ var require_UIView2 = __commonJS({
           callTransitioncompletionFunction();
           view2.removeEventListener("transitionend", transitionDidFinish, true);
         }
+        __name(transitionDidFinish, "transitionDidFinish");
         function transitionDidFinishManually() {
           for (var i2 = 0; i2 < viewOrViews.length; i2++) {
             var view2 = viewOrViews[i2];
@@ -10053,6 +10142,7 @@ var require_UIView2 = __commonJS({
             view2.removeEventListener("transitionend", transitionDidFinish, true);
           }
         }
+        __name(transitionDidFinishManually, "transitionDidFinishManually");
         return transitionObject;
       }
       animationDidFinish() {
@@ -10120,7 +10210,7 @@ var require_UIView2 = __commonJS({
         if (parentElement.UIView) {
           parentUIView = parentElement.UIView;
         }
-        const updateLayout = function() {
+        const updateLayout = /* @__PURE__ */ __name(function() {
           view.setSize(
             parentElement ? parentElement.clientWidth : window.innerWidth,
             parentElement ? parentElement.clientHeight : window.innerHeight
@@ -10141,7 +10231,7 @@ var require_UIView2 = __commonJS({
             }
           }
           parentUIView.didLayoutSubviews();
-        };
+        }, "updateLayout");
         updateLayout();
         return updateLayout;
       }
@@ -10418,7 +10508,7 @@ var require_UIView2 = __commonJS({
       }
       _loadUIEvents() {
         const isTouchEventClassDefined = import_UIObject.NO || window.TouchEvent;
-        const pauseEvent = (event2, forced = import_UIObject.NO) => {
+        const pauseEvent = /* @__PURE__ */ __name((event2, forced = import_UIObject.NO) => {
           if (this.pausesPointerEvents || forced) {
             if (event2.stopPropagation) {
               event2.stopPropagation();
@@ -10433,8 +10523,8 @@ var require_UIView2 = __commonJS({
           if (event2.stopPropagation && this.stopsPointerEventPropagation) {
             event2.stopPropagation();
           }
-        };
-        const onMouseDown = (event2) => {
+        }, "pauseEvent");
+        const onMouseDown = /* @__PURE__ */ __name((event2) => {
           if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || (this.ignoresMouse || (0, import_UIObject.IS)(this._touchEventTime) && Date.now() - this._touchEventTime > 500) && event2 instanceof MouseEvent) {
             return;
           }
@@ -10454,9 +10544,9 @@ var require_UIView2 = __commonJS({
             pauseEvent(event2);
           }
           this._hasPointerDragged = import_UIObject.NO;
-        };
+        }, "onMouseDown");
         const onTouchStart = onMouseDown;
-        const onmouseup = (event2) => {
+        const onmouseup = /* @__PURE__ */ __name((event2) => {
           if (!this._isPointerValid) {
             return;
           }
@@ -10471,16 +10561,16 @@ var require_UIView2 = __commonJS({
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerUp, event2);
           pauseEvent(event2);
-        };
+        }, "onmouseup");
         const onTouchEnd = onmouseup;
-        const onmouseout = (event2) => {
+        const onmouseout = /* @__PURE__ */ __name((event2) => {
           if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || this.ignoresMouse && event2 instanceof MouseEvent) {
             return;
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerLeave, event2);
           this._isPointerInside = import_UIObject.NO;
           pauseEvent(event2);
-        };
+        }, "onmouseout");
         const onTouchLeave = onmouseout;
         var onTouchCancel = function(event2) {
           if (!this._isPointerValid) {
@@ -10492,7 +10582,7 @@ var require_UIView2 = __commonJS({
           this._isPointerValid = import_UIObject.NO;
           this.sendControlEventForKey(_UIView.controlEvent.PointerCancel, event2);
         }.bind(this);
-        const onmouseover = (event2) => {
+        const onmouseover = /* @__PURE__ */ __name((event2) => {
           if (this.ignoresTouches && isTouchEventClassDefined && event2 instanceof TouchEvent || this.ignoresMouse && event2 instanceof MouseEvent) {
             return;
           }
@@ -10500,8 +10590,8 @@ var require_UIView2 = __commonJS({
           this._isPointerInside = import_UIObject.YES;
           this._isPointerValid = import_UIObject.YES;
           pauseEvent(event2);
-        };
-        const onMouseMove = (event2) => {
+        }, "onmouseover");
+        const onMouseMove = /* @__PURE__ */ __name((event2) => {
           if (!this._isPointerValid) {
             return;
           }
@@ -10516,8 +10606,8 @@ var require_UIView2 = __commonJS({
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerMove, event2);
           pauseEvent(event2);
-        };
-        const onTouchMove = function(event2) {
+        }, "onMouseMove");
+        const onTouchMove = /* @__PURE__ */ __name(function(event2) {
           if (!this._isPointerValid) {
             return;
           }
@@ -10537,26 +10627,28 @@ var require_UIView2 = __commonJS({
             this.sendControlEventForKey(_UIView.controlEvent.PointerLeave, event2);
           }
           this.sendControlEventForKey(_UIView.controlEvent.PointerMove, event2);
-        };
-        var onTouchZoom = function onTouchZoom2(event2) {
+        }, "onTouchMove");
+        var onTouchZoom = (/* @__PURE__ */ __name(function onTouchZoom2(event2) {
           this.sendControlEventForKey(_UIView.controlEvent.MultipleTouches, event2);
-        }.bind(this);
-        var onPointerUpInside = (event2) => {
+        }, "onTouchZoom2")).bind(this);
+        var onPointerUpInside = /* @__PURE__ */ __name((event2) => {
           pauseEvent(event2);
           this.sendControlEventForKey(_UIView.controlEvent.PointerUpInside, event2);
-        };
+        }, "onPointerUpInside");
         function eventKeyIsEnter(event2) {
           if (event2.keyCode !== 13) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsEnter, "eventKeyIsEnter");
         function eventKeyIsTab(event2) {
           if (event2.keyCode !== 9) {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsTab, "eventKeyIsTab");
         function eventKeyIsEsc(event2) {
           var result = false;
           if ("key" in event2) {
@@ -10566,30 +10658,35 @@ var require_UIView2 = __commonJS({
           }
           return result;
         }
+        __name(eventKeyIsEsc, "eventKeyIsEsc");
         function eventKeyIsLeft(event2) {
           if (event2.keyCode != "37") {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsLeft, "eventKeyIsLeft");
         function eventKeyIsRight(event2) {
           if (event2.keyCode != "39") {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsRight, "eventKeyIsRight");
         function eventKeyIsDown(event2) {
           if (event2.keyCode != "40") {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsDown, "eventKeyIsDown");
         function eventKeyIsUp(event2) {
           if (event2.keyCode != "38") {
             return import_UIObject.NO;
           }
           return import_UIObject.YES;
         }
+        __name(eventKeyIsUp, "eventKeyIsUp");
         const onKeyDown = function(event2) {
           if (eventKeyIsEnter(event2)) {
             this.sendControlEventForKey(_UIView.controlEvent.EnterDown, event2);
@@ -10802,13 +10899,13 @@ var require_UIView2 = __commonJS({
       intrinsicContentSize() {
         return import_UIObject.nil;
       }
-    };
-    var UIView14 = _UIView;
-    UIView14._UIViewIndex = -1;
-    UIView14._viewsToLayout = [];
-    UIView14._pageScale = 1;
-    UIView14._transformAttribute = ("transform" in document.documentElement.style ? "transform" : void 0) || ("-webkit-transform" in document.documentElement.style ? "-webkit-transform" : "undefined") || ("-moz-transform" in document.documentElement.style ? "-moz-transform" : "undefined") || ("-ms-transform" in document.documentElement.style ? "-ms-transform" : "undefined") || ("-o-transform" in document.documentElement.style ? "-o-transform" : "undefined");
-    UIView14.constraintAttribute = {
+    }, "_UIView");
+    var UIView17 = _UIView;
+    UIView17._UIViewIndex = -1;
+    UIView17._viewsToLayout = [];
+    UIView17._pageScale = 1;
+    UIView17._transformAttribute = ("transform" in document.documentElement.style ? "transform" : void 0) || ("-webkit-transform" in document.documentElement.style ? "-webkit-transform" : "undefined") || ("-moz-transform" in document.documentElement.style ? "-moz-transform" : "undefined") || ("-ms-transform" in document.documentElement.style ? "-ms-transform" : "undefined") || ("-o-transform" in document.documentElement.style ? "-o-transform" : "undefined");
+    UIView17.constraintAttribute = {
       "left": AutoLayout.Attribute.LEFT,
       "right": AutoLayout.Attribute.RIGHT,
       "bottom": AutoLayout.Attribute.BOTTOM,
@@ -10821,12 +10918,12 @@ var require_UIView2 = __commonJS({
       "constant": AutoLayout.Attribute.NOTANATTRIBUTE,
       "variable": AutoLayout.Attribute.VARIABLE
     };
-    UIView14.constraintRelation = {
+    UIView17.constraintRelation = {
       "equal": AutoLayout.Relation.EQU,
       "lessThanOrEqual": AutoLayout.Relation.LEQ,
       "greaterThanOrEqual": AutoLayout.Relation.GEQ
     };
-    UIView14.controlEvent = {
+    UIView17.controlEvent = {
       "PointerDown": "PointerDown",
       "PointerMove": "PointerMove",
       "PointerLeave": "PointerLeave",
@@ -10848,7 +10945,7 @@ var require_UIView2 = __commonJS({
       "Focus": "Focus",
       "Blur": "Blur"
     };
-    UIView14.broadcastEventName = {
+    UIView17.broadcastEventName = {
       "LanguageChanged": "LanguageChanged",
       "RemovedFromViewTree": "RemovedFromViewTree",
       "AddedToViewTree": "AddedToViewTree",
@@ -10864,29 +10961,29 @@ var require_UITextView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITextView_exports = {};
     __export2(UITextView_exports, {
-      UITextView: () => UITextView12
+      UITextView: () => UITextView13
     });
     module.exports = __toCommonJS2(UITextView_exports);
     var import_UIColor = require_UIColor2();
     var import_UIObject = require_UIObject2();
     var import_UIRectangle = require_UIRectangle2();
     var import_UIView = require_UIView2();
-    var _UITextView = class extends import_UIView.UIView {
+    var _UITextView = /* @__PURE__ */ __name(class extends import_UIView.UIView {
       constructor(elementID, textViewType = _UITextView.type.paragraph, viewHTMLElement = null) {
         super(elementID, viewHTMLElement, textViewType);
         this._textColor = _UITextView.defaultTextColor;
@@ -11078,13 +11175,13 @@ var require_UITextView2 = __commonJS({
         const result = this.intrinsicContentSizeWithConstraints(import_UIObject.nil, import_UIObject.nil);
         return result;
       }
-    };
-    var UITextView12 = _UITextView;
-    UITextView12.defaultTextColor = import_UIColor.UIColor.blackColor;
-    UITextView12.notificationTextColor = import_UIColor.UIColor.redColor;
-    UITextView12._intrinsicHeightCache = new import_UIObject.UIObject();
-    UITextView12._intrinsicWidthCache = new import_UIObject.UIObject();
-    UITextView12.type = {
+    }, "_UITextView");
+    var UITextView13 = _UITextView;
+    UITextView13.defaultTextColor = import_UIColor.UIColor.blackColor;
+    UITextView13.notificationTextColor = import_UIColor.UIColor.redColor;
+    UITextView13._intrinsicHeightCache = new import_UIObject.UIObject();
+    UITextView13._intrinsicWidthCache = new import_UIObject.UIObject();
+    UITextView13.type = {
       "paragraph": "p",
       "header1": "h1",
       "header2": "h2",
@@ -11097,13 +11194,13 @@ var require_UITextView2 = __commonJS({
       "span": "span",
       "label": "label"
     };
-    UITextView12.textAlignment = {
+    UITextView13.textAlignment = {
       "left": "left",
       "center": "center",
       "right": "right",
       "justify": "justify"
     };
-    UITextView12._determinePXAndPTRatios();
+    UITextView13._determinePXAndPTRatios();
   }
 });
 
@@ -11114,22 +11211,22 @@ var require_UITextField2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITextField_exports = {};
     __export2(UITextField_exports, {
-      UITextField: () => UITextField4
+      UITextField: () => UITextField2
     });
     module.exports = __toCommonJS2(UITextField_exports);
     var import_UIColor = require_UIColor2();
@@ -11137,7 +11234,7 @@ var require_UITextField2 = __commonJS({
     var import_UIObject = require_UIObject2();
     var import_UITextView = require_UITextView2();
     var import_UIView = require_UIView2();
-    var _UITextField = class extends import_UITextView.UITextView {
+    var _UITextField = /* @__PURE__ */ __name(class extends import_UITextView.UITextView {
       constructor(elementID, viewHTMLElement = null, type = import_UITextView.UITextView.type.textField) {
         super(elementID, type, viewHTMLElement);
         this.viewHTMLElement.setAttribute("type", "text");
@@ -11203,9 +11300,9 @@ var require_UITextField2 = __commonJS({
         }
         this.viewHTMLElement.type = type;
       }
-    };
-    var UITextField4 = _UITextField;
-    UITextField4.controlEvent = Object.assign({}, import_UIView.UIView.controlEvent, {
+    }, "_UITextField");
+    var UITextField2 = _UITextField;
+    UITextField2.controlEvent = Object.assign({}, import_UIView.UIView.controlEvent, {
       "TextChange": "TextChange"
     });
   }
@@ -11218,19 +11315,19 @@ var require_UITextArea2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITextArea_exports = {};
     __export2(UITextArea_exports, {
       UITextArea: () => UITextArea3
@@ -11254,6 +11351,7 @@ var require_UITextArea2 = __commonJS({
         return super.viewHTMLElement;
       }
     };
+    __name(UITextArea3, "UITextArea");
   }
 });
 
@@ -11264,19 +11362,19 @@ var require_UIBaseButton2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIBaseButton_exports = {};
     __export2(UIBaseButton_exports, {
       UIBaseButton: () => UIBaseButton
@@ -11528,6 +11626,7 @@ var require_UIBaseButton2 = __commonJS({
         return coordinatesInElement;
       }
     };
+    __name(UIBaseButton, "UIBaseButton");
   }
 });
 
@@ -11538,19 +11637,19 @@ var require_UIImageView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIImageView_exports = {};
     __export2(UIImageView_exports, {
       UIImageView: () => UIImageView4
@@ -11560,7 +11659,7 @@ var require_UIImageView2 = __commonJS({
     var import_UIObject = require_UIObject2();
     var import_UIRectangle = require_UIRectangle2();
     var import_UIView = require_UIView2();
-    var _UIImageView = class extends import_UIView.UIView {
+    var _UIImageView = /* @__PURE__ */ __name(class extends import_UIView.UIView {
       constructor(elementID, viewHTMLElement = null) {
         super(elementID, viewHTMLElement, "img");
         this._hiddenWhenEmpty = import_UIObject.NO;
@@ -11688,7 +11787,7 @@ var require_UIImageView2 = __commonJS({
         const result = new import_UIRectangle.UIRectangle(0, 0, this.viewHTMLElement.naturalHeight * multiplier, this.viewHTMLElement.naturalWidth * multiplier);
         return result;
       }
-    };
+    }, "_UIImageView");
     var UIImageView4 = _UIImageView;
     UIImageView4.fillMode = {
       "stretchToFill": "fill",
@@ -11707,22 +11806,22 @@ var require_UIButton2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIButton_exports = {};
     __export2(UIButton_exports, {
-      UIButton: () => UIButton10
+      UIButton: () => UIButton11
     });
     module.exports = __toCommonJS2(UIButton_exports);
     var import_UIBaseButton = require_UIBaseButton2();
@@ -11731,7 +11830,7 @@ var require_UIButton2 = __commonJS({
     var import_UIObject = require_UIObject2();
     var import_UIRectangle = require_UIRectangle2();
     var import_UITextView = require_UITextView2();
-    var UIButton10 = class extends import_UIBaseButton.UIBaseButton {
+    var UIButton11 = class extends import_UIBaseButton.UIBaseButton {
       constructor(elementID, elementType, titleType = import_UITextView.UITextView.type.span) {
         super(elementID, elementType, { "titleType": titleType });
         this.usesAutomaticTitleFontSize = import_UIObject.NO;
@@ -11963,6 +12062,7 @@ var require_UIButton2 = __commonJS({
         this.initStyleSelector("." + this.styleClassName, "background-color: lightblue;");
       }
     };
+    __name(UIButton11, "UIButton");
   }
 });
 
@@ -11973,19 +12073,19 @@ var require_UINativeScrollView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UINativeScrollView_exports = {};
     __export2(UINativeScrollView_exports, {
       UINativeScrollView: () => UINativeScrollView
@@ -12100,6 +12200,7 @@ var require_UINativeScrollView2 = __commonJS({
         return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
       }
     };
+    __name(UINativeScrollView, "UINativeScrollView");
   }
 });
 
@@ -12110,29 +12211,29 @@ var require_UITableView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UITableView_exports = {};
     __export2(UITableView_exports, {
-      UITableView: () => UITableView4
+      UITableView: () => UITableView2
     });
     module.exports = __toCommonJS2(UITableView_exports);
     var import_UIButton = require_UIButton2();
     var import_UINativeScrollView = require_UINativeScrollView2();
     var import_UIObject = require_UIObject2();
     var import_UIView = require_UIView2();
-    var UITableView4 = class extends import_UINativeScrollView.UINativeScrollView {
+    var UITableView2 = class extends import_UINativeScrollView.UINativeScrollView {
       constructor(elementID) {
         super(elementID);
         this.allRowsHaveEqualHeight = import_UIObject.NO;
@@ -12490,6 +12591,7 @@ var require_UITableView2 = __commonJS({
         return result;
       }
     };
+    __name(UITableView2, "UITableView");
   }
 });
 
@@ -12499,11 +12601,12 @@ __export(UIStringFilterWebWorker_worker_exports2, {
   default: () => Worker5
 });
 function Worker5() {
-  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(n){var r=this.indexOf(n)!=-1;return r});"contains"in String.prototype||(String.prototype.contains=function(n){var r=this.indexOf(n)!=-1;return r});onmessage=function(n){var r=h(n.data.filteringString,n.data.data,n.data.excludedData);r.identifier=n.data.identifier,r.instanceIdentifier=n.data.instanceIdentifier,postMessage(r)};function h(n,r,s){var a=[],e=[];if(n){var c=[];n.split(" ").forEach(function(i,t,o){i&&c.push(i.toLowerCase())}),r.forEach(function(i,t,o){var u=i.toLowerCase(),f=[];c.forEach(function(p){f.push(u.contains(p)&&!s.contains(i))}),f.contains(!0)&&!f.contains(!1)&&(a.push(i),e.push(t))})}else s.length?a=r.forEach(function(i,t,o){s.indexOf(i)==-1&&(a.push(i),e.push(t))}):(a=r,r.forEach(function(i,t,o){e.push(t)}));return{filteredData:a,filteredIndexes:e}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlTdHJpbmdGaWx0ZXJXZWJXb3JrZXIud29ya2VyLnRzIl0sCiAgInNvdXJjZXNDb250ZW50IjogWyIvLyBAdHMtY2hlY2tcblxuaWYgKFwiY29udGFpbnNcIiBpbiBBcnJheS5wcm90b3R5cGUgPT0gZmFsc2UpIHtcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgQXJyYXkucHJvdG90eXBlLmNvbnRhaW5zID0gZnVuY3Rpb24gKGVsZW1lbnQpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSAodGhpcy5pbmRleE9mKGVsZW1lbnQpICE9IC0xKVxuICAgICAgICByZXR1cm4gcmVzdWx0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbn1cblxuaWYgKFwiY29udGFpbnNcIiBpbiBTdHJpbmcucHJvdG90eXBlID09IGZhbHNlKSB7XG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIFN0cmluZy5wcm90b3R5cGUuY29udGFpbnMgPSBmdW5jdGlvbiAoc3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgcmVzdWx0ID0gKHRoaXMuaW5kZXhPZihzdHJpbmcpICE9IC0xKVxuICAgICAgICByZXR1cm4gcmVzdWx0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbn1cblxuXG5cblxuXG5vbm1lc3NhZ2UgPSBmdW5jdGlvbiAoZXZlbnQpIHtcbiAgICBcbiAgICAvL2NvbnNvbGUubG9nKCdNZXNzYWdlIHJlY2VpdmVkIGZyb20gbWFpbiBzY3JpcHQnKTtcbiAgICB2YXIgd29ya2VyUmVzdWx0ID0gZmlsdGVyRGF0YShldmVudC5kYXRhLmZpbHRlcmluZ1N0cmluZywgZXZlbnQuZGF0YS5kYXRhLCBldmVudC5kYXRhLmV4Y2x1ZGVkRGF0YSlcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0LmlkZW50aWZpZXIgPSBldmVudC5kYXRhLmlkZW50aWZpZXJcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0Lmluc3RhbmNlSWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaW5zdGFuY2VJZGVudGlmaWVyXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHBvc3RNZXNzYWdlKHdvcmtlclJlc3VsdClcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiBmaWx0ZXJEYXRhKGZpbHRlcmluZ1N0cmluZywgZGF0YSwgZXhjbHVkZWREYXRhKSB7XG4gICAgXG4gICAgdmFyIGZpbHRlcmVkRGF0YSA9IFtdXG4gICAgdmFyIGZpbHRlcmVkSW5kZXhlcyA9IFtdXG4gICAgXG4gICAgaWYgKGZpbHRlcmluZ1N0cmluZykge1xuICAgICAgICBcbiAgICAgICAgdmFyIGZpbHRlcmluZ1N0cmluZ1dvcmRzID0gW11cbiAgICAgICAgZmlsdGVyaW5nU3RyaW5nLnNwbGl0KFwiIFwiKS5mb3JFYWNoKGZ1bmN0aW9uICh3b3JkLCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIGlmICh3b3JkKSB7XG4gICAgICAgICAgICAgICAgZmlsdGVyaW5nU3RyaW5nV29yZHMucHVzaCh3b3JkLnRvTG93ZXJDYXNlKCkpXG4gICAgICAgICAgICB9XG4gICAgICAgIH0pXG4gICAgICAgIFxuICAgICAgICBkYXRhLmZvckVhY2goZnVuY3Rpb24gKGRhdGFTdHJpbmcsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgbG93ZXJjYXNlRGF0YVN0cmluZyA9IGRhdGFTdHJpbmcudG9Mb3dlckNhc2UoKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBMb29rIHRocm91Z2ggYWxsIHRoZSB3b3JkcyBpbiB0aGUgaW5wdXRcbiAgICAgICAgICAgIHZhciB3b3Jkc0ZvdW5kID0gW11cbiAgICAgICAgICAgIGZpbHRlcmluZ1N0cmluZ1dvcmRzLmZvckVhY2goZnVuY3Rpb24gKHdvcmQpIHtcbiAgICAgICAgICAgICAgICB3b3Jkc0ZvdW5kLnB1c2gobG93ZXJjYXNlRGF0YVN0cmluZy5jb250YWlucyh3b3JkKSAmJiAhZXhjbHVkZWREYXRhLmNvbnRhaW5zKGRhdGFTdHJpbmcpKVxuICAgICAgICAgICAgfSlcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgLy8gT25seSBzaG93IHRoZSBkYXRhU3RyaW5nIGlmIGl0IG1hdGNoZXMgYWxsIG9mIHRoZW1cbiAgICAgICAgICAgIC8vIEB0cy1pZ25vcmVcbiAgICAgICAgICAgIGlmICh3b3Jkc0ZvdW5kLmNvbnRhaW5zKHRydWUpICYmICF3b3Jkc0ZvdW5kLmNvbnRhaW5zKGZhbHNlKSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFTdHJpbmcpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgZWxzZSBpZiAoZXhjbHVkZWREYXRhLmxlbmd0aCkge1xuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIGZpbHRlcmVkRGF0YSA9IGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YVN0cmluZywgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGlmIChleGNsdWRlZERhdGEuaW5kZXhPZihkYXRhU3RyaW5nKSA9PSAtMSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFTdHJpbmcpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgfVxuICAgIGVsc2Uge1xuICAgICAgICBcbiAgICAgICAgZmlsdGVyZWREYXRhID0gZGF0YVxuICAgICAgICBcbiAgICAgICAgZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChzdHJpbmcsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgXG4gICAgXG4gICAgcmV0dXJuIHsgXCJmaWx0ZXJlZERhdGFcIjogZmlsdGVyZWREYXRhLCBcImZpbHRlcmVkSW5kZXhlc1wiOiBmaWx0ZXJlZEluZGV4ZXMgfVxuICAgIFxuICAgIFxuICAgIFxufVxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuIl0sCiAgIm1hcHBpbmdzIjogIkFBRUksYUFBYyxNQUFNLFlBR3BCLE1BQU0sVUFBVSxTQUFXLFNBQVVBLEVBQVMsQ0FFMUMsSUFBSUMsRUFBVSxLQUFLLFFBQVFELENBQU8sR0FBSyxHQUN2QyxPQUFPQyxDQUVYLEdBSUEsYUFBYyxPQUFPLFlBR3JCLE9BQU8sVUFBVSxTQUFXLFNBQVVDLEVBQVEsQ0FFMUMsSUFBSUQsRUFBVSxLQUFLLFFBQVFDLENBQU0sR0FBSyxHQUN0QyxPQUFPRCxDQUVYLEdBUUosVUFBWSxTQUFVRSxFQUFPLENBR3pCLElBQUlDLEVBQWVDLEVBQVdGLEVBQU0sS0FBSyxnQkFBaUJBLEVBQU0sS0FBSyxLQUFNQSxFQUFNLEtBQUssWUFBWSxFQUdsR0MsRUFBYSxXQUFhRCxFQUFNLEtBQUssV0FFckNDLEVBQWEsbUJBQXFCRCxFQUFNLEtBQUssbUJBRzdDLFlBQVlDLENBQVksQ0FFNUIsRUFNQSxTQUFTQyxFQUFXQyxFQUFpQkMsRUFBTUMsRUFBYyxDQUVyRCxJQUFJQyxFQUFlLENBQUMsRUFDaEJDLEVBQWtCLENBQUMsRUFFdkIsR0FBSUosRUFBaUIsQ0FFakIsSUFBSUssRUFBdUIsQ0FBQyxFQUM1QkwsRUFBZ0IsTUFBTSxHQUFHLEVBQUUsUUFBUSxTQUFVTSxFQUFNQyxFQUFPQyxFQUFPLENBQ3pERixHQUNBRCxFQUFxQixLQUFLQyxFQUFLLFlBQVksQ0FBQyxDQUVwRCxDQUFDLEVBRURMLEVBQUssUUFBUSxTQUFVUSxFQUFZRixFQUFPQyxFQUFPLENBRTdDLElBQUlFLEVBQXNCRCxFQUFXLFlBQVksRUFHN0NFLEVBQWEsQ0FBQyxFQUNsQk4sRUFBcUIsUUFBUSxTQUFVQyxFQUFNLENBQ3pDSyxFQUFXLEtBQUtELEVBQW9CLFNBQVNKLENBQUksR0FBSyxDQUFDSixFQUFhLFNBQVNPLENBQVUsQ0FBQyxDQUM1RixDQUFDLEVBSUdFLEVBQVcsU0FBUyxFQUFJLEdBQUssQ0FBQ0EsRUFBVyxTQUFTLEVBQUssSUFFdkRSLEVBQWEsS0FBS00sQ0FBVSxFQUM1QkwsRUFBZ0IsS0FBS0csQ0FBSyxFQUlsQyxDQUFDLENBSUwsTUFDU0wsRUFBYSxPQUdsQkMsRUFBZUYsRUFBSyxRQUFRLFNBQVVRLEVBQVlGLEVBQU9DLEVBQU8sQ0FFeEROLEVBQWEsUUFBUU8sQ0FBVSxHQUFLLEtBRXBDTixFQUFhLEtBQUtNLENBQVUsRUFDNUJMLEVBQWdCLEtBQUtHLENBQUssRUFJbEMsQ0FBQyxHQUtESixFQUFlRixFQUVmQSxFQUFLLFFBQVEsU0FBVUwsRUFBUVcsRUFBT0MsRUFBTyxDQUV6Q0osRUFBZ0IsS0FBS0csQ0FBSyxDQUU5QixDQUFDLEdBTUwsTUFBTyxDQUFFLGFBQWdCSixFQUFjLGdCQUFtQkMsQ0FBZ0IsQ0FJOUUiLAogICJuYW1lcyI6IFsiZWxlbWVudCIsICJyZXN1bHQiLCAic3RyaW5nIiwgImV2ZW50IiwgIndvcmtlclJlc3VsdCIsICJmaWx0ZXJEYXRhIiwgImZpbHRlcmluZ1N0cmluZyIsICJkYXRhIiwgImV4Y2x1ZGVkRGF0YSIsICJmaWx0ZXJlZERhdGEiLCAiZmlsdGVyZWRJbmRleGVzIiwgImZpbHRlcmluZ1N0cmluZ1dvcmRzIiwgIndvcmQiLCAiaW5kZXgiLCAiYXJyYXkiLCAiZGF0YVN0cmluZyIsICJsb3dlcmNhc2VEYXRhU3RyaW5nIiwgIndvcmRzRm91bmQiXQp9Cg==\n');
+  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(n){var r=this.indexOf(n)!=-1;return r});"contains"in String.prototype||(String.prototype.contains=function(n){var r=this.indexOf(n)!=-1;return r});onmessage=function(n){var r=h(n.data.filteringString,n.data.data,n.data.excludedData);r.identifier=n.data.identifier,r.instanceIdentifier=n.data.instanceIdentifier,postMessage(r)};function h(n,r,s){var a=[],e=[];if(n){var c=[];n.split(" ").forEach(function(i,t,o){i&&c.push(i.toLowerCase())}),r.forEach(function(i,t,o){var u=i.toLowerCase(),f=[];c.forEach(function(p){f.push(u.contains(p)&&!s.contains(i))}),f.contains(!0)&&!f.contains(!1)&&(a.push(i),e.push(t))})}else s.length?a=r.forEach(function(i,t,o){s.indexOf(i)==-1&&(a.push(i),e.push(t))}):(a=r,r.forEach(function(i,t,o){e.push(t)}));return{filteredData:a,filteredIndexes:e}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vY2Jjb3JlLXRzL25vZGVfbW9kdWxlcy91aWNvcmUtdHMvc2NyaXB0cy9VSVN0cmluZ0ZpbHRlcldlYldvcmtlci53b3JrZXIudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbIi8vIEB0cy1jaGVja1xuXG5pZiAoXCJjb250YWluc1wiIGluIEFycmF5LnByb3RvdHlwZSA9PSBmYWxzZSkge1xuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBBcnJheS5wcm90b3R5cGUuY29udGFpbnMgPSBmdW5jdGlvbiAoZWxlbWVudCkge1xuICAgICAgICBcbiAgICAgICAgdmFyIHJlc3VsdCA9ICh0aGlzLmluZGV4T2YoZWxlbWVudCkgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5pZiAoXCJjb250YWluc1wiIGluIFN0cmluZy5wcm90b3R5cGUgPT0gZmFsc2UpIHtcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgU3RyaW5nLnByb3RvdHlwZS5jb250YWlucyA9IGZ1bmN0aW9uIChzdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSAodGhpcy5pbmRleE9mKHN0cmluZykgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5cblxuXG5cbm9ubWVzc2FnZSA9IGZ1bmN0aW9uIChldmVudCkge1xuICAgIFxuICAgIC8vY29uc29sZS5sb2coJ01lc3NhZ2UgcmVjZWl2ZWQgZnJvbSBtYWluIHNjcmlwdCcpO1xuICAgIHZhciB3b3JrZXJSZXN1bHQgPSBmaWx0ZXJEYXRhKGV2ZW50LmRhdGEuZmlsdGVyaW5nU3RyaW5nLCBldmVudC5kYXRhLmRhdGEsIGV2ZW50LmRhdGEuZXhjbHVkZWREYXRhKVxuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICB3b3JrZXJSZXN1bHQuaWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaWRlbnRpZmllclxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICB3b3JrZXJSZXN1bHQuaW5zdGFuY2VJZGVudGlmaWVyID0gZXZlbnQuZGF0YS5pbnN0YW5jZUlkZW50aWZpZXJcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgcG9zdE1lc3NhZ2Uod29ya2VyUmVzdWx0KVxuICAgIFxufVxuXG5cblxuXG5cbmZ1bmN0aW9uIGZpbHRlckRhdGEoZmlsdGVyaW5nU3RyaW5nLCBkYXRhLCBleGNsdWRlZERhdGEpIHtcbiAgICBcbiAgICB2YXIgZmlsdGVyZWREYXRhID0gW11cbiAgICB2YXIgZmlsdGVyZWRJbmRleGVzID0gW11cbiAgICBcbiAgICBpZiAoZmlsdGVyaW5nU3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgZmlsdGVyaW5nU3RyaW5nV29yZHMgPSBbXVxuICAgICAgICBmaWx0ZXJpbmdTdHJpbmcuc3BsaXQoXCIgXCIpLmZvckVhY2goZnVuY3Rpb24gKHdvcmQsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgaWYgKHdvcmQpIHtcbiAgICAgICAgICAgICAgICBmaWx0ZXJpbmdTdHJpbmdXb3Jkcy5wdXNoKHdvcmQudG9Mb3dlckNhc2UoKSlcbiAgICAgICAgICAgIH1cbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YVN0cmluZywgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciBsb3dlcmNhc2VEYXRhU3RyaW5nID0gZGF0YVN0cmluZy50b0xvd2VyQ2FzZSgpXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIC8vIExvb2sgdGhyb3VnaCBhbGwgdGhlIHdvcmRzIGluIHRoZSBpbnB1dFxuICAgICAgICAgICAgdmFyIHdvcmRzRm91bmQgPSBbXVxuICAgICAgICAgICAgZmlsdGVyaW5nU3RyaW5nV29yZHMuZm9yRWFjaChmdW5jdGlvbiAod29yZCkge1xuICAgICAgICAgICAgICAgIHdvcmRzRm91bmQucHVzaChsb3dlcmNhc2VEYXRhU3RyaW5nLmNvbnRhaW5zKHdvcmQpICYmICFleGNsdWRlZERhdGEuY29udGFpbnMoZGF0YVN0cmluZykpXG4gICAgICAgICAgICB9KVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBPbmx5IHNob3cgdGhlIGRhdGFTdHJpbmcgaWYgaXQgbWF0Y2hlcyBhbGwgb2YgdGhlbVxuICAgICAgICAgICAgLy8gQHRzLWlnbm9yZVxuICAgICAgICAgICAgaWYgKHdvcmRzRm91bmQuY29udGFpbnModHJ1ZSkgJiYgIXdvcmRzRm91bmQuY29udGFpbnMoZmFsc2UpKSB7XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgZmlsdGVyZWREYXRhLnB1c2goZGF0YVN0cmluZylcbiAgICAgICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH1cbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIFxuICAgIH1cbiAgICBlbHNlIGlmIChleGNsdWRlZERhdGEubGVuZ3RoKSB7XG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgZmlsdGVyZWREYXRhID0gZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChkYXRhU3RyaW5nLCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgaWYgKGV4Y2x1ZGVkRGF0YS5pbmRleE9mKGRhdGFTdHJpbmcpID09IC0xKSB7XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgZmlsdGVyZWREYXRhLnB1c2goZGF0YVN0cmluZylcbiAgICAgICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH1cbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICB9XG4gICAgZWxzZSB7XG4gICAgICAgIFxuICAgICAgICBmaWx0ZXJlZERhdGEgPSBkYXRhXG4gICAgICAgIFxuICAgICAgICBkYXRhLmZvckVhY2goZnVuY3Rpb24gKHN0cmluZywgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGZpbHRlcmVkSW5kZXhlcy5wdXNoKGluZGV4KVxuICAgICAgICAgICAgXG4gICAgICAgIH0pXG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICBcbiAgICBcbiAgICByZXR1cm4geyBcImZpbHRlcmVkRGF0YVwiOiBmaWx0ZXJlZERhdGEsIFwiZmlsdGVyZWRJbmRleGVzXCI6IGZpbHRlcmVkSW5kZXhlcyB9XG4gICAgXG4gICAgXG4gICAgXG59XG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG4iXSwKICAibWFwcGluZ3MiOiAiQUFFSSxhQUFjLE1BQU0sWUFHcEIsTUFBTSxVQUFVLFNBQVcsU0FBVUEsRUFBUyxDQUUxQyxJQUFJQyxFQUFVLEtBQUssUUFBUUQsQ0FBTyxHQUFLLEdBQ3ZDLE9BQU9DLENBRVgsR0FJQSxhQUFjLE9BQU8sWUFHckIsT0FBTyxVQUFVLFNBQVcsU0FBVUMsRUFBUSxDQUUxQyxJQUFJRCxFQUFVLEtBQUssUUFBUUMsQ0FBTSxHQUFLLEdBQ3RDLE9BQU9ELENBRVgsR0FRSixVQUFZLFNBQVVFLEVBQU8sQ0FHekIsSUFBSUMsRUFBZUMsRUFBV0YsRUFBTSxLQUFLLGdCQUFpQkEsRUFBTSxLQUFLLEtBQU1BLEVBQU0sS0FBSyxZQUFZLEVBR2xHQyxFQUFhLFdBQWFELEVBQU0sS0FBSyxXQUVyQ0MsRUFBYSxtQkFBcUJELEVBQU0sS0FBSyxtQkFHN0MsWUFBWUMsQ0FBWSxDQUU1QixFQU1BLFNBQVNDLEVBQVdDLEVBQWlCQyxFQUFNQyxFQUFjLENBRXJELElBQUlDLEVBQWUsQ0FBQyxFQUNoQkMsRUFBa0IsQ0FBQyxFQUV2QixHQUFJSixFQUFpQixDQUVqQixJQUFJSyxFQUF1QixDQUFDLEVBQzVCTCxFQUFnQixNQUFNLEdBQUcsRUFBRSxRQUFRLFNBQVVNLEVBQU1DLEVBQU9DLEVBQU8sQ0FDekRGLEdBQ0FELEVBQXFCLEtBQUtDLEVBQUssWUFBWSxDQUFDLENBRXBELENBQUMsRUFFREwsRUFBSyxRQUFRLFNBQVVRLEVBQVlGLEVBQU9DLEVBQU8sQ0FFN0MsSUFBSUUsRUFBc0JELEVBQVcsWUFBWSxFQUc3Q0UsRUFBYSxDQUFDLEVBQ2xCTixFQUFxQixRQUFRLFNBQVVDLEVBQU0sQ0FDekNLLEVBQVcsS0FBS0QsRUFBb0IsU0FBU0osQ0FBSSxHQUFLLENBQUNKLEVBQWEsU0FBU08sQ0FBVSxDQUFDLENBQzVGLENBQUMsRUFJR0UsRUFBVyxTQUFTLEVBQUksR0FBSyxDQUFDQSxFQUFXLFNBQVMsRUFBSyxJQUV2RFIsRUFBYSxLQUFLTSxDQUFVLEVBQzVCTCxFQUFnQixLQUFLRyxDQUFLLEVBSWxDLENBQUMsQ0FJTCxNQUNTTCxFQUFhLE9BR2xCQyxFQUFlRixFQUFLLFFBQVEsU0FBVVEsRUFBWUYsRUFBT0MsRUFBTyxDQUV4RE4sRUFBYSxRQUFRTyxDQUFVLEdBQUssS0FFcENOLEVBQWEsS0FBS00sQ0FBVSxFQUM1QkwsRUFBZ0IsS0FBS0csQ0FBSyxFQUlsQyxDQUFDLEdBS0RKLEVBQWVGLEVBRWZBLEVBQUssUUFBUSxTQUFVTCxFQUFRVyxFQUFPQyxFQUFPLENBRXpDSixFQUFnQixLQUFLRyxDQUFLLENBRTlCLENBQUMsR0FNTCxNQUFPLENBQUUsYUFBZ0JKLEVBQWMsZ0JBQW1CQyxDQUFnQixDQUk5RSIsCiAgIm5hbWVzIjogWyJlbGVtZW50IiwgInJlc3VsdCIsICJzdHJpbmciLCAiZXZlbnQiLCAid29ya2VyUmVzdWx0IiwgImZpbHRlckRhdGEiLCAiZmlsdGVyaW5nU3RyaW5nIiwgImRhdGEiLCAiZXhjbHVkZWREYXRhIiwgImZpbHRlcmVkRGF0YSIsICJmaWx0ZXJlZEluZGV4ZXMiLCAiZmlsdGVyaW5nU3RyaW5nV29yZHMiLCAid29yZCIsICJpbmRleCIsICJhcnJheSIsICJkYXRhU3RyaW5nIiwgImxvd2VyY2FzZURhdGFTdHJpbmciLCAid29yZHNGb3VuZCJdCn0K\n');
 }
 var init_UIStringFilterWebWorker_worker2 = __esm({
   "node_modules/cbcore-ts/node_modules/uicore-ts/compiledScripts/UIStringFilterWebWorker.worker.js"() {
     init_inline_worker();
+    __name(Worker5, "Worker");
   }
 });
 
@@ -12516,23 +12619,23 @@ var require_UIStringFilter2 = __commonJS({
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    }, "__copyProps");
+    var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
-    ));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    )), "__toESM");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIStringFilter_exports = {};
     __export2(UIStringFilter_exports, {
       UIStringFilter: () => UIStringFilter
@@ -12540,7 +12643,7 @@ var require_UIStringFilter2 = __commonJS({
     module.exports = __toCommonJS2(UIStringFilter_exports);
     var import_UIObject = require_UIObject2();
     var import_UIStringFilterWebWorker_worker = __toESM2((init_UIStringFilterWebWorker_worker2(), __toCommonJS(UIStringFilterWebWorker_worker_exports2)));
-    var _UIStringFilter = class extends import_UIObject.UIObject {
+    var _UIStringFilter = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(useSeparateWebWorkerHolder = import_UIObject.NO) {
         super();
         this._isThreadClosed = import_UIObject.NO;
@@ -12642,7 +12745,7 @@ var require_UIStringFilter2 = __commonJS({
           this._webWorkerHolder.webWorker.terminate();
         }
       }
-    };
+    }, "_UIStringFilter");
     var UIStringFilter = _UIStringFilter;
     UIStringFilter._sharedWebWorkerHolder = { webWorker: new import_UIStringFilterWebWorker_worker.default() };
     UIStringFilter._instanceNumber = -1;
@@ -12656,19 +12759,19 @@ var require_UIScrollView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIScrollView_exports = {};
     __export2(UIScrollView_exports, {
       UIScrollView: () => UIScrollView
@@ -12697,6 +12800,7 @@ var require_UIScrollView2 = __commonJS({
         }.bind(this));
         function scrollStopped() {
         }
+        __name(scrollStopped, "scrollStopped");
         this.addTargetForControlEvent(import_UIView.UIView.controlEvent.PointerMove, function(sender, event2) {
           if (!(this._pointerDown && this._scrollEnabled && this._enabled)) {
             return;
@@ -12766,6 +12870,7 @@ var require_UIScrollView2 = __commonJS({
         this.invalidateIntrinsicContentFrame();
       }
     };
+    __name(UIScrollView, "UIScrollView");
   }
 });
 
@@ -12776,19 +12881,19 @@ var require_UISlideScrollerView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UISlideScrollerView_exports = {};
     __export2(UISlideScrollerView_exports, {
       UISlideScrollerView: () => UISlideScrollerView
@@ -13016,6 +13121,7 @@ var require_UISlideScrollerView2 = __commonJS({
         this.stopAnimating();
       }
     };
+    __name(UISlideScrollerView, "UISlideScrollerView");
   }
 });
 
@@ -13026,19 +13132,19 @@ var require_UILink2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UILink_exports = {};
     __export2(UILink_exports, {
       UILink: () => UILink
@@ -13115,6 +13221,7 @@ var require_UILink2 = __commonJS({
         const bounds = this.bounds;
       }
     };
+    __name(UILink, "UILink");
   }
 });
 
@@ -13125,19 +13232,19 @@ var require_UILinkButton2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UILinkButton_exports = {};
     __export2(UILinkButton_exports, {
       UILinkButton: () => UILinkButton
@@ -13191,6 +13298,7 @@ var require_UILinkButton2 = __commonJS({
         this.button.layoutSubviews();
       }
     };
+    __name(UILinkButton, "UILinkButton");
   }
 });
 
@@ -13201,19 +13309,19 @@ var require_UILayoutGrid2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UILayoutGrid_exports = {};
     __export2(UILayoutGrid_exports, {
       UILayoutGrid: () => UILayoutGrid
@@ -13234,6 +13342,7 @@ var require_UILayoutGrid2 = __commonJS({
         }
       }
     };
+    __name(UILayoutGrid, "UILayoutGrid");
   }
 });
 
@@ -13243,11 +13352,12 @@ __export(UIKeyValueStringFilterWebWorker_worker_exports2, {
   default: () => Worker6
 });
 function Worker6() {
-  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});"contains"in String.prototype||(String.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});onmessage=function(a){var r=y(a.data.filteringString,a.data.data,a.data.excludedData,a.data.dataKeyPath);r.identifier=a.data.identifier,r.instanceIdentifier=a.data.instanceIdentifier,postMessage(r)};function y(a,r,u,d){function l(t,n){var o=t.split("."),i=n;return o.forEach(function(c,f,p){i=i[c]}),i}var e=[],s=[];if(a){var h=[];a.split(" ").forEach(function(t,n,o){t&&h.push(t.toLowerCase())}),r.forEach(function(t,n,o){var i=l(d,t),c=i.toLowerCase(),f=[];h.forEach(function(p){f.push(c.contains(p)&&!u.contains(i))}),f.contains(!0)&&!f.contains(!1)&&(e.push(t),s.push(n))})}else u.length?e=r.forEach(function(t,n,o){u.indexOf(t)==-1&&(e.push(t),s.push(n))}):(e=r,r.forEach(function(t,n,o){s.push(n)}));return{filteredData:e,filteredIndexes:s}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlLZXlWYWx1ZVN0cmluZ0ZpbHRlcldlYldvcmtlci53b3JrZXIudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbIi8vIEB0cy1jaGVja1xuXG5pZiAoXCJjb250YWluc1wiIGluIEFycmF5LnByb3RvdHlwZSA9PSBmYWxzZSkge1xuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBBcnJheS5wcm90b3R5cGUuY29udGFpbnMgPSBmdW5jdGlvbiAoZWxlbWVudCkge1xuICAgICAgICBcbiAgICAgICAgdmFyIHJlc3VsdCA9ICh0aGlzLmluZGV4T2YoZWxlbWVudCkgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5pZiAoXCJjb250YWluc1wiIGluIFN0cmluZy5wcm90b3R5cGUgPT0gZmFsc2UpIHtcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgU3RyaW5nLnByb3RvdHlwZS5jb250YWlucyA9IGZ1bmN0aW9uIChzdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSAodGhpcy5pbmRleE9mKHN0cmluZykgIT0gLTEpXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgfVxuICAgIFxufVxuXG5cblxuXG5cbm9ubWVzc2FnZSA9IGZ1bmN0aW9uIChldmVudCkge1xuICAgIFxuICAgIC8vY29uc29sZS5sb2coJ01lc3NhZ2UgcmVjZWl2ZWQgZnJvbSBtYWluIHNjcmlwdCcpO1xuICAgIHZhciB3b3JrZXJSZXN1bHQgPSBmaWx0ZXJLZXlWYWx1ZVBhdGhEYXRhKFxuICAgICAgICBldmVudC5kYXRhLmZpbHRlcmluZ1N0cmluZyxcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhLFxuICAgICAgICBldmVudC5kYXRhLmV4Y2x1ZGVkRGF0YSxcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhS2V5UGF0aFxuICAgIClcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0LmlkZW50aWZpZXIgPSBldmVudC5kYXRhLmlkZW50aWZpZXJcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0Lmluc3RhbmNlSWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaW5zdGFuY2VJZGVudGlmaWVyXG4gICAgXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHBvc3RNZXNzYWdlKHdvcmtlclJlc3VsdClcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiBmaWx0ZXJLZXlWYWx1ZVBhdGhEYXRhKGZpbHRlcmluZ1N0cmluZywgZGF0YSwgZXhjbHVkZWREYXRhLCBkYXRhS2V5UGF0aCkge1xuICAgIFxuICAgIGZ1bmN0aW9uIHZhbHVlRm9yS2V5UGF0aChrZXlQYXRoLCBvYmplY3QpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciBrZXlzID0ga2V5UGF0aC5zcGxpdChcIi5cIilcbiAgICAgICAgdmFyIGN1cnJlbnRPYmplY3QgPSBvYmplY3RcbiAgICAgICAgXG4gICAgICAgIGtleXMuZm9yRWFjaChmdW5jdGlvbiAoa2V5LCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIGN1cnJlbnRPYmplY3QgPSBjdXJyZW50T2JqZWN0W2tleV1cbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIHJldHVybiBjdXJyZW50T2JqZWN0XG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICB2YXIgZmlsdGVyZWREYXRhID0gW11cbiAgICB2YXIgZmlsdGVyZWRJbmRleGVzID0gW11cbiAgICBcbiAgICBpZiAoZmlsdGVyaW5nU3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgZmlsdGVyaW5nU3RyaW5nV29yZHMgPSBbXVxuICAgICAgICBmaWx0ZXJpbmdTdHJpbmcuc3BsaXQoXCIgXCIpLmZvckVhY2goZnVuY3Rpb24gKHdvcmQsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgaWYgKHdvcmQpIHtcbiAgICAgICAgICAgICAgICBmaWx0ZXJpbmdTdHJpbmdXb3Jkcy5wdXNoKHdvcmQudG9Mb3dlckNhc2UoKSlcbiAgICAgICAgICAgIH1cbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YU9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciBkYXRhU3RyaW5nID0gdmFsdWVGb3JLZXlQYXRoKGRhdGFLZXlQYXRoLCBkYXRhT2JqZWN0KVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgbG93ZXJjYXNlRGF0YVN0cmluZyA9IGRhdGFTdHJpbmcudG9Mb3dlckNhc2UoKVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBMb29rIHRocm91Z2ggYWxsIHRoZSB3b3JkcyBpbiB0aGUgaW5wdXRcbiAgICAgICAgICAgIHZhciB3b3Jkc0ZvdW5kID0gW11cbiAgICAgICAgICAgIGZpbHRlcmluZ1N0cmluZ1dvcmRzLmZvckVhY2goZnVuY3Rpb24gKHdvcmQpIHtcbiAgICAgICAgICAgICAgICB3b3Jkc0ZvdW5kLnB1c2gobG93ZXJjYXNlRGF0YVN0cmluZy5jb250YWlucyh3b3JkKSAmJiAhZXhjbHVkZWREYXRhLmNvbnRhaW5zKGRhdGFTdHJpbmcpKVxuICAgICAgICAgICAgfSlcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgLy8gT25seSBzaG93IHRoZSBkYXRhU3RyaW5nIGlmIGl0IG1hdGNoZXMgYWxsIG9mIHRoZW1cbiAgICAgICAgICAgIC8vIEB0cy1pZ25vcmVcbiAgICAgICAgICAgIGlmICh3b3Jkc0ZvdW5kLmNvbnRhaW5zKHRydWUpICYmICF3b3Jkc0ZvdW5kLmNvbnRhaW5zKGZhbHNlKSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFPYmplY3QpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgZWxzZSBpZiAoZXhjbHVkZWREYXRhLmxlbmd0aCkge1xuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIGZpbHRlcmVkRGF0YSA9IGRhdGEuZm9yRWFjaChmdW5jdGlvbiAoZGF0YU9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGlmIChleGNsdWRlZERhdGEuaW5kZXhPZihkYXRhT2JqZWN0KSA9PSAtMSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIGZpbHRlcmVkRGF0YS5wdXNoKGRhdGFPYmplY3QpXG4gICAgICAgICAgICAgICAgZmlsdGVyZWRJbmRleGVzLnB1c2goaW5kZXgpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICB9XG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgfVxuICAgIGVsc2Uge1xuICAgICAgICBcbiAgICAgICAgZmlsdGVyZWREYXRhID0gZGF0YVxuICAgICAgICBcbiAgICAgICAgZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChvYmplY3QsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgXG4gICAgXG4gICAgcmV0dXJuIHsgXCJmaWx0ZXJlZERhdGFcIjogZmlsdGVyZWREYXRhLCBcImZpbHRlcmVkSW5kZXhlc1wiOiBmaWx0ZXJlZEluZGV4ZXMgfVxuICAgIFxuICAgIFxuICAgIFxufVxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuIl0sCiAgIm1hcHBpbmdzIjogIkFBRUksYUFBYyxNQUFNLFlBR3BCLE1BQU0sVUFBVSxTQUFXLFNBQVVBLEVBQVMsQ0FFMUMsSUFBSUMsRUFBVSxLQUFLLFFBQVFELENBQU8sR0FBSyxHQUN2QyxPQUFPQyxDQUVYLEdBSUEsYUFBYyxPQUFPLFlBR3JCLE9BQU8sVUFBVSxTQUFXLFNBQVVDLEVBQVEsQ0FFMUMsSUFBSUQsRUFBVSxLQUFLLFFBQVFDLENBQU0sR0FBSyxHQUN0QyxPQUFPRCxDQUVYLEdBUUosVUFBWSxTQUFVRSxFQUFPLENBR3pCLElBQUlDLEVBQWVDLEVBQ2ZGLEVBQU0sS0FBSyxnQkFDWEEsRUFBTSxLQUFLLEtBQ1hBLEVBQU0sS0FBSyxhQUNYQSxFQUFNLEtBQUssV0FDZixFQUdBQyxFQUFhLFdBQWFELEVBQU0sS0FBSyxXQUVyQ0MsRUFBYSxtQkFBcUJELEVBQU0sS0FBSyxtQkFJN0MsWUFBWUMsQ0FBWSxDQUU1QixFQU1BLFNBQVNDLEVBQXVCQyxFQUFpQkMsRUFBTUMsRUFBY0MsRUFBYSxDQUU5RSxTQUFTQyxFQUFnQkMsRUFBU0MsRUFBUSxDQUV0QyxJQUFJQyxFQUFPRixFQUFRLE1BQU0sR0FBRyxFQUN4QkcsRUFBZ0JGLEVBRXBCLE9BQUFDLEVBQUssUUFBUSxTQUFVRSxFQUFLQyxFQUFPQyxFQUFPLENBQ3RDSCxFQUFnQkEsRUFBY0MsRUFDbEMsQ0FBQyxFQUVNRCxDQUVYLENBRUEsSUFBSUksRUFBZSxDQUFDLEVBQ2hCQyxFQUFrQixDQUFDLEVBRXZCLEdBQUliLEVBQWlCLENBRWpCLElBQUljLEVBQXVCLENBQUMsRUFDNUJkLEVBQWdCLE1BQU0sR0FBRyxFQUFFLFFBQVEsU0FBVWUsRUFBTUwsRUFBT0MsRUFBTyxDQUN6REksR0FDQUQsRUFBcUIsS0FBS0MsRUFBSyxZQUFZLENBQUMsQ0FFcEQsQ0FBQyxFQUVEZCxFQUFLLFFBQVEsU0FBVWUsRUFBWU4sRUFBT0MsRUFBTyxDQUU3QyxJQUFJTSxFQUFhYixFQUFnQkQsRUFBYWEsQ0FBVSxFQUVwREUsRUFBc0JELEVBQVcsWUFBWSxFQUc3Q0UsRUFBYSxDQUFDLEVBQ2xCTCxFQUFxQixRQUFRLFNBQVVDLEVBQU0sQ0FDekNJLEVBQVcsS0FBS0QsRUFBb0IsU0FBU0gsQ0FBSSxHQUFLLENBQUNiLEVBQWEsU0FBU2UsQ0FBVSxDQUFDLENBQzVGLENBQUMsRUFJR0UsRUFBVyxTQUFTLEVBQUksR0FBSyxDQUFDQSxFQUFXLFNBQVMsRUFBSyxJQUV2RFAsRUFBYSxLQUFLSSxDQUFVLEVBQzVCSCxFQUFnQixLQUFLSCxDQUFLLEVBSWxDLENBQUMsQ0FJTCxNQUNTUixFQUFhLE9BR2xCVSxFQUFlWCxFQUFLLFFBQVEsU0FBVWUsRUFBWU4sRUFBT0MsRUFBTyxDQUV4RFQsRUFBYSxRQUFRYyxDQUFVLEdBQUssS0FFcENKLEVBQWEsS0FBS0ksQ0FBVSxFQUM1QkgsRUFBZ0IsS0FBS0gsQ0FBSyxFQUlsQyxDQUFDLEdBS0RFLEVBQWVYLEVBRWZBLEVBQUssUUFBUSxTQUFVSyxFQUFRSSxFQUFPQyxFQUFPLENBRXpDRSxFQUFnQixLQUFLSCxDQUFLLENBRTlCLENBQUMsR0FNTCxNQUFPLENBQUUsYUFBZ0JFLEVBQWMsZ0JBQW1CQyxDQUFnQixDQUk5RSIsCiAgIm5hbWVzIjogWyJlbGVtZW50IiwgInJlc3VsdCIsICJzdHJpbmciLCAiZXZlbnQiLCAid29ya2VyUmVzdWx0IiwgImZpbHRlcktleVZhbHVlUGF0aERhdGEiLCAiZmlsdGVyaW5nU3RyaW5nIiwgImRhdGEiLCAiZXhjbHVkZWREYXRhIiwgImRhdGFLZXlQYXRoIiwgInZhbHVlRm9yS2V5UGF0aCIsICJrZXlQYXRoIiwgIm9iamVjdCIsICJrZXlzIiwgImN1cnJlbnRPYmplY3QiLCAia2V5IiwgImluZGV4IiwgImFycmF5IiwgImZpbHRlcmVkRGF0YSIsICJmaWx0ZXJlZEluZGV4ZXMiLCAiZmlsdGVyaW5nU3RyaW5nV29yZHMiLCAid29yZCIsICJkYXRhT2JqZWN0IiwgImRhdGFTdHJpbmciLCAibG93ZXJjYXNlRGF0YVN0cmluZyIsICJ3b3Jkc0ZvdW5kIl0KfQo=\n');
+  return inlineWorker('"contains"in Array.prototype||(Array.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});"contains"in String.prototype||(String.prototype.contains=function(a){var r=this.indexOf(a)!=-1;return r});onmessage=function(a){var r=y(a.data.filteringString,a.data.data,a.data.excludedData,a.data.dataKeyPath);r.identifier=a.data.identifier,r.instanceIdentifier=a.data.instanceIdentifier,postMessage(r)};function y(a,r,u,d){function l(t,n){var o=t.split("."),i=n;return o.forEach(function(c,f,p){i=i[c]}),i}var e=[],s=[];if(a){var h=[];a.split(" ").forEach(function(t,n,o){t&&h.push(t.toLowerCase())}),r.forEach(function(t,n,o){var i=l(d,t),c=i.toLowerCase(),f=[];h.forEach(function(p){f.push(c.contains(p)&&!u.contains(i))}),f.contains(!0)&&!f.contains(!1)&&(e.push(t),s.push(n))})}else u.length?e=r.forEach(function(t,n,o){u.indexOf(t)==-1&&(e.push(t),s.push(n))}):(e=r,r.forEach(function(t,n,o){s.push(n)}));return{filteredData:e,filteredIndexes:s}}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vY2Jjb3JlLXRzL25vZGVfbW9kdWxlcy91aWNvcmUtdHMvc2NyaXB0cy9VSUtleVZhbHVlU3RyaW5nRmlsdGVyV2ViV29ya2VyLndvcmtlci50cyJdLAogICJzb3VyY2VzQ29udGVudCI6IFsiLy8gQHRzLWNoZWNrXG5cbmlmIChcImNvbnRhaW5zXCIgaW4gQXJyYXkucHJvdG90eXBlID09IGZhbHNlKSB7XG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIEFycmF5LnByb3RvdHlwZS5jb250YWlucyA9IGZ1bmN0aW9uIChlbGVtZW50KSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgcmVzdWx0ID0gKHRoaXMuaW5kZXhPZihlbGVtZW50KSAhPSAtMSlcbiAgICAgICAgcmV0dXJuIHJlc3VsdFxuICAgICAgICBcbiAgICB9XG4gICAgXG59XG5cbmlmIChcImNvbnRhaW5zXCIgaW4gU3RyaW5nLnByb3RvdHlwZSA9PSBmYWxzZSkge1xuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBTdHJpbmcucHJvdG90eXBlLmNvbnRhaW5zID0gZnVuY3Rpb24gKHN0cmluZykge1xuICAgICAgICBcbiAgICAgICAgdmFyIHJlc3VsdCA9ICh0aGlzLmluZGV4T2Yoc3RyaW5nKSAhPSAtMSlcbiAgICAgICAgcmV0dXJuIHJlc3VsdFxuICAgICAgICBcbiAgICB9XG4gICAgXG59XG5cblxuXG5cblxub25tZXNzYWdlID0gZnVuY3Rpb24gKGV2ZW50KSB7XG4gICAgXG4gICAgLy9jb25zb2xlLmxvZygnTWVzc2FnZSByZWNlaXZlZCBmcm9tIG1haW4gc2NyaXB0Jyk7XG4gICAgdmFyIHdvcmtlclJlc3VsdCA9IGZpbHRlcktleVZhbHVlUGF0aERhdGEoXG4gICAgICAgIGV2ZW50LmRhdGEuZmlsdGVyaW5nU3RyaW5nLFxuICAgICAgICBldmVudC5kYXRhLmRhdGEsXG4gICAgICAgIGV2ZW50LmRhdGEuZXhjbHVkZWREYXRhLFxuICAgICAgICBldmVudC5kYXRhLmRhdGFLZXlQYXRoXG4gICAgKVxuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICB3b3JrZXJSZXN1bHQuaWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaWRlbnRpZmllclxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICB3b3JrZXJSZXN1bHQuaW5zdGFuY2VJZGVudGlmaWVyID0gZXZlbnQuZGF0YS5pbnN0YW5jZUlkZW50aWZpZXJcbiAgICBcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgcG9zdE1lc3NhZ2Uod29ya2VyUmVzdWx0KVxuICAgIFxufVxuXG5cblxuXG5cbmZ1bmN0aW9uIGZpbHRlcktleVZhbHVlUGF0aERhdGEoZmlsdGVyaW5nU3RyaW5nLCBkYXRhLCBleGNsdWRlZERhdGEsIGRhdGFLZXlQYXRoKSB7XG4gICAgXG4gICAgZnVuY3Rpb24gdmFsdWVGb3JLZXlQYXRoKGtleVBhdGgsIG9iamVjdCkge1xuICAgICAgICBcbiAgICAgICAgdmFyIGtleXMgPSBrZXlQYXRoLnNwbGl0KFwiLlwiKVxuICAgICAgICB2YXIgY3VycmVudE9iamVjdCA9IG9iamVjdFxuICAgICAgICBcbiAgICAgICAga2V5cy5mb3JFYWNoKGZ1bmN0aW9uIChrZXksIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgY3VycmVudE9iamVjdCA9IGN1cnJlbnRPYmplY3Rba2V5XVxuICAgICAgICB9KVxuICAgICAgICBcbiAgICAgICAgcmV0dXJuIGN1cnJlbnRPYmplY3RcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIHZhciBmaWx0ZXJlZERhdGEgPSBbXVxuICAgIHZhciBmaWx0ZXJlZEluZGV4ZXMgPSBbXVxuICAgIFxuICAgIGlmIChmaWx0ZXJpbmdTdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciBmaWx0ZXJpbmdTdHJpbmdXb3JkcyA9IFtdXG4gICAgICAgIGZpbHRlcmluZ1N0cmluZy5zcGxpdChcIiBcIikuZm9yRWFjaChmdW5jdGlvbiAod29yZCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBpZiAod29yZCkge1xuICAgICAgICAgICAgICAgIGZpbHRlcmluZ1N0cmluZ1dvcmRzLnB1c2god29yZC50b0xvd2VyQ2FzZSgpKVxuICAgICAgICAgICAgfVxuICAgICAgICB9KVxuICAgICAgICBcbiAgICAgICAgZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChkYXRhT2JqZWN0LCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgdmFyIGRhdGFTdHJpbmcgPSB2YWx1ZUZvcktleVBhdGgoZGF0YUtleVBhdGgsIGRhdGFPYmplY3QpXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciBsb3dlcmNhc2VEYXRhU3RyaW5nID0gZGF0YVN0cmluZy50b0xvd2VyQ2FzZSgpXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIC8vIExvb2sgdGhyb3VnaCBhbGwgdGhlIHdvcmRzIGluIHRoZSBpbnB1dFxuICAgICAgICAgICAgdmFyIHdvcmRzRm91bmQgPSBbXVxuICAgICAgICAgICAgZmlsdGVyaW5nU3RyaW5nV29yZHMuZm9yRWFjaChmdW5jdGlvbiAod29yZCkge1xuICAgICAgICAgICAgICAgIHdvcmRzRm91bmQucHVzaChsb3dlcmNhc2VEYXRhU3RyaW5nLmNvbnRhaW5zKHdvcmQpICYmICFleGNsdWRlZERhdGEuY29udGFpbnMoZGF0YVN0cmluZykpXG4gICAgICAgICAgICB9KVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBPbmx5IHNob3cgdGhlIGRhdGFTdHJpbmcgaWYgaXQgbWF0Y2hlcyBhbGwgb2YgdGhlbVxuICAgICAgICAgICAgLy8gQHRzLWlnbm9yZVxuICAgICAgICAgICAgaWYgKHdvcmRzRm91bmQuY29udGFpbnModHJ1ZSkgJiYgIXdvcmRzRm91bmQuY29udGFpbnMoZmFsc2UpKSB7XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgZmlsdGVyZWREYXRhLnB1c2goZGF0YU9iamVjdClcbiAgICAgICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH1cbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIFxuICAgIH1cbiAgICBlbHNlIGlmIChleGNsdWRlZERhdGEubGVuZ3RoKSB7XG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgZmlsdGVyZWREYXRhID0gZGF0YS5mb3JFYWNoKGZ1bmN0aW9uIChkYXRhT2JqZWN0LCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgaWYgKGV4Y2x1ZGVkRGF0YS5pbmRleE9mKGRhdGFPYmplY3QpID09IC0xKSB7XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgZmlsdGVyZWREYXRhLnB1c2goZGF0YU9iamVjdClcbiAgICAgICAgICAgICAgICBmaWx0ZXJlZEluZGV4ZXMucHVzaChpbmRleClcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH1cbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICB9XG4gICAgZWxzZSB7XG4gICAgICAgIFxuICAgICAgICBmaWx0ZXJlZERhdGEgPSBkYXRhXG4gICAgICAgIFxuICAgICAgICBkYXRhLmZvckVhY2goZnVuY3Rpb24gKG9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGZpbHRlcmVkSW5kZXhlcy5wdXNoKGluZGV4KVxuICAgICAgICAgICAgXG4gICAgICAgIH0pXG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICBcbiAgICBcbiAgICByZXR1cm4geyBcImZpbHRlcmVkRGF0YVwiOiBmaWx0ZXJlZERhdGEsIFwiZmlsdGVyZWRJbmRleGVzXCI6IGZpbHRlcmVkSW5kZXhlcyB9XG4gICAgXG4gICAgXG4gICAgXG59XG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG4iXSwKICAibWFwcGluZ3MiOiAiQUFFSSxhQUFjLE1BQU0sWUFHcEIsTUFBTSxVQUFVLFNBQVcsU0FBVUEsRUFBUyxDQUUxQyxJQUFJQyxFQUFVLEtBQUssUUFBUUQsQ0FBTyxHQUFLLEdBQ3ZDLE9BQU9DLENBRVgsR0FJQSxhQUFjLE9BQU8sWUFHckIsT0FBTyxVQUFVLFNBQVcsU0FBVUMsRUFBUSxDQUUxQyxJQUFJRCxFQUFVLEtBQUssUUFBUUMsQ0FBTSxHQUFLLEdBQ3RDLE9BQU9ELENBRVgsR0FRSixVQUFZLFNBQVVFLEVBQU8sQ0FHekIsSUFBSUMsRUFBZUMsRUFDZkYsRUFBTSxLQUFLLGdCQUNYQSxFQUFNLEtBQUssS0FDWEEsRUFBTSxLQUFLLGFBQ1hBLEVBQU0sS0FBSyxXQUNmLEVBR0FDLEVBQWEsV0FBYUQsRUFBTSxLQUFLLFdBRXJDQyxFQUFhLG1CQUFxQkQsRUFBTSxLQUFLLG1CQUk3QyxZQUFZQyxDQUFZLENBRTVCLEVBTUEsU0FBU0MsRUFBdUJDLEVBQWlCQyxFQUFNQyxFQUFjQyxFQUFhLENBRTlFLFNBQVNDLEVBQWdCQyxFQUFTQyxFQUFRLENBRXRDLElBQUlDLEVBQU9GLEVBQVEsTUFBTSxHQUFHLEVBQ3hCRyxFQUFnQkYsRUFFcEIsT0FBQUMsRUFBSyxRQUFRLFNBQVVFLEVBQUtDLEVBQU9DLEVBQU8sQ0FDdENILEVBQWdCQSxFQUFjQyxFQUNsQyxDQUFDLEVBRU1ELENBRVgsQ0FFQSxJQUFJSSxFQUFlLENBQUMsRUFDaEJDLEVBQWtCLENBQUMsRUFFdkIsR0FBSWIsRUFBaUIsQ0FFakIsSUFBSWMsRUFBdUIsQ0FBQyxFQUM1QmQsRUFBZ0IsTUFBTSxHQUFHLEVBQUUsUUFBUSxTQUFVZSxFQUFNTCxFQUFPQyxFQUFPLENBQ3pESSxHQUNBRCxFQUFxQixLQUFLQyxFQUFLLFlBQVksQ0FBQyxDQUVwRCxDQUFDLEVBRURkLEVBQUssUUFBUSxTQUFVZSxFQUFZTixFQUFPQyxFQUFPLENBRTdDLElBQUlNLEVBQWFiLEVBQWdCRCxFQUFhYSxDQUFVLEVBRXBERSxFQUFzQkQsRUFBVyxZQUFZLEVBRzdDRSxFQUFhLENBQUMsRUFDbEJMLEVBQXFCLFFBQVEsU0FBVUMsRUFBTSxDQUN6Q0ksRUFBVyxLQUFLRCxFQUFvQixTQUFTSCxDQUFJLEdBQUssQ0FBQ2IsRUFBYSxTQUFTZSxDQUFVLENBQUMsQ0FDNUYsQ0FBQyxFQUlHRSxFQUFXLFNBQVMsRUFBSSxHQUFLLENBQUNBLEVBQVcsU0FBUyxFQUFLLElBRXZEUCxFQUFhLEtBQUtJLENBQVUsRUFDNUJILEVBQWdCLEtBQUtILENBQUssRUFJbEMsQ0FBQyxDQUlMLE1BQ1NSLEVBQWEsT0FHbEJVLEVBQWVYLEVBQUssUUFBUSxTQUFVZSxFQUFZTixFQUFPQyxFQUFPLENBRXhEVCxFQUFhLFFBQVFjLENBQVUsR0FBSyxLQUVwQ0osRUFBYSxLQUFLSSxDQUFVLEVBQzVCSCxFQUFnQixLQUFLSCxDQUFLLEVBSWxDLENBQUMsR0FLREUsRUFBZVgsRUFFZkEsRUFBSyxRQUFRLFNBQVVLLEVBQVFJLEVBQU9DLEVBQU8sQ0FFekNFLEVBQWdCLEtBQUtILENBQUssQ0FFOUIsQ0FBQyxHQU1MLE1BQU8sQ0FBRSxhQUFnQkUsRUFBYyxnQkFBbUJDLENBQWdCLENBSTlFIiwKICAibmFtZXMiOiBbImVsZW1lbnQiLCAicmVzdWx0IiwgInN0cmluZyIsICJldmVudCIsICJ3b3JrZXJSZXN1bHQiLCAiZmlsdGVyS2V5VmFsdWVQYXRoRGF0YSIsICJmaWx0ZXJpbmdTdHJpbmciLCAiZGF0YSIsICJleGNsdWRlZERhdGEiLCAiZGF0YUtleVBhdGgiLCAidmFsdWVGb3JLZXlQYXRoIiwgImtleVBhdGgiLCAib2JqZWN0IiwgImtleXMiLCAiY3VycmVudE9iamVjdCIsICJrZXkiLCAiaW5kZXgiLCAiYXJyYXkiLCAiZmlsdGVyZWREYXRhIiwgImZpbHRlcmVkSW5kZXhlcyIsICJmaWx0ZXJpbmdTdHJpbmdXb3JkcyIsICJ3b3JkIiwgImRhdGFPYmplY3QiLCAiZGF0YVN0cmluZyIsICJsb3dlcmNhc2VEYXRhU3RyaW5nIiwgIndvcmRzRm91bmQiXQp9Cg==\n');
 }
 var init_UIKeyValueStringFilterWebWorker_worker2 = __esm({
   "node_modules/cbcore-ts/node_modules/uicore-ts/compiledScripts/UIKeyValueStringFilterWebWorker.worker.js"() {
     init_inline_worker();
+    __name(Worker6, "Worker");
   }
 });
 
@@ -13260,23 +13370,23 @@ var require_UIKeyValueStringFilter2 = __commonJS({
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    }, "__copyProps");
+    var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
-    ));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    )), "__toESM");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIKeyValueStringFilter_exports = {};
     __export2(UIKeyValueStringFilter_exports, {
       UIKeyValueStringFilter: () => UIKeyValueStringFilter2
@@ -13284,7 +13394,7 @@ var require_UIKeyValueStringFilter2 = __commonJS({
     module.exports = __toCommonJS2(UIKeyValueStringFilter_exports);
     var import_UIObject = require_UIObject2();
     var import_UIKeyValueStringFilterWebWorker_worker = __toESM2((init_UIKeyValueStringFilterWebWorker_worker2(), __toCommonJS(UIKeyValueStringFilterWebWorker_worker_exports2)));
-    var _UIKeyValueStringFilter = class extends import_UIObject.UIObject {
+    var _UIKeyValueStringFilter = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(useSeparateWebWorkerHolder = import_UIObject.NO) {
         super();
         this._isThreadClosed = import_UIObject.NO;
@@ -13369,7 +13479,7 @@ var require_UIKeyValueStringFilter2 = __commonJS({
           this._webWorkerHolder.webWorker.terminate();
         }
       }
-    };
+    }, "_UIKeyValueStringFilter");
     var UIKeyValueStringFilter2 = _UIKeyValueStringFilter;
     UIKeyValueStringFilter2._sharedWebWorkerHolder = { webWorker: new import_UIKeyValueStringFilterWebWorker_worker.default() };
     UIKeyValueStringFilter2._instanceNumber = -1;
@@ -13382,11 +13492,12 @@ __export(UIKeyValueStringSorterWebWorker_worker_exports2, {
   default: () => Worker7
 });
 function Worker7() {
-  return inlineWorker('onmessage=function(e){var a=g(e.data.data,e.data.sortingInstructions);a.identifier=e.data.identifier,a.instanceIdentifier=e.data.instanceIdentifier,postMessage(a)};function v(e,a){for(var i=e.split("."),r=a,n=0;n<i.length;n++){var u=i[n];if(u.substring(0,2)=="[]"){r=r[u.substring(2)];var t=i.slice(n+1).join("."),o=r;r=o.map(function(d,s,f){var c=v(t,d);return c});break}r=(r||{})[u]}return r}function l(e,a,i){if(i.length==0)return 0;var r=i[0],n=1;r.direction=="descending"&&(n=-1);var u=e[r.keyPath],t=a[r.keyPath];if(u<t)return-1*n;if(u>t)return 1*n;if(i.length>1){var o=i.slice(1);return l(e,a,o)}return 0}function g(e,a){var i=e.map(function(t,o,d){var s={_UIKeyValueStringSorterWebWorkerSortingObjectIndex:o};return a.forEach(function(f,c,y){s[f.keyPath]=JSON.stringify(v(f.keyPath,t)||{}).toLowerCase()}),s}),r=i.sort(function(t,o){return l(t,o,a)}),n=r.map(function(t,o,d){var s=t._UIKeyValueStringSorterWebWorkerSortingObjectIndex;return s}),u={sortedData:n.map(function(t,o,d){return e[t]}),sortedIndexes:n};return u}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vdWljb3JlLXRzL3NjcmlwdHMvVUlLZXlWYWx1ZVN0cmluZ1NvcnRlcldlYldvcmtlci53b3JrZXIudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbIm9ubWVzc2FnZSA9IGZ1bmN0aW9uIChldmVudCkge1xuICAgIFxuICAgIC8vY29uc29sZS5sb2coJ01lc3NhZ2UgcmVjZWl2ZWQgZnJvbSBtYWluIHNjcmlwdCcpO1xuICAgIHZhciB3b3JrZXJSZXN1bHQgPSBzb3J0RGF0YShcbiAgICAgICAgZXZlbnQuZGF0YS5kYXRhLFxuICAgICAgICBldmVudC5kYXRhLnNvcnRpbmdJbnN0cnVjdGlvbnNcbiAgICApXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHdvcmtlclJlc3VsdC5pZGVudGlmaWVyID0gZXZlbnQuZGF0YS5pZGVudGlmaWVyXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHdvcmtlclJlc3VsdC5pbnN0YW5jZUlkZW50aWZpZXIgPSBldmVudC5kYXRhLmluc3RhbmNlSWRlbnRpZmllclxuICAgIFxuICAgIFxuICAgIC8vIEB0cy1pZ25vcmVcbiAgICBwb3N0TWVzc2FnZSh3b3JrZXJSZXN1bHQpXG4gICAgXG59XG5cblxuXG5cblxuZnVuY3Rpb24gdmFsdWVGb3JLZXlQYXRoKGtleVBhdGgsIG9iamVjdCkge1xuICAgIFxuICAgIHZhciBrZXlzID0ga2V5UGF0aC5zcGxpdChcIi5cIilcbiAgICB2YXIgY3VycmVudE9iamVjdCA9IG9iamVjdFxuICAgIFxuICAgIGZvciAodmFyIGkgPSAwOyBpIDwga2V5cy5sZW5ndGg7IGkrKykge1xuICAgICAgICBcbiAgICAgICAgdmFyIGtleSA9IGtleXNbaV1cbiAgICAgICAgXG4gICAgICAgIGlmIChrZXkuc3Vic3RyaW5nKDAsIDIpID09IFwiW11cIikge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBUaGlzIG5leHQgb2JqZWN0IHdpbGwgYmUgYW4gYXJyYXkgYW5kIHRoZSByZXN0IG9mIHRoZSBrZXlzIG5lZWQgdG8gYmUgcnVuIGZvciBlYWNoIG9mIHRoZSBlbGVtZW50c1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBjdXJyZW50T2JqZWN0ID0gY3VycmVudE9iamVjdFtrZXkuc3Vic3RyaW5nKDIpXVxuICAgICAgICAgICAgXG4gICAgICAgICAgICAvLyBDdXJyZW50T2JqZWN0IGlzIG5vdyBhbiBhcnJheVxuICAgICAgICAgICAgXG4gICAgICAgICAgICB2YXIgcmVtYWluaW5nS2V5UGF0aCA9IGtleXMuc2xpY2UoaSArIDEpLmpvaW4oXCIuXCIpXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciBjdXJyZW50QXJyYXkgPSBjdXJyZW50T2JqZWN0XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGN1cnJlbnRPYmplY3QgPSBjdXJyZW50QXJyYXkubWFwKGZ1bmN0aW9uIChzdWJPYmplY3QsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIHZhciByZXN1bHQgPSB2YWx1ZUZvcktleVBhdGgocmVtYWluaW5nS2V5UGF0aCwgc3ViT2JqZWN0KVxuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgIH0pXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGJyZWFrXG4gICAgICAgICAgICBcbiAgICAgICAgfVxuICAgICAgICBcbiAgICAgICAgY3VycmVudE9iamVjdCA9IChjdXJyZW50T2JqZWN0IHx8IHt9KVtrZXldXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgcmV0dXJuIGN1cnJlbnRPYmplY3RcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiBjb21wYXJlKGZpcnN0T2JqZWN0LCBzZWNvbmRPYmplY3QsIHNvcnRpbmdJbnN0cnVjdGlvbnMpIHtcbiAgICBcbiAgICBcbiAgICBpZiAoc29ydGluZ0luc3RydWN0aW9ucy5sZW5ndGggPT0gMCkge1xuICAgICAgICByZXR1cm4gMFxuICAgIH1cbiAgICBcbiAgICBcbiAgICB2YXIgc29ydGluZ0luc3RydWN0aW9uID0gc29ydGluZ0luc3RydWN0aW9uc1swXVxuICAgIFxuICAgIFxuICAgIHZhciBkaXJlY3Rpb25NdWx0aXBsaWVyID0gMVxuICAgIGlmIChzb3J0aW5nSW5zdHJ1Y3Rpb24uZGlyZWN0aW9uID09IFwiZGVzY2VuZGluZ1wiKSB7XG4gICAgICAgIGRpcmVjdGlvbk11bHRpcGxpZXIgPSAtMVxuICAgIH1cbiAgICBcbiAgICBcbiAgICB2YXIgZmlyc3REYXRhU3RyaW5nID0gZmlyc3RPYmplY3Rbc29ydGluZ0luc3RydWN0aW9uLmtleVBhdGhdXG4gICAgXG4gICAgdmFyIHNlY29uZERhdGFTdHJpbmcgPSBzZWNvbmRPYmplY3Rbc29ydGluZ0luc3RydWN0aW9uLmtleVBhdGhdXG4gICAgXG4gICAgXG4gICAgXG4gICAgXG4gICAgaWYgKGZpcnN0RGF0YVN0cmluZyA8IHNlY29uZERhdGFTdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHJldHVybiAtMSAqIGRpcmVjdGlvbk11bHRpcGxpZXJcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIGlmIChmaXJzdERhdGFTdHJpbmcgPiBzZWNvbmREYXRhU3RyaW5nKSB7XG4gICAgICAgIFxuICAgICAgICByZXR1cm4gMSAqIGRpcmVjdGlvbk11bHRpcGxpZXJcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIGlmIChzb3J0aW5nSW5zdHJ1Y3Rpb25zLmxlbmd0aCA+IDEpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZW1haW5pbmdTb3J0aW5nSW5zdHJ1Y3Rpb25zID0gc29ydGluZ0luc3RydWN0aW9ucy5zbGljZSgxKVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICByZXR1cm4gY29tcGFyZShmaXJzdE9iamVjdCwgc2Vjb25kT2JqZWN0LCByZW1haW5pbmdTb3J0aW5nSW5zdHJ1Y3Rpb25zKVxuICAgICAgICBcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIHJldHVybiAwXG4gICAgXG59XG5cblxuXG5cblxuZnVuY3Rpb24gc29ydERhdGEoZGF0YSwgc29ydGluZ0luc3RydWN0aW9ucykge1xuICAgIFxuICAgIFxuICAgIHZhciBzb3J0aW5nT2JqZWN0cyA9IGRhdGEubWFwKGZ1bmN0aW9uIChkYXRhSXRlbSwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgcmVzdWx0ID0ge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICBcIl9VSUtleVZhbHVlU3RyaW5nU29ydGVyV2ViV29ya2VyU29ydGluZ09iamVjdEluZGV4XCI6IGluZGV4XG4gICAgICAgICAgICBcbiAgICAgICAgfVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIHNvcnRpbmdJbnN0cnVjdGlvbnMuZm9yRWFjaChmdW5jdGlvbiAoaW5zdHJ1Y3Rpb24sIGluZGV4LCBpbnN0cnVjdGlvbnNBcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICByZXN1bHRbaW5zdHJ1Y3Rpb24ua2V5UGF0aF0gPSBKU09OLnN0cmluZ2lmeSh2YWx1ZUZvcktleVBhdGgoaW5zdHJ1Y3Rpb24ua2V5UGF0aCwgZGF0YUl0ZW0pIHx8IHt9KVxuICAgICAgICAgICAgICAgIC50b0xvd2VyQ2FzZSgpXG4gICAgICAgICAgICBcbiAgICAgICAgfSlcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIHJldHVybiByZXN1bHRcbiAgICAgICAgXG4gICAgICAgIFxuICAgIH0pXG4gICAgXG4gICAgXG4gICAgdmFyIHNvcnRlZERhdGEgPSBzb3J0aW5nT2JqZWN0cy5zb3J0KGZ1bmN0aW9uIChmaXJzdE9iamVjdCwgc2Vjb25kT2JqZWN0KSB7XG4gICAgICAgIFxuICAgICAgICByZXR1cm4gY29tcGFyZShmaXJzdE9iamVjdCwgc2Vjb25kT2JqZWN0LCBzb3J0aW5nSW5zdHJ1Y3Rpb25zKVxuICAgICAgICBcbiAgICB9KVxuICAgIFxuICAgIHZhciBzb3J0ZWRJbmRleGVzID0gc29ydGVkRGF0YS5tYXAoZnVuY3Rpb24gKG9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgIFxuICAgICAgICB2YXIgc29ydGVkSW5kZXggPSBvYmplY3QuX1VJS2V5VmFsdWVTdHJpbmdTb3J0ZXJXZWJXb3JrZXJTb3J0aW5nT2JqZWN0SW5kZXhcbiAgICAgICAgXG4gICAgICAgIHJldHVybiBzb3J0ZWRJbmRleFxuICAgICAgICBcbiAgICB9KVxuICAgIFxuICAgIHZhciByZXN1bHQgPSB7XG4gICAgICAgIFxuICAgICAgICBcInNvcnRlZERhdGFcIjogc29ydGVkSW5kZXhlcy5tYXAoZnVuY3Rpb24gKHNvcnRlZEluZGV4LCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgcmV0dXJuIGRhdGFbc29ydGVkSW5kZXhdXG4gICAgICAgICAgICBcbiAgICAgICAgfSksXG4gICAgICAgIFwic29ydGVkSW5kZXhlc1wiOiBzb3J0ZWRJbmRleGVzXG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICBcbiAgICByZXR1cm4gcmVzdWx0XG4gICAgXG4gICAgXG59XG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG4iXSwKICAibWFwcGluZ3MiOiAiQUFBQSxVQUFZLFNBQVVBLEVBQU8sQ0FHekIsSUFBSUMsRUFBZUMsRUFDZkYsRUFBTSxLQUFLLEtBQ1hBLEVBQU0sS0FBSyxtQkFDZixFQUdBQyxFQUFhLFdBQWFELEVBQU0sS0FBSyxXQUVyQ0MsRUFBYSxtQkFBcUJELEVBQU0sS0FBSyxtQkFJN0MsWUFBWUMsQ0FBWSxDQUU1QixFQU1BLFNBQVNFLEVBQWdCQyxFQUFTQyxFQUFRLENBS3RDLFFBSElDLEVBQU9GLEVBQVEsTUFBTSxHQUFHLEVBQ3hCRyxFQUFnQkYsRUFFWEcsRUFBSSxFQUFHQSxFQUFJRixFQUFLLE9BQVFFLElBQUssQ0FFbEMsSUFBSUMsRUFBTUgsRUFBS0UsR0FFZixHQUFJQyxFQUFJLFVBQVUsRUFBRyxDQUFDLEdBQUssS0FBTSxDQUk3QkYsRUFBZ0JBLEVBQWNFLEVBQUksVUFBVSxDQUFDLEdBSTdDLElBQUlDLEVBQW1CSixFQUFLLE1BQU1FLEVBQUksQ0FBQyxFQUFFLEtBQUssR0FBRyxFQUU3Q0csRUFBZUosRUFFbkJBLEVBQWdCSSxFQUFhLElBQUksU0FBVUMsRUFBV0MsRUFBT0MsRUFBTyxDQUVoRSxJQUFJQyxFQUFTWixFQUFnQk8sRUFBa0JFLENBQVMsRUFFeEQsT0FBT0csQ0FFWCxDQUFDLEVBRUQsS0FFSixDQUVBUixHQUFpQkEsR0FBaUIsQ0FBQyxHQUFHRSxFQUcxQyxDQUVBLE9BQU9GLENBRVgsQ0FNQSxTQUFTUyxFQUFRQyxFQUFhQyxFQUFjQyxFQUFxQixDQUc3RCxHQUFJQSxFQUFvQixRQUFVLEVBQzlCLE1BQU8sR0FJWCxJQUFJQyxFQUFxQkQsRUFBb0IsR0FHekNFLEVBQXNCLEVBQ3RCRCxFQUFtQixXQUFhLGVBQ2hDQyxFQUFzQixJQUkxQixJQUFJQyxFQUFrQkwsRUFBWUcsRUFBbUIsU0FFakRHLEVBQW1CTCxFQUFhRSxFQUFtQixTQUt2RCxHQUFJRSxFQUFrQkMsRUFFbEIsTUFBTyxHQUFLRixFQUloQixHQUFJQyxFQUFrQkMsRUFFbEIsTUFBTyxHQUFJRixFQUlmLEdBQUlGLEVBQW9CLE9BQVMsRUFBRyxDQUVoQyxJQUFJSyxFQUErQkwsRUFBb0IsTUFBTSxDQUFDLEVBSTlELE9BQU9ILEVBQVFDLEVBQWFDLEVBQWNNLENBQTRCLENBRzFFLENBRUEsTUFBTyxFQUVYLENBTUEsU0FBU3RCLEVBQVN1QixFQUFNTixFQUFxQixDQUd6QyxJQUFJTyxFQUFpQkQsRUFBSyxJQUFJLFNBQVVFLEVBQVVkLEVBQU9DLEVBQU8sQ0FFNUQsSUFBSUMsRUFBUyxDQUVULG1EQUFzREYsQ0FFMUQsRUFHQSxPQUFBTSxFQUFvQixRQUFRLFNBQVVTLEVBQWFmLEVBQU9nQixFQUFtQixDQUV6RWQsRUFBT2EsRUFBWSxTQUFXLEtBQUssVUFBVXpCLEVBQWdCeUIsRUFBWSxRQUFTRCxDQUFRLEdBQUssQ0FBQyxDQUFDLEVBQzVGLFlBQVksQ0FFckIsQ0FBQyxFQUtNWixDQUdYLENBQUMsRUFHR2UsRUFBYUosRUFBZSxLQUFLLFNBQVVULEVBQWFDLEVBQWMsQ0FFdEUsT0FBT0YsRUFBUUMsRUFBYUMsRUFBY0MsQ0FBbUIsQ0FFakUsQ0FBQyxFQUVHWSxFQUFnQkQsRUFBVyxJQUFJLFNBQVV6QixFQUFRUSxFQUFPQyxFQUFPLENBRS9ELElBQUlrQixFQUFjM0IsRUFBTyxtREFFekIsT0FBTzJCLENBRVgsQ0FBQyxFQUVHakIsRUFBUyxDQUVULFdBQWNnQixFQUFjLElBQUksU0FBVUMsRUFBYW5CLEVBQU9DLEVBQU8sQ0FFakUsT0FBT1csRUFBS08sRUFFaEIsQ0FBQyxFQUNELGNBQWlCRCxDQUVyQixFQUdBLE9BQU9oQixDQUdYIiwKICAibmFtZXMiOiBbImV2ZW50IiwgIndvcmtlclJlc3VsdCIsICJzb3J0RGF0YSIsICJ2YWx1ZUZvcktleVBhdGgiLCAia2V5UGF0aCIsICJvYmplY3QiLCAia2V5cyIsICJjdXJyZW50T2JqZWN0IiwgImkiLCAia2V5IiwgInJlbWFpbmluZ0tleVBhdGgiLCAiY3VycmVudEFycmF5IiwgInN1Yk9iamVjdCIsICJpbmRleCIsICJhcnJheSIsICJyZXN1bHQiLCAiY29tcGFyZSIsICJmaXJzdE9iamVjdCIsICJzZWNvbmRPYmplY3QiLCAic29ydGluZ0luc3RydWN0aW9ucyIsICJzb3J0aW5nSW5zdHJ1Y3Rpb24iLCAiZGlyZWN0aW9uTXVsdGlwbGllciIsICJmaXJzdERhdGFTdHJpbmciLCAic2Vjb25kRGF0YVN0cmluZyIsICJyZW1haW5pbmdTb3J0aW5nSW5zdHJ1Y3Rpb25zIiwgImRhdGEiLCAic29ydGluZ09iamVjdHMiLCAiZGF0YUl0ZW0iLCAiaW5zdHJ1Y3Rpb24iLCAiaW5zdHJ1Y3Rpb25zQXJyYXkiLCAic29ydGVkRGF0YSIsICJzb3J0ZWRJbmRleGVzIiwgInNvcnRlZEluZGV4Il0KfQo=\n');
+  return inlineWorker('onmessage=function(e){var a=g(e.data.data,e.data.sortingInstructions);a.identifier=e.data.identifier,a.instanceIdentifier=e.data.instanceIdentifier,postMessage(a)};function v(e,a){for(var i=e.split("."),r=a,n=0;n<i.length;n++){var u=i[n];if(u.substring(0,2)=="[]"){r=r[u.substring(2)];var t=i.slice(n+1).join("."),o=r;r=o.map(function(d,s,f){var c=v(t,d);return c});break}r=(r||{})[u]}return r}function l(e,a,i){if(i.length==0)return 0;var r=i[0],n=1;r.direction=="descending"&&(n=-1);var u=e[r.keyPath],t=a[r.keyPath];if(u<t)return-1*n;if(u>t)return 1*n;if(i.length>1){var o=i.slice(1);return l(e,a,o)}return 0}function g(e,a){var i=e.map(function(t,o,d){var s={_UIKeyValueStringSorterWebWorkerSortingObjectIndex:o};return a.forEach(function(f,c,y){s[f.keyPath]=JSON.stringify(v(f.keyPath,t)||{}).toLowerCase()}),s}),r=i.sort(function(t,o){return l(t,o,a)}),n=r.map(function(t,o,d){var s=t._UIKeyValueStringSorterWebWorkerSortingObjectIndex;return s}),u={sortedData:n.map(function(t,o,d){return e[t]}),sortedIndexes:n};return u}\n//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsiLi4vLi4vLi4vLi4vLi4vY2Jjb3JlLXRzL25vZGVfbW9kdWxlcy91aWNvcmUtdHMvc2NyaXB0cy9VSUtleVZhbHVlU3RyaW5nU29ydGVyV2ViV29ya2VyLndvcmtlci50cyJdLAogICJzb3VyY2VzQ29udGVudCI6IFsib25tZXNzYWdlID0gZnVuY3Rpb24gKGV2ZW50KSB7XG4gICAgXG4gICAgLy9jb25zb2xlLmxvZygnTWVzc2FnZSByZWNlaXZlZCBmcm9tIG1haW4gc2NyaXB0Jyk7XG4gICAgdmFyIHdvcmtlclJlc3VsdCA9IHNvcnREYXRhKFxuICAgICAgICBldmVudC5kYXRhLmRhdGEsXG4gICAgICAgIGV2ZW50LmRhdGEuc29ydGluZ0luc3RydWN0aW9uc1xuICAgIClcbiAgICBcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0LmlkZW50aWZpZXIgPSBldmVudC5kYXRhLmlkZW50aWZpZXJcbiAgICAvLyBAdHMtaWdub3JlXG4gICAgd29ya2VyUmVzdWx0Lmluc3RhbmNlSWRlbnRpZmllciA9IGV2ZW50LmRhdGEuaW5zdGFuY2VJZGVudGlmaWVyXG4gICAgXG4gICAgXG4gICAgLy8gQHRzLWlnbm9yZVxuICAgIHBvc3RNZXNzYWdlKHdvcmtlclJlc3VsdClcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiB2YWx1ZUZvcktleVBhdGgoa2V5UGF0aCwgb2JqZWN0KSB7XG4gICAgXG4gICAgdmFyIGtleXMgPSBrZXlQYXRoLnNwbGl0KFwiLlwiKVxuICAgIHZhciBjdXJyZW50T2JqZWN0ID0gb2JqZWN0XG4gICAgXG4gICAgZm9yICh2YXIgaSA9IDA7IGkgPCBrZXlzLmxlbmd0aDsgaSsrKSB7XG4gICAgICAgIFxuICAgICAgICB2YXIga2V5ID0ga2V5c1tpXVxuICAgICAgICBcbiAgICAgICAgaWYgKGtleS5zdWJzdHJpbmcoMCwgMikgPT0gXCJbXVwiKSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIC8vIFRoaXMgbmV4dCBvYmplY3Qgd2lsbCBiZSBhbiBhcnJheSBhbmQgdGhlIHJlc3Qgb2YgdGhlIGtleXMgbmVlZCB0byBiZSBydW4gZm9yIGVhY2ggb2YgdGhlIGVsZW1lbnRzXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIGN1cnJlbnRPYmplY3QgPSBjdXJyZW50T2JqZWN0W2tleS5zdWJzdHJpbmcoMildXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIC8vIEN1cnJlbnRPYmplY3QgaXMgbm93IGFuIGFycmF5XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHZhciByZW1haW5pbmdLZXlQYXRoID0ga2V5cy5zbGljZShpICsgMSkuam9pbihcIi5cIilcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgdmFyIGN1cnJlbnRBcnJheSA9IGN1cnJlbnRPYmplY3RcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgY3VycmVudE9iamVjdCA9IGN1cnJlbnRBcnJheS5tYXAoZnVuY3Rpb24gKHN1Yk9iamVjdCwgaW5kZXgsIGFycmF5KSB7XG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgdmFyIHJlc3VsdCA9IHZhbHVlRm9yS2V5UGF0aChyZW1haW5pbmdLZXlQYXRoLCBzdWJPYmplY3QpXG4gICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgcmV0dXJuIHJlc3VsdFxuICAgICAgICAgICAgICAgIFxuICAgICAgICAgICAgfSlcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgYnJlYWtcbiAgICAgICAgICAgIFxuICAgICAgICB9XG4gICAgICAgIFxuICAgICAgICBjdXJyZW50T2JqZWN0ID0gKGN1cnJlbnRPYmplY3QgfHwge30pW2tleV1cbiAgICAgICAgXG4gICAgICAgIFxuICAgIH1cbiAgICBcbiAgICByZXR1cm4gY3VycmVudE9iamVjdFxuICAgIFxufVxuXG5cblxuXG5cbmZ1bmN0aW9uIGNvbXBhcmUoZmlyc3RPYmplY3QsIHNlY29uZE9iamVjdCwgc29ydGluZ0luc3RydWN0aW9ucykge1xuICAgIFxuICAgIFxuICAgIGlmIChzb3J0aW5nSW5zdHJ1Y3Rpb25zLmxlbmd0aCA9PSAwKSB7XG4gICAgICAgIHJldHVybiAwXG4gICAgfVxuICAgIFxuICAgIFxuICAgIHZhciBzb3J0aW5nSW5zdHJ1Y3Rpb24gPSBzb3J0aW5nSW5zdHJ1Y3Rpb25zWzBdXG4gICAgXG4gICAgXG4gICAgdmFyIGRpcmVjdGlvbk11bHRpcGxpZXIgPSAxXG4gICAgaWYgKHNvcnRpbmdJbnN0cnVjdGlvbi5kaXJlY3Rpb24gPT0gXCJkZXNjZW5kaW5nXCIpIHtcbiAgICAgICAgZGlyZWN0aW9uTXVsdGlwbGllciA9IC0xXG4gICAgfVxuICAgIFxuICAgIFxuICAgIHZhciBmaXJzdERhdGFTdHJpbmcgPSBmaXJzdE9iamVjdFtzb3J0aW5nSW5zdHJ1Y3Rpb24ua2V5UGF0aF1cbiAgICBcbiAgICB2YXIgc2Vjb25kRGF0YVN0cmluZyA9IHNlY29uZE9iamVjdFtzb3J0aW5nSW5zdHJ1Y3Rpb24ua2V5UGF0aF1cbiAgICBcbiAgICBcbiAgICBcbiAgICBcbiAgICBpZiAoZmlyc3REYXRhU3RyaW5nIDwgc2Vjb25kRGF0YVN0cmluZykge1xuICAgICAgICBcbiAgICAgICAgcmV0dXJuIC0xICogZGlyZWN0aW9uTXVsdGlwbGllclxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgaWYgKGZpcnN0RGF0YVN0cmluZyA+IHNlY29uZERhdGFTdHJpbmcpIHtcbiAgICAgICAgXG4gICAgICAgIHJldHVybiAxICogZGlyZWN0aW9uTXVsdGlwbGllclxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgaWYgKHNvcnRpbmdJbnN0cnVjdGlvbnMubGVuZ3RoID4gMSkge1xuICAgICAgICBcbiAgICAgICAgdmFyIHJlbWFpbmluZ1NvcnRpbmdJbnN0cnVjdGlvbnMgPSBzb3J0aW5nSW5zdHJ1Y3Rpb25zLnNsaWNlKDEpXG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIHJldHVybiBjb21wYXJlKGZpcnN0T2JqZWN0LCBzZWNvbmRPYmplY3QsIHJlbWFpbmluZ1NvcnRpbmdJbnN0cnVjdGlvbnMpXG4gICAgICAgIFxuICAgICAgICBcbiAgICB9XG4gICAgXG4gICAgcmV0dXJuIDBcbiAgICBcbn1cblxuXG5cblxuXG5mdW5jdGlvbiBzb3J0RGF0YShkYXRhLCBzb3J0aW5nSW5zdHJ1Y3Rpb25zKSB7XG4gICAgXG4gICAgXG4gICAgdmFyIHNvcnRpbmdPYmplY3RzID0gZGF0YS5tYXAoZnVuY3Rpb24gKGRhdGFJdGVtLCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciByZXN1bHQgPSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIFwiX1VJS2V5VmFsdWVTdHJpbmdTb3J0ZXJXZWJXb3JrZXJTb3J0aW5nT2JqZWN0SW5kZXhcIjogaW5kZXhcbiAgICAgICAgICAgIFxuICAgICAgICB9XG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgc29ydGluZ0luc3RydWN0aW9ucy5mb3JFYWNoKGZ1bmN0aW9uIChpbnN0cnVjdGlvbiwgaW5kZXgsIGluc3RydWN0aW9uc0FycmF5KSB7XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIHJlc3VsdFtpbnN0cnVjdGlvbi5rZXlQYXRoXSA9IEpTT04uc3RyaW5naWZ5KHZhbHVlRm9yS2V5UGF0aChpbnN0cnVjdGlvbi5rZXlQYXRoLCBkYXRhSXRlbSkgfHwge30pXG4gICAgICAgICAgICAgICAgLnRvTG93ZXJDYXNlKClcbiAgICAgICAgICAgIFxuICAgICAgICB9KVxuICAgICAgICBcbiAgICAgICAgXG4gICAgICAgIFxuICAgICAgICBcbiAgICAgICAgcmV0dXJuIHJlc3VsdFxuICAgICAgICBcbiAgICAgICAgXG4gICAgfSlcbiAgICBcbiAgICBcbiAgICB2YXIgc29ydGVkRGF0YSA9IHNvcnRpbmdPYmplY3RzLnNvcnQoZnVuY3Rpb24gKGZpcnN0T2JqZWN0LCBzZWNvbmRPYmplY3QpIHtcbiAgICAgICAgXG4gICAgICAgIHJldHVybiBjb21wYXJlKGZpcnN0T2JqZWN0LCBzZWNvbmRPYmplY3QsIHNvcnRpbmdJbnN0cnVjdGlvbnMpXG4gICAgICAgIFxuICAgIH0pXG4gICAgXG4gICAgdmFyIHNvcnRlZEluZGV4ZXMgPSBzb3J0ZWREYXRhLm1hcChmdW5jdGlvbiAob2JqZWN0LCBpbmRleCwgYXJyYXkpIHtcbiAgICAgICAgXG4gICAgICAgIHZhciBzb3J0ZWRJbmRleCA9IG9iamVjdC5fVUlLZXlWYWx1ZVN0cmluZ1NvcnRlcldlYldvcmtlclNvcnRpbmdPYmplY3RJbmRleFxuICAgICAgICBcbiAgICAgICAgcmV0dXJuIHNvcnRlZEluZGV4XG4gICAgICAgIFxuICAgIH0pXG4gICAgXG4gICAgdmFyIHJlc3VsdCA9IHtcbiAgICAgICAgXG4gICAgICAgIFwic29ydGVkRGF0YVwiOiBzb3J0ZWRJbmRleGVzLm1hcChmdW5jdGlvbiAoc29ydGVkSW5kZXgsIGluZGV4LCBhcnJheSkge1xuICAgICAgICAgICAgXG4gICAgICAgICAgICByZXR1cm4gZGF0YVtzb3J0ZWRJbmRleF1cbiAgICAgICAgICAgIFxuICAgICAgICB9KSxcbiAgICAgICAgXCJzb3J0ZWRJbmRleGVzXCI6IHNvcnRlZEluZGV4ZXNcbiAgICAgICAgXG4gICAgfVxuICAgIFxuICAgIFxuICAgIHJldHVybiByZXN1bHRcbiAgICBcbiAgICBcbn1cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cblxuXG5cbiJdLAogICJtYXBwaW5ncyI6ICJBQUFBLFVBQVksU0FBVUEsRUFBTyxDQUd6QixJQUFJQyxFQUFlQyxFQUNmRixFQUFNLEtBQUssS0FDWEEsRUFBTSxLQUFLLG1CQUNmLEVBR0FDLEVBQWEsV0FBYUQsRUFBTSxLQUFLLFdBRXJDQyxFQUFhLG1CQUFxQkQsRUFBTSxLQUFLLG1CQUk3QyxZQUFZQyxDQUFZLENBRTVCLEVBTUEsU0FBU0UsRUFBZ0JDLEVBQVNDLEVBQVEsQ0FLdEMsUUFISUMsRUFBT0YsRUFBUSxNQUFNLEdBQUcsRUFDeEJHLEVBQWdCRixFQUVYRyxFQUFJLEVBQUdBLEVBQUlGLEVBQUssT0FBUUUsSUFBSyxDQUVsQyxJQUFJQyxFQUFNSCxFQUFLRSxHQUVmLEdBQUlDLEVBQUksVUFBVSxFQUFHLENBQUMsR0FBSyxLQUFNLENBSTdCRixFQUFnQkEsRUFBY0UsRUFBSSxVQUFVLENBQUMsR0FJN0MsSUFBSUMsRUFBbUJKLEVBQUssTUFBTUUsRUFBSSxDQUFDLEVBQUUsS0FBSyxHQUFHLEVBRTdDRyxFQUFlSixFQUVuQkEsRUFBZ0JJLEVBQWEsSUFBSSxTQUFVQyxFQUFXQyxFQUFPQyxFQUFPLENBRWhFLElBQUlDLEVBQVNaLEVBQWdCTyxFQUFrQkUsQ0FBUyxFQUV4RCxPQUFPRyxDQUVYLENBQUMsRUFFRCxLQUVKLENBRUFSLEdBQWlCQSxHQUFpQixDQUFDLEdBQUdFLEVBRzFDLENBRUEsT0FBT0YsQ0FFWCxDQU1BLFNBQVNTLEVBQVFDLEVBQWFDLEVBQWNDLEVBQXFCLENBRzdELEdBQUlBLEVBQW9CLFFBQVUsRUFDOUIsTUFBTyxHQUlYLElBQUlDLEVBQXFCRCxFQUFvQixHQUd6Q0UsRUFBc0IsRUFDdEJELEVBQW1CLFdBQWEsZUFDaENDLEVBQXNCLElBSTFCLElBQUlDLEVBQWtCTCxFQUFZRyxFQUFtQixTQUVqREcsRUFBbUJMLEVBQWFFLEVBQW1CLFNBS3ZELEdBQUlFLEVBQWtCQyxFQUVsQixNQUFPLEdBQUtGLEVBSWhCLEdBQUlDLEVBQWtCQyxFQUVsQixNQUFPLEdBQUlGLEVBSWYsR0FBSUYsRUFBb0IsT0FBUyxFQUFHLENBRWhDLElBQUlLLEVBQStCTCxFQUFvQixNQUFNLENBQUMsRUFJOUQsT0FBT0gsRUFBUUMsRUFBYUMsRUFBY00sQ0FBNEIsQ0FHMUUsQ0FFQSxNQUFPLEVBRVgsQ0FNQSxTQUFTdEIsRUFBU3VCLEVBQU1OLEVBQXFCLENBR3pDLElBQUlPLEVBQWlCRCxFQUFLLElBQUksU0FBVUUsRUFBVWQsRUFBT0MsRUFBTyxDQUU1RCxJQUFJQyxFQUFTLENBRVQsbURBQXNERixDQUUxRCxFQUdBLE9BQUFNLEVBQW9CLFFBQVEsU0FBVVMsRUFBYWYsRUFBT2dCLEVBQW1CLENBRXpFZCxFQUFPYSxFQUFZLFNBQVcsS0FBSyxVQUFVekIsRUFBZ0J5QixFQUFZLFFBQVNELENBQVEsR0FBSyxDQUFDLENBQUMsRUFDNUYsWUFBWSxDQUVyQixDQUFDLEVBS01aLENBR1gsQ0FBQyxFQUdHZSxFQUFhSixFQUFlLEtBQUssU0FBVVQsRUFBYUMsRUFBYyxDQUV0RSxPQUFPRixFQUFRQyxFQUFhQyxFQUFjQyxDQUFtQixDQUVqRSxDQUFDLEVBRUdZLEVBQWdCRCxFQUFXLElBQUksU0FBVXpCLEVBQVFRLEVBQU9DLEVBQU8sQ0FFL0QsSUFBSWtCLEVBQWMzQixFQUFPLG1EQUV6QixPQUFPMkIsQ0FFWCxDQUFDLEVBRUdqQixFQUFTLENBRVQsV0FBY2dCLEVBQWMsSUFBSSxTQUFVQyxFQUFhbkIsRUFBT0MsRUFBTyxDQUVqRSxPQUFPVyxFQUFLTyxFQUVoQixDQUFDLEVBQ0QsY0FBaUJELENBRXJCLEVBR0EsT0FBT2hCLENBR1giLAogICJuYW1lcyI6IFsiZXZlbnQiLCAid29ya2VyUmVzdWx0IiwgInNvcnREYXRhIiwgInZhbHVlRm9yS2V5UGF0aCIsICJrZXlQYXRoIiwgIm9iamVjdCIsICJrZXlzIiwgImN1cnJlbnRPYmplY3QiLCAiaSIsICJrZXkiLCAicmVtYWluaW5nS2V5UGF0aCIsICJjdXJyZW50QXJyYXkiLCAic3ViT2JqZWN0IiwgImluZGV4IiwgImFycmF5IiwgInJlc3VsdCIsICJjb21wYXJlIiwgImZpcnN0T2JqZWN0IiwgInNlY29uZE9iamVjdCIsICJzb3J0aW5nSW5zdHJ1Y3Rpb25zIiwgInNvcnRpbmdJbnN0cnVjdGlvbiIsICJkaXJlY3Rpb25NdWx0aXBsaWVyIiwgImZpcnN0RGF0YVN0cmluZyIsICJzZWNvbmREYXRhU3RyaW5nIiwgInJlbWFpbmluZ1NvcnRpbmdJbnN0cnVjdGlvbnMiLCAiZGF0YSIsICJzb3J0aW5nT2JqZWN0cyIsICJkYXRhSXRlbSIsICJpbnN0cnVjdGlvbiIsICJpbnN0cnVjdGlvbnNBcnJheSIsICJzb3J0ZWREYXRhIiwgInNvcnRlZEluZGV4ZXMiLCAic29ydGVkSW5kZXgiXQp9Cg==\n');
 }
 var init_UIKeyValueStringSorterWebWorker_worker2 = __esm({
   "node_modules/cbcore-ts/node_modules/uicore-ts/compiledScripts/UIKeyValueStringSorterWebWorker.worker.js"() {
     init_inline_worker();
+    __name(Worker7, "Worker");
   }
 });
 
@@ -13399,23 +13510,23 @@ var require_UIKeyValueStringSorter2 = __commonJS({
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    }, "__copyProps");
+    var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
-    ));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    )), "__toESM");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIKeyValueStringSorter_exports = {};
     __export2(UIKeyValueStringSorter_exports, {
       UIKeyValueStringSorter: () => UIKeyValueStringSorter
@@ -13423,7 +13534,7 @@ var require_UIKeyValueStringSorter2 = __commonJS({
     module.exports = __toCommonJS2(UIKeyValueStringSorter_exports);
     var import_UIObject = require_UIObject2();
     var import_UIKeyValueStringSorterWebWorker_worker = __toESM2((init_UIKeyValueStringSorterWebWorker_worker2(), __toCommonJS(UIKeyValueStringSorterWebWorker_worker_exports2)));
-    var _UIKeyValueStringSorter = class extends import_UIObject.UIObject {
+    var _UIKeyValueStringSorter = /* @__PURE__ */ __name(class extends import_UIObject.UIObject {
       constructor(useSeparateWebWorkerHolder = import_UIObject.NO) {
         super();
         this._isThreadClosed = import_UIObject.NO;
@@ -13520,7 +13631,7 @@ var require_UIKeyValueStringSorter2 = __commonJS({
           this._webWorkerHolder.webWorker.terminate();
         }
       }
-    };
+    }, "_UIKeyValueStringSorter");
     var UIKeyValueStringSorter = _UIKeyValueStringSorter;
     UIKeyValueStringSorter._sharedWebWorkerHolder = { webWorker: new import_UIKeyValueStringSorterWebWorker_worker.default() };
     UIKeyValueStringSorter._instanceNumber = -1;
@@ -13541,19 +13652,19 @@ var require_UIDialogView2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIDialogView_exports = {};
     __export2(UIDialogView_exports, {
       UIDialogView: () => UIDialogView3
@@ -13641,9 +13752,6 @@ var require_UIDialogView2 = __commonJS({
         this.showInView(import_UICore.UICore.main.rootViewController.view, animated);
       }
       dismiss(animated) {
-        if (!this.isVisible) {
-          return;
-        }
         animated = animated && !import_ClientCheckers.IS_FIREFOX;
         if (animated == void 0) {
           animated = this._appearedAnimated;
@@ -13686,6 +13794,7 @@ var require_UIDialogView2 = __commonJS({
         super.layoutSubviews();
       }
     };
+    __name(UIDialogView3, "UIDialogView");
   }
 });
 
@@ -13696,19 +13805,19 @@ var require_UIDateTimeInput2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIDateTimeInput_exports = {};
     __export2(UIDateTimeInput_exports, {
       UIDateTimeInput: () => UIDateTimeInput
@@ -13716,7 +13825,7 @@ var require_UIDateTimeInput2 = __commonJS({
     module.exports = __toCommonJS2(UIDateTimeInput_exports);
     var import_UIObject = require_UIObject2();
     var import_UIView = require_UIView2();
-    var _UIDateTimeInput = class extends import_UIView.UIView {
+    var _UIDateTimeInput = /* @__PURE__ */ __name(class extends import_UIView.UIView {
       constructor(elementID, type = _UIDateTimeInput.type.DateTime) {
         super(elementID, import_UIObject.nil, "input");
         this.viewHTMLElement.setAttribute("type", type);
@@ -13731,7 +13840,7 @@ var require_UIDateTimeInput2 = __commonJS({
         const result = new Date(this.viewHTMLElement.value);
         return result;
       }
-    };
+    }, "_UIDateTimeInput");
     var UIDateTimeInput = _UIDateTimeInput;
     UIDateTimeInput.controlEvent = Object.assign({}, import_UIView.UIView.controlEvent, {
       "ValueChange": "ValueChange"
@@ -13756,19 +13865,19 @@ var require_UIActionIndicator2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIActionIndicator_exports = {};
     __export2(UIActionIndicator_exports, {
       UIActionIndicator: () => UIActionIndicator2
@@ -13819,6 +13928,7 @@ var require_UIActionIndicator2 = __commonJS({
         this.indicatorView.style.top = "" + ((bounds.height - size) * 0.5 - 11).integerValue + "px";
       }
     };
+    __name(UIActionIndicator2, "UIActionIndicator");
   }
 });
 
@@ -13829,15 +13939,15 @@ var require_UIInterfaces2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __copyProps2 = (to, from, except, desc) => {
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var UIInterfaces_exports = {};
     module.exports = __toCommonJS2(UIInterfaces_exports);
   }
@@ -13852,40 +13962,40 @@ var require_UIRootViewController2 = __commonJS({
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
     var __reflectGet2 = Reflect.get;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
-    var __superGet2 = (cls, obj, key) => __reflectGet2(__getProtoOf2(cls), key, obj);
-    var __async2 = (__this, __arguments, generator) => {
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
+    var __superGet2 = /* @__PURE__ */ __name((cls, obj, key) => __reflectGet2(__getProtoOf2(cls), key, obj), "__superGet");
+    var __async2 = /* @__PURE__ */ __name((__this, __arguments, generator) => {
       return new Promise((resolve, reject) => {
-        var fulfilled = (value) => {
+        var fulfilled = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.next(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var rejected = (value) => {
+        }, "fulfilled");
+        var rejected = /* @__PURE__ */ __name((value) => {
           try {
             step(generator.throw(value));
           } catch (e) {
             reject(e);
           }
-        };
-        var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+        }, "rejected");
+        var step = /* @__PURE__ */ __name((x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected), "step");
         step((generator = generator.apply(__this, __arguments)).next());
       });
-    };
+    }, "__async");
     var UIRootViewController_exports = {};
     __export2(UIRootViewController_exports, {
       UIRootViewController: () => UIRootViewController2
@@ -14099,6 +14209,7 @@ var require_UIRootViewController2 = __commonJS({
         (0, import_UIObject.wrapInNil)(this._detailsDialogView).setMaxSizes(this.bottomBarView.frame.max.y);
       }
     };
+    __name(UIRootViewController2, "UIRootViewController");
   }
 });
 
@@ -14109,16 +14220,16 @@ var require_compiledScripts2 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __copyProps2 = (to, from, except, desc) => {
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __reExport = (target, mod, secondTarget) => (__copyProps2(target, mod, "default"), secondTarget && __copyProps2(secondTarget, mod, "default"));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __reExport = /* @__PURE__ */ __name((target, mod, secondTarget) => (__copyProps2(target, mod, "default"), secondTarget && __copyProps2(secondTarget, mod, "default")), "__reExport");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var scripts_exports = {};
     module.exports = __toCommonJS2(scripts_exports);
     __reExport(scripts_exports, require_UIObject2(), module.exports);
@@ -14165,27 +14276,27 @@ var require_CBLanguageService = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var CBLanguageService_exports = {};
     __export2(CBLanguageService_exports, {
       CBLanguageService: () => CBLanguageService2
     });
     module.exports = __toCommonJS2(CBLanguageService_exports);
-    var import_uicore_ts21 = require_compiledScripts2();
+    var import_uicore_ts23 = require_compiledScripts2();
     var import_CBCore = require_CBCore();
-    var _CBLanguageService = class {
+    var _CBLanguageService = /* @__PURE__ */ __name(class {
       static useStoredLanguageValues(values = {}) {
         const result = JSON.parse(JSON.stringify(_CBLanguageService.languageValues)).objectByCopyingValuesRecursivelyFromObject(
           values
@@ -14198,7 +14309,7 @@ var require_CBLanguageService = __commonJS({
       static broadcastLanguageChangeEvent(view) {
         view = view || import_CBCore.CBCore.sharedInstance.viewCores.everyElement.rootViewController.view.rootView;
         view.broadcastEventInSubtree({
-          name: import_uicore_ts21.UIView.broadcastEventName.LanguageChanged,
+          name: import_uicore_ts23.UIView.broadcastEventName.LanguageChanged,
           parameters: {}
         });
       }
@@ -14214,9 +14325,9 @@ var require_CBLanguageService = __commonJS({
       updateCurrentLanguageKey() {
         _CBLanguageService.updateCurrentLanguageKey();
       }
-      static updateCurrentLanguageKey(route = import_uicore_ts21.UIRoute.currentRoute) {
+      static updateCurrentLanguageKey(route = import_uicore_ts23.UIRoute.currentRoute) {
         let result = route.componentWithName("settings").parameters.language;
-        if ((0, import_uicore_ts21.IS_NOT)(result)) {
+        if ((0, import_uicore_ts23.IS_NOT)(result)) {
           result = _CBLanguageService.defaultLanguageKey;
         }
         const isChanged = result != _CBLanguageService._currentLanguageKey;
@@ -14232,19 +14343,19 @@ var require_CBLanguageService = __commonJS({
       }
       static stringForKey(key, languageKey, defaultString, parameters) {
         var result;
-        if ((0, import_uicore_ts21.IS)(key) && _CBLanguageService.languages[languageKey] && (0, import_uicore_ts21.IS_DEFINED)(_CBLanguageService.languages[languageKey][key])) {
+        if ((0, import_uicore_ts23.IS)(key) && _CBLanguageService.languages[languageKey] && (0, import_uicore_ts23.IS_DEFINED)(_CBLanguageService.languages[languageKey][key])) {
           result = _CBLanguageService.languages[languageKey][key];
         } else {
           result = defaultString;
         }
-        if ((0, import_uicore_ts21.IS)(parameters)) {
+        if ((0, import_uicore_ts23.IS)(parameters)) {
           const parameterKeys = Object.keys(parameters);
           parameterKeys.forEach(function(key2, index, array) {
             const keyString = "%" + key2 + "%";
             const parameter = parameters[key2];
             var parameterString;
             if (parameter instanceof Object) {
-              parameterString = import_uicore_ts21.UICore.languageService.stringForCurrentLanguage(parameter);
+              parameterString = import_uicore_ts23.UICore.languageService.stringForCurrentLanguage(parameter);
             } else {
               parameterString = parameter;
             }
@@ -14268,8 +14379,8 @@ var require_CBLanguageService = __commonJS({
         return result;
       }
       static localizedTextObjectForText(text) {
-        if ((0, import_uicore_ts21.IS_NOT)(text)) {
-          return import_uicore_ts21.nil;
+        if ((0, import_uicore_ts23.IS_NOT)(text)) {
+          return import_uicore_ts23.nil;
         }
         const result = {
           [_CBLanguageService.defaultLanguageKey]: text
@@ -14287,15 +14398,15 @@ var require_CBLanguageService = __commonJS({
         if (localizedTextObject === "" + localizedTextObject) {
           return localizedTextObject;
         }
-        localizedTextObject = (0, import_uicore_ts21.FIRST_OR_NIL)(localizedTextObject);
+        localizedTextObject = (0, import_uicore_ts23.FIRST_OR_NIL)(localizedTextObject);
         var result = localizedTextObject[_CBLanguageService.currentLanguageKey];
-        if ((0, import_uicore_ts21.IS_NOT)(result)) {
+        if ((0, import_uicore_ts23.IS_NOT)(result)) {
           result = localizedTextObject[_CBLanguageService.defaultLanguageKey];
         }
-        if ((0, import_uicore_ts21.IS_NOT)(result)) {
+        if ((0, import_uicore_ts23.IS_NOT)(result)) {
           result = localizedTextObject["en"];
         }
-        if ((0, import_uicore_ts21.IS_NOT)(result)) {
+        if ((0, import_uicore_ts23.IS_NOT)(result)) {
           result = "";
         }
         return result;
@@ -14303,7 +14414,7 @@ var require_CBLanguageService = __commonJS({
       stringForCurrentLanguage(localizedTextObject) {
         return _CBLanguageService.stringForCurrentLanguage(localizedTextObject);
       }
-    };
+    }, "_CBLanguageService");
     var CBLanguageService2 = _CBLanguageService;
     CBLanguageService2.languageValues = {
       en: {
@@ -14322,7 +14433,7 @@ var require_CBLanguageService = __commonJS({
       }
     };
     CBLanguageService2.languages = JSON.parse(JSON.stringify(_CBLanguageService.languageValues));
-    import_uicore_ts21.UICore.languageService = CBLanguageService2;
+    import_uicore_ts23.UICore.languageService = CBLanguageService2;
   }
 });
 
@@ -14333,26 +14444,26 @@ var require_CBServerClient = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var CBServerClient_exports = {};
     __export2(CBServerClient_exports, {
       CBServerClient: () => CBServerClient
     });
     module.exports = __toCommonJS2(CBServerClient_exports);
-    var import_uicore_ts21 = require_compiledScripts();
-    var CBServerClient = class extends import_uicore_ts21.UIObject {
+    var import_uicore_ts23 = require_compiledScripts();
+    var CBServerClient = class extends import_uicore_ts23.UIObject {
       constructor(core) {
         super();
         this._core = core;
@@ -14361,23 +14472,23 @@ var require_CBServerClient = __commonJS({
         this.sendRequest("POST", URL2, objectToSend, function(status, response) {
           if (status != 200) {
             console.log("GET " + URL2 + " " + status);
-            if ((0, import_uicore_ts21.IS)(completion)) {
-              completion(import_uicore_ts21.nil);
+            if ((0, import_uicore_ts23.IS)(completion)) {
+              completion(import_uicore_ts23.nil);
             }
             return;
           }
           const result = JSON.parse(response);
-          if ((0, import_uicore_ts21.IS)(completion)) {
+          if ((0, import_uicore_ts23.IS)(completion)) {
             completion(result);
           }
         }.bind(this));
       }
       retrieveJSONObject(URL2, completion) {
-        this.retrieveJSONObjectWithCaching(URL2, import_uicore_ts21.nil, import_uicore_ts21.nil, import_uicore_ts21.YES, completion);
+        this.retrieveJSONObjectWithCaching(URL2, import_uicore_ts23.nil, import_uicore_ts23.nil, import_uicore_ts23.YES, completion);
       }
       retrieveJSONObjectWithCaching(URL2, cacheObject, cacheKey, forceUpdate, completion) {
-        if ((0, import_uicore_ts21.IS)(cacheObject[cacheKey]) && !forceUpdate) {
-          if ((0, import_uicore_ts21.IS)(completion)) {
+        if ((0, import_uicore_ts23.IS)(cacheObject[cacheKey]) && !forceUpdate) {
+          if ((0, import_uicore_ts23.IS)(completion)) {
             completion(cacheObject[cacheKey]);
           }
           return;
@@ -14385,14 +14496,14 @@ var require_CBServerClient = __commonJS({
         this.sendRequest("GET", URL2, null, function(status, response) {
           if (status != 200) {
             console.log("GET " + URL2 + " " + status);
-            if ((0, import_uicore_ts21.IS)(completion)) {
-              completion(import_uicore_ts21.nil);
+            if ((0, import_uicore_ts23.IS)(completion)) {
+              completion(import_uicore_ts23.nil);
             }
             return;
           }
           const result = JSON.parse(response);
           cacheObject[cacheKey] = result;
-          if ((0, import_uicore_ts21.IS)(completion)) {
+          if ((0, import_uicore_ts23.IS)(completion)) {
             completion(result);
           }
         }.bind(this));
@@ -14404,14 +14515,16 @@ var require_CBServerClient = __commonJS({
         xhr.onreadystatechange = processRequest;
         function processRequest(event2) {
           if (xhr.readyState == 4) {
-            if ((0, import_uicore_ts21.IS)(completion)) {
+            if ((0, import_uicore_ts23.IS)(completion)) {
               completion(xhr.status, xhr.responseText);
             }
           }
         }
+        __name(processRequest, "processRequest");
         xhr.send(JSON.stringify(data));
       }
     };
+    __name(CBServerClient, "CBServerClient");
   }
 });
 
@@ -14448,10 +14561,10 @@ var require_encodePacket_browser = __commonJS({
     var commons_js_1 = require_commons();
     var withNativeBlob = typeof Blob === "function" || typeof Blob !== "undefined" && Object.prototype.toString.call(Blob) === "[object BlobConstructor]";
     var withNativeArrayBuffer = typeof ArrayBuffer === "function";
-    var isView = (obj) => {
+    var isView = /* @__PURE__ */ __name((obj) => {
       return typeof ArrayBuffer.isView === "function" ? ArrayBuffer.isView(obj) : obj && obj.buffer instanceof ArrayBuffer;
-    };
-    var encodePacket = ({ type, data }, supportsBinary, callback) => {
+    }, "isView");
+    var encodePacket = /* @__PURE__ */ __name(({ type, data }, supportsBinary, callback) => {
       if (withNativeBlob && data instanceof Blob) {
         if (supportsBinary) {
           return callback(data);
@@ -14466,15 +14579,15 @@ var require_encodePacket_browser = __commonJS({
         }
       }
       return callback(commons_js_1.PACKET_TYPES[type] + (data || ""));
-    };
-    var encodeBlobAsBase64 = (data, callback) => {
+    }, "encodePacket");
+    var encodeBlobAsBase64 = /* @__PURE__ */ __name((data, callback) => {
       const fileReader = new FileReader();
       fileReader.onload = function() {
         const content = fileReader.result.split(",")[1];
         callback("b" + content);
       };
       return fileReader.readAsDataURL(data);
-    };
+    }, "encodeBlobAsBase64");
     exports.default = encodePacket;
   }
 });
@@ -14490,7 +14603,7 @@ var require_base64_arraybuffer = __commonJS({
     for (let i = 0; i < chars.length; i++) {
       lookup[chars.charCodeAt(i)] = i;
     }
-    var encode = (arraybuffer) => {
+    var encode = /* @__PURE__ */ __name((arraybuffer) => {
       let bytes = new Uint8Array(arraybuffer), i, len = bytes.length, base64 = "";
       for (i = 0; i < len; i += 3) {
         base64 += chars[bytes[i] >> 2];
@@ -14504,9 +14617,9 @@ var require_base64_arraybuffer = __commonJS({
         base64 = base64.substring(0, base64.length - 2) + "==";
       }
       return base64;
-    };
+    }, "encode");
     exports.encode = encode;
-    var decode = (base64) => {
+    var decode = /* @__PURE__ */ __name((base64) => {
       let bufferLength = base64.length * 0.75, len = base64.length, i, p = 0, encoded1, encoded2, encoded3, encoded4;
       if (base64[base64.length - 1] === "=") {
         bufferLength--;
@@ -14525,7 +14638,7 @@ var require_base64_arraybuffer = __commonJS({
         bytes[p++] = (encoded3 & 3) << 6 | encoded4 & 63;
       }
       return arraybuffer;
-    };
+    }, "decode");
     exports.decode = decode;
   }
 });
@@ -14538,7 +14651,7 @@ var require_decodePacket_browser = __commonJS({
     var commons_js_1 = require_commons();
     var base64_arraybuffer_js_1 = require_base64_arraybuffer();
     var withNativeArrayBuffer = typeof ArrayBuffer === "function";
-    var decodePacket = (encodedPacket, binaryType) => {
+    var decodePacket = /* @__PURE__ */ __name((encodedPacket, binaryType) => {
       if (typeof encodedPacket !== "string") {
         return {
           type: "message",
@@ -14562,16 +14675,16 @@ var require_decodePacket_browser = __commonJS({
       } : {
         type: commons_js_1.PACKET_TYPES_REVERSE[type]
       };
-    };
-    var decodeBase64Packet = (data, binaryType) => {
+    }, "decodePacket");
+    var decodeBase64Packet = /* @__PURE__ */ __name((data, binaryType) => {
       if (withNativeArrayBuffer) {
         const decoded = (0, base64_arraybuffer_js_1.decode)(data);
         return mapBinary(decoded, binaryType);
       } else {
         return { base64: true, data };
       }
-    };
-    var mapBinary = (data, binaryType) => {
+    }, "decodeBase64Packet");
+    var mapBinary = /* @__PURE__ */ __name((data, binaryType) => {
       switch (binaryType) {
         case "blob":
           return data instanceof ArrayBuffer ? new Blob([data]) : data;
@@ -14579,7 +14692,7 @@ var require_decodePacket_browser = __commonJS({
         default:
           return data;
       }
-    };
+    }, "mapBinary");
     exports.default = decodePacket;
   }
 });
@@ -14595,7 +14708,7 @@ var require_cjs = __commonJS({
     var decodePacket_js_1 = require_decodePacket_browser();
     exports.decodePacket = decodePacket_js_1.default;
     var SEPARATOR = String.fromCharCode(30);
-    var encodePayload = (packets, callback) => {
+    var encodePayload = /* @__PURE__ */ __name((packets, callback) => {
       const length = packets.length;
       const encodedPackets = new Array(length);
       let count = 0;
@@ -14607,9 +14720,9 @@ var require_cjs = __commonJS({
           }
         });
       });
-    };
+    }, "encodePayload");
     exports.encodePayload = encodePayload;
-    var decodePayload = (encodedPayload, binaryType) => {
+    var decodePayload = /* @__PURE__ */ __name((encodedPayload, binaryType) => {
       const encodedPackets = encodedPayload.split(SEPARATOR);
       const packets = [];
       for (let i = 0; i < encodedPackets.length; i++) {
@@ -14620,7 +14733,7 @@ var require_cjs = __commonJS({
         }
       }
       return packets;
-    };
+    }, "decodePayload");
     exports.decodePayload = decodePayload;
     exports.protocol = 4;
   }
@@ -14634,12 +14747,14 @@ var require_component_emitter = __commonJS({
       if (obj)
         return mixin(obj);
     }
+    __name(Emitter, "Emitter");
     function mixin(obj) {
       for (var key in Emitter.prototype) {
         obj[key] = Emitter.prototype[key];
       }
       return obj;
     }
+    __name(mixin, "mixin");
     Emitter.prototype.on = Emitter.prototype.addEventListener = function(event2, fn) {
       this._callbacks = this._callbacks || {};
       (this._callbacks["$" + event2] = this._callbacks["$" + event2] || []).push(fn);
@@ -14650,6 +14765,7 @@ var require_component_emitter = __commonJS({
         this.off(event2, on);
         fn.apply(this, arguments);
       }
+      __name(on, "on");
       on.fn = fn;
       this.on(event2, on);
       return this;
@@ -14738,6 +14854,7 @@ var require_util = __commonJS({
         return acc;
       }, {});
     }
+    __name(pick, "pick");
     exports.pick = pick;
     var NATIVE_SET_TIMEOUT = setTimeout;
     var NATIVE_CLEAR_TIMEOUT = clearTimeout;
@@ -14750,6 +14867,7 @@ var require_util = __commonJS({
         obj.clearTimeoutFn = clearTimeout.bind(globalThis_js_1.globalThisShim);
       }
     }
+    __name(installTimerFunctions, "installTimerFunctions");
     exports.installTimerFunctions = installTimerFunctions;
     var BASE64_OVERHEAD = 1.33;
     function byteLength(obj) {
@@ -14758,6 +14876,7 @@ var require_util = __commonJS({
       }
       return Math.ceil((obj.byteLength || obj.size) * BASE64_OVERHEAD);
     }
+    __name(byteLength, "byteLength");
     exports.byteLength = byteLength;
     function utf8Length(str) {
       let c = 0, length = 0;
@@ -14776,6 +14895,7 @@ var require_util = __commonJS({
       }
       return length;
     }
+    __name(utf8Length, "utf8Length");
   }
 });
 
@@ -14856,6 +14976,7 @@ var require_ms = __commonJS({
           return void 0;
       }
     }
+    __name(parse, "parse");
     function fmtShort(ms) {
       var msAbs = Math.abs(ms);
       if (msAbs >= d) {
@@ -14872,6 +14993,7 @@ var require_ms = __commonJS({
       }
       return ms + "ms";
     }
+    __name(fmtShort, "fmtShort");
     function fmtLong(ms) {
       var msAbs = Math.abs(ms);
       if (msAbs >= d) {
@@ -14888,10 +15010,12 @@ var require_ms = __commonJS({
       }
       return ms + " ms";
     }
+    __name(fmtLong, "fmtLong");
     function plural(ms, msAbs, n, name) {
       var isPlural = msAbs >= n * 1.5;
       return Math.round(ms / n) + " " + name + (isPlural ? "s" : "");
     }
+    __name(plural, "plural");
   }
 });
 
@@ -14921,6 +15045,7 @@ var require_common = __commonJS({
         }
         return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
       }
+      __name(selectColor, "selectColor");
       createDebug.selectColor = selectColor;
       function createDebug(namespace) {
         let prevTime;
@@ -14961,6 +15086,7 @@ var require_common = __commonJS({
           const logFn = self2.log || createDebug.log;
           logFn.apply(self2, args);
         }
+        __name(debug, "debug");
         debug.namespace = namespace;
         debug.useColors = createDebug.useColors();
         debug.color = createDebug.selectColor(namespace);
@@ -14988,11 +15114,13 @@ var require_common = __commonJS({
         }
         return debug;
       }
+      __name(createDebug, "createDebug");
       function extend(namespace, delimiter) {
         const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
         newDebug.log = this.log;
         return newDebug;
       }
+      __name(extend, "extend");
       function enable(namespaces) {
         createDebug.save(namespaces);
         createDebug.namespaces = namespaces;
@@ -15013,6 +15141,7 @@ var require_common = __commonJS({
           }
         }
       }
+      __name(enable, "enable");
       function disable() {
         const namespaces = [
           ...createDebug.names.map(toNamespace),
@@ -15021,6 +15150,7 @@ var require_common = __commonJS({
         createDebug.enable("");
         return namespaces;
       }
+      __name(disable, "disable");
       function enabled(name) {
         if (name[name.length - 1] === "*") {
           return true;
@@ -15039,21 +15169,26 @@ var require_common = __commonJS({
         }
         return false;
       }
+      __name(enabled, "enabled");
       function toNamespace(regexp) {
         return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
       }
+      __name(toNamespace, "toNamespace");
       function coerce(val) {
         if (val instanceof Error) {
           return val.stack || val.message;
         }
         return val;
       }
+      __name(coerce, "coerce");
       function destroy() {
         console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
       }
+      __name(destroy, "destroy");
       createDebug.enable(createDebug.load());
       return createDebug;
     }
+    __name(setup, "setup");
     module.exports = setup;
   }
 });
@@ -15162,6 +15297,7 @@ var require_browser = __commonJS({
       }
       return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
     }
+    __name(useColors, "useColors");
     function formatArgs(args) {
       args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module.exports.humanize(this.diff);
       if (!this.useColors) {
@@ -15182,6 +15318,7 @@ var require_browser = __commonJS({
       });
       args.splice(lastC, 0, c);
     }
+    __name(formatArgs, "formatArgs");
     exports.log = console.debug || console.log || (() => {
     });
     function save(namespaces) {
@@ -15194,6 +15331,7 @@ var require_browser = __commonJS({
       } catch (error) {
       }
     }
+    __name(save, "save");
     function load() {
       let r;
       try {
@@ -15205,12 +15343,14 @@ var require_browser = __commonJS({
       }
       return r;
     }
+    __name(load, "load");
     function localstorage() {
       try {
         return localStorage;
       } catch (error) {
       }
     }
+    __name(localstorage, "localstorage");
     module.exports = require_common()(exports);
     var { formatters } = module.exports;
     formatters.j = function(v) {
@@ -15245,6 +15385,7 @@ var require_transport = __commonJS({
         this.type = "TransportError";
       }
     };
+    __name(TransportError, "TransportError");
     var Transport = class extends component_emitter_1.Emitter {
       constructor(opts) {
         super();
@@ -15297,6 +15438,7 @@ var require_transport = __commonJS({
         super.emitReserved("close", details);
       }
     };
+    __name(Transport, "Transport");
     exports.Transport = Transport;
   }
 });
@@ -15321,6 +15463,7 @@ var require_yeast = __commonJS({
       } while (num > 0);
       return encoded;
     }
+    __name(encode, "encode");
     exports.encode = encode;
     function decode(str) {
       let decoded = 0;
@@ -15329,6 +15472,7 @@ var require_yeast = __commonJS({
       }
       return decoded;
     }
+    __name(decode, "decode");
     exports.decode = decode;
     function yeast() {
       const now = encode(+new Date());
@@ -15336,6 +15480,7 @@ var require_yeast = __commonJS({
         return seed = 0, prev = now;
       return now + "." + encode(seed++);
     }
+    __name(yeast, "yeast");
     exports.yeast = yeast;
     for (; i < length; i++)
       map[alphabet[i]] = i;
@@ -15359,6 +15504,7 @@ var require_parseqs = __commonJS({
       }
       return str;
     }
+    __name(encode, "encode");
     exports.encode = encode;
     function decode(qs) {
       let qry = {};
@@ -15369,6 +15515,7 @@ var require_parseqs = __commonJS({
       }
       return qry;
     }
+    __name(decode, "decode");
     exports.decode = decode;
   }
 });
@@ -15411,6 +15558,7 @@ var require_xmlhttprequest_browser = __commonJS({
         }
       }
     }
+    __name(XHR, "XHR");
     exports.XHR = XHR;
   }
 });
@@ -15436,6 +15584,7 @@ var require_polling = __commonJS({
     var debug = (0, debug_1.default)("engine.io-client:polling");
     function empty() {
     }
+    __name(empty, "empty");
     var hasXHR2 = function() {
       const xhr = new xmlhttprequest_js_1.XHR({
         xdomain: false
@@ -15466,11 +15615,11 @@ var require_polling = __commonJS({
       }
       pause(onPause) {
         this.readyState = "pausing";
-        const pause = () => {
+        const pause = /* @__PURE__ */ __name(() => {
           debug("paused");
           this.readyState = "paused";
           onPause();
-        };
+        }, "pause");
         if (this.polling || !this.writable) {
           let total = 0;
           if (this.polling) {
@@ -15501,7 +15650,7 @@ var require_polling = __commonJS({
       }
       onData(data) {
         debug("polling got data %s", data);
-        const callback = (packet) => {
+        const callback = /* @__PURE__ */ __name((packet) => {
           if ("opening" === this.readyState && packet.type === "open") {
             this.onOpen();
           }
@@ -15510,7 +15659,7 @@ var require_polling = __commonJS({
             return false;
           }
           this.onPacket(packet);
-        };
+        }, "callback");
         (0, engine_io_parser_1.decodePayload)(data, this.socket.binaryType).forEach(callback);
         if ("closed" !== this.readyState) {
           this.polling = false;
@@ -15523,10 +15672,10 @@ var require_polling = __commonJS({
         }
       }
       doClose() {
-        const close = () => {
+        const close = /* @__PURE__ */ __name(() => {
           debug("writing close packet");
           this.write([{ type: "close" }]);
-        };
+        }, "close");
         if ("open" === this.readyState) {
           debug("transport open - closing");
           close();
@@ -15585,6 +15734,7 @@ var require_polling = __commonJS({
         this.pollXhr = req;
       }
     };
+    __name(Polling, "Polling");
     exports.Polling = Polling;
     var Request = class extends component_emitter_1.Emitter {
       constructor(uri, opts) {
@@ -15688,6 +15838,7 @@ var require_polling = __commonJS({
         this.cleanup();
       }
     };
+    __name(Request, "Request");
     exports.Request = Request;
     Request.requestsCount = 0;
     Request.requests = {};
@@ -15706,6 +15857,7 @@ var require_polling = __commonJS({
         }
       }
     }
+    __name(unloadHandler, "unloadHandler");
   }
 });
 
@@ -15851,6 +16003,7 @@ var require_websocket = __commonJS({
         return !!websocket_constructor_js_1.WebSocket;
       }
     };
+    __name(WS, "WS");
     exports.WS = WS;
   }
 });
@@ -15912,6 +16065,7 @@ var require_parseuri = __commonJS({
       uri.queryKey = queryKey(uri, uri["query"]);
       return uri;
     }
+    __name(parse, "parse");
     exports.parse = parse;
     function pathNames(obj, path) {
       const regx = /\/{2,9}/g, names = path.replace(regx, "/").split("/");
@@ -15923,6 +16077,7 @@ var require_parseuri = __commonJS({
       }
       return names;
     }
+    __name(pathNames, "pathNames");
     function queryKey(uri, query) {
       const data = {};
       query.replace(/(?:^|&)([^&=]*)=?([^&]*)/g, function($0, $1, $2) {
@@ -15932,6 +16087,7 @@ var require_parseuri = __commonJS({
       });
       return data;
     }
+    __name(queryKey, "queryKey");
   }
 });
 
@@ -16078,7 +16234,7 @@ var require_socket = __commonJS({
         let transport = this.createTransport(name);
         let failed = false;
         Socket.priorWebsocketSuccess = false;
-        const onTransportOpen = () => {
+        const onTransportOpen = /* @__PURE__ */ __name(() => {
           if (failed)
             return;
           debug('probe transport "%s" opened', name);
@@ -16115,7 +16271,7 @@ var require_socket = __commonJS({
               this.emitReserved("upgradeError", err);
             }
           });
-        };
+        }, "onTransportOpen");
         function freezeTransport() {
           if (failed)
             return;
@@ -16124,32 +16280,36 @@ var require_socket = __commonJS({
           transport.close();
           transport = null;
         }
-        const onerror = (err) => {
+        __name(freezeTransport, "freezeTransport");
+        const onerror = /* @__PURE__ */ __name((err) => {
           const error = new Error("probe error: " + err);
           error.transport = transport.name;
           freezeTransport();
           debug('probe transport "%s" failed because of error: %s', name, err);
           this.emitReserved("upgradeError", error);
-        };
+        }, "onerror");
         function onTransportClose() {
           onerror("transport closed");
         }
+        __name(onTransportClose, "onTransportClose");
         function onclose() {
           onerror("socket closed");
         }
+        __name(onclose, "onclose");
         function onupgrade(to) {
           if (transport && to.name !== transport.name) {
             debug('"%s" works - aborting "%s"', to.name, transport.name);
             freezeTransport();
           }
         }
-        const cleanup = () => {
+        __name(onupgrade, "onupgrade");
+        const cleanup = /* @__PURE__ */ __name(() => {
           transport.removeListener("open", onTransportOpen);
           transport.removeListener("error", onerror);
           transport.removeListener("close", onTransportClose);
           this.off("close", onclose);
           this.off("upgrading", onupgrade);
-        };
+        }, "cleanup");
         transport.once("open", onTransportOpen);
         transport.once("error", onerror);
         transport.once("close", onTransportClose);
@@ -16295,20 +16455,20 @@ var require_socket = __commonJS({
         this.flush();
       }
       close() {
-        const close = () => {
+        const close = /* @__PURE__ */ __name(() => {
           this.onClose("forced close");
           debug("socket closing - telling transport to close");
           this.transport.close();
-        };
-        const cleanupAndClose = () => {
+        }, "close");
+        const cleanupAndClose = /* @__PURE__ */ __name(() => {
           this.off("upgrade", cleanupAndClose);
           this.off("upgradeError", cleanupAndClose);
           close();
-        };
-        const waitForUpgrade = () => {
+        }, "cleanupAndClose");
+        const waitForUpgrade = /* @__PURE__ */ __name(() => {
           this.once("upgrade", cleanupAndClose);
           this.once("upgradeError", cleanupAndClose);
-        };
+        }, "waitForUpgrade");
         if ("opening" === this.readyState || "open" === this.readyState) {
           this.readyState = "closing";
           if (this.writeBuffer.length) {
@@ -16361,6 +16521,7 @@ var require_socket = __commonJS({
         return filteredUpgrades;
       }
     };
+    __name(Socket, "Socket");
     exports.Socket = Socket;
     Socket.protocol = engine_io_parser_1.protocol;
   }
@@ -16446,6 +16607,7 @@ var require_url = __commonJS({
       obj.href = obj.protocol + "://" + host + (loc && loc.port === obj.port ? "" : ":" + obj.port);
       return obj;
     }
+    __name(url, "url");
     exports.url = url;
   }
 });
@@ -16457,15 +16619,16 @@ var require_is_binary = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hasBinary = exports.isBinary = void 0;
     var withNativeArrayBuffer = typeof ArrayBuffer === "function";
-    var isView = (obj) => {
+    var isView = /* @__PURE__ */ __name((obj) => {
       return typeof ArrayBuffer.isView === "function" ? ArrayBuffer.isView(obj) : obj.buffer instanceof ArrayBuffer;
-    };
+    }, "isView");
     var toString = Object.prototype.toString;
     var withNativeBlob = typeof Blob === "function" || typeof Blob !== "undefined" && toString.call(Blob) === "[object BlobConstructor]";
     var withNativeFile = typeof File === "function" || typeof File !== "undefined" && toString.call(File) === "[object FileConstructor]";
     function isBinary(obj) {
       return withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj)) || withNativeBlob && obj instanceof Blob || withNativeFile && obj instanceof File;
     }
+    __name(isBinary, "isBinary");
     exports.isBinary = isBinary;
     function hasBinary(obj, toJSON) {
       if (!obj || typeof obj !== "object") {
@@ -16492,6 +16655,7 @@ var require_is_binary = __commonJS({
       }
       return false;
     }
+    __name(hasBinary, "hasBinary");
     exports.hasBinary = hasBinary;
   }
 });
@@ -16511,6 +16675,7 @@ var require_binary = __commonJS({
       pack.attachments = buffers.length;
       return { packet: pack, buffers };
     }
+    __name(deconstructPacket, "deconstructPacket");
     exports.deconstructPacket = deconstructPacket;
     function _deconstructPacket(data, buffers) {
       if (!data)
@@ -16536,11 +16701,13 @@ var require_binary = __commonJS({
       }
       return data;
     }
+    __name(_deconstructPacket, "_deconstructPacket");
     function reconstructPacket(packet, buffers) {
       packet.data = _reconstructPacket(packet.data, buffers);
       packet.attachments = void 0;
       return packet;
     }
+    __name(reconstructPacket, "reconstructPacket");
     exports.reconstructPacket = reconstructPacket;
     function _reconstructPacket(data, buffers) {
       if (!data)
@@ -16565,6 +16732,7 @@ var require_binary = __commonJS({
       }
       return data;
     }
+    __name(_reconstructPacket, "_reconstructPacket");
   }
 });
 
@@ -16629,6 +16797,7 @@ var require_cjs3 = __commonJS({
         return buffers;
       }
     };
+    __name(Encoder, "Encoder");
     exports.Encoder = Encoder;
     var Decoder = class extends component_emitter_1.Emitter {
       constructor(reviver) {
@@ -16749,6 +16918,7 @@ var require_cjs3 = __commonJS({
         }
       }
     };
+    __name(Decoder, "Decoder");
     exports.Decoder = Decoder;
     var BinaryReconstructor = class {
       constructor(packet) {
@@ -16770,6 +16940,7 @@ var require_cjs3 = __commonJS({
         this.buffers = [];
       }
     };
+    __name(BinaryReconstructor, "BinaryReconstructor");
   }
 });
 
@@ -16781,10 +16952,11 @@ var require_on = __commonJS({
     exports.on = void 0;
     function on(obj, ev, fn) {
       obj.on(ev, fn);
-      return function subDestroy() {
+      return /* @__PURE__ */ __name(function subDestroy() {
         obj.off(ev, fn);
-      };
+      }, "subDestroy");
     }
+    __name(on, "on");
     exports.on = on;
   }
 });
@@ -16865,7 +17037,7 @@ var require_socket2 = __commonJS({
       }
       emit(ev, ...args) {
         if (RESERVED_EVENTS.hasOwnProperty(ev)) {
-          throw new Error('"' + ev + '" is a reserved event name');
+          throw new Error('"' + ev.toString() + '" is a reserved event name');
         }
         args.unshift(ev);
         const packet = {
@@ -17143,6 +17315,7 @@ var require_socket2 = __commonJS({
         }
       }
     };
+    __name(Socket, "Socket");
     exports.Socket = Socket;
   }
 });
@@ -17161,6 +17334,7 @@ var require_backo2 = __commonJS({
       this.jitter = opts.jitter > 0 && opts.jitter <= 1 ? opts.jitter : 0;
       this.attempts = 0;
     }
+    __name(Backoff, "Backoff");
     exports.Backoff = Backoff;
     Backoff.prototype.duration = function() {
       var ms = this.ms * Math.pow(this.factor, this.attempts++);
@@ -17352,9 +17526,9 @@ var require_manager = __commonJS({
           if (this.opts.autoUnref) {
             timer.unref();
           }
-          this.subs.push(function subDestroy() {
+          this.subs.push(/* @__PURE__ */ __name(function subDestroy() {
             clearTimeout(timer);
-          });
+          }, "subDestroy"));
         }
         this.subs.push(openSubDestroy);
         this.subs.push(errorSub);
@@ -17375,7 +17549,11 @@ var require_manager = __commonJS({
         this.emitReserved("ping");
       }
       ondata(data) {
-        this.decoder.add(data);
+        try {
+          this.decoder.add(data);
+        } catch (e) {
+          this.onclose("parse error");
+        }
       }
       ondecoded(packet) {
         this.emitReserved("packet", packet);
@@ -17472,9 +17650,9 @@ var require_manager = __commonJS({
           if (this.opts.autoUnref) {
             timer.unref();
           }
-          this.subs.push(function subDestroy() {
+          this.subs.push(/* @__PURE__ */ __name(function subDestroy() {
             clearTimeout(timer);
-          });
+          }, "subDestroy"));
         }
       }
       onreconnect() {
@@ -17484,6 +17662,7 @@ var require_manager = __commonJS({
         this.emitReserved("reconnect", attempt);
       }
     };
+    __name(Manager, "Manager");
     exports.Manager = Manager;
   }
 });
@@ -17537,6 +17716,7 @@ var require_cjs4 = __commonJS({
       }
       return io.socket(parsed.path, opts);
     }
+    __name(lookup, "lookup");
     exports.io = lookup;
     exports.connect = lookup;
     exports.default = lookup;
@@ -17561,7 +17741,7 @@ var require_object_hash = __commonJS({
       var t;
       "object" == typeof exports ? module.exports = e() : "function" == typeof define && define.amd ? define(e) : ("undefined" != typeof window ? t = window : "undefined" != typeof global ? t = global : "undefined" != typeof self && (t = self), t.objectHash = e());
     }(function() {
-      return function o(i, u, a) {
+      return (/* @__PURE__ */ __name(function o(i, u, a) {
         function s(n, e2) {
           if (!u[n]) {
             if (!i[n]) {
@@ -17580,10 +17760,11 @@ var require_object_hash = __commonJS({
           }
           return u[n].exports;
         }
+        __name(s, "s");
         for (var f = "function" == typeof __require && __require, e = 0; e < a.length; e++)
           s(a[e]);
         return s;
-      }({ 1: [function(w, b, m) {
+      }, "o"))({ 1: [function(w, b, m) {
         (function(e, t, f, n, r, o, i, u, a) {
           "use strict";
           var s = w("crypto");
@@ -17599,6 +17780,7 @@ var require_object_hash = __commonJS({
               return "buffer" !== t3.encoding ? r2.toString(t3.encoding) : r2;
             }(e2, t2 = h(e2, t2));
           }
+          __name(c, "c");
           (m = b.exports = c).sha1 = function(e2) {
             return c(e2);
           }, m.keys = function(e2) {
@@ -17624,16 +17806,19 @@ var require_object_hash = __commonJS({
               throw new Error('Encoding "' + n2.encoding + '"  not supported. supported values: ' + d.join(", "));
             return n2;
           }
+          __name(h, "h");
           function p(e2) {
             if ("function" == typeof e2) {
               return null != /^function\s+\w*\s*\(\s*\)\s*{\s+\[native code\]\s+}$/i.exec(Function.prototype.toString.call(e2));
             }
           }
+          __name(p, "p");
           function g(u2, t2, a2) {
             a2 = a2 || [];
             function s2(e2) {
               return t2.update ? t2.update(e2, "utf8") : t2.write(e2, "utf8");
             }
+            __name(s2, "s");
             return { dispatch: function(e2) {
               return u2.replacer && (e2 = u2.replacer(e2)), this["_" + (null === e2 ? "null" : typeof e2)](e2);
             }, _object: function(t3) {
@@ -17770,6 +17955,7 @@ var require_object_hash = __commonJS({
               return s2("tlswrap");
             } };
           }
+          __name(g, "g");
           function y() {
             return { buf: "", write: function(e2) {
               this.buf += e2;
@@ -17779,6 +17965,7 @@ var require_object_hash = __commonJS({
               return this.buf;
             } };
           }
+          __name(y, "y");
           m.writeToStream = function(e2, t2, n2) {
             return void 0 === n2 && (n2 = t2, t2 = {}), g(t2 = h(e2, t2), n2).dispatch(e2);
           };
@@ -17792,6 +17979,7 @@ var require_object_hash = __commonJS({
               var t3 = e4.charCodeAt(0);
               return t3 === n2 || t3 === a2 ? 62 : t3 === r2 || t3 === s2 ? 63 : t3 < o2 ? -1 : t3 < o2 + 10 ? t3 - o2 + 26 + 26 : t3 < u2 + 26 ? t3 - u2 : t3 < i2 + 26 ? t3 - i2 + 26 : void 0;
             }
+            __name(c, "c");
             e3.toByteArray = function(e4) {
               var t3, n3;
               if (0 < e4.length % 4)
@@ -17800,6 +17988,7 @@ var require_object_hash = __commonJS({
               function s3(e5) {
                 i3[a3++] = e5;
               }
+              __name(s3, "s");
               for (t3 = 0; t3 < u3; t3 += 4, 0)
                 s3((16711680 & (n3 = c(e4.charAt(t3)) << 18 | c(e4.charAt(t3 + 1)) << 12 | c(e4.charAt(t3 + 2)) << 6 | c(e4.charAt(t3 + 3)))) >> 16), s3((65280 & n3) >> 8), s3(255 & n3);
               return 2 == o3 ? s3(255 & (n3 = c(e4.charAt(t3)) << 2 | c(e4.charAt(t3 + 1)) >> 4)) : 1 == o3 && (s3((n3 = c(e4.charAt(t3)) << 10 | c(e4.charAt(t3 + 1)) << 4 | c(e4.charAt(t3 + 2)) >> 2) >> 8 & 255), s3(255 & n3)), i3;
@@ -17808,6 +17997,7 @@ var require_object_hash = __commonJS({
               function a3(e5) {
                 return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(e5);
               }
+              __name(a3, "a");
               for (t3 = 0, r3 = e4.length - i3; t3 < r3; t3 += 3)
                 n3 = (e4[t3] << 16) + (e4[t3 + 1] << 8) + e4[t3 + 2], u3 += a3((o3 = n3) >> 18 & 63) + a3(o3 >> 12 & 63) + a3(o3 >> 6 & 63) + a3(63 & o3);
               switch (i3) {
@@ -17852,6 +18042,7 @@ var require_object_hash = __commonJS({
                 i2[u2] = 0;
             return i2;
           }
+          __name(g, "g");
           function y(e3, t2, n2, r2) {
             return g._charsWritten = T(function(e4) {
               for (var t3 = [], n3 = 0; n3 < e4.length; n3++)
@@ -17859,6 +18050,7 @@ var require_object_hash = __commonJS({
               return t3;
             }(t2), e3, n2, r2);
           }
+          __name(y, "y");
           function w(e3, t2, n2, r2) {
             return g._charsWritten = T(function(e4) {
               for (var t3, n3, r3, o2 = [], i2 = 0; i2 < e4.length; i2++)
@@ -17866,6 +18058,7 @@ var require_object_hash = __commonJS({
               return o2;
             }(t2), e3, n2, r2);
           }
+          __name(w, "w");
           function c(e3, t2, n2) {
             var r2 = "";
             n2 = Math.min(e3.length, n2);
@@ -17873,36 +18066,43 @@ var require_object_hash = __commonJS({
               r2 += String.fromCharCode(e3[o2]);
             return r2;
           }
+          __name(c, "c");
           function l(e3, t2, n2, r2) {
             r2 || (D("boolean" == typeof n2, "missing or invalid endian"), D(null != t2, "missing offset"), D(t2 + 1 < e3.length, "Trying to read beyond buffer length"));
             var o2, i2 = e3.length;
             if (!(i2 <= t2))
               return n2 ? (o2 = e3[t2], t2 + 1 < i2 && (o2 |= e3[t2 + 1] << 8)) : (o2 = e3[t2] << 8, t2 + 1 < i2 && (o2 |= e3[t2 + 1])), o2;
           }
+          __name(l, "l");
           function d(e3, t2, n2, r2) {
             r2 || (D("boolean" == typeof n2, "missing or invalid endian"), D(null != t2, "missing offset"), D(t2 + 3 < e3.length, "Trying to read beyond buffer length"));
             var o2, i2 = e3.length;
             if (!(i2 <= t2))
               return n2 ? (t2 + 2 < i2 && (o2 = e3[t2 + 2] << 16), t2 + 1 < i2 && (o2 |= e3[t2 + 1] << 8), o2 |= e3[t2], t2 + 3 < i2 && (o2 += e3[t2 + 3] << 24 >>> 0)) : (t2 + 1 < i2 && (o2 = e3[t2 + 1] << 16), t2 + 2 < i2 && (o2 |= e3[t2 + 2] << 8), t2 + 3 < i2 && (o2 |= e3[t2 + 3]), o2 += e3[t2] << 24 >>> 0), o2;
           }
+          __name(d, "d");
           function h(e3, t2, n2, r2) {
             if (r2 || (D("boolean" == typeof n2, "missing or invalid endian"), D(null != t2, "missing offset"), D(t2 + 1 < e3.length, "Trying to read beyond buffer length")), !(e3.length <= t2)) {
               var o2 = l(e3, t2, n2, true);
               return 32768 & o2 ? -1 * (65535 - o2 + 1) : o2;
             }
           }
+          __name(h, "h");
           function p(e3, t2, n2, r2) {
             if (r2 || (D("boolean" == typeof n2, "missing or invalid endian"), D(null != t2, "missing offset"), D(t2 + 3 < e3.length, "Trying to read beyond buffer length")), !(e3.length <= t2)) {
               var o2 = d(e3, t2, n2, true);
               return 2147483648 & o2 ? -1 * (4294967295 - o2 + 1) : o2;
             }
           }
+          __name(p, "p");
           function b(e3, t2, n2, r2) {
             return r2 || (D("boolean" == typeof n2, "missing or invalid endian"), D(t2 + 3 < e3.length, "Trying to read beyond buffer length")), f.read(e3, t2, n2, 23, 4);
           }
+          __name(b, "b");
           function m(e3, t2, n2, r2) {
             return r2 || (D("boolean" == typeof n2, "missing or invalid endian"), D(t2 + 7 < e3.length, "Trying to read beyond buffer length")), f.read(e3, t2, n2, 52, 8);
           }
+          __name(m, "m");
           function v(e3, t2, n2, r2, o2) {
             o2 || (D(null != t2, "missing value"), D("boolean" == typeof r2, "missing or invalid endian"), D(null != n2, "missing offset"), D(n2 + 1 < e3.length, "trying to write beyond buffer length"), N(t2, 65535));
             var i2 = e3.length;
@@ -17910,6 +18110,7 @@ var require_object_hash = __commonJS({
               for (var u2 = 0, a2 = Math.min(i2 - n2, 2); u2 < a2; u2++)
                 e3[n2 + u2] = (t2 & 255 << 8 * (r2 ? u2 : 1 - u2)) >>> 8 * (r2 ? u2 : 1 - u2);
           }
+          __name(v, "v");
           function _(e3, t2, n2, r2, o2) {
             o2 || (D(null != t2, "missing value"), D("boolean" == typeof r2, "missing or invalid endian"), D(null != n2, "missing offset"), D(n2 + 3 < e3.length, "trying to write beyond buffer length"), N(t2, 4294967295));
             var i2 = e3.length;
@@ -17917,18 +18118,23 @@ var require_object_hash = __commonJS({
               for (var u2 = 0, a2 = Math.min(i2 - n2, 4); u2 < a2; u2++)
                 e3[n2 + u2] = t2 >>> 8 * (r2 ? u2 : 3 - u2) & 255;
           }
+          __name(_, "_");
           function E(e3, t2, n2, r2, o2) {
             o2 || (D(null != t2, "missing value"), D("boolean" == typeof r2, "missing or invalid endian"), D(null != n2, "missing offset"), D(n2 + 1 < e3.length, "Trying to write beyond buffer length"), Y(t2, 32767, -32768)), e3.length <= n2 || v(e3, 0 <= t2 ? t2 : 65535 + t2 + 1, n2, r2, o2);
           }
+          __name(E, "E");
           function I(e3, t2, n2, r2, o2) {
             o2 || (D(null != t2, "missing value"), D("boolean" == typeof r2, "missing or invalid endian"), D(null != n2, "missing offset"), D(n2 + 3 < e3.length, "Trying to write beyond buffer length"), Y(t2, 2147483647, -2147483648)), e3.length <= n2 || _(e3, 0 <= t2 ? t2 : 4294967295 + t2 + 1, n2, r2, o2);
           }
+          __name(I, "I");
           function A(e3, t2, n2, r2, o2) {
             o2 || (D(null != t2, "missing value"), D("boolean" == typeof r2, "missing or invalid endian"), D(null != n2, "missing offset"), D(n2 + 3 < e3.length, "Trying to write beyond buffer length"), F(t2, 34028234663852886e22, -34028234663852886e22)), e3.length <= n2 || f.write(e3, t2, n2, r2, 23, 4);
           }
+          __name(A, "A");
           function B(e3, t2, n2, r2, o2) {
             o2 || (D(null != t2, "missing value"), D("boolean" == typeof r2, "missing or invalid endian"), D(null != n2, "missing offset"), D(n2 + 7 < e3.length, "Trying to write beyond buffer length"), F(t2, 17976931348623157e292, -17976931348623157e292)), e3.length <= n2 || f.write(e3, t2, n2, r2, 52, 8);
           }
+          __name(B, "B");
           H.Buffer = g, H.SlowBuffer = g, H.INSPECT_MAX_BYTES = 50, g.poolSize = 8192, g._useTypedArrays = function() {
             try {
               var e3 = new ArrayBuffer(0), t2 = new Uint8Array(e3);
@@ -18191,17 +18397,21 @@ var require_object_hash = __commonJS({
           function U(e3, t2, n2) {
             return "number" != typeof e3 ? n2 : t2 <= (e3 = ~~e3) ? t2 : 0 <= e3 || 0 <= (e3 += t2) ? e3 : 0;
           }
+          __name(U, "U");
           function x(e3) {
             return (e3 = ~~Math.ceil(+e3)) < 0 ? 0 : e3;
           }
+          __name(x, "x");
           function S(e3) {
             return (Array.isArray || function(e4) {
               return "[object Array]" === Object.prototype.toString.call(e4);
             })(e3);
           }
+          __name(S, "S");
           function j(e3) {
             return e3 < 16 ? "0" + e3.toString(16) : e3.toString(16);
           }
+          __name(j, "j");
           function C(e3) {
             for (var t2 = [], n2 = 0; n2 < e3.length; n2++) {
               var r2 = e3.charCodeAt(n2);
@@ -18216,14 +18426,17 @@ var require_object_hash = __commonJS({
             }
             return t2;
           }
+          __name(C, "C");
           function k(e3) {
             return s.toByteArray(e3);
           }
+          __name(k, "k");
           function T(e3, t2, n2, r2) {
             for (var o2 = 0; o2 < r2 && !(o2 + n2 >= t2.length || o2 >= e3.length); o2++)
               t2[o2 + n2] = e3[o2];
             return o2;
           }
+          __name(T, "T");
           function M(e3) {
             try {
               return decodeURIComponent(e3);
@@ -18231,19 +18444,24 @@ var require_object_hash = __commonJS({
               return String.fromCharCode(65533);
             }
           }
+          __name(M, "M");
           function N(e3, t2) {
             D("number" == typeof e3, "cannot write a non-number as a number"), D(0 <= e3, "specified a negative value for writing an unsigned value"), D(e3 <= t2, "value is larger than maximum value for type"), D(Math.floor(e3) === e3, "value has a fractional component");
           }
+          __name(N, "N");
           function Y(e3, t2, n2) {
             D("number" == typeof e3, "cannot write a non-number as a number"), D(e3 <= t2, "value larger than maximum allowed value"), D(n2 <= e3, "value smaller than minimum allowed value"), D(Math.floor(e3) === e3, "value has a fractional component");
           }
+          __name(Y, "Y");
           function F(e3, t2, n2) {
             D("number" == typeof e3, "cannot write a non-number as a number"), D(e3 <= t2, "value larger than maximum allowed value"), D(n2 <= e3, "value smaller than minimum allowed value");
           }
+          __name(F, "F");
           function D(e3, t2) {
             if (!e3)
               throw new Error(t2 || "Failed assertion");
           }
+          __name(D, "D");
           g._augment = function(e3) {
             return e3._isBuffer = true, e3._get = e3.get, e3._set = e3.set, e3.get = L.get, e3.set = L.set, e3.write = L.write, e3.toString = L.toString, e3.toLocaleString = L.toString, e3.toJSON = L.toJSON, e3.copy = L.copy, e3.slice = L.slice, e3.readUInt8 = L.readUInt8, e3.readUInt16LE = L.readUInt16LE, e3.readUInt16BE = L.readUInt16BE, e3.readUInt32LE = L.readUInt32LE, e3.readUInt32BE = L.readUInt32BE, e3.readInt8 = L.readInt8, e3.readInt16LE = L.readInt16LE, e3.readInt16BE = L.readInt16BE, e3.readInt32LE = L.readInt32LE, e3.readInt32BE = L.readInt32BE, e3.readFloatLE = L.readFloatLE, e3.readFloatBE = L.readFloatBE, e3.readDoubleLE = L.readDoubleLE, e3.readDoubleBE = L.readDoubleBE, e3.writeUInt8 = L.writeUInt8, e3.writeUInt16LE = L.writeUInt16LE, e3.writeUInt16BE = L.writeUInt16BE, e3.writeUInt32LE = L.writeUInt32LE, e3.writeUInt32BE = L.writeUInt32BE, e3.writeInt8 = L.writeInt8, e3.writeInt16LE = L.writeInt16LE, e3.writeInt16BE = L.writeInt16BE, e3.writeInt32LE = L.writeInt32LE, e3.writeInt32BE = L.writeInt32BE, e3.writeFloatLE = L.writeFloatLE, e3.writeFloatBE = L.writeFloatBE, e3.writeDoubleLE = L.writeDoubleLE, e3.writeDoubleBE = L.writeDoubleBE, e3.fill = L.fill, e3.inspect = L.inspect, e3.toArrayBuffer = L.toArrayBuffer, e3;
           };
@@ -18284,10 +18502,12 @@ var require_object_hash = __commonJS({
               return i2 = null, e4 ? n2.toString(e4) : n2;
             } };
           }
+          __name(g, "g");
           function y() {
             var e3 = [].slice.call(arguments).join(" ");
             throw new Error([e3, "we accept pull requests", "http://github.com/dominictarr/crypto-browserify"].join("\n"));
           }
+          __name(y, "y");
           p.fill(0), b.createHash = function(e3) {
             return g(e3);
           }, b.createHmac = g, b.randomBytes = function(e3, t2) {
@@ -18318,26 +18538,33 @@ var require_object_hash = __commonJS({
             }
             return Array(n2, r2, o2, i2);
           }
+          __name(c, "c");
           function l(e3, t2, n2, r2, o2, i2) {
             return y((u2 = y(y(t2, e3), y(r2, i2))) << (a2 = o2) | u2 >>> 32 - a2, n2);
             var u2, a2;
           }
+          __name(l, "l");
           function d(e3, t2, n2, r2, o2, i2, u2) {
             return l(t2 & n2 | ~t2 & r2, e3, t2, o2, i2, u2);
           }
+          __name(d, "d");
           function h(e3, t2, n2, r2, o2, i2, u2) {
             return l(t2 & r2 | n2 & ~r2, e3, t2, o2, i2, u2);
           }
+          __name(h, "h");
           function p(e3, t2, n2, r2, o2, i2, u2) {
             return l(t2 ^ n2 ^ r2, e3, t2, o2, i2, u2);
           }
+          __name(p, "p");
           function g(e3, t2, n2, r2, o2, i2, u2) {
             return l(n2 ^ (t2 | ~r2), e3, t2, o2, i2, u2);
           }
+          __name(g, "g");
           function y(e3, t2) {
             var n2 = (65535 & e3) + (65535 & t2);
             return (e3 >> 16) + (t2 >> 16) + (n2 >> 16) << 16 | 65535 & n2;
           }
+          __name(y, "y");
           b.exports = function(e3) {
             return f.hash(e3, c, 16);
           };
@@ -18345,11 +18572,11 @@ var require_object_hash = __commonJS({
       }, { "./helpers": 4, buffer: 3, lYpoI2: 10 }], 7: [function(e, l, t) {
         (function(e2, t2, n, r, o, i, u, a, s) {
           var f, c;
-          c = function(e3) {
+          c = /* @__PURE__ */ __name(function(e3) {
             for (var t3, n2 = new Array(e3), r2 = 0; r2 < e3; r2++)
               0 == (3 & r2) && (t3 = 4294967296 * Math.random()), n2[r2] = t3 >>> ((3 & r2) << 3) & 255;
             return n2;
-          }, l.exports = f || c;
+          }, "c"), l.exports = f || c;
         }).call(this, e("lYpoI2"), "undefined" != typeof self ? self : "undefined" != typeof window ? window : {}, e("buffer").Buffer, arguments[3], arguments[4], arguments[5], arguments[6], "/node_modules/gulp-browserify/node_modules/crypto-browserify/rng.js", "/node_modules/gulp-browserify/node_modules/crypto-browserify");
       }, { buffer: 3, lYpoI2: 10 }], 8: [function(l, d, e) {
         (function(e2, t, n, r, o, i, u, a, s) {
@@ -18365,13 +18592,16 @@ var require_object_hash = __commonJS({
             }
             return Array(s2, f2, c2, l2, d2);
           }
+          __name(c, "c");
           function _(e3, t2) {
             var n2 = (65535 & e3) + (65535 & t2);
             return (e3 >> 16) + (t2 >> 16) + (n2 >> 16) << 16 | 65535 & n2;
           }
+          __name(_, "_");
           function E(e3, t2) {
             return e3 << t2 | e3 >>> 32 - t2;
           }
+          __name(E, "E");
           d.exports = function(e3) {
             return f.hash(e3, c, 20, true);
           };
@@ -18382,9 +18612,11 @@ var require_object_hash = __commonJS({
             var n2 = (65535 & e3) + (65535 & t2);
             return (e3 >> 16) + (t2 >> 16) + (n2 >> 16) << 16 | 65535 & n2;
           }
+          __name(B, "B");
           function L(e3, t2) {
             return e3 >>> t2 | e3 << 32 - t2;
           }
+          __name(L, "L");
           function f(e3, t2) {
             var n2, r2, o2, i2, u2, a2, s2, f2, c2, l2, d2 = new Array(1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221, 3624381080, 310598401, 607225278, 1426881987, 1925078388, 2162078206, 2614888103, 3248222580, 3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, 2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037, 2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344, 430227734, 506948616, 659060556, 883997877, 958139571, 1322822218, 1537002063, 1747873779, 1955562222, 2024104815, 2227730452, 2361852424, 2428436474, 2756734187, 3204031479, 3329325298), h = new Array(1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225), p = new Array(64);
             e3[t2 >> 5] |= 128 << 24 - t2 % 32, e3[15 + (t2 + 64 >> 9 << 4)] = t2;
@@ -18396,6 +18628,7 @@ var require_object_hash = __commonJS({
             }
             return h;
           }
+          __name(f, "f");
           var c = l("./helpers");
           d.exports = function(e3) {
             return c.hash(e3, f, 32, true);
@@ -18405,6 +18638,7 @@ var require_object_hash = __commonJS({
         (function(e2, t2, n, r, o, i, u, a, s) {
           function f() {
           }
+          __name(f, "f");
           (e2 = c.exports = {}).nextTick = function() {
             var e3 = "undefined" != typeof window && window.setImmediate, t3 = "undefined" != typeof window && window.postMessage && window.addEventListener;
             if (e3)
@@ -18470,42 +18704,42 @@ var require_CBSocketCallbackHolder = __commonJS({
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __getProtoOf2 = Object.getPrototypeOf;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+    }, "__copyProps");
+    var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
       mod
-    ));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    )), "__toESM");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var CBSocketCallbackHolder_exports = {};
     __export2(CBSocketCallbackHolder_exports, {
       CBSocketCallbackHolder: () => CBSocketCallbackHolder
     });
     module.exports = __toCommonJS2(CBSocketCallbackHolder_exports);
     var import_object_hash = __toESM2(require_object_hash());
-    var import_uicore_ts21 = require_compiledScripts();
+    var import_uicore_ts23 = require_compiledScripts();
     var import_CBSocketClient = require_CBSocketClient();
-    var CBSocketCallbackHolder = class extends import_uicore_ts21.UIObject {
+    var CBSocketCallbackHolder = class extends import_uicore_ts23.UIObject {
       constructor(socketClient, previousCallbackHolder) {
         super();
         this.messageDescriptors = {};
         this.handlers = {};
         this.onetimeHandlers = {};
         this.keysForIdentifiers = {};
-        this.isValid = import_uicore_ts21.YES;
+        this.isValid = import_uicore_ts23.YES;
         this._verifiedResponseHashesDictionary = {};
         this._socketClient = socketClient;
-        if ((0, import_uicore_ts21.IS)(previousCallbackHolder)) {
+        if ((0, import_uicore_ts23.IS)(previousCallbackHolder)) {
           this.handlers = previousCallbackHolder.handlers;
           this._verifiedResponseHashesDictionary = previousCallbackHolder._verifiedResponseHashesDictionary;
         }
@@ -18513,7 +18747,7 @@ var require_CBSocketCallbackHolder = __commonJS({
       triggerDisconnectHandlers() {
         this.messageDescriptors.forEach(function(descriptor, key) {
           if (descriptor.mainResponseReceived) {
-            descriptor.completionFunction(import_CBSocketClient.CBSocketClient.disconnectionMessage, import_uicore_ts21.nil);
+            descriptor.completionFunction(import_CBSocketClient.CBSocketClient.disconnectionMessage, import_uicore_ts23.nil);
           }
         });
       }
@@ -18530,7 +18764,7 @@ var require_CBSocketCallbackHolder = __commonJS({
         this.onetimeHandlers[key].push(handlerFunction);
       }
       get storedResponseHashesDictionary() {
-        if ((0, import_uicore_ts21.IS_NOT)(this._storedResponseHashesDictionary)) {
+        if ((0, import_uicore_ts23.IS_NOT)(this._storedResponseHashesDictionary)) {
           this._storedResponseHashesDictionary = JSON.parse(localStorage["CBSocketResponseHashesDictionary"] || "{}");
         }
         return this._storedResponseHashesDictionary;
@@ -18538,7 +18772,7 @@ var require_CBSocketCallbackHolder = __commonJS({
       storedResponseHashObjectForKey(requestKey, requestDataHash) {
         const localStorageKey = this.keyForRequestKeyAndRequestDataHash(requestKey, requestDataHash);
         const hashObject = this.storedResponseHashesDictionary[localStorageKey];
-        const result = (0, import_uicore_ts21.FIRST)(hashObject, {});
+        const result = (0, import_uicore_ts23.FIRST)(hashObject, {});
         return result;
       }
       storedResponseForKey(requestKey, requestDataHash) {
@@ -18551,7 +18785,7 @@ var require_CBSocketCallbackHolder = __commonJS({
         return result;
       }
       storeResponse(requestKey, requestDataHash, responseMessage, responseDataHash) {
-        if (!responseMessage.canBeStoredAsResponse || (0, import_uicore_ts21.IS_NOT)(responseMessage.messageData) && (0, import_uicore_ts21.IS_NOT)(responseMessage.messageDataHash)) {
+        if (!responseMessage.canBeStoredAsResponse || (0, import_uicore_ts23.IS_NOT)(responseMessage.messageData) && (0, import_uicore_ts23.IS_NOT)(responseMessage.messageDataHash)) {
           return;
         }
         const localStorageKey = this.keyForRequestKeyAndRequestDataHash(requestKey, requestDataHash);
@@ -18580,9 +18814,9 @@ var require_CBSocketCallbackHolder = __commonJS({
         }
       }
       socketShouldSendMessage(key, message, completionPolicy, completionFunction) {
-        var result = import_uicore_ts21.YES;
-        var triggerStoredResponseImmediately = import_uicore_ts21.NO;
-        const messageDataHash = (0, import_object_hash.default)(message.messageData || import_uicore_ts21.nil);
+        var result = import_uicore_ts23.YES;
+        var triggerStoredResponseImmediately = import_uicore_ts23.NO;
+        const messageDataHash = (0, import_object_hash.default)(message.messageData || import_uicore_ts23.nil);
         const descriptorKey = "socketMessageDescriptor_" + key + messageDataHash;
         this.messageDescriptors[descriptorKey] = this.messageDescriptors[descriptorKey] || [];
         const hashObject = this.storedResponseHashObjectForKey(key, messageDataHash);
@@ -18593,7 +18827,7 @@ var require_CBSocketCallbackHolder = __commonJS({
             return descriptor.messageDataHash == messageDataHash;
           });
           if (matchingDescriptor) {
-            result = import_uicore_ts21.NO;
+            result = import_uicore_ts23.NO;
           }
         }
         if (completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.storedOrFirst) {
@@ -18601,10 +18835,10 @@ var require_CBSocketCallbackHolder = __commonJS({
           const matchingDescriptor = descriptorsForKey.find(function(descriptor, index, array) {
             return descriptor.messageDataHash == messageDataHash;
           });
-          const storedResponse = (0, import_uicore_ts21.IS)(message.storedResponseHash);
+          const storedResponse = (0, import_uicore_ts23.IS)(message.storedResponseHash);
           if (matchingDescriptor || storedResponse && this._verifiedResponseHashesDictionary[message.storedResponseHash]) {
-            result = import_uicore_ts21.NO;
-            triggerStoredResponseImmediately = import_uicore_ts21.YES;
+            result = import_uicore_ts23.NO;
+            triggerStoredResponseImmediately = import_uicore_ts23.YES;
           }
         }
         if (completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.firstOnly) {
@@ -18613,14 +18847,14 @@ var require_CBSocketCallbackHolder = __commonJS({
             return descriptor.messageDataHash == messageDataHash;
           });
           if (matchingDescriptor) {
-            return import_uicore_ts21.NO;
+            return import_uicore_ts23.NO;
           }
         }
         if (hashObject && hashObject.hash && hashObject.validityDate && message.storedResponseHash && this._verifiedResponseHashesDictionary[message.storedResponseHash] && hashObject.validityDate > Date.now()) {
-          result = import_uicore_ts21.NO;
-          triggerStoredResponseImmediately = import_uicore_ts21.YES;
+          result = import_uicore_ts23.NO;
+          triggerStoredResponseImmediately = import_uicore_ts23.YES;
         }
-        if ((0, import_uicore_ts21.IS)(completionFunction)) {
+        if ((0, import_uicore_ts23.IS)(completionFunction)) {
           this.messageDescriptors[descriptorKey].push({
             key,
             message: {
@@ -18630,8 +18864,8 @@ var require_CBSocketCallbackHolder = __commonJS({
             },
             sentAtTime: Date.now(),
             messageDataHash,
-            mainResponseReceived: import_uicore_ts21.NO,
-            anyMainResponseReceived: import_uicore_ts21.NO,
+            mainResponseReceived: import_uicore_ts23.NO,
+            anyMainResponseReceived: import_uicore_ts23.NO,
             completionPolicy,
             completionFunction
           });
@@ -18641,12 +18875,12 @@ var require_CBSocketCallbackHolder = __commonJS({
           this.socketDidReceiveMessageForKey(
             import_CBSocketClient.CBSocketClient.responseMessageKey,
             {
-              identifier: import_uicore_ts21.nil,
-              messageData: import_uicore_ts21.nil,
+              identifier: import_uicore_ts23.nil,
+              messageData: import_uicore_ts23.nil,
               inResponseToIdentifier: message.identifier,
-              useStoredResponse: import_uicore_ts21.YES
+              useStoredResponse: import_uicore_ts23.YES
             },
-            import_uicore_ts21.nil
+            import_uicore_ts23.nil
           );
         }
         return result;
@@ -18656,7 +18890,7 @@ var require_CBSocketCallbackHolder = __commonJS({
       }
       socketWillSendMultipleMessage(messageToSend, completionFunction = CBSocketCallbackHolder.defaultMultipleMessagecompletionFunction) {
         const key = import_CBSocketClient.CBSocketClient.multipleMessageKey;
-        const messageDataHash = (0, import_object_hash.default)(messageToSend.messageData || import_uicore_ts21.nil);
+        const messageDataHash = (0, import_object_hash.default)(messageToSend.messageData || import_uicore_ts23.nil);
         const descriptorKey = "socketMessageDescriptor_" + key + messageDataHash;
         this.messageDescriptors[descriptorKey] = this.messageDescriptors[descriptorKey] || [];
         messageToSend.storedResponseHash = this.storedResponseHashObjectForKey(key, messageDataHash).hash;
@@ -18669,8 +18903,8 @@ var require_CBSocketCallbackHolder = __commonJS({
           },
           sentAtTime: Date.now(),
           messageDataHash,
-          mainResponseReceived: import_uicore_ts21.NO,
-          anyMainResponseReceived: import_uicore_ts21.NO,
+          mainResponseReceived: import_uicore_ts23.NO,
+          anyMainResponseReceived: import_uicore_ts23.NO,
           completionPolicy: import_CBSocketClient.CBSocketClient.completionPolicy.directOnly,
           completionFunction: function(responseMessage, respondWithMessage) {
             completionFunction(
@@ -18710,7 +18944,7 @@ var require_CBSocketCallbackHolder = __commonJS({
             delete this.keysForIdentifiers[message.inResponseToIdentifier];
             delete this.messageDescriptors[descriptorKey];
           }
-          const callCompletionFunction = (descriptor, storedResponseCondition = import_uicore_ts21.NO) => {
+          const callCompletionFunction = /* @__PURE__ */ __name((descriptor, storedResponseCondition = import_uicore_ts23.NO) => {
             var messageData = message.messageData;
             if (message.useStoredResponse && storedResponseCondition) {
               messageData = this.storedResponseForKey(descriptor.key, descriptor.messageDataHash);
@@ -18726,29 +18960,29 @@ var require_CBSocketCallbackHolder = __commonJS({
                 this.storedResponseHashesDictionary[localStorageKey].validityDate = Date.now() + message.responseValidityDuration;
                 this.saveStoredResponseHashesDictionary(this.storedResponseHashesDictionary);
               }
-              this._verifiedResponseHashesDictionary[responseHash] = import_uicore_ts21.YES;
+              this._verifiedResponseHashesDictionary[responseHash] = import_uicore_ts23.YES;
               console.log("Using stored response.");
             }
             descriptor.completionFunction(messageData, sendResponseFunction);
             descriptor.responseDataHash = responseDataHash;
-          };
+          }, "callCompletionFunction");
           descriptorsForKey.copy().forEach(function(descriptor, index, array) {
             if (descriptor.completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.directOnly && descriptor.message.identifier == message.inResponseToIdentifier || descriptor.completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.first || descriptor.completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.firstOnly || descriptor.completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.storedOrFirst) {
               if (!message.keepWaitingForResponses) {
                 this.storeResponse(descriptor.key, descriptor.messageDataHash, message, responseDataHash);
                 descriptorsForKey.removeElement(descriptor);
-                sendResponseFunction.respondingToMainResponse = import_uicore_ts21.YES;
+                sendResponseFunction.respondingToMainResponse = import_uicore_ts23.YES;
               }
               callCompletionFunction(descriptor, !message.keepWaitingForResponses);
             } else if (descriptor.completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.all) {
               callCompletionFunction(descriptor, !message.keepWaitingForResponses);
               if (!message.keepWaitingForResponses) {
                 if (message.inResponseToIdentifier == descriptor.message.identifier) {
-                  sendResponseFunction.respondingToMainResponse = import_uicore_ts21.YES;
-                  descriptor.mainResponseReceived = import_uicore_ts21.YES;
+                  sendResponseFunction.respondingToMainResponse = import_uicore_ts23.YES;
+                  descriptor.mainResponseReceived = import_uicore_ts23.YES;
                   descriptorsForKey.removeElement(descriptor);
                 }
-                descriptor.anyMainResponseReceived = import_uicore_ts21.YES;
+                descriptor.anyMainResponseReceived = import_uicore_ts23.YES;
               }
             } else if (descriptor.completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.allDifferent) {
               if (descriptor.responseDataHash != responseDataHash) {
@@ -18756,17 +18990,17 @@ var require_CBSocketCallbackHolder = __commonJS({
               }
               if (!message.keepWaitingForResponses) {
                 if (message.inResponseToIdentifier == descriptor.message.identifier) {
-                  sendResponseFunction.respondingToMainResponse = import_uicore_ts21.YES;
-                  descriptor.mainResponseReceived = import_uicore_ts21.YES;
+                  sendResponseFunction.respondingToMainResponse = import_uicore_ts23.YES;
+                  descriptor.mainResponseReceived = import_uicore_ts23.YES;
                   descriptorsForKey.removeElement(descriptor);
                 }
-                descriptor.anyMainResponseReceived = import_uicore_ts21.YES;
+                descriptor.anyMainResponseReceived = import_uicore_ts23.YES;
               }
             } else if (descriptor.completionPolicy == import_CBSocketClient.CBSocketClient.completionPolicy.last && descriptor.message.identifier == message.inResponseToIdentifier) {
               if (!message.keepWaitingForResponses) {
-                descriptor.mainResponseReceived = import_uicore_ts21.YES;
-                descriptor.anyMainResponseReceived = import_uicore_ts21.YES;
-                sendResponseFunction.respondingToMainResponse = import_uicore_ts21.YES;
+                descriptor.mainResponseReceived = import_uicore_ts23.YES;
+                descriptor.anyMainResponseReceived = import_uicore_ts23.YES;
+                sendResponseFunction.respondingToMainResponse = import_uicore_ts23.YES;
               } else {
                 descriptor.completionFunction(message.messageData, sendResponseFunction);
               }
@@ -18776,10 +19010,10 @@ var require_CBSocketCallbackHolder = __commonJS({
                   callCompletionFunction(descriptor, !message.keepWaitingForResponses);
                 }
                 if (descriptor.message.identifier == message.inResponseToIdentifier) {
-                  descriptor.mainResponseReceived = import_uicore_ts21.YES;
-                  sendResponseFunction.respondingToMainResponse = import_uicore_ts21.YES;
+                  descriptor.mainResponseReceived = import_uicore_ts23.YES;
+                  sendResponseFunction.respondingToMainResponse = import_uicore_ts23.YES;
                 }
-                descriptor.anyMainResponseReceived = import_uicore_ts21.YES;
+                descriptor.anyMainResponseReceived = import_uicore_ts23.YES;
               } else if (descriptor.message.identifier == message.inResponseToIdentifier && message.keepWaitingForResponses) {
                 descriptor.completionFunction(message.messageData, sendResponseFunction);
               }
@@ -18802,6 +19036,7 @@ var require_CBSocketCallbackHolder = __commonJS({
         }
       }
     };
+    __name(CBSocketCallbackHolder, "CBSocketCallbackHolder");
   }
 });
 
@@ -18812,44 +19047,46 @@ var require_CBSocketClient = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var CBSocketClient_exports = {};
     __export2(CBSocketClient_exports, {
       CBSocketClient: () => CBSocketClient2,
-      IS_NOT_SOCKET_ERROR: () => IS_NOT_SOCKET_ERROR2,
+      IS_NOT_SOCKET_ERROR: () => IS_NOT_SOCKET_ERROR,
       IS_SOCKET_ERROR: () => IS_SOCKET_ERROR,
-      SocketClient: () => SocketClient3
+      SocketClient: () => SocketClient6
     });
     module.exports = __toCommonJS2(CBSocketClient_exports);
     var import_socket = require_cjs4();
-    var import_uicore_ts21 = require_compiledScripts();
+    var import_uicore_ts23 = require_compiledScripts();
     var import_CBCore = require_CBCore();
     var import_CBSocketCallbackHolder = require_CBSocketCallbackHolder();
     function IS_SOCKET_ERROR(object) {
-      const result = (0, import_uicore_ts21.IS)(object) && object._isCBSocketErrorMessage;
+      const result = (0, import_uicore_ts23.IS)(object) && object._isCBSocketErrorMessage;
       return result;
     }
-    function IS_NOT_SOCKET_ERROR2(object) {
+    __name(IS_SOCKET_ERROR, "IS_SOCKET_ERROR");
+    function IS_NOT_SOCKET_ERROR(object) {
       return !IS_SOCKET_ERROR(object);
     }
-    var _CBSocketClient = class extends import_uicore_ts21.UIObject {
+    __name(IS_NOT_SOCKET_ERROR, "IS_NOT_SOCKET_ERROR");
+    var _CBSocketClient = /* @__PURE__ */ __name(class extends import_uicore_ts23.UIObject {
       constructor(core) {
         super();
         this._socket = (0, import_socket.io)();
-        this._isConnectionEstablished = import_uicore_ts21.NO;
-        this._collectMessagesToSendLater = import_uicore_ts21.NO;
+        this._isConnectionEstablished = import_uicore_ts23.NO;
+        this._collectMessagesToSendLater = import_uicore_ts23.NO;
         this._messagesToBeSent = [];
         this._subscribedKeys = {};
         this._callbackHolder = new import_CBSocketCallbackHolder.CBSocketCallbackHolder(this);
@@ -18857,8 +19094,8 @@ var require_CBSocketClient = __commonJS({
         this.socket.on("connect", () => {
           console.log("Socket.io connected to server. clientID = " + this.socket + ", socketID = " + this.socket);
           var instanceIdentifier = localStorage.getItem("InstanceIdentifier");
-          if ((0, import_uicore_ts21.IS_NOT)(instanceIdentifier)) {
-            instanceIdentifier = (0, import_uicore_ts21.MAKE_ID)();
+          if ((0, import_uicore_ts23.IS_NOT)(instanceIdentifier)) {
+            instanceIdentifier = (0, import_uicore_ts23.MAKE_ID)();
             localStorage.setItem("InstanceIdentifier", instanceIdentifier);
           }
           const handshakeMessage = {
@@ -18868,7 +19105,7 @@ var require_CBSocketClient = __commonJS({
             instanceIdentifier
           };
           this.socket.emit("CBSocketHandshakeInitMessage", {
-            identifier: (0, import_uicore_ts21.MAKE_ID)(),
+            identifier: (0, import_uicore_ts23.MAKE_ID)(),
             messageData: handshakeMessage
           });
         });
@@ -18893,8 +19130,8 @@ var require_CBSocketClient = __commonJS({
         );
         this.socket.on("disconnect", () => {
           console.log("Socket.io disconnected from server. clientID = " + this.socket + ".");
-          this._isConnectionEstablished = import_uicore_ts21.NO;
-          this._callbackHolder.isValid = import_uicore_ts21.NO;
+          this._isConnectionEstablished = import_uicore_ts23.NO;
+          this._callbackHolder.isValid = import_uicore_ts23.NO;
           this._callbackHolder.triggerDisconnectHandlers();
         });
         this.socket.on("CBPerformReconnect", (message) => {
@@ -18924,7 +19161,7 @@ var require_CBSocketClient = __commonJS({
       cancelUnsentMessages(messagesToCancel) {
         this._messagesToBeSent = this._messagesToBeSent.filter((messageObject, index, array) => !messagesToCancel.contains(messageObject));
       }
-      sendUnsentMessages(receiveResponsesTogether = import_uicore_ts21.NO, completion) {
+      sendUnsentMessages(receiveResponsesTogether = import_uicore_ts23.NO, completion) {
         if (!this._isConnectionEstablished || this._collectMessagesToSendLater) {
           return;
         }
@@ -18933,10 +19170,10 @@ var require_CBSocketClient = __commonJS({
         this._messagesToBeSent.copy().forEach((messageToBeSentObject) => {
           if (this._isConnectionEstablished) {
             var message = messageToBeSentObject.message;
-            if ((0, import_uicore_ts21.IS_NOT)(message)) {
+            if ((0, import_uicore_ts23.IS_NOT)(message)) {
               message = "";
             }
-            const identifier = (0, import_uicore_ts21.MAKE_ID)();
+            const identifier = (0, import_uicore_ts23.MAKE_ID)();
             const completion2 = messageToBeSentObject.completion;
             const messageObject2 = {
               messageData: message,
@@ -18960,7 +19197,7 @@ var require_CBSocketClient = __commonJS({
           }
         });
         this._messagesToBeSent = [];
-        if ((0, import_uicore_ts21.IS_NOT)(groupedMessages.length)) {
+        if ((0, import_uicore_ts23.IS_NOT)(groupedMessages.length)) {
           return;
         }
         if (groupedMessages.length == 1) {
@@ -18970,7 +19207,7 @@ var require_CBSocketClient = __commonJS({
         }
         const messageObject = {
           messageData: groupedMessages,
-          identifier: (0, import_uicore_ts21.MAKE_ID)(),
+          identifier: (0, import_uicore_ts23.MAKE_ID)(),
           shouldGroupResponses: receiveResponsesTogether
         };
         this._callbackHolder.socketWillSendMultipleMessage(messageObject, completion);
@@ -18980,43 +19217,43 @@ var require_CBSocketClient = __commonJS({
         });
       }
       sendUserBoundMessageForKeyWithPolicy(key, message, completionPolicy, completion) {
-        this._sendMessageForKey(key, message, void 0, import_uicore_ts21.NO, completionPolicy, import_uicore_ts21.YES, import_uicore_ts21.nil, completion);
+        this._sendMessageForKey(key, message, void 0, import_uicore_ts23.NO, completionPolicy, import_uicore_ts23.YES, import_uicore_ts23.nil, completion);
       }
       sendUserBoundMessageForKey(key, message, completion) {
-        this._sendMessageForKey(key, message, void 0, import_uicore_ts21.NO, void 0, import_uicore_ts21.YES, import_uicore_ts21.nil, completion);
+        this._sendMessageForKey(key, message, void 0, import_uicore_ts23.NO, void 0, import_uicore_ts23.YES, import_uicore_ts23.nil, completion);
       }
       sendMessageForKeyWithPolicy(key, message, completionPolicy, completion) {
-        this._sendMessageForKey(key, message, void 0, import_uicore_ts21.NO, completionPolicy, import_uicore_ts21.NO, import_uicore_ts21.nil, completion);
+        this._sendMessageForKey(key, message, void 0, import_uicore_ts23.NO, completionPolicy, import_uicore_ts23.NO, import_uicore_ts23.nil, completion);
       }
       sendMessageForKey(key, message, completion) {
-        this._sendMessageForKey(key, message, void 0, import_uicore_ts21.NO, void 0, import_uicore_ts21.NO, import_uicore_ts21.nil, completion);
+        this._sendMessageForKey(key, message, void 0, import_uicore_ts23.NO, void 0, import_uicore_ts23.NO, import_uicore_ts23.nil, completion);
       }
-      resultForMessageForKey(key, message, completionPolicy, isUserBound = import_uicore_ts21.NO) {
+      resultForMessageForKey(key, message, completionPolicy, isUserBound = import_uicore_ts23.NO) {
         const result = new Promise((resolve, reject) => {
           this._sendMessageForKey(
             key,
             message,
             void 0,
-            import_uicore_ts21.NO,
+            import_uicore_ts23.NO,
             completionPolicy,
             isUserBound,
-            import_uicore_ts21.nil,
+            import_uicore_ts23.nil,
             (responseMessage, respondWithMessage) => resolve({
               responseMessage,
-              result: (0, import_uicore_ts21.IF)(IS_NOT_SOCKET_ERROR2(responseMessage))(() => responseMessage).ELSE((0, import_uicore_ts21.RETURNER)(void 0)),
-              errorResult: (0, import_uicore_ts21.IF)(IS_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE((0, import_uicore_ts21.RETURNER)(void 0)),
+              result: (0, import_uicore_ts23.IF)(IS_NOT_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE((0, import_uicore_ts23.RETURNER)(void 0)),
+              errorResult: (0, import_uicore_ts23.IF)(IS_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE((0, import_uicore_ts23.RETURNER)(void 0)),
               respondWithMessage
             })
           );
         });
         return result;
       }
-      _sendMessageForKey(key, message, inResponseToMessage = {}, keepMessageConnectionOpen = import_uicore_ts21.NO, completionPolicy = _CBSocketClient.completionPolicy.directOnly, isUserBound = import_uicore_ts21.NO, didSendFunction = import_uicore_ts21.nil, completion = import_uicore_ts21.nil) {
-        if ((0, import_uicore_ts21.IS_NIL)(message)) {
+      _sendMessageForKey(key, message, inResponseToMessage = {}, keepMessageConnectionOpen = import_uicore_ts23.NO, completionPolicy = _CBSocketClient.completionPolicy.directOnly, isUserBound = import_uicore_ts23.NO, didSendFunction = import_uicore_ts23.nil, completion = import_uicore_ts23.nil) {
+        if ((0, import_uicore_ts23.IS_NIL)(message)) {
           message = "";
         }
         if (this._isConnectionEstablished && !this._collectMessagesToSendLater) {
-          const identifier = (0, import_uicore_ts21.MAKE_ID)();
+          const identifier = (0, import_uicore_ts23.MAKE_ID)();
           const messageObject = {
             messageData: message,
             identifier,
@@ -19040,7 +19277,7 @@ var require_CBSocketClient = __commonJS({
             inResponseToMessage,
             keepWaitingForResponses: keepMessageConnectionOpen,
             completionPolicy,
-            isBoundToUserWithID: (0, import_uicore_ts21.IF)(isUserBound)((0, import_uicore_ts21.RETURNER)((0, import_uicore_ts21.FIRST_OR_NIL)(import_CBCore.CBCore.sharedInstance.userProfile._id)))(),
+            isBoundToUserWithID: (0, import_uicore_ts23.IF)(isUserBound)((0, import_uicore_ts23.RETURNER)((0, import_uicore_ts23.FIRST_OR_NIL)(import_CBCore.CBCore.sharedInstance.userProfile._id)))(),
             didSendFunction,
             completion
           });
@@ -19049,7 +19286,7 @@ var require_CBSocketClient = __commonJS({
       }
       sendMessagesAsGroup(functionToCall) {
         const collectMessagesToSendLater = this._collectMessagesToSendLater;
-        this._collectMessagesToSendLater = import_uicore_ts21.YES;
+        this._collectMessagesToSendLater = import_uicore_ts23.YES;
         var result = functionToCall();
         this._collectMessagesToSendLater = collectMessagesToSendLater;
         this.sendUnsentMessages();
@@ -19057,10 +19294,10 @@ var require_CBSocketClient = __commonJS({
       }
       sendAndReceiveMessagesAsGroup(functionToCall, completion) {
         const collectMessagesToSendLater = this._collectMessagesToSendLater;
-        this._collectMessagesToSendLater = import_uicore_ts21.YES;
+        this._collectMessagesToSendLater = import_uicore_ts23.YES;
         var result = functionToCall();
         this._collectMessagesToSendLater = collectMessagesToSendLater;
-        this.sendUnsentMessages(import_uicore_ts21.YES, completion);
+        this.sendUnsentMessages(import_uicore_ts23.YES, completion);
         return result;
       }
       didReceiveMessageForKey(key, message) {
@@ -19069,10 +19306,10 @@ var require_CBSocketClient = __commonJS({
             _CBSocketClient.responseMessageKey,
             responseMessage,
             message,
-            import_uicore_ts21.NO,
+            import_uicore_ts23.NO,
             void 0,
-            import_uicore_ts21.NO,
-            import_uicore_ts21.nil,
+            import_uicore_ts23.NO,
+            import_uicore_ts23.nil,
             completion
           );
         }.bind(this);
@@ -19081,10 +19318,10 @@ var require_CBSocketClient = __commonJS({
             _CBSocketClient.responseMessageKey,
             updateMessage,
             message,
-            import_uicore_ts21.YES,
+            import_uicore_ts23.YES,
             void 0,
-            import_uicore_ts21.NO,
-            import_uicore_ts21.nil,
+            import_uicore_ts23.NO,
+            import_uicore_ts23.nil,
             completion
           );
         }.bind(this);
@@ -19093,10 +19330,10 @@ var require_CBSocketClient = __commonJS({
             _CBSocketClient.responseMessageKey,
             responseMessage,
             message,
-            import_uicore_ts21.NO,
+            import_uicore_ts23.NO,
             void 0,
-            import_uicore_ts21.YES,
-            import_uicore_ts21.nil,
+            import_uicore_ts23.YES,
+            import_uicore_ts23.nil,
             completion
           );
         }.bind(this);
@@ -19105,10 +19342,10 @@ var require_CBSocketClient = __commonJS({
             _CBSocketClient.responseMessageKey,
             updateMessage,
             message,
-            import_uicore_ts21.YES,
+            import_uicore_ts23.YES,
             void 0,
-            import_uicore_ts21.YES,
-            import_uicore_ts21.nil,
+            import_uicore_ts23.YES,
+            import_uicore_ts23.nil,
             completion
           );
         }.bind(this);
@@ -19125,7 +19362,7 @@ var require_CBSocketClient = __commonJS({
       }
       addTargetForMessagesForKey(key, handlerFunction) {
         this._callbackHolder.registerHandler(key, handlerFunction);
-        if ((0, import_uicore_ts21.IS_NOT)(this._subscribedKeys[key])) {
+        if ((0, import_uicore_ts23.IS_NOT)(this._subscribedKeys[key])) {
           this._socket.on(key, function(message) {
             this.didReceiveMessageForKey(key, message);
           }.bind(this));
@@ -19134,19 +19371,19 @@ var require_CBSocketClient = __commonJS({
       }
       addTargetForOneMessageForKey(key, handlerFunction) {
         this._callbackHolder.registerOnetimeHandler(key, handlerFunction);
-        if ((0, import_uicore_ts21.IS_NOT)(this._subscribedKeys[key])) {
+        if ((0, import_uicore_ts23.IS_NOT)(this._subscribedKeys[key])) {
           this._socket.on(key, function(message) {
             this.didReceiveMessageForKey(key, message);
           }.bind(this));
           this._subscribedKeys[key] = true;
         }
       }
-    };
+    }, "_CBSocketClient");
     var CBSocketClient2 = _CBSocketClient;
     CBSocketClient2.responseMessageKey = "CBSocketResponseMessage";
     CBSocketClient2.multipleMessageKey = "CBSocketMultipleMessage";
     CBSocketClient2.disconnectionMessage = {
-      _isCBSocketErrorMessage: import_uicore_ts21.YES,
+      _isCBSocketErrorMessage: import_uicore_ts23.YES,
       messageData: "Server disconnected"
     };
     CBSocketClient2.completionPolicy = {
@@ -19160,14 +19397,14 @@ var require_CBSocketClient = __commonJS({
       "firstOnly": "firstOnly",
       "storedOrFirst": "storedOrFirst"
     };
-    var SocketClient3 = new Proxy({ "name": "SocketClient" }, {
+    var SocketClient6 = new Proxy({ "name": "SocketClient" }, {
       get(target, key) {
-        const result = (messageData, completionPolicy, isUserBound) => import_CBCore.CBCore.sharedInstance.socketClient.resultForMessageForKey(
+        const result = /* @__PURE__ */ __name((messageData, completionPolicy, isUserBound) => import_CBCore.CBCore.sharedInstance.socketClient.resultForMessageForKey(
           key,
           messageData,
           completionPolicy,
           isUserBound
-        );
+        ), "result");
         return result;
       }
     });
@@ -19181,39 +19418,39 @@ var require_CBCore = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var CBCore_exports = {};
     __export2(CBCore_exports, {
-      CBCore: () => CBCore7
+      CBCore: () => CBCore6
     });
     module.exports = __toCommonJS2(CBCore_exports);
-    var import_uicore_ts21 = require_compiledScripts();
+    var import_uicore_ts23 = require_compiledScripts();
     var import_CBLanguageService = require_CBLanguageService();
     var import_CBServerClient = require_CBServerClient();
     var import_CBSocketClient = require_CBSocketClient();
-    var _CBCore = class extends import_uicore_ts21.UIObject {
+    var _CBCore = /* @__PURE__ */ __name(class extends import_uicore_ts23.UIObject {
       constructor() {
         super();
         this.viewCores = [];
-        this._isUserLoggedIn = import_uicore_ts21.nil;
-        this._cachedMinimizedChatInquiryIDs = import_uicore_ts21.nil;
+        this._isUserLoggedIn = import_uicore_ts23.nil;
+        this._cachedMinimizedChatInquiryIDs = import_uicore_ts23.nil;
         this._socketClient = new import_CBSocketClient.CBSocketClient(this);
         this._serverClient = new import_CBServerClient.CBServerClient(this);
         this._functionsToCallForEachSocketClient = [];
         this._models = [];
-        this.dialogViewShowerClass = import_uicore_ts21.nil;
+        this.dialogViewShowerClass = import_uicore_ts23.nil;
         if (CBCoreInitializerObject) {
           import_CBLanguageService.CBLanguageService.useStoredLanguageValues(CBCoreInitializerObject.languageValues);
         }
@@ -19255,18 +19492,18 @@ var require_CBCore = __commonJS({
         if (isUserLoggedIn && previousValue != isUserLoggedIn) {
           this.broadcastMessageInRootViewTree({
             name: _CBCore.broadcastEventName.userDidLogIn,
-            parameters: import_uicore_ts21.nil
+            parameters: import_uicore_ts23.nil
           });
           this.updateLinkTargets();
         } else if (previousValue != isUserLoggedIn) {
           this.performFunctionWithDelay(0.01, function() {
-            import_uicore_ts21.UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed([
+            import_uicore_ts23.UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed([
               "settings",
               "inquiry"
             ]).apply();
             this.broadcastMessageInRootViewTree({
               name: _CBCore.broadcastEventName.userDidLogOut,
-              parameters: import_uicore_ts21.nil
+              parameters: import_uicore_ts23.nil
             });
             this.updateLinkTargets();
           }.bind(this));
@@ -19274,7 +19511,7 @@ var require_CBCore = __commonJS({
       }
       updateLinkTargets() {
         this.viewCores.everyElement.rootViewController.view.forEachViewInSubtree(function(view) {
-          if (view instanceof import_uicore_ts21.UILink) {
+          if (view instanceof import_uicore_ts23.UILink) {
             view.updateTarget();
           }
         });
@@ -19284,42 +19521,42 @@ var require_CBCore = __commonJS({
         return result;
       }
       get userProfile() {
-        var result = import_uicore_ts21.nil;
+        var result = import_uicore_ts23.nil;
         try {
           result = JSON.parse(localStorage.getItem("CBUserProfile"));
         } catch (error) {
         }
-        return (0, import_uicore_ts21.FIRST_OR_NIL)(result);
+        return (0, import_uicore_ts23.FIRST_OR_NIL)(result);
       }
       set userProfile(userProfile) {
-        if ((0, import_uicore_ts21.IS_NOT)(userProfile)) {
+        if ((0, import_uicore_ts23.IS_NOT)(userProfile)) {
           localStorage.removeItem("CBUserProfile");
         }
         localStorage.setItem("CBUserProfile", JSON.stringify(userProfile));
         this.didSetUserProfile();
       }
       didSetUserProfile() {
-        this.isUserLoggedIn = (0, import_uicore_ts21.IS)(this.userProfile);
+        this.isUserLoggedIn = (0, import_uicore_ts23.IS)(this.userProfile);
       }
       set languageKey(languageKey) {
-        if ((0, import_uicore_ts21.IS_NOT)(languageKey)) {
+        if ((0, import_uicore_ts23.IS_NOT)(languageKey)) {
           localStorage.removeItem("CBLanguageKey");
         }
         localStorage.setItem("CBLanguageKey", JSON.stringify(languageKey));
         this.didSetLanguageKey();
       }
       get languageKey() {
-        const result = (0, import_uicore_ts21.FIRST)(localStorage.getItem("CBLanguageKey"), import_CBLanguageService.CBLanguageService.defaultLanguageKey).replace(
+        const result = (0, import_uicore_ts23.FIRST)(localStorage.getItem("CBLanguageKey"), import_CBLanguageService.CBLanguageService.defaultLanguageKey).replace(
           '"',
           ""
         ).replace('"', "");
         return result;
       }
       didSetLanguageKey() {
-        import_uicore_ts21.UIRoute.currentRoute.routeWithComponent(
+        import_uicore_ts23.UIRoute.currentRoute.routeWithComponent(
           "settings",
           { "language": this.languageKey },
-          import_uicore_ts21.YES
+          import_uicore_ts23.YES
         ).applyByReplacingCurrentRouteInHistory();
       }
       get externalServiceIdentifier() {
@@ -19348,9 +19585,9 @@ var require_CBCore = __commonJS({
         this._functionsToCallForEachSocketClient.push(functionToCall);
         functionToCall();
       }
-    };
-    var CBCore7 = _CBCore;
-    CBCore7.broadcastEventName = {
+    }, "_CBCore");
+    var CBCore6 = _CBCore;
+    CBCore6.broadcastEventName = {
       "userDidLogIn": "UserDidLogIn",
       "userDidLogOut": "UserDidLogOut"
     };
@@ -19364,19 +19601,19 @@ var require_CBDataInterfaces = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __export2 = (target, all) => {
+    var __export2 = /* @__PURE__ */ __name((target, all) => {
       for (var name in all)
         __defProp2(target, name, { get: all[name], enumerable: true });
-    };
-    var __copyProps2 = (to, from, except, desc) => {
+    }, "__export");
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var CBDataInterfaces_exports = {};
     __export2(CBDataInterfaces_exports, {
       CBAuthenticationSource: () => CBAuthenticationSource
@@ -19400,16 +19637,16 @@ var require_compiledScripts3 = __commonJS({
     var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
     var __getOwnPropNames2 = Object.getOwnPropertyNames;
     var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-    var __copyProps2 = (to, from, except, desc) => {
+    var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
       if (from && typeof from === "object" || typeof from === "function") {
         for (let key of __getOwnPropNames2(from))
           if (!__hasOwnProp2.call(to, key) && key !== except)
             __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
       }
       return to;
-    };
-    var __reExport = (target, mod, secondTarget) => (__copyProps2(target, mod, "default"), secondTarget && __copyProps2(secondTarget, mod, "default"));
-    var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    }, "__copyProps");
+    var __reExport = /* @__PURE__ */ __name((target, mod, secondTarget) => (__copyProps2(target, mod, "default"), secondTarget && __copyProps2(secondTarget, mod, "default")), "__reExport");
+    var __toCommonJS2 = /* @__PURE__ */ __name((mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod), "__toCommonJS");
     var scripts_exports = {};
     module.exports = __toCommonJS2(scripts_exports);
     __reExport(scripts_exports, require_CBCore(), module.exports);
@@ -19421,18 +19658,18 @@ var require_compiledScripts3 = __commonJS({
   }
 });
 
+// scripts/RunApplication.ts
+var import_uicore_ts22 = __toESM(require_compiledScripts());
+
 // scripts/RootViewController.ts
-var import_uicore_ts20 = __toESM(require_compiledScripts());
-var import_cbcore_ts16 = __toESM(require_compiledScripts3());
+var import_cbcore_ts8 = __toESM(require_compiledScripts3());
+var import_uicore_ts21 = __toESM(require_compiledScripts());
 
 // scripts/BottomBarView.ts
 var import_uicore_ts = __toESM(require_compiledScripts());
 var BottomBarView = class extends import_uicore_ts.UIView {
   constructor(elementID) {
     super(elementID);
-  }
-  initView(elementID, viewHTMLElement) {
-    super.initView(elementID, viewHTMLElement);
     this.backgroundColor = import_uicore_ts.UIColor.colorWithRGBA(50, 50, 50);
     this.setInnerHTML("bottomBarContent", "bottomBarContent");
   }
@@ -19440,6 +19677,7 @@ var BottomBarView = class extends import_uicore_ts.UIView {
     super.layoutSubviews();
   }
 };
+__name(BottomBarView, "BottomBarView");
 
 // scripts/Custom components/CBColor.ts
 var import_uicore_ts2 = __toESM(require_compiledScripts());
@@ -19463,29 +19701,181 @@ var CBColor = class extends import_uicore_ts2.UIColor {
     return new CBColor("rgba(236, 88, 111, 1)");
   }
 };
+__name(CBColor, "CBColor");
 
-// scripts/InformationViewController.ts
-var import_uicore_ts3 = __toESM(require_compiledScripts());
+// scripts/EditorViewController.ts
 var import_cbcore_ts = __toESM(require_compiledScripts3());
-var _InformationViewController = class extends import_uicore_ts3.UIViewController {
+var import_uicore_ts3 = __toESM(require_compiledScripts());
+var _EditorViewController = class extends import_uicore_ts3.UIViewController {
   constructor(view) {
     super(view);
+    this.titleLabel = new import_uicore_ts3.UITextView(
+      this.view.elementID + "TitleLabel",
+      import_uicore_ts3.UITextView.type.header2
+    ).configuredWithObject({
+      text: "Editor",
+      userInteractionEnabled: import_uicore_ts3.NO
+    }).performingFunctionWithSelf((self2) => this.view.addSubview(self2));
+    this.closeButton = new import_uicore_ts3.UIButton().configuredWithObject({
+      titleLabel: { text: "X" },
+      controlEventTargetAccumulator: {
+        PointerUpInside: () => import_uicore_ts3.UIRoute.currentRoute.routeByRemovingParameterInComponent("settings", "editorOpen").applyByReplacingCurrentRouteInHistory()
+      }
+    }).performingFunctionWithSelf((self2) => this.view.addSubview(self2));
+    this.currentViewLabel = new import_uicore_ts3.UITextView().performingFunctionWithSelf((self2) => this.view.addSubview(self2));
+    this.editorContainer = new import_uicore_ts3.UIView("EditorEditorContainer", import_uicore_ts3.nil, "iframe").configuredWithObject({
+      viewHTMLElement: { src: "CBEditorEditor.html" }
+    }).performingFunctionWithSelf((self2) => this.view.addSubview(self2));
+    this._selectedViewColor = import_uicore_ts3.nil;
+    this._selectedView = import_uicore_ts3.nil;
+    this._editor = import_uicore_ts3.nil;
     this.view.backgroundColor = import_uicore_ts3.UIColor.whiteColor;
+    this.view.setBorder(2, 1);
+    this.view.calculateAndSetViewFrame = () => {
+      const width = 550;
+      const height = 850;
+      this.view.setFrame(
+        new import_uicore_ts3.UIRectangle(
+          view.rootView.bounds.width - 10 - width + this.view.pointerDraggingPoint.x,
+          10 + this.view.pointerDraggingPoint.y,
+          height,
+          width
+        ),
+        500
+      );
+    };
+    this.view.controlEventTargetAccumulator.PointerDrag = () => this.view.calculateAndSetViewFrame();
+    this.initEditor();
+    import_uicore_ts3.UIView.pointerUpInsideCalled = (eventView) => this.pointerUpInsideWasCalledOnView(eventView);
+  }
+  initEditor() {
+    window.onmessage = (event2) => {
+      if (event2.data == "CBEditorFrameReady") {
+        const editorIframe = this.editorContainer.viewHTMLElement;
+        this._editor = new Proxy(import_uicore_ts3.nil, {
+          get(target, key) {
+            const result = /* @__PURE__ */ __name((...parameters) => new Promise((resolve, reject) => {
+              var _a;
+              const channel = new MessageChannel();
+              channel.port1.onmessage = ({ data }) => {
+                channel.port1.close();
+                if (data.error) {
+                  reject(data.error);
+                } else {
+                  resolve(data.result);
+                }
+              };
+              (_a = editorIframe.contentWindow) == null ? void 0 : _a.postMessage(
+                {
+                  type: "CBEditorFrameMessage",
+                  key,
+                  parameters
+                },
+                "*",
+                [channel.port2]
+              );
+            }), "result");
+            return result;
+          }
+        });
+      }
+    };
+  }
+  pointerUpInsideWasCalledOnView(view) {
+    return __async(this, null, function* () {
+      var _a, _b;
+      if (!this.view.isMemberOfViewTree || view.allSuperviews.contains(this.view)) {
+        return;
+      }
+      this.currentViewLabel.text = view.elementID;
+      const propertyDescriptor = view.propertyDescriptors.firstElement;
+      if (propertyDescriptor) {
+        this.currentViewLabel.text = ((_b = (_a = propertyDescriptor == null ? void 0 : propertyDescriptor.object) == null ? void 0 : _a.constructor) == null ? void 0 : _b.name) + "_" + (propertyDescriptor == null ? void 0 : propertyDescriptor.name);
+        const fileObject = (yield import_cbcore_ts.SocketClient.EditProperty({
+          className: propertyDescriptor.object.constructor.name,
+          propertyKey: propertyDescriptor.name
+        })).result;
+        fileObject.referencedFiles.forEach((object) => {
+          this._editor.addExtraLibFromContents(
+            object.codeFileContents,
+            object.path
+          );
+        });
+        this._editor.loadModelFromContents(fileObject.codeFileContents, fileObject.path);
+      }
+      this._selectedView.backgroundColor = this._selectedViewColor;
+      this._selectedViewColor = view.backgroundColor;
+      view.backgroundColor = import_uicore_ts3.UIColor.redColor;
+      this._selectedView = view;
+    });
+  }
+  viewDidAppear() {
+    return __async(this, null, function* () {
+    });
+  }
+  viewWillDisappear() {
+    return __async(this, null, function* () {
+      this._selectedView.backgroundColor = this._selectedViewColor;
+    });
   }
   handleRoute(route) {
     return __async(this, null, function* () {
-      __superGet(_InformationViewController.prototype, this, "handleRoute").call(this, route);
-      import_cbcore_ts.CBCore.sharedInstance.didSetLanguageKey();
+      __superGet(_EditorViewController.prototype, this, "handleRoute").call(this, route);
+      const inquiryComponent = route.componentWithName(_EditorViewController.routeComponentName);
+    });
+  }
+  updateViewConstraints() {
+    super.updateViewConstraints();
+  }
+  updateViewStyles() {
+    super.updateViewStyles();
+  }
+  viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews();
+  }
+  layoutViewSubviews() {
+    super.layoutViewSubviews();
+    const padding = this.core.paddingLength;
+    const labelHeight = padding;
+    const bounds = this.view.bounds.rectangleWithInset(padding);
+    this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2);
+    this.closeButton.frame = bounds.rectangleWithHeight(28).rectangleWithWidth(28, 1);
+    this.currentViewLabel.frame = this.titleLabel.frame.rectangleForNextRow(padding);
+    const editorFrame = this.currentViewLabel.frame.rectangleForNextRow(
+      padding,
+      bounds.height - this.currentViewLabel.frame.max.y - padding * 2
+    );
+    this.editorContainer.frame = editorFrame;
+    this._editor.layout({ height: editorFrame.height, width: editorFrame.width });
+  }
+};
+var EditorViewController = _EditorViewController;
+__name(EditorViewController, "EditorViewController");
+EditorViewController.routeComponentName = "cb_editor";
+EditorViewController.ParameterIdentifierName = {};
+
+// scripts/InformationViewController.ts
+var import_cbcore_ts2 = __toESM(require_compiledScripts3());
+var import_uicore_ts4 = __toESM(require_compiledScripts());
+var _InformationViewController = class extends import_uicore_ts4.UIViewController {
+  constructor(view) {
+    super(view);
+    this.view.backgroundColor = import_uicore_ts4.UIColor.whiteColor;
+  }
+  handleRoute(route) {
+    return __async(this, null, function* () {
+      yield __superGet(_InformationViewController.prototype, this, "handleRoute").call(this, route);
+      import_cbcore_ts2.CBCore.sharedInstance.didSetLanguageKey();
       const inquiryComponent = route.componentWithName(_InformationViewController.routeComponentName);
       const key = inquiryComponent.parameters[_InformationViewController.ParameterIdentifierName.key];
       this.view.setInnerHTML(key, "Failed to load data for key");
       this.view.setNeedsLayoutUpToRootView();
       const imgLoad = imagesLoaded(this.view.viewHTMLElement);
-      const imagesDidLoad = function(instance) {
+      const imagesDidLoad = /* @__PURE__ */ __name(() => {
         console.log("ALWAYS - all images have been loaded");
         this.view.setNeedsLayoutUpToRootView();
         imgLoad.off("always", imagesDidLoad);
-      }.bind(this);
+      }, "imagesDidLoad");
       imgLoad.on("always", imagesDidLoad);
     });
   }
@@ -19506,24 +19896,21 @@ var _InformationViewController = class extends import_uicore_ts3.UIViewControlle
   }
 };
 var InformationViewController = _InformationViewController;
+__name(InformationViewController, "InformationViewController");
 InformationViewController.routeComponentName = "information";
 InformationViewController.ParameterIdentifierName = {
   "key": "key"
 };
 
 // scripts/InternalDropdownSettingsViewController.ts
-var import_uicore_ts14 = __toESM(require_compiledScripts());
-var import_cbcore_ts8 = __toESM(require_compiledScripts3());
-var import_cbcore_ts9 = __toESM(require_compiledScripts3());
+var import_cbcore_ts5 = __toESM(require_compiledScripts3());
+var import_uicore_ts16 = __toESM(require_compiledScripts());
 
 // scripts/Custom components/CBButton.ts
-var import_uicore_ts4 = __toESM(require_compiledScripts());
-var CBButton = class extends import_uicore_ts4.UIButton {
+var import_uicore_ts5 = __toESM(require_compiledScripts());
+var CBButton = class extends import_uicore_ts5.UIButton {
   constructor(elementID, elementType) {
     super(elementID, elementType);
-  }
-  initView(elementID, viewHTMLElement, initViewData) {
-    super.initView(elementID, viewHTMLElement, initViewData);
     this.style.outline = "none";
     this.colors.titleLabel.normal = CBColor.whiteColor;
     this.setBackgroundColorsWithNormalColor(CBColor.primaryTintColor);
@@ -19531,10 +19918,10 @@ var CBButton = class extends import_uicore_ts4.UIButton {
   }
   setBackgroundColorsWithNormalColor(normalBackgroundColor) {
     this.colors.background.normal = normalBackgroundColor;
-    this.colors.background.hovered = import_uicore_ts4.UIColor.colorWithRGBA(40, 168, 183);
+    this.colors.background.hovered = import_uicore_ts5.UIColor.colorWithRGBA(40, 168, 183);
     this.colors.background.focused = normalBackgroundColor;
-    this.colors.background.highlighted = import_uicore_ts4.UIColor.colorWithRGBA(48, 196, 212);
-    this.colors.background.selected = import_uicore_ts4.UIColor.whiteColor;
+    this.colors.background.highlighted = import_uicore_ts5.UIColor.colorWithRGBA(48, 196, 212);
+    this.colors.background.selected = import_uicore_ts5.UIColor.whiteColor;
     this.updateContentForCurrentState();
   }
   updateContentForNormalState() {
@@ -19555,35 +19942,36 @@ var CBButton = class extends import_uicore_ts4.UIButton {
   }
   updateContentForCurrentEnabledState() {
     super.updateContentForCurrentEnabledState();
-    if ((0, import_uicore_ts4.IS_NOT)(this.enabled)) {
-      this.titleLabel.textColor = new import_uicore_ts4.UIColor("#adadad");
-      this.backgroundColor = new import_uicore_ts4.UIColor("#e5e5e5");
+    if ((0, import_uicore_ts5.IS_NOT)(this.enabled)) {
+      this.titleLabel.textColor = new import_uicore_ts5.UIColor("#adadad");
+      this.backgroundColor = new import_uicore_ts5.UIColor("#e5e5e5");
       this.alpha = 1;
     }
   }
 };
+__name(CBButton, "CBButton");
 
 // scripts/Custom components/CBCheckbox.ts
-var import_uicore_ts5 = __toESM(require_compiledScripts());
-var _CBCheckbox = class extends import_uicore_ts5.UIView {
+var import_uicore_ts6 = __toESM(require_compiledScripts());
+var _CBCheckbox = class extends import_uicore_ts6.UIView {
   constructor(elementID) {
-    super(elementID, import_uicore_ts5.nil, "label");
-  }
-  initView(elementID, viewHTMLElement) {
-    super.initView(elementID, viewHTMLElement);
-    this.checkbox = new import_uicore_ts5.UIView(elementID + "Checkbox", import_uicore_ts5.nil, "input");
+    super(elementID, import_uicore_ts6.nil, "label");
+    this.checkbox = new import_uicore_ts6.UIView(elementID + "Checkbox", import_uicore_ts6.nil, "input");
     this.checkbox.viewHTMLElement.setAttribute("type", "checkbox");
     this.addSubview(this.checkbox);
-    this.titleLabel = new import_uicore_ts5.UITextView(elementID + "TitleLabel", import_uicore_ts5.UITextView.type.span);
+    this.titleLabel = new import_uicore_ts6.UITextView(elementID + "TitleLabel", import_uicore_ts6.UITextView.type.span);
     this.addSubview(this.titleLabel);
-    this.checkbox.userInteractionEnabled = import_uicore_ts5.NO;
-    this.titleLabel.userInteractionEnabled = import_uicore_ts5.NO;
+    this.checkbox.userInteractionEnabled = import_uicore_ts6.NO;
+    this.titleLabel.userInteractionEnabled = import_uicore_ts6.NO;
     this.titleLabel.style.overflow = "visible";
     this.titleLabel.style.lineHeight = "1.5";
     this.style.cursor = "pointer";
     this.viewHTMLElement.onchange = (event2) => {
       this.sendControlEventForKey(_CBCheckbox.controlEvent.SelectionChange, event2);
     };
+  }
+  get controlEventTargetAccumulator() {
+    return super.controlEventTargetAccumulator;
   }
   get isStatic() {
     const result = this.checkbox.viewHTMLElement.classList.contains("staticCheckbox");
@@ -19605,7 +19993,7 @@ var _CBCheckbox = class extends import_uicore_ts5.UIView {
   layoutSubviews() {
     super.layoutSubviews();
     const titleWidth = this.bounds.width - 35;
-    this.titleLabel.setMaxSizes(import_uicore_ts5.nil, titleWidth);
+    this.titleLabel.setMaxSizes(import_uicore_ts6.nil, titleWidth);
     this.titleLabel.textPrefix = '<span style="position: absolute; overflow: hidden; left: 0; top: 0;text-overflow: ellipsis; white-space: pre; padding-left: 35px; width: ' + titleWidth + 'px;">';
     this.titleLabel.textSuffix = "</span>";
     this.hoverText = this.titleLabel.text.replace(
@@ -19615,24 +20003,46 @@ var _CBCheckbox = class extends import_uicore_ts5.UIView {
   }
 };
 var CBCheckbox = _CBCheckbox;
-CBCheckbox.controlEvent = Object.assign({}, import_uicore_ts5.UIView.controlEvent, {
+__name(CBCheckbox, "CBCheckbox");
+CBCheckbox.controlEvent = Object.assign({}, import_uicore_ts6.UIView.controlEvent, {
   "SelectionChange": "SelectionChange"
 });
 
 // scripts/Custom components/CBDialogViewShower.ts
-var import_uicore_ts9 = __toESM(require_compiledScripts());
+var import_uicore_ts11 = __toESM(require_compiledScripts());
+
+// scripts/LanguageService.ts
+var import_cbcore_ts3 = __toESM(require_compiledScripts3());
+var import_uicore_ts7 = __toESM(require_compiledScripts());
+var LanguageService = class extends import_cbcore_ts3.CBLanguageService {
+};
+__name(LanguageService, "LanguageService");
+LanguageService.languageValues = {
+  en: {
+    languageName: "English",
+    languageNameShort: "ENG",
+    topBarTitle: "UICore application",
+    selectLanguageTitle: "Select language",
+    leftBarTitle: "Title"
+  },
+  est: {
+    languageName: "Eesti keel",
+    languageNameShort: "EST",
+    topBarTitle: "UICore rakendus",
+    selectLanguageTitle: "Vali keel",
+    leftBarTitle: "Pealkiri"
+  }
+};
+import_uicore_ts7.UICore.languageService = LanguageService;
 
 // scripts/Custom components/CBDialogView.ts
-var import_uicore_ts8 = __toESM(require_compiledScripts());
+var import_uicore_ts10 = __toESM(require_compiledScripts());
 
 // scripts/Custom components/CBFlatButton.ts
-var import_uicore_ts6 = __toESM(require_compiledScripts());
+var import_uicore_ts8 = __toESM(require_compiledScripts());
 var CBFlatButton = class extends CBButton {
   constructor(elementID, elementType) {
     super(elementID, elementType);
-  }
-  initView(elementID, viewHTMLElement, initViewData) {
-    super.initView(elementID, viewHTMLElement, initViewData);
     this.colors = {
       titleLabel: {
         normal: CBColor.primaryTintColor,
@@ -19641,9 +20051,9 @@ var CBFlatButton = class extends CBButton {
       },
       background: {
         normal: CBColor.transparentColor,
-        hovered: new import_uicore_ts6.UIColor("#F8F8F8"),
-        highlighted: new import_uicore_ts6.UIColor("#ebebeb"),
-        selected: new import_uicore_ts6.UIColor("#ebebeb")
+        hovered: new import_uicore_ts8.UIColor("#F8F8F8"),
+        highlighted: new import_uicore_ts8.UIColor("#ebebeb"),
+        selected: new import_uicore_ts8.UIColor("#ebebeb")
       }
     };
   }
@@ -19658,18 +20068,19 @@ var CBFlatButton = class extends CBButton {
     return result;
   }
   updateContentForNormalState() {
-    import_uicore_ts6.UIButton.prototype.updateContentForNormalState.call(this);
+    import_uicore_ts8.UIButton.prototype.updateContentForNormalState.call(this);
   }
   updateContentForHoveredState() {
-    import_uicore_ts6.UIButton.prototype.updateContentForHoveredState.call(this);
+    import_uicore_ts8.UIButton.prototype.updateContentForHoveredState.call(this);
   }
   updateContentForFocusedState() {
-    import_uicore_ts6.UIButton.prototype.updateContentForFocusedState.call(this);
+    import_uicore_ts8.UIButton.prototype.updateContentForFocusedState.call(this);
   }
   updateContentForHighlightedState() {
-    import_uicore_ts6.UIButton.prototype.updateContentForHighlightedState.call(this);
+    import_uicore_ts8.UIButton.prototype.updateContentForHighlightedState.call(this);
   }
 };
+__name(CBFlatButton, "CBFlatButton");
 CBFlatButton.colors = {
   titleLabel: {
     normal: CBColor.primaryTintColor,
@@ -19678,21 +20089,19 @@ CBFlatButton.colors = {
   },
   background: {
     normal: CBColor.transparentColor,
-    hovered: new import_uicore_ts6.UIColor("#F8F8F8"),
-    highlighted: new import_uicore_ts6.UIColor("#ebebeb"),
-    selected: new import_uicore_ts6.UIColor("#ebebeb")
+    hovered: new import_uicore_ts8.UIColor("#F8F8F8"),
+    highlighted: new import_uicore_ts8.UIColor("#ebebeb"),
+    selected: new import_uicore_ts8.UIColor("#ebebeb")
   }
 };
 
-// scripts/Custom components/CBDialogView.ts
-var import_cbcore_ts2 = __toESM(require_compiledScripts3());
-
 // scripts/Custom components/RowView.ts
-var import_uicore_ts7 = __toESM(require_compiledScripts());
-var RowView = class extends import_uicore_ts7.UIView {
+var import_uicore_ts9 = __toESM(require_compiledScripts());
+var RowView = class extends import_uicore_ts9.UIView {
   constructor(elementID, cells = [], cellWidths = []) {
     super(elementID);
     this.padding = 0;
+    this._cellWidths = [];
     this._rowHeight = 50;
     this._cells = cells;
     this._cellWeights = cellWidths;
@@ -19703,20 +20112,20 @@ var RowView = class extends import_uicore_ts7.UIView {
   set cells(cells) {
     const previousCells = this.cells;
     const cellWeights = this.cellWeights.copy();
-    previousCells.copy().forEach(function(cell, index, array) {
+    previousCells.copy().forEach((cell, index) => {
       if (!cells.contains(cell)) {
         cell.removeFromSuperview();
         this._cells.removeElement(cell);
-        cellWeights[index] = import_uicore_ts7.nil;
+        cellWeights[index] = import_uicore_ts9.nil;
       }
-    }.bind(this));
-    this.cellWeights = cellWeights.filter((value, index, array) => (0, import_uicore_ts7.IS_NOT_NIL)(value));
-    cells.copy().forEach(function(cell, index, array) {
-      if (!(0, import_uicore_ts7.IS)(cell.superview)) {
+    });
+    this.cellWeights = cellWeights.filter((cellWeight) => (0, import_uicore_ts9.IS_NOT_NIL)(cellWeight));
+    cells.copy().forEach((cell, index) => {
+      if (!(0, import_uicore_ts9.IS)(cell.superview)) {
         this.addCell(cell, 1, index);
       }
-    }, this);
-    this._previousLayoutBounds = import_uicore_ts7.nil;
+    });
+    this._previousLayoutBounds = import_uicore_ts9.nil;
     this.setNeedsLayout();
   }
   removeCellAtIndex(index) {
@@ -19732,7 +20141,7 @@ var RowView = class extends import_uicore_ts7.UIView {
     this.removeCellAtIndex(this.cells.length - 1);
   }
   addCell(cell, weight = 1, index = this.cells.length) {
-    if (this.cells.contains(cell) && (0, import_uicore_ts7.IS_NOT_NIL)(cell)) {
+    if (this.cells.contains(cell) && (0, import_uicore_ts9.IS_NOT_NIL)(cell)) {
       return;
     }
     this.cells.insertElementAtIndex(index, cell);
@@ -19745,7 +20154,7 @@ var RowView = class extends import_uicore_ts7.UIView {
   }
   set cellWeights(widths) {
     this._cellWeights = widths;
-    this._previousLayoutBounds = import_uicore_ts7.nil;
+    this._previousLayoutBounds = import_uicore_ts9.nil;
     this.setNeedsLayout();
   }
   get cellWidths() {
@@ -19753,12 +20162,11 @@ var RowView = class extends import_uicore_ts7.UIView {
   }
   set cellWidths(widths) {
     this._cellWidths = widths;
-    this._previousLayoutBounds = import_uicore_ts7.nil;
+    this._previousLayoutBounds = import_uicore_ts9.nil;
     this.setNeedsLayout();
   }
   get rowHeight() {
-    var result = (0, import_uicore_ts7.IF)(this._rowHeight)(() => this._rowHeight).ELSE(() => this.cells.map((value, index, array) => value.intrinsicContentHeight(this.bounds.width)).max());
-    return result;
+    return (0, import_uicore_ts9.IF)(this._rowHeight)(() => this._rowHeight).ELSE(() => this.cells.map((cell) => cell.intrinsicContentHeight(this.bounds.width)).max());
   }
   layoutSubviews() {
     const bounds = this.bounds;
@@ -19768,30 +20176,26 @@ var RowView = class extends import_uicore_ts7.UIView {
     super.layoutSubviews();
     this._previousLayoutBounds = bounds;
     bounds.distributeViewsAlongWidth(this._cells, this._cellWeights, this.padding, this._cellWidths);
-    this.cells.forEach(function(cell, index, array) {
-      cell.frame = cell.frame.rectangleWithHeight(this.rowHeight);
-    }.bind(this));
+    this.cells.forEach((cell) => cell.frame = cell.frame.rectangleWithHeight(this.rowHeight));
   }
 };
+__name(RowView, "RowView");
 
 // scripts/Custom components/CBDialogView.ts
-var CBDialogView = class extends import_uicore_ts8.UIView {
+var CBDialogView = class extends import_uicore_ts10.UIView {
   constructor(elementID) {
     super(elementID);
-    this.titleLabel = import_uicore_ts8.nil;
-    this.titleRow = import_uicore_ts8.nil;
-    this.placeholderLabel = import_uicore_ts8.nil;
-    this._view = import_uicore_ts8.nil;
-    this.questionLabel = import_uicore_ts8.nil;
-    this.yesButton = import_uicore_ts8.nil;
-    this.noButton = import_uicore_ts8.nil;
-    this.cancelButton = import_uicore_ts8.nil;
-    this.noButtonDismissesDialog = import_uicore_ts8.YES;
-    this.updateContent();
-  }
-  initView(elementID, viewHTMLElement) {
-    super.initView(elementID, viewHTMLElement);
+    this.titleLabel = import_uicore_ts10.nil;
+    this.titleRow = import_uicore_ts10.nil;
+    this.placeholderLabel = import_uicore_ts10.nil;
+    this._view = import_uicore_ts10.nil;
+    this.questionLabel = import_uicore_ts10.nil;
+    this.yesButton = import_uicore_ts10.nil;
+    this.noButton = import_uicore_ts10.nil;
+    this.cancelButton = import_uicore_ts10.nil;
+    this.noButtonDismissesDialog = import_uicore_ts10.YES;
     this.style.borderRadius = "5px";
+    this.updateContent();
   }
   set view(view) {
     this.view.removeFromSuperview();
@@ -19802,35 +20206,35 @@ var CBDialogView = class extends import_uicore_ts8.UIView {
     return this._view;
   }
   initCancelButtonIfNeeded() {
-    if ((0, import_uicore_ts8.IS_NOT)(this.cancelButton)) {
+    if ((0, import_uicore_ts10.IS_NOT)(this.cancelButton)) {
       this.cancelButton = new CBFlatButton(this.elementID + "CancelButton");
       this.cancelButton.titleLabel.text = "OK";
-      this.cancelButton.titleLabelColor = import_uicore_ts8.UIColor.greenColor;
+      this.cancelButton.titleLabelColor = import_uicore_ts10.UIColor.greenColor;
       this.cancelButton.titleLabel.style.fontWeight = "600";
       this.addSubview(this.cancelButton);
       this.cancelButton.addTargetForControlEvents([
-        import_uicore_ts8.UIButton.controlEvent.PointerUpInside,
-        import_uicore_ts8.UIButton.controlEvent.EnterDown
+        import_uicore_ts10.UIButton.controlEvent.PointerUpInside,
+        import_uicore_ts10.UIButton.controlEvent.EnterDown
       ], function(sender, event2) {
         this.dialogView.dismiss();
       }.bind(this));
     }
   }
   initYesNoButtonsIfNeeded() {
-    if ((0, import_uicore_ts8.IS_NOT)(this.yesButton)) {
+    if ((0, import_uicore_ts10.IS_NOT)(this.yesButton)) {
       this.yesButton = new CBFlatButton(this.elementID + "YesButton");
       this.yesButton.titleLabel.setText("cBDDialogViewYES", "YES");
-      this.yesButton.titleLabelColor = import_uicore_ts8.UIColor.greenColor;
+      this.yesButton.titleLabelColor = import_uicore_ts10.UIColor.greenColor;
       this.yesButton.titleLabel.style.fontWeight = "600";
       this.addSubview(this.yesButton);
       this.noButton = new CBFlatButton(this.elementID + "NoButton");
       this.noButton.titleLabel.setText("cBDDialogViewNO", "NO");
-      this.noButton.titleLabelColor = import_uicore_ts8.UIColor.redColor;
+      this.noButton.titleLabelColor = import_uicore_ts10.UIColor.redColor;
       this.noButton.titleLabel.style.fontWeight = "600";
       this.addSubview(this.noButton);
       this.noButton.addTargetForControlEvents([
-        import_uicore_ts8.UIButton.controlEvent.PointerUpInside,
-        import_uicore_ts8.UIButton.controlEvent.EnterDown
+        import_uicore_ts10.UIButton.controlEvent.PointerUpInside,
+        import_uicore_ts10.UIButton.controlEvent.EnterDown
       ], function(sender, event2) {
         if (this.noButtonDismissesDialog) {
           this.dialogView.dismiss();
@@ -19839,45 +20243,46 @@ var CBDialogView = class extends import_uicore_ts8.UIView {
     }
   }
   initQuestionLabelIfNeeded() {
-    if ((0, import_uicore_ts8.IS_NOT)(this.questionLabel)) {
-      this.questionLabel = new import_uicore_ts8.UITextView(this.elementID + "QuestionLabel", import_uicore_ts8.UITextView.type.header3);
-      this.questionLabel.text = import_cbcore_ts2.LanguageService.stringForKey(
+    if ((0, import_uicore_ts10.IS_NOT)(this.questionLabel)) {
+      this.questionLabel = new import_uicore_ts10.UITextView(this.elementID + "QuestionLabel", import_uicore_ts10.UITextView.type.header3);
+      this.questionLabel.text = LanguageService.stringForKey(
         "cBDDialogViewAreYouSure",
-        import_cbcore_ts2.LanguageService.currentLanguageKey,
+        LanguageService.currentLanguageKey,
         "Are you sure?"
       );
-      this.questionLabel.textAlignment = import_uicore_ts8.UITextView.textAlignment.center;
+      this.questionLabel.textAlignment = import_uicore_ts10.UITextView.textAlignment.center;
       this.addSubview(this.questionLabel);
     }
   }
   initTitleRow() {
-    if ((0, import_uicore_ts8.IS_NOT)(this.titleRow)) {
+    if ((0, import_uicore_ts10.IS_NOT)(this.titleRow)) {
       this.titleRow = new RowView(this.elementID + "TitleRow");
       this.addSubview(this.titleRow);
     }
   }
   initTitleLabelIfNeeded() {
-    if ((0, import_uicore_ts8.IS_NOT)(this.titleLabel)) {
-      this.titleLabel = new import_uicore_ts8.UITextView(this.elementID + "TitleLabel", import_uicore_ts8.UITextView.type.header4);
+    if ((0, import_uicore_ts10.IS_NOT)(this.titleLabel)) {
+      this.titleLabel = new import_uicore_ts10.UITextView(this.elementID + "TitleLabel", import_uicore_ts10.UITextView.type.header4);
       this.titleLabel.text = "Accept offer";
       this.titleLabel.style.fontSize = "24";
       this.addSubview(this.titleLabel);
     }
   }
   initPlaceholderLabelIfNeeded() {
-    if ((0, import_uicore_ts8.IS_NOT)(this.placeholderLabel)) {
-      this.placeholderLabel = new import_uicore_ts8.UITextView(this.elementID + "PlaceholderLabel", import_uicore_ts8.UITextView.type.header4);
+    if ((0, import_uicore_ts10.IS_NOT)(this.placeholderLabel)) {
+      this.placeholderLabel = new import_uicore_ts10.UITextView(this.elementID + "PlaceholderLabel", import_uicore_ts10.UITextView.type.header4);
       this.placeholderLabel.text = "No offers have been made yet.";
       this.addSubview(this.placeholderLabel);
     }
   }
   updateContent() {
     function stringFromValue(value) {
-      if ((0, import_uicore_ts8.IS)(value)) {
+      if ((0, import_uicore_ts10.IS)(value)) {
         return value;
       }
       return "-";
     }
+    __name(stringFromValue, "stringFromValue");
     this.layoutSubviews();
   }
   layoutSubviews() {
@@ -19890,15 +20295,15 @@ var CBDialogView = class extends import_uicore_ts8.UIView {
       bounds.y + padding * 0.5
     );
     this.titleLabel.style.marginLeft = "" + padding * 0.5 + "px";
-    this.titleRow.frame = (0, import_uicore_ts8.FIRST_OR_NIL)(this.titleLabel, topObject).frame.rectangleForNextRow(
+    this.titleRow.frame = (0, import_uicore_ts10.FIRST_OR_NIL)(this.titleLabel, topObject).frame.rectangleForNextRow(
       0,
       this.titleRow.intrinsicContentHeight(bounds.width)
     );
-    this.view.frame = (0, import_uicore_ts8.FIRST_OR_NIL)(this.titleRow, this.titleLabel, topObject).frame.rectangleForNextRow(
+    this.view.frame = (0, import_uicore_ts10.FIRST_OR_NIL)(this.titleRow, this.titleLabel, topObject).frame.rectangleForNextRow(
       padding,
       this.view.intrinsicContentHeight(bounds.width)
     ).rectangleWithWidth(bounds.width).rectangleWithX(bounds.x);
-    this.questionLabel.frame = (0, import_uicore_ts8.FIRST_OR_NIL)(
+    this.questionLabel.frame = (0, import_uicore_ts10.FIRST_OR_NIL)(
       this.view,
       this.titleRow,
       this.titleLabel,
@@ -19908,53 +20313,57 @@ var CBDialogView = class extends import_uicore_ts8.UIView {
       this.questionLabel.intrinsicContentHeight(bounds.width)
     ).rectangleWithWidth(bounds.width).rectangleWithX(bounds.x);
     const buttons = [this.yesButton, this.noButton];
-    const buttonsFrame = (0, import_uicore_ts8.FIRST_OR_NIL)(
+    const buttonsFrame = (0, import_uicore_ts10.FIRST_OR_NIL)(
       this.questionLabel,
       this.view,
       this.titleRow,
       this.titleLabel,
       topObject
-    ).frame.rectangleForNextRow(padding, labelHeight * 2).rectangleWithWidth([buttons.everyElement.titleLabel.intrinsicContentWidth().max(), 120].max() * 2 + padding * 3, 0.5);
+    ).frame.rectangleForNextRow(padding, labelHeight * 2).rectangleWithWidth([
+      buttons.everyElement.titleLabel.intrinsicContentWidth().max(),
+      120
+    ].max() * 2 + padding * 3, 0.5);
     buttonsFrame.distributeViewsAlongWidth(buttons);
     this.cancelButton.frame = buttonsFrame.rectangleWithWidth(150, 0.5);
     this.placeholderLabel.frame = bounds.rectangleWithInsets(padding * 0.5, padding * 0.5, 0, 0);
-    if ((0, import_uicore_ts8.IS)(this.view)) {
-      this.placeholderLabel.hidden = import_uicore_ts8.YES;
+    if ((0, import_uicore_ts10.IS)(this.view)) {
+      this.placeholderLabel.hidden = import_uicore_ts10.YES;
     } else {
-      this.placeholderLabel.hidden = import_uicore_ts8.NO;
+      this.placeholderLabel.hidden = import_uicore_ts10.NO;
     }
   }
   intrinsicContentHeight(constrainingWidth = 0) {
     const padding = this.core.paddingLength;
     const labelHeight = padding * 0.75;
     function addPaddingIfNeeded(value) {
-      return (0, import_uicore_ts8.IF)(value)(function() {
+      return (0, import_uicore_ts10.IF)(value)(function() {
         return value + padding;
       })();
     }
-    var result = padding;
+    __name(addPaddingIfNeeded, "addPaddingIfNeeded");
+    let result = padding;
     result = result + addPaddingIfNeeded(this.titleLabel.intrinsicContentHeight(constrainingWidth));
     result = result + addPaddingIfNeeded(this.titleRow.intrinsicContentHeight(constrainingWidth));
     result = result + addPaddingIfNeeded(this.view.intrinsicContentHeight(constrainingWidth) + padding);
     result = result + addPaddingIfNeeded(this.questionLabel.intrinsicContentHeight(constrainingWidth));
-    result = result + (0, import_uicore_ts8.IF)((0, import_uicore_ts8.FIRST_OR_NIL)(this.yesButton, this.cancelButton))((0, import_uicore_ts8.RETURNER)(labelHeight))();
+    result = result + (0, import_uicore_ts10.IF)((0, import_uicore_ts10.FIRST_OR_NIL)(this.yesButton, this.cancelButton))((0, import_uicore_ts10.RETURNER)(labelHeight))();
     return result;
   }
 };
+__name(CBDialogView, "CBDialogView");
 
 // scripts/Custom components/CBDialogViewShower.ts
-var import_cbcore_ts3 = __toESM(require_compiledScripts3());
-var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
+var _CBDialogViewShower = class extends import_uicore_ts11.UIObject {
   constructor(elementID, core) {
     super();
-    this.dialogView = new import_uicore_ts9.UIDialogView();
+    this.dialogView = new import_uicore_ts11.UIDialogView();
     this.dialogView.view = new CBDialogView(elementID);
-    this.dialogView.view.backgroundColor = import_uicore_ts9.UIColor.whiteColor;
+    this.dialogView.view.backgroundColor = import_uicore_ts11.UIColor.whiteColor;
     this.dialogView.core = this.dialogView.core || core;
     const dialogLayoutFunction = this.dialogView.layoutSubviews.bind(this.dialogView);
-    this.dialogView.layoutSubviews = function() {
+    this.dialogView.layoutSubviews = () => {
       dialogLayoutFunction();
-      this.dialogView.view.frame = new import_uicore_ts9.UIRectangle(
+      this.dialogView.view.frame = new import_uicore_ts11.UIRectangle(
         0,
         0,
         window.innerHeight,
@@ -19964,29 +20373,32 @@ var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
         0.5
       ).rectangleWithWidth(this.getDialogWidth(), 0.5);
       this.dialogView.frame = this.dialogView.core.rootViewController.view.bounds;
-    }.bind(this);
+    };
     this.dialogView.view.yesButton.addTargetForControlEvents([
-      import_uicore_ts9.UIButton.controlEvent.PointerUpInside,
-      import_uicore_ts9.UIButton.controlEvent.EnterDown
-    ], function(sender, event2) {
-      this.yesButtonWasPressed();
-    }.bind(this));
+      import_uicore_ts11.UIButton.controlEvent.PointerUpInside,
+      import_uicore_ts11.UIButton.controlEvent.EnterDown
+    ], () => this.yesButtonWasPressed());
     this.dialogView.view.noButton.addTargetForControlEvents([
-      import_uicore_ts9.UIButton.controlEvent.PointerUpInside,
-      import_uicore_ts9.UIButton.controlEvent.EnterDown
-    ], function(sender, event2) {
+      import_uicore_ts11.UIButton.controlEvent.PointerUpInside,
+      import_uicore_ts11.UIButton.controlEvent.EnterDown
+    ], () => {
       this.noButtonWasPressed();
-    }.bind(this));
+    });
   }
   getDialogWidth() {
     const padding = this.dialogView.core.paddingLength;
     const labelHeight = padding * 0.75;
-    var result = 250;
+    let result = 250;
     const width = this.dialogView.view.titleLabel.intrinsicContentWidth() + padding * 2;
-    result = Math.max(result, this.dialogView.view.view.intrinsicContentWidth(this.dialogView.view.view.viewHTMLElement.naturalHeight || 1e9));
+    result = Math.max(
+      result,
+      this.dialogView.view.view.intrinsicContentWidth(
+        this.dialogView.view.view.viewHTMLElement.naturalHeight || 1e9
+      )
+    );
     result = Math.max(result, width);
     result = Math.min(result, 1e3);
-    const dialogMaxWidth = (this.dialogView.superview || { "bounds": new import_uicore_ts9.UIRectangle(0, 0, 0, result) }).bounds.width;
+    const dialogMaxWidth = (this.dialogView.superview || { "bounds": new import_uicore_ts11.UIRectangle(0, 0, 0, result) }).bounds.width;
     result = Math.min(result, dialogMaxWidth);
     return result;
   }
@@ -20000,94 +20412,78 @@ var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
     this.dialogView.view.initTitleLabelIfNeeded();
     this.dialogView.view.titleLabel.localizedTextObject = titleTextObject;
     this.dialogView.view.initQuestionLabelIfNeeded();
-    if ((0, import_uicore_ts9.IS)(questionTextObject)) {
+    if ((0, import_uicore_ts11.IS)(questionTextObject)) {
       this.dialogView.view.questionLabel.localizedTextObject = questionTextObject;
     }
     this.dialogView.view.initYesNoButtonsIfNeeded();
     this.dialogView.view.noButton.addTargetForControlEvents([
-      import_uicore_ts9.UIButton.controlEvent.EnterDown,
-      import_uicore_ts9.UIButton.controlEvent.PointerUpInside
-    ], function(sender, event2) {
-      this.noButtonWasPressed();
-    }.bind(this));
+      import_uicore_ts11.UIButton.controlEvent.EnterDown,
+      import_uicore_ts11.UIButton.controlEvent.PointerUpInside
+    ], () => this.noButtonWasPressed());
     this.dialogView.view.yesButton.addTargetForControlEvents([
-      import_uicore_ts9.UIButton.controlEvent.EnterDown,
-      import_uicore_ts9.UIButton.controlEvent.PointerUpInside
-    ], function(sender, event2) {
-      this.yesButtonWasPressed();
-    }.bind(this));
-    this.dialogView.showInRootView(import_uicore_ts9.YES);
+      import_uicore_ts11.UIButton.controlEvent.EnterDown,
+      import_uicore_ts11.UIButton.controlEvent.PointerUpInside
+    ], () => this.yesButtonWasPressed());
+    this.dialogView.showInRootView(import_uicore_ts11.YES);
   }
   showMessageDialogInRootView(titleTextObject) {
     this.dialogView.view.initTitleLabelIfNeeded();
     this.dialogView.view.titleLabel.localizedTextObject = titleTextObject;
     this.dialogView.view.initCancelButtonIfNeeded();
-    this.dialogView.view.cancelButton.addTargetForControlEvents([
-      import_uicore_ts9.UIButton.controlEvent.EnterDown,
-      import_uicore_ts9.UIButton.controlEvent.PointerUpInside
-    ], function(sender, event2) {
-      this.cancelButtonWasPressed();
-    }.bind(this));
-    this.dialogView.showInRootView(import_uicore_ts9.YES);
+    this.dialogView.view.cancelButton.controlEventTargetAccumulator.EnterDown.PointerUpInside = () => this.cancelButtonWasPressed();
+    this.dialogView.showInRootView(import_uicore_ts11.YES);
     this.dialogView.view.cancelButton.focus();
   }
   showDialogInRootView(view) {
     this.dialogView.view.view = view;
     this.dialogView.view.initCancelButtonIfNeeded();
-    this.dialogView.view.cancelButton.addTargetForControlEvents([
-      import_uicore_ts9.UIButton.controlEvent.EnterDown,
-      import_uicore_ts9.UIButton.controlEvent.PointerUpInside
-    ], function(sender, event2) {
-      this.cancelButtonWasPressed();
-    }.bind(this));
-    this.dialogView.showInRootView(import_uicore_ts9.YES);
+    this.dialogView.view.cancelButton.controlEventTargetAccumulator.EnterDown.PointerUpInside = () => this.cancelButtonWasPressed();
+    this.dialogView.showInRootView(import_uicore_ts11.YES);
     this.dialogView.view.cancelButton.focus();
   }
   showImageDialogInRootView(imageURL, deleteImageCallback) {
-    var loadingLabel = new import_uicore_ts9.UITextView();
+    const loadingLabel = new import_uicore_ts11.UITextView();
     loadingLabel.text = "Loading image.";
-    loadingLabel.textAlignment = import_uicore_ts9.UITextView.textAlignment.center;
+    loadingLabel.textAlignment = import_uicore_ts11.UITextView.textAlignment.center;
     this.dialogView.view.view = loadingLabel;
-    const imageView = new import_uicore_ts9.UIImageView();
+    const imageView = new import_uicore_ts11.UIImageView();
     imageView.imageSource = imageURL;
-    imageView.viewHTMLElement.onload = (event2) => {
+    imageView.viewHTMLElement.onload = () => {
       this.dialogView.view.view = imageView;
       imageView.setNeedsLayoutUpToRootView();
     };
-    imageView.fillMode = import_uicore_ts9.UIImageView.fillMode.aspectFitIfLarger;
-    if ((0, import_uicore_ts9.IS)(deleteImageCallback)) {
+    imageView.fillMode = import_uicore_ts11.UIImageView.fillMode.aspectFitIfLarger;
+    if ((0, import_uicore_ts11.IS)(deleteImageCallback)) {
       this.dialogView.view.initYesNoButtonsIfNeeded();
       this.dialogView.view.yesButton.titleLabel.text = "Close";
       this.dialogView.view.noButton.titleLabel.text = "Delete";
-      this.dialogView.view.noButtonDismissesDialog = import_uicore_ts9.NO;
+      this.dialogView.view.noButtonDismissesDialog = import_uicore_ts11.NO;
       this.dialogView.view.noButton.addTargetForControlEvents([
-        import_uicore_ts9.UIButton.controlEvent.EnterDown,
-        import_uicore_ts9.UIButton.controlEvent.PointerUpInside
-      ], function(sender, event2) {
-        const dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(function() {
-        }.bind(this));
-        var textObject = import_cbcore_ts3.LanguageService.localizedTextObjectForText("Delete this image.");
+        import_uicore_ts11.UIButton.controlEvent.EnterDown,
+        import_uicore_ts11.UIButton.controlEvent.PointerUpInside
+      ], () => {
+        const dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(() => {
+        });
+        const textObject = LanguageService.localizedTextObjectForText("Delete this image.");
         dialogShower.showQuestionDialogInRootView(textObject);
-        dialogShower.yesButtonWasPressed = function() {
+        dialogShower.yesButtonWasPressed = () => {
           deleteImageCallback();
           dialogShower.dialogView.dismiss();
         };
-      }.bind(this));
+      });
       this.dialogView.view.yesButton.addTargetForControlEvents([
-        import_uicore_ts9.UIButton.controlEvent.EnterDown,
-        import_uicore_ts9.UIButton.controlEvent.PointerUpInside
-      ], function(sender, event2) {
-        this.dialogView.dismiss();
-      }.bind(this));
+        import_uicore_ts11.UIButton.controlEvent.EnterDown,
+        import_uicore_ts11.UIButton.controlEvent.PointerUpInside
+      ], () => this.dialogView.dismiss());
     } else {
       this.dialogView.view.initCancelButtonIfNeeded();
       this.dialogView.view.cancelButton.titleLabel.text = "Close";
     }
-    this.dialogView.showInRootView(import_uicore_ts9.YES);
+    this.dialogView.showInRootView(import_uicore_ts11.YES);
     this.dialogView.view.cancelButton.focus();
   }
   showActionIndicatorDialogInRootView(message) {
-    const actionIndicator = new import_uicore_ts9.UIActionIndicator();
+    const actionIndicator = new import_uicore_ts11.UIActionIndicator();
     this.dialogView.zIndex = 150;
     this.dialogView.view.view = actionIndicator;
     actionIndicator.style.minHeight = "100px";
@@ -20095,37 +20491,37 @@ var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
     this.dialogView.view.questionLabel.text = message;
     actionIndicator.start();
     this.dialogView.view.backgroundColor = CBColor.primaryContentColor.colorWithAlpha(0.5);
-    this.dialogView.view.questionLabel.textColor = import_uicore_ts9.UIColor.whiteColor;
-    this.dialogView.dismissesOnTapOutside = import_uicore_ts9.NO;
+    this.dialogView.view.questionLabel.textColor = import_uicore_ts11.UIColor.whiteColor;
+    this.dialogView.dismissesOnTapOutside = import_uicore_ts11.NO;
     _CBDialogViewShower.currentActionIndicatorDialogViewShower = this;
-    this.dialogView.showInRootView(import_uicore_ts9.NO);
+    this.dialogView.showInRootView(import_uicore_ts11.NO);
     this.dialogView.view.cancelButton.focus();
   }
   static showNextDialog() {
-    (_CBDialogViewShower.nextShowDialogFunctions.firstElement || import_uicore_ts9.nil)();
+    (_CBDialogViewShower.nextShowDialogFunctions.firstElement || import_uicore_ts11.nil)();
     _CBDialogViewShower.nextShowDialogFunctions.removeElementAtIndex(0);
   }
-  static alert(text, dismissCallback = import_uicore_ts9.nil) {
+  static alert(text, dismissCallback = import_uicore_ts11.nil) {
     const dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback);
-    const textObject = import_cbcore_ts3.LanguageService.localizedTextObjectForText(text);
+    const textObject = LanguageService.localizedTextObjectForText(text);
     const showDialogFunction = dialogShower.showMessageDialogInRootView.bind(dialogShower, textObject);
     _CBDialogViewShower._showDialogWithFunction(showDialogFunction, dialogShower);
   }
-  static localizedAlert(textObject, dismissCallback = import_uicore_ts9.nil) {
+  static localizedAlert(textObject, dismissCallback = import_uicore_ts11.nil) {
     const dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback);
     const showDialogFunction = dialogShower.showMessageDialogInRootView.bind(dialogShower, textObject);
     _CBDialogViewShower._showDialogWithFunction(showDialogFunction, dialogShower);
   }
-  static showQuestionDialog(questionText, dismissCallback = import_uicore_ts9.nil) {
+  static showQuestionDialog(questionText, dismissCallback = import_uicore_ts11.nil) {
     const dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback);
-    const textObject = import_cbcore_ts3.LanguageService.localizedTextObjectForText(questionText);
+    const textObject = LanguageService.localizedTextObjectForText(questionText);
     const showDialogFunction = dialogShower.showQuestionDialogInRootView.bind(dialogShower, textObject);
     _CBDialogViewShower._showDialogWithFunction(showDialogFunction, dialogShower);
     return dialogShower;
   }
-  static showImageDialog(imageURL, deleteImageCallback = import_uicore_ts9.nil, dismissCallback = import_uicore_ts9.nil) {
-    var dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback);
-    var showDialogFunction = dialogShower.showImageDialogInRootView.bind(
+  static showImageDialog(imageURL, deleteImageCallback = import_uicore_ts11.nil, dismissCallback = import_uicore_ts11.nil) {
+    const dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback);
+    const showDialogFunction = dialogShower.showImageDialogInRootView.bind(
       dialogShower,
       imageURL,
       deleteImageCallback
@@ -20133,14 +20529,14 @@ var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
     _CBDialogViewShower._showDialogWithFunction(showDialogFunction, dialogShower);
     return dialogShower;
   }
-  static showDialog(view, dismissCallback = import_uicore_ts9.nil) {
+  static showDialog(view, dismissCallback = import_uicore_ts11.nil) {
     const dialogShower = _CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback);
     const showDialogFunction = dialogShower.showDialogInRootView.bind(dialogShower, view);
     _CBDialogViewShower._showDialogWithFunction(showDialogFunction, dialogShower);
     return dialogShower;
   }
-  static showActionIndicatorDialog(message, dismissCallback = import_uicore_ts9.nil) {
-    if ((0, import_uicore_ts9.IS)(_CBDialogViewShower.currentActionIndicatorDialogViewShower)) {
+  static showActionIndicatorDialog(message, dismissCallback = import_uicore_ts11.nil) {
+    if ((0, import_uicore_ts11.IS)(_CBDialogViewShower.currentActionIndicatorDialogViewShower)) {
       _CBDialogViewShower.currentActionIndicatorDialogViewShower.dialogView.view.questionLabel.text = message;
       _CBDialogViewShower.currentActionIndicatorDialogViewShower.dialogView.view.setNeedsLayoutUpToRootView();
       return;
@@ -20151,7 +20547,7 @@ var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
   }
   static hideActionIndicatorDialog() {
     _CBDialogViewShower.currentActionIndicatorDialogViewShower.dialogView.dismiss();
-    _CBDialogViewShower.currentActionIndicatorDialogViewShower = import_uicore_ts9.nil;
+    _CBDialogViewShower.currentActionIndicatorDialogViewShower = import_uicore_ts11.nil;
   }
   static _dialogShowerWithDismissCallback(dismissCallback) {
     const dialogShower = new _CBDialogViewShower();
@@ -20165,7 +20561,7 @@ var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
     return dialogShower;
   }
   static _showDialogWithFunction(showDialogFunction, dialogShower) {
-    if ((0, import_uicore_ts9.IS)(_CBDialogViewShower.currentDialogViewShower)) {
+    if ((0, import_uicore_ts11.IS)(_CBDialogViewShower.currentDialogViewShower)) {
       _CBDialogViewShower.nextShowDialogFunctions.push(showDialogFunction);
     } else {
       _CBDialogViewShower.currentDialogViewShower = dialogShower;
@@ -20174,34 +20570,32 @@ var _CBDialogViewShower = class extends import_uicore_ts9.UIObject {
   }
 };
 var CBDialogViewShower = _CBDialogViewShower;
+__name(CBDialogViewShower, "CBDialogViewShower");
 CBDialogViewShower.nextShowDialogFunctions = [];
-CBDialogViewShower.currentActionIndicatorDialogViewShower = import_uicore_ts9.nil;
+CBDialogViewShower.currentActionIndicatorDialogViewShower = import_uicore_ts11.nil;
 
 // scripts/Custom components/CBTextField.ts
-var import_uicore_ts10 = __toESM(require_compiledScripts());
-var CBTextField = class extends import_uicore_ts10.UIView {
+var import_uicore_ts12 = __toESM(require_compiledScripts());
+var CBTextField = class extends import_uicore_ts12.UIView {
   constructor(elementID) {
     super(elementID);
-  }
-  initView(elementID, viewHTMLElement) {
-    super.initView(elementID, viewHTMLElement);
-    viewHTMLElement.classList.add("input");
-    this.textField = new import_uicore_ts10.UITextField(elementID + "TextField");
+    this.viewHTMLElement.classList.add("input");
+    this.textField = new import_uicore_ts12.UITextField(elementID + "TextField");
     this.addSubview(this.textField);
-    this.titleLabel = new import_uicore_ts10.UITextView(elementID + "TitleLabel", import_uicore_ts10.UITextView.type.label);
-    this.titleLabel.textColor = import_uicore_ts10.UIColor.greyColor;
+    this.titleLabel = new import_uicore_ts12.UITextView(elementID + "TitleLabel", import_uicore_ts12.UITextView.type.label);
+    this.titleLabel.textColor = import_uicore_ts12.UIColor.greyColor;
     this.titleLabel.style.fontStyle = "italic";
     this.addSubview(this.titleLabel);
     this.titleLabel.viewHTMLElement.setAttribute("for", this.textField.elementID);
-    this.textField.addTargetForControlEvent(import_uicore_ts10.UIView.controlEvent.Focus, (event2) => {
+    this.textField.addTargetForControlEvent(import_uicore_ts12.UIView.controlEvent.Focus, (event2) => {
       this.titleLabel.viewHTMLElement.classList.add("active");
       this.titleLabel.textColor = CBColor.primaryTintColor;
     });
-    this.textField.addTargetForControlEvent(import_uicore_ts10.UIView.controlEvent.Blur, (event2) => {
-      if ((0, import_uicore_ts10.IS_NOT)(this.text)) {
+    this.textField.addTargetForControlEvent(import_uicore_ts12.UIView.controlEvent.Blur, (event2) => {
+      if ((0, import_uicore_ts12.IS_NOT)(this.text)) {
         this.titleLabel.viewHTMLElement.classList.remove("active");
       }
-      this.titleLabel.textColor = import_uicore_ts10.UIColor.greyColor;
+      this.titleLabel.textColor = import_uicore_ts12.UIColor.greyColor;
     });
     this.textField.style.webkitUserSelect = "text";
   }
@@ -20218,11 +20612,11 @@ var CBTextField = class extends import_uicore_ts10.UIView {
     return this.textField.text;
   }
   set text(text) {
-    if ((0, import_uicore_ts10.IS_NOT)(text)) {
+    if ((0, import_uicore_ts12.IS_NOT)(text)) {
       text = "";
     }
     this.textField.text = text;
-    if ((0, import_uicore_ts10.IS)(this.text)) {
+    if ((0, import_uicore_ts12.IS)(this.text)) {
       this.titleLabel.viewHTMLElement.classList.add("active");
     } else {
       this.titleLabel.viewHTMLElement.classList.remove("active");
@@ -20242,7 +20636,7 @@ var CBTextField = class extends import_uicore_ts10.UIView {
   }
   set enabled(enabled) {
     super.enabled = enabled;
-    if ((0, import_uicore_ts10.IS_NOT)(enabled)) {
+    if ((0, import_uicore_ts12.IS_NOT)(enabled)) {
       this.textField.viewHTMLElement.setAttribute("readonly", "" + !enabled);
     } else {
       this.textField.viewHTMLElement.removeAttribute("readonly");
@@ -20258,28 +20652,20 @@ var CBTextField = class extends import_uicore_ts10.UIView {
     this.textField.blur();
   }
 };
-
-// scripts/InternalDropdownSettingsViewController.ts
-var import_cbcore_ts10 = __toESM(require_compiledScripts3());
+__name(CBTextField, "CBTextField");
 
 // scripts/Custom components/SearchableDropdown.ts
-var import_uicore_ts13 = __toESM(require_compiledScripts());
-var import_cbcore_ts5 = __toESM(require_compiledScripts3());
-var import_cbcore_ts6 = __toESM(require_compiledScripts3());
-var import_cbcore_ts7 = __toESM(require_compiledScripts3());
+var import_cbcore_ts4 = __toESM(require_compiledScripts3());
+var import_uicore_ts15 = __toESM(require_compiledScripts());
 
 // scripts/Custom components/SearchableDropdownRow.ts
-var import_uicore_ts11 = __toESM(require_compiledScripts());
-var import_cbcore_ts4 = __toESM(require_compiledScripts3());
-var _SearchableDropdownRow = class extends import_uicore_ts11.UIButton {
+var import_uicore_ts13 = __toESM(require_compiledScripts());
+var _SearchableDropdownRow = class extends import_uicore_ts13.UIButton {
   constructor(elementID) {
     super(elementID);
     this.type = _SearchableDropdownRow.type.selectableItem;
-  }
-  initView(elementID, viewHTMLElement, initViewData) {
-    super.initView(elementID, viewHTMLElement, initViewData);
     this._checkbox = new CBCheckbox(elementID + "Checkbox");
-    this._checkbox.userInteractionEnabled = import_uicore_ts11.NO;
+    this._checkbox.userInteractionEnabled = import_uicore_ts13.NO;
     this.addSubview(this._checkbox);
     this.style.outline = "none";
   }
@@ -20302,55 +20688,56 @@ var _SearchableDropdownRow = class extends import_uicore_ts11.UIButton {
     this.updateContentForCurrentState();
   }
   get focused() {
-    return this._focused;
+    var _a;
+    return (_a = this._focused) != null ? _a : import_uicore_ts13.NO;
   }
   updateContentForNormalState() {
     if (this.type == _SearchableDropdownRow.type.sectionTitle) {
-      this.backgroundColor = import_uicore_ts11.UIColor.transparentColor;
+      this.backgroundColor = import_uicore_ts13.UIColor.transparentColor;
       this.titleLabel.textColor = CBColor.primaryContentColor.colorWithAlpha(0.5);
       this.style.borderTop = "1px solid rgba(0, 0, 0, 0.3)";
       this.titleLabel.style.marginLeft = "";
       this.textSuffix = "";
       if (this._checkbox) {
-        this._checkbox.hidden = import_uicore_ts11.YES;
+        this._checkbox.hidden = import_uicore_ts13.YES;
       }
-      this.titleLabel.hidden = import_uicore_ts11.NO;
+      this.titleLabel.hidden = import_uicore_ts13.NO;
     } else if (this.type == _SearchableDropdownRow.type.selectedItem) {
-      this.backgroundColor = import_uicore_ts11.UIColor.transparentColor;
+      this.backgroundColor = import_uicore_ts13.UIColor.transparentColor;
       this.titleLabel.textColor = CBColor.primaryTintColor;
       this.style.borderTop = "";
       this.textSuffix = "";
       if (this._checkbox) {
-        this._checkbox.hidden = import_uicore_ts11.NO;
+        this._checkbox.hidden = import_uicore_ts13.NO;
         this._checkbox.titleLabel.textColor = CBColor.primaryContentColor;
       }
-      this.titleLabel.hidden = import_uicore_ts11.YES;
+      this.titleLabel.hidden = import_uicore_ts13.YES;
     } else if (this.type == _SearchableDropdownRow.type.customItem) {
-      this.backgroundColor = import_uicore_ts11.UIColor.transparentColor;
+      this.backgroundColor = import_uicore_ts13.UIColor.transparentColor;
       this.titleLabel.textColor = CBColor.primaryTintColor;
       this.style.borderTop = "1px solid rgba(0, 0, 0, 0.3)";
       this.titleLabel.style.marginLeft = "";
-      this.textSuffix = import_cbcore_ts4.LanguageService.stringForKey(
+      this.textSuffix = LanguageService.stringForKey(
         "searchableDropdownCustomItem",
-        import_cbcore_ts4.LanguageService.currentLanguageKey,
+        LanguageService.currentLanguageKey,
         "-Custom item"
       );
       if (this._checkbox) {
-        this._checkbox.hidden = import_uicore_ts11.YES;
+        this._checkbox.hidden = import_uicore_ts13.YES;
       }
-      this.titleLabel.hidden = import_uicore_ts11.NO;
+      this.titleLabel.hidden = import_uicore_ts13.NO;
     } else {
-      this.backgroundColor = import_uicore_ts11.UIColor.transparentColor;
+      this.backgroundColor = import_uicore_ts13.UIColor.transparentColor;
       this.titleLabel.textColor = CBColor.primaryTintColor;
       this.style.borderTop = "";
       this.titleLabel.style.marginLeft = "20px";
       this.textSuffix = "";
       if (this._checkbox) {
-        this._checkbox.hidden = import_uicore_ts11.YES;
+        this._checkbox.hidden = import_uicore_ts13.YES;
       }
-      this.titleLabel.hidden = import_uicore_ts11.NO;
+      this.titleLabel.hidden = import_uicore_ts13.NO;
     }
-    this.userInteractionEnabled = import_uicore_ts11.YES;
+    this.userInteractionEnabled = import_uicore_ts13.YES;
   }
   get textSuffix() {
     return this.titleLabel.textSuffix;
@@ -20371,15 +20758,17 @@ var _SearchableDropdownRow = class extends import_uicore_ts11.UIButton {
   updateContentForSelectedState() {
     this.updateContentForNormalState();
     if (this.type == _SearchableDropdownRow.type.selectableItem || this.type == _SearchableDropdownRow.type.customItem) {
-      this._checkbox.hidden = import_uicore_ts11.NO;
+      this._checkbox.hidden = import_uicore_ts13.NO;
       this._checkbox.titleLabel.textColor = CBColor.primaryTintColor;
-      this._titleLabel.hidden = import_uicore_ts11.YES;
+      if ((0, import_uicore_ts13.IS)(this._titleLabel)) {
+        this._titleLabel.hidden = import_uicore_ts13.YES;
+      }
     }
   }
   wasRemovedFromViewTree() {
     super.wasRemovedFromViewTree();
-    this.highlighted = import_uicore_ts11.NO;
-    this.hovered = import_uicore_ts11.NO;
+    this.highlighted = import_uicore_ts13.NO;
+    this.hovered = import_uicore_ts13.NO;
   }
   layoutSubviews() {
     super.layoutSubviews();
@@ -20392,6 +20781,7 @@ var _SearchableDropdownRow = class extends import_uicore_ts11.UIButton {
   }
 };
 var SearchableDropdownRow = _SearchableDropdownRow;
+__name(SearchableDropdownRow, "SearchableDropdownRow");
 SearchableDropdownRow.type = {
   "sectionTitle": "SectionTitle",
   "selectedItem": "SelectedItem",
@@ -20400,32 +20790,38 @@ SearchableDropdownRow.type = {
 };
 
 // scripts/Custom components/SearchTextField.ts
-var import_uicore_ts12 = __toESM(require_compiledScripts());
-var SearchTextField = class extends import_uicore_ts12.UIView {
+var import_uicore_ts14 = __toESM(require_compiledScripts());
+var _SearchTextField = class extends import_uicore_ts14.UIView {
   constructor(elementID) {
     super(elementID);
-  }
-  initView(elementID, viewHTMLElement) {
-    super.initView(elementID, viewHTMLElement);
-    viewHTMLElement.classList.add("input", "input--search");
-    viewHTMLElement.innerHTML = '            <button type="button" class="input__button">                <i class="material-icons">search</i>            </button>            <input type="search" class="input__field" placeholder="Search">';
-    this._textField = new import_uicore_ts12.UIView(import_uicore_ts12.nil, this.textFieldElement);
-    this._searchButton = new import_uicore_ts12.UIView(import_uicore_ts12.nil, this.searchButtonElement);
+    this.viewHTMLElement.classList.add("input", "input--search");
+    this.viewHTMLElement.innerHTML = '            <button type="button" class="input__button">                <i class="material-icons">search</i>            </button>            <input type="search" class="input__field" placeholder="Search">';
+    this._textField = new import_uicore_ts14.UIView(import_uicore_ts14.nil, this.textFieldElement);
+    this._searchButton = new import_uicore_ts14.UIView(import_uicore_ts14.nil, this.searchButtonElement);
     this._searchButton.addTargetForControlEvents([
-      import_uicore_ts12.UIView.controlEvent.EnterDown,
-      import_uicore_ts12.UIView.controlEvent.PointerUpInside
+      import_uicore_ts14.UIView.controlEvent.EnterDown,
+      import_uicore_ts14.UIView.controlEvent.PointerUpInside
     ], function(sender, event2) {
       this.performSearch();
     }.bind(this));
     this._textField.addTargetForControlEvent(
-      import_uicore_ts12.UIView.controlEvent.EnterDown,
+      import_uicore_ts14.UIView.controlEvent.EnterDown,
       function(sender, event2) {
         this.performSearch();
       }.bind(this)
     );
-    this._textField.viewHTMLElement.oninput = function(event2) {
-      this._textField.sendControlEventForKey(import_uicore_ts12.UITextField.controlEvent.TextChange, event2);
-    }.bind(this);
+    this._textField.viewHTMLElement.oninput = (event2) => {
+      this.sendControlEventForKey(_SearchTextField.controlEvent.TextChange, event2);
+    };
+  }
+  get controlEventTargetAccumulator() {
+    return super.controlEventTargetAccumulator;
+  }
+  get searchButton() {
+    return this._searchButton;
+  }
+  get textField() {
+    return this._textField;
   }
   get searchButtonElement() {
     return this.viewHTMLElement.querySelector("button");
@@ -20437,7 +20833,8 @@ var SearchTextField = class extends import_uicore_ts12.UIView {
     this.textFieldElement.setAttribute("placeholder", placeholderText);
   }
   get placeholderText() {
-    return this.textFieldElement.getAttribute("placeholder");
+    var _a;
+    return (_a = this.textFieldElement.getAttribute("placeholder")) != null ? _a : "";
   }
   get text() {
     return this.textFieldElement.value;
@@ -20457,9 +20854,14 @@ var SearchTextField = class extends import_uicore_ts12.UIView {
     super.layoutSubviews();
   }
 };
+var SearchTextField = _SearchTextField;
+__name(SearchTextField, "SearchTextField");
+SearchTextField.controlEvent = Object.assign({}, import_uicore_ts14.UIView.controlEvent, {
+  "TextChange": "TextChange"
+});
 
 // scripts/Custom components/SearchableDropdown.ts
-var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
+var _SearchableDropdown = class extends import_uicore_ts15.UIButton {
   constructor(elementID) {
     super(elementID);
     this._data = [];
@@ -20469,120 +20871,103 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
     this.selectedIndices = [];
     this._selectedData = [];
     this._drawingData = [];
-    this._isDrawingDataValid = import_uicore_ts13.NO;
-    this.isSingleSelection = import_uicore_ts13.NO;
-    this.showsSelectedSectionInMultipleSelectionMode = import_uicore_ts13.NO;
-    this.allowsCustomItem = import_uicore_ts13.NO;
-    this.keepFocusedRowVisible = import_uicore_ts13.YES;
-  }
-  initView(elementID, viewHTMLElement, initViewData) {
-    super.initView(elementID, viewHTMLElement, initViewData);
-    this._titleLabel.text = "Current value";
-    this._titleLabel.textAlignment = import_uicore_ts13.UITextView.textAlignment.left;
-    this.overflowLabel = new import_uicore_ts13.UITextView(elementID + "OverflowLabel");
+    this._isDrawingDataValid = import_uicore_ts15.NO;
+    this.isSingleSelection = import_uicore_ts15.NO;
+    this.showsSelectedSectionInMultipleSelectionMode = import_uicore_ts15.NO;
+    this._dropdownCode = "";
+    this.allowsCustomItem = import_uicore_ts15.NO;
+    this.keepFocusedRowVisible = import_uicore_ts15.YES;
+    if (this._titleLabel) {
+      this._titleLabel.text = "Current value";
+      this._titleLabel.textAlignment = import_uicore_ts15.UITextView.textAlignment.left;
+    }
+    this.overflowLabel = new import_uicore_ts15.UITextView(elementID + "OverflowLabel");
     this.overflowLabel.textColor = CBColor.primaryContentColor;
-    this.overflowLabel.textAlignment = import_uicore_ts13.UITextView.textAlignment.right;
+    this.overflowLabel.textAlignment = import_uicore_ts15.UITextView.textAlignment.right;
     this.addSubview(this.overflowLabel);
-    this._rightImageView = new import_uicore_ts13.UIImageView(this.elementID + "RightImageView");
+    this._rightImageView = new import_uicore_ts15.UIImageView(this.elementID + "RightImageView");
     this._rightImageView.imageSource = "images/baseline-arrow_drop_down-24px.svg";
-    this._rightImageView.userInteractionEnabled = import_uicore_ts13.NO;
+    this._rightImageView.userInteractionEnabled = import_uicore_ts15.NO;
     this.addSubview(this._rightImageView);
     this.setNeedsLayout();
-    this._containerView = new import_uicore_ts13.UIView(elementID + "ContainerView");
+    this._containerView = new import_uicore_ts15.UIView(elementID + "ContainerView");
     this._containerView.style.boxShadow = "0 9px 13px 0 rgba(0,0,0,0.26)";
     this._containerView.style.borderRadius = "2px";
     this._searchTextField = new SearchTextField(elementID + "SearchTextField");
-    this._searchTextField.placeholderText = import_cbcore_ts7.LanguageService.stringForKey(
+    this._searchTextField.placeholderText = LanguageService.stringForKey(
       "searchableDropdownSearch",
-      import_cbcore_ts7.LanguageService.currentLanguageKey,
+      LanguageService.currentLanguageKey,
       "Search"
     );
     this._containerView.addSubview(this._searchTextField);
-    this._searchTextField._textField.addTargetForControlEvent(
-      import_uicore_ts13.UITextField.controlEvent.TextChange,
-      function(sender, event2) {
-        this.updateFilteredData(this._searchTextField.text);
-      }.bind(this)
-    );
-    this._searchTextField._textField.addTargetForControlEvent(
-      import_uicore_ts13.UIView.controlEvent.EscDown,
-      function(sender, event2) {
-        if ((0, import_uicore_ts13.IS)(this._searchTextField.text)) {
-          this._searchTextField.text = "";
-          this.updateFilteredData("");
-        } else {
-          this._dialogView.dismiss(import_uicore_ts13.YES);
-        }
-      }.bind(this)
-    );
-    this._searchTextField._textField.addTargetForControlEvent(
-      import_uicore_ts13.UIView.controlEvent.DownArrowDown,
-      function(sender, event2) {
-        if (this.focusedRowIndex < this.drawingData.length - 1) {
-          this.focusedRowIndex = this.focusedRowIndex + 1;
-        }
-      }.bind(this)
-    );
-    this._searchTextField._textField.addTargetForControlEvent(
-      import_uicore_ts13.UIView.controlEvent.UpArrowDown,
-      function(sender, event2) {
-        if (this.focusedRowIndex > 0) {
-          this.focusedRowIndex = this.focusedRowIndex - 1;
-        }
-      }.bind(this)
-    );
-    this._searchTextField._textField.addTargetForControlEvent(
-      import_uicore_ts13.UIView.controlEvent.EnterDown,
-      function(sender, event2) {
-        const isTouchDevice = "ontouchstart" in document.documentElement;
-        if (isTouchDevice) {
-          this._searchTextField.blur();
-          return;
-        }
-        const datapoint = this.drawingData[this.focusedRowIndex];
-        const alreadySelected = this.selectedDataContains(datapoint);
-        if (alreadySelected) {
-          this.selectedData.removeElement(datapoint);
-        } else if (this.isSingleSelection) {
-          this.selectedIndices = [this.focusedRowIndex];
-          this.selectedData = [datapoint];
-          this.selectionDidChange(this.selectedData);
-          this.updateContentForCurrentSelection();
-          this._dialogView.dismiss();
-        } else {
-          this.selectedData.push(datapoint);
-        }
-      }.bind(this)
-    );
-    this._tableView = new import_uicore_ts13.UITableView(elementID + "TableView");
+    this._searchTextField.controlEventTargetAccumulator.TextChange = () => {
+      this.updateFilteredData(this._searchTextField.text);
+    };
+    this._searchTextField.textField.controlEventTargetAccumulator.EscDown = () => {
+      if ((0, import_uicore_ts15.IS)(this._searchTextField.text)) {
+        this._searchTextField.text = "";
+        this.updateFilteredData("");
+      } else {
+        this._dialogView.dismiss(import_uicore_ts15.YES);
+      }
+    };
+    this._searchTextField.textField.controlEventTargetAccumulator.DownArrowDown = () => {
+      if (this.focusedRowIndex < this.drawingData.length - 1) {
+        this.focusedRowIndex = this.focusedRowIndex + 1;
+      }
+    };
+    this._searchTextField.textField.controlEventTargetAccumulator.UpArrowDown = () => {
+      if (this.focusedRowIndex > 0) {
+        this.focusedRowIndex = this.focusedRowIndex - 1;
+      }
+    };
+    this._searchTextField.textField.controlEventTargetAccumulator.EnterDown = () => {
+      const isTouchDevice = "ontouchstart" in document.documentElement;
+      if (isTouchDevice) {
+        this._searchTextField.blur();
+        return;
+      }
+      if ((0, import_uicore_ts15.IS_UNDEFINED)(this.focusedRowIndex)) {
+        return;
+      }
+      const datapoint = this.drawingData[this.focusedRowIndex];
+      const alreadySelected = this.selectedDataContains(datapoint);
+      if (alreadySelected) {
+        this.selectedData.removeElement(datapoint);
+      } else if (this.isSingleSelection) {
+        this.selectedIndices = [this.focusedRowIndex];
+        this.selectedData = [datapoint];
+        this.selectionDidChange(this.selectedData);
+        this.updateContentForCurrentSelection();
+        this._dialogView.dismiss();
+      } else {
+        this.selectedData.push(datapoint);
+      }
+    };
+    this._tableView = new import_uicore_ts15.UITableView(elementID + "TableView");
     this._containerView.addSubview(this._tableView);
-    this._tableView.backgroundColor = import_uicore_ts13.UIColor.whiteColor;
-    this._dialogView = new import_uicore_ts13.UIDialogView(elementID + "DialogView");
+    this._tableView.backgroundColor = import_uicore_ts15.UIColor.whiteColor;
+    this._dialogView = new import_uicore_ts15.UIDialogView(elementID + "DialogView");
     this._dialogView.view = this._containerView;
-    this._dialogView.backgroundColor = import_uicore_ts13.UIColor.transparentColor;
-    this.addTargetForControlEvents([
-      import_uicore_ts13.UIView.controlEvent.PointerUpInside,
-      import_uicore_ts13.UIView.controlEvent.EnterDown
-    ], function(sender, event2) {
+    this._dialogView.backgroundColor = import_uicore_ts15.UIColor.transparentColor;
+    this.controlEventTargetAccumulator.PointerUpInside.EnterDown = () => {
       if (this._dialogView.isVisible) {
         this.closeDropdown();
       } else {
         this.openDropdown();
       }
-    }.bind(this));
+    };
     this._dialogView.addTargetForControlEvent(
-      import_uicore_ts13.UIView.controlEvent.PointerDown,
-      function(sender, event2) {
+      import_uicore_ts15.UIView.controlEvent.PointerDown,
+      (sender, event2) => {
         if (sender.viewHTMLElement == event2.target) {
           sender.dismiss();
         }
       }
     );
-    const dialogLayoutFunction = this._dialogView.layoutSubviews;
-    this._dialogView.layoutSubviews = function() {
+    this._dialogView.layoutSubviews = () => {
       this._dialogView.frame = this.rootView.bounds;
       const padding = this.core.paddingLength;
-      const labelHeight = padding;
       const searchTextFieldHeight = this.bounds.height;
       this._containerView.frame = this.superview.rectangleInView(this.frame, this.rootView).rectangleWithHeight(this.expandedContainerViewHeight);
       this._searchTextField.frame = this._containerView.bounds.rectangleWithHeight(searchTextFieldHeight).rectangleWithInsets(
@@ -20592,103 +20977,98 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
         0
       );
       this._tableView.frame = this._containerView.bounds.rectangleWithInsets(0, 0, 0, searchTextFieldHeight);
-    }.bind(this);
-    this._tableView.numberOfRows = function() {
-      var result = this.drawingData.length;
-      if ((0, import_uicore_ts13.IS_NOT)(this.isSingleSelection) && this.showsSelectedSectionInMultipleSelectionMode) {
+    };
+    this._tableView.numberOfRows = () => {
+      let result = this.drawingData.length;
+      if ((0, import_uicore_ts15.IS_NOT)(this.isSingleSelection) && this.showsSelectedSectionInMultipleSelectionMode) {
         result = result + this.selectedData.length;
       }
       return result;
-    }.bind(this);
-    const newReusableViewForIdentifierFunction = this._tableView.newReusableViewForIdentifier.bind(this._tableView);
-    this._tableView.newReusableViewForIdentifier = function(identifier, rowIndex) {
-      const view = new SearchableDropdownRow(elementID + identifier + rowIndex);
-      view.stopsPointerEventPropagation = import_uicore_ts13.NO;
-      view.pausesPointerEvents = import_uicore_ts13.NO;
-      return view;
-    }.bind(this);
-    const viewForSelectedItemRow = function(index) {
-      const view = this._tableView.reusableViewForIdentifier("SelectedItemRow", index);
-      view.titleLabel.text = import_cbcore_ts7.LanguageService.stringForCurrentLanguage(this.selectedData[index].title);
-      view.selected = import_uicore_ts13.YES;
-      return view;
-    }.bind(this);
-    this._tableView.viewForRowWithIndex = function(index) {
-      const view = this._tableView.reusableViewForIdentifier("SubjectView", index);
-      view.style.borderBottomColor = "";
-      view.style.borderBottomStyle = "";
-      view.style.borderBottomWidth = "";
-      const rowWasHovered = function(sender, event2) {
-        this.focusedRowIndex = index;
-      }.bind(this);
-      view.addTargetForControlEvent(import_uicore_ts13.UIButton.controlEvent.PointerHover, rowWasHovered);
+    };
+    this._tableView.newReusableViewForIdentifier = (identifier, rowIndex) => new SearchableDropdownRow(elementID + identifier + rowIndex).configuredWithObject({
+      stopsPointerEventPropagation: import_uicore_ts15.NO,
+      pausesPointerEvents: import_uicore_ts15.NO
+    });
+    this._tableView.viewForRowWithIndex = (index) => {
+      const view = this._tableView.reusableViewForIdentifier("SubjectView", index).configuredWithObject({
+        style: {
+          borderBottomColor: "",
+          borderBottomStyle: "",
+          borderBottomWidth: ""
+        }
+      });
+      let viewWasTapped;
+      const rowWasHovered = /* @__PURE__ */ __name(() => this.focusedRowIndex = index, "rowWasHovered");
+      view.controlEventTargetAccumulator.PointerHover = rowWasHovered;
       view.removeTargetForControlEvent(
-        import_uicore_ts13.UIButton.controlEvent.PointerHover,
+        import_uicore_ts15.UIButton.controlEvent.PointerHover,
         view._SearchableDropdownRowWasHoveredFunction
       );
       view._SearchableDropdownRowWasHoveredFunction = rowWasHovered;
       view.focused = this.focusedRowIndex == index;
       if (!this.isSingleSelection && this.showsSelectedSectionInMultipleSelectionMode) {
         if (index < this.selectedData.length) {
-          view.type = SearchableDropdownRow.type.selectedItem;
-          view.titleText = import_cbcore_ts7.LanguageService.stringForCurrentLanguage(this.selectedData[index].title);
-          view.selected = import_uicore_ts13.YES;
-          view.updateContentForCurrentState();
+          view.configuredWithObject({
+            type: SearchableDropdownRow.type.selectedItem,
+            titleText: LanguageService.stringForCurrentLanguage(this.selectedData[index].title),
+            selected: import_uicore_ts15.YES
+          }).updateContentForCurrentState();
           if (index == this.selectedData.length - 1) {
-            view.style.borderBottomColor = import_uicore_ts13.UIColor.colorWithRGBA(100, 100, 100).stringValue;
-            view.style.borderBottomStyle = "solid";
-            view.style.borderBottomWidth = "1px";
+            view.configureWithObject({
+              style: {
+                borderBottomColor: import_uicore_ts15.UIColor.colorWithRGBA(100, 100, 100).stringValue,
+                borderBottomStyle: "solid",
+                borderBottomWidth: "1px"
+              }
+            });
           }
-          var viewWasTapped = function(sender, event2) {
+          viewWasTapped = /* @__PURE__ */ __name(() => {
             this.selectedIndices.removeElementAtIndex(index);
             const selectedItem = this.selectedData[index];
             this.selectedData.removeElement(selectedItem);
-            view.selected = import_uicore_ts13.NO;
+            view.selected = import_uicore_ts15.NO;
             this.selectionDidChange(this.selectedData);
             this.updateContentForCurrentSelection();
             this._searchTextField.focus();
             if (view.viewWasTappedFunction) {
               view.removeTargetForControlEvents([
-                import_uicore_ts13.UIView.controlEvent.EnterDown,
-                import_uicore_ts13.UIView.controlEvent.PointerTap
+                import_uicore_ts15.UIView.controlEvent.EnterDown,
+                import_uicore_ts15.UIView.controlEvent.PointerTap
               ], view.viewWasTappedFunction);
             }
-          }.bind(this);
+          }, "viewWasTapped");
           if (view.viewWasTappedFunction) {
             view.removeTargetForControlEvents([
-              import_uicore_ts13.UIView.controlEvent.EnterDown,
-              import_uicore_ts13.UIView.controlEvent.PointerTap
+              import_uicore_ts15.UIView.controlEvent.EnterDown,
+              import_uicore_ts15.UIView.controlEvent.PointerTap
             ], view.viewWasTappedFunction);
           }
-          view.addTargetForControlEvents([
-            import_uicore_ts13.UIView.controlEvent.EnterDown,
-            import_uicore_ts13.UIView.controlEvent.PointerTap
-          ], viewWasTapped);
+          view.controlEventTargetAccumulator.EnterDown.PointerTap = viewWasTapped;
           view.viewWasTappedFunction = viewWasTapped;
           return view;
         }
         index = index - this.selectedData.length;
       }
       const datapoint = this.drawingData[index];
-      if ((0, import_uicore_ts13.IS_NOT)(datapoint)) {
-        return;
+      if ((0, import_uicore_ts15.IS_NOT)(datapoint)) {
+        return import_uicore_ts15.nil;
       }
       if (datapoint.isADropdownDataSection) {
         view.type = SearchableDropdownRow.type.sectionTitle;
-        view.userInteractionEnabled = import_uicore_ts13.NO;
+        view.userInteractionEnabled = import_uicore_ts15.NO;
       } else {
         view.type = SearchableDropdownRow.type.selectableItem;
-        view.userInteractionEnabled = import_uicore_ts13.YES;
+        view.userInteractionEnabled = import_uicore_ts15.YES;
       }
-      if (datapoint._id == (this._customItem || import_uicore_ts13.nil)._id) {
+      if (datapoint._id == (this._customItem || import_uicore_ts15.nil)._id) {
         view.type = SearchableDropdownRow.type.customItem;
       }
       view.updateContentForNormalState();
       view.updateContentForCurrentState();
-      view.titleText = import_cbcore_ts7.LanguageService.stringForCurrentLanguage(datapoint.title);
-      view.titleLabel.textAlignment = import_uicore_ts13.UITextView.textAlignment.left;
+      view.titleText = LanguageService.stringForCurrentLanguage(datapoint.title);
+      view.titleLabel.textAlignment = import_uicore_ts15.UITextView.textAlignment.left;
       view.selected = this.selectedRowIdentifiers.contains(datapoint._id);
-      var viewWasTapped = function(sender, event2) {
+      viewWasTapped = /* @__PURE__ */ __name(() => {
         if (view.selected) {
           this.selectedIndices.removeElement(index);
           this.selectedData.removeElement(datapoint);
@@ -20707,48 +21087,45 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
         }
         const selectedData = this.selectedData;
         if (!view.selected) {
-          view.selected = import_uicore_ts13.YES;
-          this.performFunctionWithDelay(0.25, function() {
+          view.selected = import_uicore_ts15.YES;
+          this.performFunctionWithDelay(0.25, () => {
             this.selectionDidChange(selectedData);
             this.updateContentForCurrentSelection();
             if (this.showsSelectedSectionInMultipleSelectionMode) {
               this._tableView.contentOffset = this._tableView.contentOffset.pointByAddingY(view.frame.height);
             }
-          }.bind(this));
+          });
         } else {
-          view._checkbox.selected = import_uicore_ts13.NO;
+          view._checkbox.selected = import_uicore_ts15.NO;
           this.selectionDidChange(selectedData);
-          this.performFunctionWithDelay(0.15, function() {
-            view.selected = import_uicore_ts13.NO;
+          this.performFunctionWithDelay(0.15, () => {
+            view.selected = import_uicore_ts15.NO;
             this.updateContentForCurrentSelection();
             if (this.showsSelectedSectionInMultipleSelectionMode) {
               this._tableView.contentOffset = this._tableView.contentOffset.pointByAddingY(-view.frame.height);
             }
-          }.bind(this));
+          });
         }
         this._searchTextField.focus();
-      }.bind(this);
+      }, "viewWasTapped");
       if (view.viewWasTappedFunction) {
         view.removeTargetForControlEvents([
-          import_uicore_ts13.UIView.controlEvent.EnterDown,
-          import_uicore_ts13.UIView.controlEvent.PointerUpInside
+          import_uicore_ts15.UIView.controlEvent.EnterDown,
+          import_uicore_ts15.UIView.controlEvent.PointerUpInside
         ], view.viewWasTappedFunction);
       }
-      view.addTargetForControlEvents([
-        import_uicore_ts13.UIView.controlEvent.EnterDown,
-        import_uicore_ts13.UIView.controlEvent.PointerUpInside
-      ], viewWasTapped);
+      view.controlEventTargetAccumulator.EnterDown.PointerUpInside = viewWasTapped;
       view.viewWasTappedFunction = viewWasTapped;
       return view;
-    }.bind(this);
-    this._keyValueStringFilter = new import_uicore_ts13.UIKeyValueStringFilter();
+    };
+    this._keyValueStringFilter = new import_uicore_ts15.UIKeyValueStringFilter();
   }
   openDropdown() {
-    this._dialogView.showInView(this.rootView, import_uicore_ts13.YES);
+    this._dialogView.showInView(this.rootView, import_uicore_ts15.YES);
     this._searchTextField.focus();
   }
   closeDropdown() {
-    this._dialogView.dismiss(import_uicore_ts13.YES);
+    this._dialogView.dismiss(import_uicore_ts15.YES);
   }
   boundsDidChange() {
     super.boundsDidChange();
@@ -20756,80 +21133,80 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
   }
   set dropdownCode(dropdownCode) {
     this._dropdownCode = dropdownCode;
-    this.fetchDropdownDataForCode(dropdownCode);
+    this.fetchDropdownDataForCode(dropdownCode).then(import_uicore_ts15.nil);
   }
   get dropdownCode() {
     return this._dropdownCode;
   }
   fetchDropdownDataForCode(dropdownCode) {
-    import_cbcore_ts5.CBCore.sharedInstance.socketClient.sendMessageForKeyWithPolicy(
-      "RetrieveDropdownDataForCode",
-      dropdownCode,
-      import_cbcore_ts6.CBSocketClient.completionPolicy.storedOrFirst,
-      function(responseMessage) {
-        if ((0, import_uicore_ts13.IS)(responseMessage)) {
+    return __async(this, null, function* () {
+      const responseMessage = (yield import_cbcore_ts4.SocketClient.RetrieveDropdownDataForCode(
+        dropdownCode,
+        import_cbcore_ts4.CBSocketClient.completionPolicy.storedOrFirst
+      )).result;
+      const dropdownData = [];
+      responseMessage.data.forEach((sectionOrRow) => {
+        var _a;
+        if (sectionOrRow.isADropdownDataSection) {
+          const dataSection = {
+            _id: sectionOrRow._id,
+            title: sectionOrRow.title,
+            rowsData: [],
+            isADropdownDataSection: import_uicore_ts15.YES,
+            isADropdownDataRow: import_uicore_ts15.NO,
+            attachedObject: sectionOrRow.attachedObject,
+            itemCode: sectionOrRow.itemCode,
+            dropdownCode: sectionOrRow.dropdownCode
+          };
+          const rowsData = dataSection == null ? void 0 : dataSection.rowsData;
+          (_a = sectionOrRow == null ? void 0 : sectionOrRow.rowsData) == null ? void 0 : _a.forEach((rowData) => {
+            rowsData == null ? void 0 : rowsData.push({
+              _id: rowData._id,
+              title: rowData.title,
+              isADropdownDataSection: import_uicore_ts15.NO,
+              isADropdownDataRow: import_uicore_ts15.YES,
+              attachedObject: rowData.attachedObject,
+              itemCode: rowData.itemCode,
+              dropdownCode: rowData.dropdownCode
+            });
+          });
+          dataSection.rowsData = rowsData;
+          dropdownData.push(dataSection);
         } else {
-          return;
+          dropdownData.push({
+            _id: sectionOrRow._id,
+            title: sectionOrRow.title,
+            rowsData: [],
+            itemCode: sectionOrRow.itemCode,
+            dropdownCode: sectionOrRow.dropdownCode,
+            attachedObject: sectionOrRow.attachedObject,
+            isADropdownDataRow: import_uicore_ts15.YES,
+            isADropdownDataSection: false
+          });
         }
-        const dropdownData = [];
-        responseMessage.data.forEach(function(sectionOrRow, index, array) {
-          if (sectionOrRow.isADropdownDataSection) {
-            const dataSection = {
-              _id: sectionOrRow._id,
-              title: sectionOrRow.title,
-              rowsData: [],
-              isADropdownDataSection: import_uicore_ts13.YES,
-              isADropdownDataRow: import_uicore_ts13.NO,
-              attachedObject: sectionOrRow.attachedObject,
-              itemCode: sectionOrRow.itemCode,
-              dropdownCode: sectionOrRow.dropdownCode
-            };
-            const rowsData = dataSection.rowsData;
-            sectionOrRow.rowsData.forEach(function(rowData, index2, array2) {
-              rowsData.push({
-                _id: rowData._id,
-                title: rowData.title,
-                isADropdownDataSection: import_uicore_ts13.NO,
-                isADropdownDataRow: import_uicore_ts13.YES,
-                attachedObject: rowData.attachedObject,
-                itemCode: rowData.itemCode,
-                dropdownCode: rowData.dropdownCode
-              });
-            });
-            dataSection.rowsData = rowsData;
-            dropdownData.push(dataSection);
-          } else {
-            dropdownData.push({
-              _id: sectionOrRow._id,
-              title: sectionOrRow.title,
-              isADropdownDataRow: import_uicore_ts13.YES,
-              itemCode: sectionOrRow.itemCode,
-              dropdownCode: sectionOrRow.dropdownCode,
-              attachedObject: sectionOrRow.attachedObject
-            });
-          }
-        });
-        this.data = dropdownData;
-        this.didLoadDataForDropdownCode();
-      }.bind(this)
-    );
+      });
+      this.data = dropdownData;
+      this.didLoadDataForDropdownCode();
+    });
   }
   didLoadDataForDropdownCode() {
   }
   get focusedRowIndex() {
-    return this._focusedRowIndex;
+    return this._focusedRowIndex || 0;
   }
   set focusedRowIndex(focusedRowIndex) {
     const previousFocusedRowIndex = this.focusedRowIndex;
     this._focusedRowIndex = focusedRowIndex;
-    if (previousFocusedRowIndex != focusedRowIndex) {
-      this._tableView.visibleRowWithIndex(previousFocusedRowIndex).focused = import_uicore_ts13.NO;
-      const focusedRow = this._tableView.visibleRowWithIndex(this.focusedRowIndex);
-      focusedRow.focused = import_uicore_ts13.YES;
+    if (previousFocusedRowIndex != focusedRowIndex && focusedRowIndex) {
+      if (previousFocusedRowIndex) {
+        this._tableView.visibleRowWithIndex(previousFocusedRowIndex).focused = import_uicore_ts15.NO;
+      }
+      const focusedRow = this._tableView.visibleRowWithIndex(focusedRowIndex);
+      focusedRow.focused = import_uicore_ts15.YES;
       if (!this.keepFocusedRowVisible) {
         return;
       }
-      var contentOffset = this._tableView.contentOffset;
+      let contentOffset = this._tableView.contentOffset;
       if (focusedRow.frame.y < contentOffset.y) {
         contentOffset.y = focusedRow.frame.y;
       }
@@ -20847,43 +21224,43 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
     this._dialogView.setNeedsLayout();
   }
   get expandedContainerViewHeight() {
-    if ((0, import_uicore_ts13.IS)(this._expandedContainerViewHeight)) {
+    if ((0, import_uicore_ts15.IS)(this._expandedContainerViewHeight)) {
       return this._expandedContainerViewHeight;
     }
-    const padding = this.core.paddingLength;
-    const labelHeight = padding;
-    const result = this.superview.bounds.height - this.frame.max.y - padding;
-    return result;
+    return this.superview.bounds.height - this.frame.max.y - this.core.paddingLength;
   }
   selectedDataContains(datapoint) {
-    for (var i = 0; i < this.selectedData.length; i++) {
+    for (let i = 0; i < this.selectedData.length; i++) {
       const value = this.selectedData[i];
       if (value._id == datapoint._id) {
-        return import_uicore_ts13.YES;
+        return import_uicore_ts15.YES;
       }
     }
-    return import_uicore_ts13.NO;
+    return import_uicore_ts15.NO;
   }
   updateContentForNormalState() {
     this.style.borderBottom = "1px solid rgba(0,0,0,0.12)";
-    this.titleLabel.textColor = CBColor.primaryContentColor;
-    this.backgroundColor = import_uicore_ts13.UIColor.transparentColor;
     this.style.borderBottomColor = CBColor.primaryContentColor.colorWithAlpha(0.12).stringValue;
+    this.titleLabel.textColor = CBColor.primaryContentColor;
+    this.backgroundColor = import_uicore_ts15.UIColor.transparentColor;
   }
   updateContentForHighlightedState() {
     this.style.borderBottomWidth = "2px";
     this.style.borderBottomColor = this.tintColor.stringValue;
   }
+  get controlEventTargetAccumulator() {
+    return super.controlEventTargetAccumulator;
+  }
   selectionDidChange(selectedRows) {
     this.updateTitleWithSelection(selectedRows);
-    this.sendControlEventForKey(_SearchableDropdown.controlEvent.SelectionDidChange, import_uicore_ts13.nil);
+    this.sendControlEventForKey(_SearchableDropdown.controlEvent.SelectionDidChange, import_uicore_ts15.nil);
   }
   updateContentForCurrentSelection() {
     this._tableView.reloadData();
     this.setNeedsLayout();
   }
   get placeholderText() {
-    if ((0, import_uicore_ts13.IS_UNDEFINED)(this._placeholderText)) {
+    if ((0, import_uicore_ts15.IS_UNDEFINED)(this._placeholderText)) {
       this._placeholderText = "Not selected";
     }
     return this._placeholderText;
@@ -20893,11 +21270,11 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
     this.updateTitleWithSelection(this.selectedData);
   }
   setPlaceholderText(key, defaultString, parameters) {
-    this.placeholderLocalizedTextObject = import_cbcore_ts7.LanguageService.localizedTextObjectForKey(key, defaultString, parameters);
+    this.placeholderLocalizedTextObject = LanguageService.localizedTextObjectForKey(key, defaultString, parameters);
   }
   get placeholderLocalizedTextObject() {
-    if ((0, import_uicore_ts13.IS_UNDEFINED)(this._placeholderLocalizedTextObject)) {
-      this._placeholderLocalizedTextObject = import_cbcore_ts7.LanguageService.localizedTextObjectForKey(
+    if ((0, import_uicore_ts15.IS_UNDEFINED)(this._placeholderLocalizedTextObject)) {
+      this._placeholderLocalizedTextObject = LanguageService.localizedTextObjectForKey(
         "searchableDropdownNotSelected"
       );
     }
@@ -20910,15 +21287,14 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
   updateTitleWithSelection(selectedRows) {
     this.titleLabel.localizedTextObject = this.placeholderLocalizedTextObject;
     if (selectedRows && selectedRows.length) {
-      const maxWidth = this.titleLabel.bounds.width;
-      this.titleLabel.localizedTextObject = import_uicore_ts13.nil;
+      this.titleLabel.localizedTextObject = import_uicore_ts15.nil;
       this.titleLabel.text = "";
-      var stopLooping = import_uicore_ts13.NO;
-      selectedRows.forEach(function(selectedDatapoint, index, array) {
+      let stopLooping = import_uicore_ts15.NO;
+      selectedRows.forEach((selectedDatapoint, index, array) => {
         if (stopLooping) {
           return;
         }
-        var selectedString = import_cbcore_ts7.LanguageService.stringForCurrentLanguage(selectedDatapoint.title);
+        let selectedString = LanguageService.stringForCurrentLanguage(selectedDatapoint.title);
         if (index) {
           selectedString = ", " + selectedString;
         }
@@ -20931,24 +21307,25 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
         if (index && this.bounds.width - (this.overflowLabel.intrinsicContentWidth() + this.titleLabel.intrinsicContentWidth()) - 20 < 0) {
           this.titleLabel.text = previousText;
           this.overflowLabel.text = "+" + (array.length - index - 2 * 0);
-          stopLooping = import_uicore_ts13.YES;
+          stopLooping = import_uicore_ts15.YES;
         }
-      }, this);
+      });
     }
   }
   updateFilteredData(filteringString) {
     this._filteredData = [];
-    this.data.forEach(function(sectionOrRow, index, array) {
-      if (import_cbcore_ts7.LanguageService.stringForCurrentLanguage(sectionOrRow.title).toLowerCase().contains(filteringString.toLowerCase())) {
+    this.data.forEach((sectionOrRow) => {
+      var _a;
+      if (LanguageService.stringForCurrentLanguage(sectionOrRow.title).toLowerCase().contains(filteringString.toLowerCase())) {
         this.filteredData.push(sectionOrRow);
       } else if (sectionOrRow.isADropdownDataSection) {
         this._keyValueStringFilter.filterData(
           filteringString,
-          sectionOrRow.rowsData,
+          (_a = sectionOrRow.rowsData) != null ? _a : [],
           this._excludedData,
-          "title." + import_cbcore_ts7.LanguageService.currentLanguageKey,
+          "title." + LanguageService.currentLanguageKey,
           sectionOrRow,
-          function(filteredData, filteredIndexes, sectionFromThread) {
+          (filteredData, filteredIndexes, sectionFromThread) => {
             if (filteredData.length) {
               this.filteredData.push({
                 _id: sectionFromThread._id,
@@ -20964,64 +21341,69 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
                 this.filteredData.removeElement(this._customItem);
                 this.filteredData.push(this._customItem);
               }
-              this._isDrawingDataValid = import_uicore_ts13.NO;
+              this._isDrawingDataValid = import_uicore_ts15.NO;
               this._tableView.reloadData();
             }
-          }.bind(this)
+          }
         );
       }
-    }.bind(this));
+    });
     if (this.allowsCustomItem && this._searchTextField.text) {
-      this.filteredData.removeElement(this._customItem);
+      if (this._customItem) {
+        this.filteredData.removeElement(this._customItem);
+      }
       this.initCustomItemWithTitle(this._searchTextField.text);
-      this.filteredData.push(this._customItem);
+      if (this._customItem) {
+        this.filteredData.push(this._customItem);
+      }
     }
     if (this.filteredData.length) {
       this.focusedRowIndex = 0;
     } else {
       this.focusedRowIndex = null;
     }
-    this._isDrawingDataValid = import_uicore_ts13.NO;
+    this._isDrawingDataValid = import_uicore_ts15.NO;
     this._tableView.reloadData();
   }
   initCustomItemWithTitle(title) {
-    if ((0, import_uicore_ts13.IS_NOT)(title)) {
+    if ((0, import_uicore_ts15.IS_NOT)(title)) {
       this._customItem = void 0;
-    } else {
-      this._customItem = {
-        _id: "" + (0, import_uicore_ts13.MAKE_ID)(),
-        title: import_cbcore_ts7.LanguageService.localizedTextObjectForText(title),
-        rowsData: [],
-        isADropdownDataSection: import_uicore_ts13.NO,
-        isADropdownDataRow: import_uicore_ts13.YES,
-        attachedObject: void 0,
-        itemCode: "custom_item",
-        dropdownCode: this.dropdownCode
-      };
+      return;
     }
+    this._customItem = {
+      _id: "" + (0, import_uicore_ts15.MAKE_ID)(),
+      title: LanguageService.localizedTextObjectForText(title),
+      rowsData: [],
+      isADropdownDataSection: import_uicore_ts15.NO,
+      isADropdownDataRow: import_uicore_ts15.YES,
+      attachedObject: void 0,
+      itemCode: "custom_item",
+      dropdownCode: this.dropdownCode
+    };
   }
   selectItemOrCustomItemWithTitle(title) {
-    if ((0, import_uicore_ts13.IS_NOT)(title)) {
+    var _a;
+    if ((0, import_uicore_ts15.IS_NOT)(title)) {
       this._customItem = void 0;
-    } else {
-      var item = this.drawingData.find(function(dataItem, index, array) {
-        return import_cbcore_ts7.LanguageService.stringForCurrentLanguage(dataItem.title) == title;
-      });
-      if (this.allowsCustomItem && (0, import_uicore_ts13.IS_NOT)(item)) {
-        this._searchTextField.text = title;
-        this.updateFilteredData(title);
-        item = this._customItem;
-      }
-      if ((0, import_uicore_ts13.IS_NOT)(this.isSingleSelection)) {
-        if ((0, import_uicore_ts13.IS_NOT)(this.selectedDataContains(item))) {
-          const selectedItemCodes = this.selectedItemCodes.copy();
-          selectedItemCodes.push(item.itemCode);
-          this.selectedItemCodes = selectedItemCodes;
-        }
-        return;
-      }
-      this.selectedItemCodes = [item.itemCode];
+      return;
     }
+    let item = (_a = this.drawingData.find((dataItem) => {
+      return LanguageService.stringForCurrentLanguage(dataItem.title) == title;
+    })) != null ? _a : import_uicore_ts15.nil;
+    if (this.allowsCustomItem && (0, import_uicore_ts15.IS_NOT)(item)) {
+      this._searchTextField.text = title;
+      this.updateFilteredData(title);
+      item = this._customItem;
+    }
+    if ((0, import_uicore_ts15.IS_NOT)(this.isSingleSelection)) {
+      if ((0, import_uicore_ts15.IS_NOT)(this.selectedDataContains(item))) {
+        const selectedItemCodes = this.selectedItemCodes.copy();
+        selectedItemCodes.push(item.itemCode);
+        this.selectedItemCodes = selectedItemCodes;
+      }
+      return;
+    }
+    this.selectedItemCodes = [item.itemCode];
   }
   set data(data) {
     this._data = data;
@@ -21032,7 +21414,7 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
   }
   set filteredData(data) {
     this._filteredData = data;
-    this._isDrawingDataValid = import_uicore_ts13.NO;
+    this._isDrawingDataValid = import_uicore_ts15.NO;
   }
   get filteredData() {
     return this._filteredData;
@@ -21042,25 +21424,25 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
       return this._drawingData;
     }
     const result = [];
-    this._filteredData.forEach(function(section) {
+    this._filteredData.forEach((section) => {
       result.push({
         _id: section._id,
         title: section.title,
         rowsData: null,
         isADropdownDataSection: section.isADropdownDataSection,
-        isADropdownDataRow: import_uicore_ts13.NO,
+        isADropdownDataRow: import_uicore_ts15.NO,
         attachedObject: section.attachedObject,
         itemCode: section.itemCode,
         dropdownCode: section.dropdownCode
       });
       if (section.rowsData) {
-        section.rowsData.forEach(function(row) {
+        section.rowsData.forEach((row) => {
           result.push(row);
-        }.bind(this));
+        });
       }
-    }.bind(this));
+    });
     this._drawingData = result;
-    this._isDrawingDataValid = import_uicore_ts13.YES;
+    this._isDrawingDataValid = import_uicore_ts15.YES;
     return result;
   }
   get selectedData() {
@@ -21077,14 +21459,12 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
     this.selectionDidChange(this.selectedData);
   }
   get selectedItemCodes() {
-    return this.selectedData.map(function(item) {
-      return item.itemCode;
-    });
+    return this.selectedData.map((item) => item.itemCode);
   }
   set selectedItemCodes(selectedItemCodes) {
     const selectedData = [];
     const selectedIndices = [];
-    this._drawingData.forEach(function(item, index, array) {
+    this._drawingData.forEach((item, index) => {
       if (selectedItemCodes.contains(item.itemCode)) {
         selectedData.push(item);
         selectedIndices.push(index);
@@ -21098,9 +21478,9 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
   }
   get selectedRowIdentifiers() {
     const result = [];
-    this.selectedData.forEach(function(selectedDatapoint) {
+    this.selectedData.forEach((selectedDatapoint) => {
       result.push(selectedDatapoint._id);
-    }.bind(this));
+    });
     return result;
   }
   wasAddedToViewTree() {
@@ -21111,7 +21491,6 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
     super.layoutSubviews();
     const bounds = this.bounds;
     const padding = this.core.paddingLength;
-    const labelHeight = padding;
     this.updateTitleWithSelection(this.selectedData);
     if (this._rightImageView) {
       this._rightImageView.frame = bounds.rectangleWithInsets(0, padding * 0.5, 0, 0).rectangleWithWidth(24, 1).rectangleWithHeight(24, 0.5);
@@ -21125,25 +21504,23 @@ var _SearchableDropdown = class extends import_uicore_ts13.UIButton {
   }
 };
 var SearchableDropdown = _SearchableDropdown;
-SearchableDropdown.controlEvent = Object.assign({}, import_uicore_ts13.UIView.controlEvent, {
+__name(SearchableDropdown, "SearchableDropdown");
+SearchableDropdown.controlEvent = Object.assign({}, import_uicore_ts15.UIView.controlEvent, {
   "SelectionDidChange": "SelectionDidChange"
 });
 
 // scripts/InternalDropdownSettingsViewController.ts
-var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.UIViewController {
+var _InternalDropdownSettingsViewController = class extends import_uicore_ts16.UIViewController {
   constructor(view) {
     super(view);
-    this.loadSubviews();
-  }
-  loadSubviews() {
-    this.view.backgroundColor = import_uicore_ts14.UIColor.whiteColor;
-    this.titleLabel = new import_uicore_ts14.UITextView(this.view.elementID + "TitleLabel", import_uicore_ts14.UITextView.type.header2);
+    this.view.backgroundColor = import_uicore_ts16.UIColor.whiteColor;
+    this.titleLabel = new import_uicore_ts16.UITextView(this.view.elementID + "TitleLabel", import_uicore_ts16.UITextView.type.header2);
     this.titleLabel.text = "Internal dropdown settings";
     this.view.addSubview(this.titleLabel);
     this.dropdownCodeTextField = new CBTextField(this.view.elementID + "DropdownCodeTextField");
     this.dropdownCodeTextField.placeholderText = "Dropdown code";
     this.view.addSubview(this.dropdownCodeTextField);
-    this.dropdownCodesTextArea = new import_uicore_ts14.UITextArea(this.view.elementID + "DropdownCodesTextArea");
+    this.dropdownCodesTextArea = new import_uicore_ts16.UITextArea(this.view.elementID + "DropdownCodesTextArea");
     this.dropdownCodesTextArea.placeholderText = "Available dropdown codes";
     this.view.addSubview(this.dropdownCodesTextArea);
     this.loadButton = new CBButton(this.view.elementID + "LoadButton");
@@ -21153,12 +21530,12 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
     this.saveButton.titleLabel.setText("internalDropdownSettingsViewControllerSaveButton", "Save");
     this.view.addSubview(this.saveButton);
     this.dropdown = new SearchableDropdown(this.view.elementID + "SearchableDropdown");
-    this.dropdown._controlEventTargets[import_uicore_ts14.UIView.controlEvent.PointerUpInside] = [];
-    this.dropdown._controlEventTargets[import_uicore_ts14.UIView.controlEvent.EnterDown] = [];
-    this.dropdown._dialogView = import_uicore_ts14.nil;
-    this.dropdown.isSingleSelection = import_uicore_ts14.YES;
-    this.dropdown._rightImageView.imageSource = import_uicore_ts14.nil;
-    this.dropdown.keepFocusedRowVisible = import_uicore_ts14.NO;
+    this.dropdown._controlEventTargets[import_uicore_ts16.UIView.controlEvent.PointerUpInside] = [];
+    this.dropdown._controlEventTargets[import_uicore_ts16.UIView.controlEvent.EnterDown] = [];
+    this.dropdown._dialogView = import_uicore_ts16.nil;
+    this.dropdown.isSingleSelection = import_uicore_ts16.YES;
+    this.dropdown._rightImageView.imageSource = import_uicore_ts16.nil;
+    this.dropdown.keepFocusedRowVisible = import_uicore_ts16.NO;
     this.view.addSubview(this.dropdown);
     this.dropdown._tableView.style.borderWidth = "1px";
     this.dropdown._tableView.style.borderStyle = "solid";
@@ -21166,30 +21543,30 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
     this.view.addSubview(this.dropdown._tableView);
     this.addButton = new CBButton(this.view.elementID + "AddButton");
     this.addButton.titleLabel.text = "Add row";
-    this.addButton.setBackgroundColorsWithNormalColor(import_uicore_ts14.UIColor.greenColor);
+    this.addButton.setBackgroundColorsWithNormalColor(import_uicore_ts16.UIColor.greenColor);
     this.view.addSubview(this.addButton);
     this.deleteButton = new CBButton(this.view.elementID + "DeleteButton");
     this.deleteButton.titleLabel.text = "Delete row";
-    this.deleteButton.setBackgroundColorsWithNormalColor(import_uicore_ts14.UIColor.redColor);
+    this.deleteButton.setBackgroundColorsWithNormalColor(import_uicore_ts16.UIColor.redColor);
     this.view.addSubview(this.deleteButton);
     this.deleteDropdownButton = new CBButton(this.view.elementID + "DeleteDropdownButton");
     this.deleteDropdownButton.titleLabel.text = "Delete dropdown";
-    this.deleteDropdownButton.setBackgroundColorsWithNormalColor(import_uicore_ts14.UIColor.redColor);
+    this.deleteDropdownButton.setBackgroundColorsWithNormalColor(import_uicore_ts16.UIColor.redColor);
     this.view.addSubview(this.deleteDropdownButton);
     this.clearDropdownButton = new CBButton(this.view.elementID + "ClearDropdownButton");
     this.clearDropdownButton.titleLabel.text = "Clear dropdown";
-    this.clearDropdownButton.setBackgroundColorsWithNormalColor(import_uicore_ts14.UIColor.redColor);
+    this.clearDropdownButton.setBackgroundColorsWithNormalColor(import_uicore_ts16.UIColor.redColor);
     this.view.addSubview(this.clearDropdownButton);
     this.itemTitleCheckbox = new CBCheckbox(this.view.elementID + "ItemTitleCheckbox");
     this.itemAttachedObjectCheckbox = new CBCheckbox(this.view.elementID + "ItemTitleCheckbox");
     this.itemTitleCheckbox.titleLabel.text = "Item title";
     this.itemAttachedObjectCheckbox.titleLabel.text = "Attached object";
-    this.itemTitleCheckbox.selected = import_uicore_ts14.YES;
+    this.itemTitleCheckbox.selected = import_uicore_ts16.YES;
     this.view.addSubviews([this.itemTitleCheckbox, this.itemAttachedObjectCheckbox]);
-    this.itemTitleOrAttachedObjectTextArea = new import_uicore_ts14.UITextArea(this.view.elementID + "ItemTitleOrAttachedObjectTextArea");
+    this.itemTitleOrAttachedObjectTextArea = new import_uicore_ts16.UITextArea(this.view.elementID + "ItemTitleOrAttachedObjectTextArea");
     this.itemTitleOrAttachedObjectTextArea.placeholderText = "Title";
     this.view.addSubview(this.itemTitleOrAttachedObjectTextArea);
-    this.itemTitleJSONLabel = new import_uicore_ts14.UITextView(this.view.elementID + "ItemTitleJSONLabel");
+    this.itemTitleJSONLabel = new import_uicore_ts16.UITextView(this.view.elementID + "ItemTitleJSONLabel");
     this.view.addSubview(this.itemTitleJSONLabel);
     this.itemTitleDidChange();
     this.isASectionCheckbox = new CBCheckbox(this.view.elementID + "IsASectionCheckbox");
@@ -21204,10 +21581,10 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
     this.upButton = new CBButton(this.view.elementID + "UpButton");
     this.upButton.titleLabel.text = "Up";
     this.view.addSubview(this.upButton);
-    this.dataTextJSONLabel = new import_uicore_ts14.UITextView(this.view.elementID + "DataTextJSONLabel");
+    this.dataTextJSONLabel = new import_uicore_ts16.UITextView(this.view.elementID + "DataTextJSONLabel");
     this.dataTextJSONLabel.text = "Data in JSON format";
     this.view.addSubview(this.dataTextJSONLabel);
-    this.dataTextArea = new import_uicore_ts14.UITextArea(this.view.elementID + "DataTextArea");
+    this.dataTextArea = new import_uicore_ts16.UITextArea(this.view.elementID + "DataTextArea");
     this.dataTextArea.placeholderText = "Data in JSON format";
     this.view.addSubview(this.dataTextArea);
     this.loadPlainDataButton = new CBButton(this.view.elementID + "LoadPlainDataButton");
@@ -21216,26 +21593,15 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
     this.loadJSONDataButton = new CBButton(this.view.elementID + "LoadJSONDataButton");
     this.loadJSONDataButton.titleLabel.text = "Load JSON data";
     this.view.addSubview(this.loadJSONDataButton);
-    [
-      this.itemTitleCheckbox,
-      this.itemAttachedObjectCheckbox
-    ].forEach(function(checkbox, index, array) {
-      checkbox.addTargetForControlEvents([
-        CBCheckbox.controlEvent.EnterDown,
-        CBCheckbox.controlEvent.SelectionChange
-      ], function(sender, event2) {
-        [
-          this.itemTitleCheckbox,
-          this.itemAttachedObjectCheckbox
-        ].forEach(function(checkboxObject, index2, array2) {
-          checkboxObject.selected = checkboxObject == sender;
-        });
-        this.updateitemDetailsView();
-      }.bind(this));
-    }.bind(this));
+    [this.itemTitleCheckbox, this.itemAttachedObjectCheckbox].everyElement.controlEventTargetAccumulator.EnterDown.SelectionChange = (sender) => {
+      [this.itemTitleCheckbox, this.itemAttachedObjectCheckbox].forEach((checkboxObject) => {
+        checkboxObject.selected = checkboxObject == sender;
+      });
+      this.updateitemDetailsView();
+    };
     this.downButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
+      (sender, event2) => {
         const data = this.dropdown.drawingData;
         const rowIndex = this.dropdown.selectedIndices.firstElement;
         if (this.dropdown.selectedData.firstElement && rowIndex < data.length - 1) {
@@ -21246,11 +21612,11 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
           this.dropdown._drawingData = data;
           this.reloadTableData();
         }
-      }.bind(this)
+      }
     );
     this.upButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
+      (sender, event2) => {
         const data = this.dropdown.drawingData;
         const rowIndex = this.dropdown.selectedIndices.firstElement;
         if (this.dropdown.selectedData.firstElement && rowIndex > 0) {
@@ -21261,54 +21627,54 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
           this.dropdown._drawingData = data;
           this.reloadTableData();
         }
-      }.bind(this)
+      }
     );
     this.dropdown.addTargetForControlEvent(
       SearchableDropdown.controlEvent.SelectionDidChange,
-      function(sender, event2) {
+      (sender, event2) => {
         this.updateitemDetailsView();
-      }.bind(this)
+      }
     );
     this.isASectionCheckbox.addTargetForControlEvent(
       CBCheckbox.controlEvent.SelectionChange,
-      function(sender, event2) {
-        const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts14.nil;
+      (sender, event2) => {
+        const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts16.nil;
         selectedItem.isADropdownDataSection = sender.selected;
-        selectedItem.isADropdownDataRow = (0, import_uicore_ts14.IS_NOT)(sender.selected);
+        selectedItem.isADropdownDataRow = (0, import_uicore_ts16.IS_NOT)(sender.selected);
         this.reloadTableData();
-      }.bind(this)
+      }
     );
     this.itemCodeTextField.textField.addTargetForControlEvent(
-      import_uicore_ts14.UITextArea.controlEvent.TextChange,
-      function(sender, event2) {
-        const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts14.nil;
+      import_uicore_ts16.UITextArea.controlEvent.TextChange,
+      (sender, event2) => {
+        const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts16.nil;
         selectedItem.itemCode = this.itemCodeTextField.text;
-      }.bind(this)
+      }
     );
     this.itemTitleOrAttachedObjectTextArea.addTargetForControlEvent(
-      import_uicore_ts14.UITextArea.controlEvent.TextChange,
-      function(sender, event2) {
+      import_uicore_ts16.UITextArea.controlEvent.TextChange,
+      (sender, event2) => {
         if (this.itemTitleCheckbox.selected) {
           this.itemTitleDidChange();
         } else {
           this.itemAttachedObjectDidChange();
         }
         this.reloadTableData();
-      }.bind(this)
+      }
     );
     this.updateAvailableCodes();
     this.loadButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
         this.loadData();
       }.bind(this)
     );
     this.saveButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
-        import_cbcore_ts8.CBCore.sharedInstance.socketClient.sendMessageForKey(
+        import_cbcore_ts5.CBCore.sharedInstance.socketClient.sendMessageForKey(
           "RetrieveDropdownCodes",
-          import_uicore_ts14.nil,
+          import_uicore_ts16.nil,
           function(codes) {
             this.saveData();
           }.bind(this)
@@ -21316,24 +21682,25 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
       }.bind(this)
     );
     this.addButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
+        var _a;
         const title = JSON.parse(this.itemTitleOrAttachedObjectTextArea.text);
-        if ((0, import_uicore_ts14.IS_NOT)(import_cbcore_ts10.LanguageService.stringForCurrentLanguage(title))) {
-          title[import_cbcore_ts10.LanguageService.defaultLanguageKey] = "<Title>";
+        if ((0, import_uicore_ts16.IS_NOT)(LanguageService.stringForCurrentLanguage(title))) {
+          title[LanguageService.defaultLanguageKey] = "<Title>";
         }
-        const itemID = (0, import_uicore_ts14.MAKE_ID)();
+        const itemID = (0, import_uicore_ts16.MAKE_ID)();
         const dataRow = {
           _id: itemID,
           title,
           isADropdownDataRow: !this.isASectionCheckbox.selected,
           isADropdownDataSection: this.isASectionCheckbox.selected,
           attachedObject: void 0,
-          itemCode: import_uicore_ts14.nil,
-          dropdownCode: (this.dropdown.selectedData.firstElement || {}).dropdownCodes
+          itemCode: import_uicore_ts16.nil,
+          dropdownCode: (_a = this.dropdown.selectedData.firstElement) == null ? void 0 : _a.dropdownCode
         };
         const rowIndex = this.dropdown.selectedIndices.firstElement;
-        if ((0, import_uicore_ts14.IS_DEFINED)(rowIndex)) {
+        if ((0, import_uicore_ts16.IS_DEFINED)(rowIndex)) {
           this.dropdown.drawingData.insertElementAtIndex(rowIndex + 1, dataRow);
           this.reloadTableData();
         } else {
@@ -21344,10 +21711,10 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
       }.bind(this)
     );
     this.deleteButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
         const rowIndex = this.dropdown.selectedIndices.firstElement;
-        if ((0, import_uicore_ts14.IS_DEFINED)(rowIndex)) {
+        if ((0, import_uicore_ts16.IS_DEFINED)(rowIndex)) {
           this.dropdown.drawingData.removeElementAtIndex(rowIndex);
           this.dropdown.selectedData.removeElementAtIndex(0);
           this.dropdown.selectedIndices.removeElementAtIndex(0);
@@ -21357,18 +21724,18 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
       }.bind(this)
     );
     this.deleteDropdownButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
         if (this.dropdownCodeTextField.text && confirm("Are you sure you want to delete this dropdown?")) {
           if (this.dropdownCodeTextField.text && confirm("This will REMOVE THE DROPDOWN FROM THE SERVER, are you definitely sure?")) {
-            import_cbcore_ts8.CBCore.sharedInstance.socketClient.sendMessageForKey(
+            import_cbcore_ts5.CBCore.sharedInstance.socketClient.sendMessageForKey(
               "DeleteDropdownDataForCode",
               this.dropdownCodeTextField.text,
               function() {
                 this.updateAvailableCodes();
               }.bind(this)
             );
-            this.dropdownCodeTextField.text = import_uicore_ts14.nil;
+            this.dropdownCodeTextField.text = import_uicore_ts16.nil;
             this.dropdown.data = [];
             this.updateitemDetailsView();
           }
@@ -21376,7 +21743,7 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
       }.bind(this)
     );
     this.clearDropdownButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
         if (this.dropdownCodeTextField.text && confirm("Are you sure you want to clear this dropdown?")) {
           this.dropdown.data = [];
@@ -21387,13 +21754,13 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
       }.bind(this)
     );
     this.loadPlainDataButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
         this.loadPlainData();
       }.bind(this)
     );
     this.loadJSONDataButton.addTargetForControlEvent(
-      import_uicore_ts14.UIView.controlEvent.PointerUpInside,
+      import_uicore_ts16.UIView.controlEvent.PointerUpInside,
       function(sender, event2) {
         this.loadJSONData();
       }.bind(this)
@@ -21402,24 +21769,22 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
   reloadTableData() {
     this.dropdown._tableView.reloadData();
     const dataToShow = {};
-    this.dropdown.drawingData.forEach(function(dataItem, index, array) {
-      dataToShow[(0, import_uicore_ts14.FIRST)(dataItem.itemCode, dataItem._id)] = dataItem.title;
-    });
+    this.dropdown.drawingData.forEach((dataItem) => dataToShow[(0, import_uicore_ts16.FIRST)(dataItem.itemCode, dataItem._id)] = dataItem.title);
     this.dataTextArea.text = JSON.stringify(dataToShow, null, 2);
   }
   updateAvailableCodes() {
     return __async(this, null, function* () {
-      var { result: codes } = yield import_cbcore_ts9.SocketClient.RetrieveDropdownCodes();
+      const { result: codes } = yield import_cbcore_ts5.SocketClient.RetrieveDropdownCodes();
       this.dropdownCodesTextArea.text = "Saved codes: " + JSON.stringify(codes);
-      if (codes.length && (0, import_uicore_ts14.IS_NOT)(this.dropdownCodeTextField.text)) {
+      if (codes.length && (0, import_uicore_ts16.IS_NOT)(this.dropdownCodeTextField.text)) {
         this.dropdownCodeTextField.text = codes.firstElement;
-        this.loadData();
+        yield this.loadData();
       }
     });
   }
   updateitemDetailsView() {
-    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts14.nil;
-    if ((0, import_uicore_ts14.IS)(selectedItem)) {
+    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts16.nil;
+    if ((0, import_uicore_ts16.IS)(selectedItem)) {
       if (this.itemTitleCheckbox.selected) {
         this.itemTitleOrAttachedObjectTextArea.text = JSON.stringify(selectedItem.title, null, 2);
         this.itemTitleDidChange();
@@ -21429,17 +21794,17 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
       }
       this.itemCodeTextField.text = selectedItem.itemCode;
     }
-    this.isASectionCheckbox.selected = (0, import_uicore_ts14.IS)(selectedItem.isADropdownDataSection);
+    this.isASectionCheckbox.selected = (0, import_uicore_ts16.IS)(selectedItem.isADropdownDataSection);
   }
   loadData() {
     return __async(this, null, function* () {
-      if ((0, import_uicore_ts14.IS_NOT)(this.dropdownCodeTextField.text)) {
+      if ((0, import_uicore_ts16.IS_NOT)(this.dropdownCodeTextField.text)) {
         this.loadSubjectData();
         return;
       }
-      var { result: responseMessage } = yield import_cbcore_ts9.SocketClient.RetrieveDropdownDataForCode(this.dropdownCodeTextField.text);
+      const { result: responseMessage } = yield import_cbcore_ts5.SocketClient.RetrieveDropdownDataForCode(this.dropdownCodeTextField.text);
       this._triggerLayoutViewSubviews();
-      if ((0, import_uicore_ts14.IS)(responseMessage)) {
+      if ((0, import_uicore_ts16.IS)(responseMessage)) {
         CBDialogViewShower.alert("Loaded data.");
       } else {
         CBDialogViewShower.alert("Failed to load data.");
@@ -21447,24 +21812,25 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
       }
       const dropdownData = [];
       responseMessage.data.forEach(function(sectionOrRow, index, array) {
+        var _a;
         if (sectionOrRow.isADropdownDataSection) {
           const dataSection = {
             _id: sectionOrRow._id,
             title: sectionOrRow.title,
             rowsData: [],
-            isADropdownDataSection: import_uicore_ts14.YES,
-            isADropdownDataRow: import_uicore_ts14.NO,
+            isADropdownDataSection: import_uicore_ts16.YES,
+            isADropdownDataRow: import_uicore_ts16.NO,
             attachedObject: sectionOrRow.attachedObject,
             itemCode: sectionOrRow.itemCode,
             dropdownCode: sectionOrRow.dropdownCode
           };
           const rowsData = dataSection.rowsData;
-          sectionOrRow.rowsData.forEach(function(rowData, index2, array2) {
-            rowsData.push({
+          (_a = sectionOrRow.rowsData) == null ? void 0 : _a.forEach((rowData, index2, array2) => {
+            rowsData == null ? void 0 : rowsData.push({
               _id: rowData._id,
               title: rowData.title,
-              isADropdownDataSection: import_uicore_ts14.NO,
-              isADropdownDataRow: import_uicore_ts14.YES,
+              isADropdownDataSection: import_uicore_ts16.NO,
+              isADropdownDataRow: import_uicore_ts16.YES,
               attachedObject: rowData.attachedObject,
               itemCode: rowData.itemCode,
               dropdownCode: rowData.dropdownCode
@@ -21477,7 +21843,7 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
             _id: sectionOrRow._id,
             title: sectionOrRow.title,
             attachedObject: sectionOrRow.attachedObject,
-            isADropdownDataRow: import_uicore_ts14.YES,
+            isADropdownDataRow: import_uicore_ts16.YES,
             itemCode: sectionOrRow.itemCode,
             dropdownCode: sectionOrRow.dropdownCode
           });
@@ -21496,35 +21862,38 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
         dropdownCode: this.dropdownCodeTextField.text,
         data: []
       };
-      var currentRowsTarget = uploadData.data;
-      this.dropdown.drawingData.forEach(function(item, index, array) {
+      let currentRowsTarget = uploadData.data;
+      this.dropdown.drawingData.forEach((item) => {
         if (item.isADropdownDataSection) {
           currentRowsTarget = [];
           uploadData.data.push({
+            _id: "",
             title: item.title,
             attachedObject: item.attachedObject,
             rowsData: currentRowsTarget,
-            isADropdownDataSection: import_uicore_ts14.YES,
-            isADropdownDataRow: import_uicore_ts14.NO,
-            itemCode: (0, import_uicore_ts14.FIRST)(item.itemCode, item._id),
+            isADropdownDataSection: import_uicore_ts16.YES,
+            isADropdownDataRow: import_uicore_ts16.NO,
+            itemCode: (0, import_uicore_ts16.FIRST)(item.itemCode, item._id),
             dropdownCode: uploadData.dropdownCode
           });
         } else {
           currentRowsTarget.push({
+            _id: "",
+            rowsData: [],
             title: item.title,
             attachedObject: item.attachedObject,
-            isADropdownDataSection: import_uicore_ts14.NO,
-            isADropdownDataRow: import_uicore_ts14.YES,
-            itemCode: (0, import_uicore_ts14.FIRST)(item.itemCode, item._id),
+            isADropdownDataSection: import_uicore_ts16.NO,
+            isADropdownDataRow: import_uicore_ts16.YES,
+            itemCode: (0, import_uicore_ts16.FIRST)(item.itemCode, item._id),
             dropdownCode: uploadData.dropdownCode
           });
         }
-      }.bind(this));
-      var { result: response } = yield import_cbcore_ts9.SocketClient.SaveDropdownData(uploadData);
-      this.updateAvailableCodes();
-      if ((0, import_uicore_ts14.IS)(response)) {
+      });
+      const { result: response } = yield import_cbcore_ts5.SocketClient.SaveDropdownData(uploadData);
+      this.updateAvailableCodes().then(import_uicore_ts16.nil);
+      if ((0, import_uicore_ts16.IS)(response)) {
         CBDialogViewShower.alert("Saved successfully.");
-        this.loadData();
+        yield this.loadData();
       } else {
         CBDialogViewShower.alert("Failed to save dropdown data.");
       }
@@ -21540,15 +21909,15 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
         title: {
           "en": lineItems.lastElement
         },
-        isADropdownDataRow: import_uicore_ts14.YES,
-        isADropdownDataSection: import_uicore_ts14.NO,
+        isADropdownDataRow: import_uicore_ts16.YES,
+        isADropdownDataSection: import_uicore_ts16.NO,
         attachedObject: void 0,
         itemCode: lineItems.firstElement,
         dropdownCode: this.dropdownCodeTextField.text
       });
     }.bind(this));
     this.dropdown._drawingData = drawingData;
-    this.dropdown._isDrawingDataValid = import_uicore_ts14.YES;
+    this.dropdown._isDrawingDataValid = import_uicore_ts16.YES;
     this.reloadTableData();
     if (this.dropdown.selectedIndices.length) {
       this.dropdown._selectedData = [this.dropdown.drawingData[this.dropdown.selectedIndices.firstElement]];
@@ -21557,28 +21926,28 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
   }
   loadJSONData() {
     const drawingData = [];
-    var itemTitles = {};
+    let itemTitles = {};
     try {
       itemTitles = JSON.parse(this.dataTextArea.text);
     } catch (exception) {
-      CBDialogViewShower.alert(exception);
+      CBDialogViewShower.alert("" + exception);
       return;
     }
-    var index = 0;
-    itemTitles.forEach(function(itemTitle, itemCode) {
+    let index = 0;
+    itemTitles.forEach((itemTitle, itemCode) => {
       drawingData.push({
         _id: "" + index,
         title: itemTitle,
-        isADropdownDataRow: import_uicore_ts14.YES,
-        isADropdownDataSection: import_uicore_ts14.NO,
+        isADropdownDataRow: import_uicore_ts16.YES,
+        isADropdownDataSection: import_uicore_ts16.NO,
         attachedObject: void 0,
         itemCode,
         dropdownCode: this.dropdownCodeTextField.text
       });
       index = index + 1;
-    }.bind(this));
+    });
     this.dropdown._drawingData = drawingData;
-    this.dropdown._isDrawingDataValid = import_uicore_ts14.YES;
+    this.dropdown._isDrawingDataValid = import_uicore_ts16.YES;
     this.reloadTableData();
     if (this.dropdown.selectedIndices.length) {
       this.dropdown._selectedData = [this.dropdown.drawingData[this.dropdown.selectedIndices.firstElement]];
@@ -21586,8 +21955,8 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
     this.updateitemDetailsView();
   }
   itemTitleDidChange() {
-    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts14.nil;
-    if ((0, import_uicore_ts14.IS_NOT)(this.itemTitleOrAttachedObjectTextArea.text) || this.itemTitleOrAttachedObjectTextArea.text == "undefined") {
+    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts16.nil;
+    if ((0, import_uicore_ts16.IS_NOT)(this.itemTitleOrAttachedObjectTextArea.text) || this.itemTitleOrAttachedObjectTextArea.text == "undefined") {
       this.itemTitleOrAttachedObjectTextArea.text = "{  }";
     }
     try {
@@ -21597,17 +21966,17 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
         this.itemTitleJSONLabel.text = "No issues detected";
         selectedItem.title = selectedItemTitle;
       } else {
-        this.itemTitleJSONLabel.textColor = import_uicore_ts14.UIColor.redColor;
+        this.itemTitleJSONLabel.textColor = import_uicore_ts16.UIColor.redColor;
         this.itemTitleJSONLabel.text = "JSON has to describe a CBLocalizedTextObject.";
       }
     } catch (error) {
       this.itemTitleJSONLabel.text = error.message;
-      this.itemTitleJSONLabel.textColor = import_uicore_ts14.UIColor.redColor;
+      this.itemTitleJSONLabel.textColor = import_uicore_ts16.UIColor.redColor;
     }
   }
   itemAttachedObjectDidChange() {
-    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts14.nil;
-    if ((0, import_uicore_ts14.IS_NOT)(this.itemTitleOrAttachedObjectTextArea.text) || this.itemTitleOrAttachedObjectTextArea.text == "undefined") {
+    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts16.nil;
+    if ((0, import_uicore_ts16.IS_NOT)(this.itemTitleOrAttachedObjectTextArea.text) || this.itemTitleOrAttachedObjectTextArea.text == "undefined") {
       this.itemTitleOrAttachedObjectTextArea.text = "{ undefined }";
     }
     try {
@@ -21620,12 +21989,12 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
         this.itemTitleJSONLabel.text = "No issues detected";
         selectedItem.attachedObject = selectedItemAttachedObject;
       } else {
-        this.itemTitleJSONLabel.textColor = import_uicore_ts14.UIColor.redColor;
+        this.itemTitleJSONLabel.textColor = import_uicore_ts16.UIColor.redColor;
         this.itemTitleJSONLabel.text = "JSON has to describe an object.";
       }
     } catch (error) {
       this.itemTitleJSONLabel.text = error.message;
-      this.itemTitleJSONLabel.textColor = import_uicore_ts14.UIColor.redColor;
+      this.itemTitleJSONLabel.textColor = import_uicore_ts16.UIColor.redColor;
     }
   }
   loadSubjectData() {
@@ -21702,28 +22071,24 @@ var _InternalDropdownSettingsViewController = class extends import_uicore_ts14.U
   }
 };
 var InternalDropdownSettingsViewController = _InternalDropdownSettingsViewController;
+__name(InternalDropdownSettingsViewController, "InternalDropdownSettingsViewController");
 InternalDropdownSettingsViewController.routeComponentName = "internal_dropdown_settings";
 InternalDropdownSettingsViewController.ParameterIdentifierName = {};
 
 // scripts/InternalLanguageSettingsViewController.ts
-var import_uicore_ts15 = __toESM(require_compiledScripts());
-var import_cbcore_ts11 = __toESM(require_compiledScripts3());
-var import_cbcore_ts12 = __toESM(require_compiledScripts3());
-var import_cbcore_ts13 = __toESM(require_compiledScripts3());
-var _InternalLanguageSettingsViewController = class extends import_uicore_ts15.UIViewController {
+var import_cbcore_ts6 = __toESM(require_compiledScripts3());
+var import_uicore_ts17 = __toESM(require_compiledScripts());
+var _InternalLanguageSettingsViewController = class extends import_uicore_ts17.UIViewController {
   constructor(view) {
     super(view);
-    this.loadSubviews();
-  }
-  loadSubviews() {
-    this.view.backgroundColor = import_uicore_ts15.UIColor.whiteColor;
-    this.titleLabel = new import_uicore_ts15.UITextView(this.view.elementID + "TitleLabel", import_uicore_ts15.UITextView.type.header2);
+    this.view.backgroundColor = import_uicore_ts17.UIColor.whiteColor;
+    this.titleLabel = new import_uicore_ts17.UITextView(this.view.elementID + "TitleLabel", import_uicore_ts17.UITextView.type.header2);
     this.titleLabel.text = "Internal language settings";
     this.view.addSubview(this.titleLabel);
     this.languageKeyTextField = new CBTextField(this.view.elementID + "LanguageKeyTextField");
     this.languageKeyTextField.placeholderText = "Language key";
     this.view.addSubview(this.languageKeyTextField);
-    this.languageKeysTextArea = new import_uicore_ts15.UITextArea(this.view.elementID + "LanguageKeysTextArea");
+    this.languageKeysTextArea = new import_uicore_ts17.UITextArea(this.view.elementID + "LanguageKeysTextArea");
     this.languageKeysTextArea.placeholderText = "Available language keys";
     this.view.addSubview(this.languageKeysTextArea);
     this.loadButton = new CBButton(this.view.elementID + "LoadButton");
@@ -21733,12 +22098,12 @@ var _InternalLanguageSettingsViewController = class extends import_uicore_ts15.U
     this.saveButton.titleLabel.setText("internalLanguageSettingsViewControllerSaveButton", "Save");
     this.view.addSubview(this.saveButton);
     this.dropdown = new SearchableDropdown(this.view.elementID + "SearchableDropdown");
-    this.dropdown._controlEventTargets[import_uicore_ts15.UIView.controlEvent.PointerUpInside] = [];
-    this.dropdown._controlEventTargets[import_uicore_ts15.UIView.controlEvent.EnterDown] = [];
-    this.dropdown._dialogView = import_uicore_ts15.nil;
-    this.dropdown.isSingleSelection = import_uicore_ts15.YES;
-    this.dropdown._rightImageView.imageSource = import_uicore_ts15.nil;
-    this.dropdown.keepFocusedRowVisible = import_uicore_ts15.NO;
+    this.dropdown._controlEventTargets[import_uicore_ts17.UIView.controlEvent.PointerUpInside] = [];
+    this.dropdown._controlEventTargets[import_uicore_ts17.UIView.controlEvent.EnterDown] = [];
+    this.dropdown._dialogView = import_uicore_ts17.nil;
+    this.dropdown.isSingleSelection = import_uicore_ts17.YES;
+    this.dropdown._rightImageView.imageSource = import_uicore_ts17.nil;
+    this.dropdown.keepFocusedRowVisible = import_uicore_ts17.NO;
     this.view.addSubview(this.dropdown);
     this.dropdown._tableView.style.borderWidth = "1px";
     this.dropdown._tableView.style.borderStyle = "solid";
@@ -21746,199 +22111,159 @@ var _InternalLanguageSettingsViewController = class extends import_uicore_ts15.U
     this.view.addSubview(this.dropdown._tableView);
     this.addButton = new CBButton(this.view.elementID + "AddButton");
     this.addButton.titleLabel.text = "Add text";
-    this.addButton.setBackgroundColorsWithNormalColor(import_uicore_ts15.UIColor.greenColor);
+    this.addButton.setBackgroundColorsWithNormalColor(import_uicore_ts17.UIColor.greenColor);
     this.view.addSubview(this.addButton);
     this.deleteButton = new CBButton(this.view.elementID + "DeleteButton");
     this.deleteButton.titleLabel.text = "Delete text";
-    this.deleteButton.setBackgroundColorsWithNormalColor(import_uicore_ts15.UIColor.redColor);
+    this.deleteButton.setBackgroundColorsWithNormalColor(import_uicore_ts17.UIColor.redColor);
     this.view.addSubview(this.deleteButton);
     this.deleteLanguageButton = new CBButton(this.view.elementID + "DeleteLanguageButton");
     this.deleteLanguageButton.titleLabel.text = "Delete language";
-    this.deleteLanguageButton.setBackgroundColorsWithNormalColor(import_uicore_ts15.UIColor.redColor);
+    this.deleteLanguageButton.setBackgroundColorsWithNormalColor(import_uicore_ts17.UIColor.redColor);
     this.view.addSubview(this.deleteLanguageButton);
     this.clearLanguageButton = new CBButton(this.view.elementID + "ClearLanguageButton");
     this.clearLanguageButton.titleLabel.text = "Clear language";
-    this.clearLanguageButton.setBackgroundColorsWithNormalColor(import_uicore_ts15.UIColor.redColor);
+    this.clearLanguageButton.setBackgroundColorsWithNormalColor(import_uicore_ts17.UIColor.redColor);
     this.view.addSubview(this.clearLanguageButton);
     this.itemKeyTextField = new CBTextField(this.view.elementID + "ItemKeyTextField");
     this.itemKeyTextField.placeholderText = "Item key";
     this.view.addSubview(this.itemKeyTextField);
-    this.itemTitleOrAttachedObjectTextArea = new import_uicore_ts15.UITextArea(this.view.elementID + "ItemTitleOrAttachedObjectTextArea");
+    this.itemTitleOrAttachedObjectTextArea = new import_uicore_ts17.UITextArea(this.view.elementID + "ItemTitleOrAttachedObjectTextArea");
     this.itemTitleOrAttachedObjectTextArea.placeholderText = "Title";
     this.view.addSubview(this.itemTitleOrAttachedObjectTextArea);
     this.itemTitleDidChange();
-    this.dataTextJSONLabel = new import_uicore_ts15.UITextView(this.view.elementID + "DataTextJSONLabel");
+    this.dataTextJSONLabel = new import_uicore_ts17.UITextView(this.view.elementID + "DataTextJSONLabel");
     this.dataTextJSONLabel.text = "Data in JSON format";
     this.view.addSubview(this.dataTextJSONLabel);
-    this.dataTextArea = new import_uicore_ts15.UITextArea(this.view.elementID + "DataTextArea");
+    this.dataTextArea = new import_uicore_ts17.UITextArea(this.view.elementID + "DataTextArea");
     this.dataTextArea.placeholderText = "Data in JSON format";
     this.view.addSubview(this.dataTextArea);
     this.loadJSONDataButton = new CBButton(this.view.elementID + "LoadJSONDataButton");
     this.loadJSONDataButton.titleLabel.text = "Load JSON data";
     this.view.addSubview(this.loadJSONDataButton);
-    this.dropdown.addTargetForControlEvent(
-      SearchableDropdown.controlEvent.SelectionDidChange,
-      function(sender, event2) {
-        this.updateitemDetailsView();
-      }.bind(this)
-    );
+    this.dropdown.controlEventTargetAccumulator.SelectionDidChange = () => this.updateitemDetailsView();
     const dropdownViewForRowWithIndexFunction = this.dropdown._tableView.viewForRowWithIndex.bind(this.dropdown._tableView);
-    this.dropdown._tableView.viewForRowWithIndex = function(rowIndex) {
+    this.dropdown._tableView.viewForRowWithIndex = (rowIndex) => {
       const row = dropdownViewForRowWithIndexFunction(rowIndex);
       const dataItem = this.dropdown.drawingData[rowIndex];
       const key = dataItem.itemCode;
       const value = dataItem.attachedObject;
-      if (import_cbcore_ts13.LanguageService.languageValues[this.languageKeyTextField.text][key] == value) {
+      if (LanguageService.languageValues[this.languageKeyTextField.text][key] == value) {
         row.titleText = row.titleText + " - static";
         row.alpha = 0.5;
       } else {
         row.alpha = 1;
       }
       return row;
-    }.bind(this);
-    this.itemKeyTextField.textField.addTargetForControlEvent(
-      import_uicore_ts15.UITextArea.controlEvent.TextChange,
-      function(sender, event2) {
-        const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts15.nil;
-        const previousKey = selectedItem.itemCode;
-        const languageObject = import_cbcore_ts13.LanguageService.languages[this.languageKeyTextField.text];
-        const languageValuesValue = languageObject[previousKey];
-        if ((0, import_uicore_ts15.IS_NOT)(languageValuesValue)) {
-          delete languageObject[previousKey];
-        }
-        languageObject[this.itemKeyTextField.text] = selectedItem.attachedObject;
-        selectedItem.title = import_cbcore_ts13.LanguageService.localizedTextObjectForText(this.itemKeyTextField.text);
-        selectedItem.itemCode = this.itemKeyTextField.text;
-        selectedItem._id = this.itemKeyTextField.text;
-        this.reloadTableData();
-      }.bind(this)
-    );
-    this.itemTitleOrAttachedObjectTextArea.addTargetForControlEvent(
-      import_uicore_ts15.UITextArea.controlEvent.TextChange,
-      function(sender, event2) {
-        this.itemTitleDidChange();
-        this.reloadTableData();
-      }.bind(this)
-    );
+    };
+    this.itemKeyTextField.textField.controlEventTargetAccumulator.TextChange = () => {
+      const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts17.nil;
+      const previousKey = selectedItem.itemCode;
+      const languageObject = LanguageService.languages[this.languageKeyTextField.text];
+      const languageValuesValue = languageObject[previousKey];
+      if ((0, import_uicore_ts17.IS_NOT)(languageValuesValue)) {
+        delete languageObject[previousKey];
+      }
+      languageObject[this.itemKeyTextField.text] = selectedItem.attachedObject;
+      selectedItem.title = LanguageService.localizedTextObjectForText(this.itemKeyTextField.text);
+      selectedItem.itemCode = this.itemKeyTextField.text;
+      selectedItem._id = this.itemKeyTextField.text;
+      this.reloadTableData();
+    };
+    this.itemTitleOrAttachedObjectTextArea.controlEventTargetAccumulator.TextChange = () => {
+      this.itemTitleDidChange();
+      this.reloadTableData();
+    };
     this.updateAvailableKeys();
-    this.loadButton.addTargetForControlEvent(
-      import_uicore_ts15.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
-        this.loadData();
-      }.bind(this)
-    );
-    this.saveButton.addTargetForControlEvent(
-      import_uicore_ts15.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
-        import_cbcore_ts11.CBCore.sharedInstance.socketClient.sendMessageForKey(
-          "RetrieveLanguageData",
-          import_uicore_ts15.nil,
-          function(codes) {
-            this.saveData();
-          }.bind(this)
-        );
-      }.bind(this)
-    );
-    this.addButton.addTargetForControlEvent(
-      import_uicore_ts15.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
-        const title = import_cbcore_ts13.LanguageService.localizedTextObjectForText(this.itemKeyTextField.text);
-        const itemID = (0, import_uicore_ts15.MAKE_ID)();
-        const dataRow = {
-          _id: itemID,
-          title,
-          isADropdownDataRow: import_uicore_ts15.YES,
-          isADropdownDataSection: import_uicore_ts15.NO,
-          attachedObject: void 0,
-          itemCode: import_uicore_ts15.nil,
-          dropdownCode: (this.dropdown.selectedData.firstElement || {}).dropdownCodes
-        };
-        const rowIndex = this.dropdown.selectedIndices.firstElement;
-        if ((0, import_uicore_ts15.IS_DEFINED)(rowIndex)) {
-          this.dropdown.drawingData.insertElementAtIndex(rowIndex + 1, dataRow);
-          this.reloadTableData();
-        } else {
-          this.dropdown.drawingData.push(dataRow);
-          this.reloadTableData();
-          this.dropdown._tableView.scrollToBottom();
-        }
-      }.bind(this)
-    );
-    this.deleteButton.addTargetForControlEvent(
-      import_uicore_ts15.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
-        const rowIndex = this.dropdown.selectedIndices.firstElement;
-        if ((0, import_uicore_ts15.IS_DEFINED)(rowIndex)) {
-          var selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts15.nil;
-          var key = import_cbcore_ts13.LanguageService.stringForCurrentLanguage(selectedItem.title);
-          delete import_cbcore_ts13.LanguageService.languages[this.languageKeyTextField.text][key];
-          this.dropdown.drawingData.removeElementAtIndex(rowIndex);
-          this.dropdown.selectedData.removeElementAtIndex(0);
-          this.dropdown.selectedIndices.removeElementAtIndex(0);
-          this.dropdown.selectionDidChange(this.dropdown.selectedData);
-        }
+    this.loadButton.controlEventTargetAccumulator.PointerUpInside = () => this.loadData();
+    this.saveButton.controlEventTargetAccumulator.PointerUpInside = () => __async(this, null, function* () {
+      const codes = (yield import_cbcore_ts6.SocketClient.RetrieveLanguageData(import_uicore_ts17.nil)).result;
+      yield this.saveData();
+    });
+    this.addButton.controlEventTargetAccumulator.PointerUpInside = () => {
+      var _a;
+      const title = LanguageService.localizedTextObjectForText(this.itemKeyTextField.text);
+      const itemID = (0, import_uicore_ts17.MAKE_ID)();
+      const dataRow = {
+        _id: itemID,
+        title,
+        isADropdownDataRow: import_uicore_ts17.YES,
+        isADropdownDataSection: import_uicore_ts17.NO,
+        attachedObject: "",
+        itemCode: import_uicore_ts17.nil,
+        dropdownCode: (_a = this.dropdown.selectedData.firstElement) == null ? void 0 : _a.dropdownCode
+      };
+      const rowIndex = this.dropdown.selectedIndices.firstElement;
+      if ((0, import_uicore_ts17.IS_DEFINED)(rowIndex)) {
+        this.dropdown.drawingData.insertElementAtIndex(rowIndex + 1, dataRow);
         this.reloadTableData();
-      }.bind(this)
-    );
-    this.deleteLanguageButton.addTargetForControlEvent(
-      import_uicore_ts15.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
-        if (this.languageKeyTextField.text && confirm("Are you sure you want to delete this language?")) {
-          if (confirm("This will REMOVE THE LANGUAGE FROM THE SERVER, are you definitely sure?")) {
-            import_cbcore_ts11.CBCore.sharedInstance.socketClient.sendMessageForKey(
-              "DeleteLanguageWithKey",
-              this.languageKeyTextField.text,
-              function(responseMessage, respondWithMessage) {
-                import_cbcore_ts13.LanguageService.useStoredLanguageValues(responseMessage);
-                this.updateAvailableKeys();
-                this.languageKeyTextField.text = import_uicore_ts15.nil;
-                this.dropdown.data = [];
-                this.updateitemDetailsView();
-              }.bind(this)
-            );
-          }
+      } else {
+        this.dropdown.drawingData.push(dataRow);
+        this.reloadTableData();
+        this.dropdown._tableView.scrollToBottom();
+      }
+    };
+    this.deleteButton.controlEventTargetAccumulator.PointerUpInside = () => {
+      const rowIndex = this.dropdown.selectedIndices.firstElement;
+      if ((0, import_uicore_ts17.IS_DEFINED)(rowIndex)) {
+        const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts17.nil;
+        const key = LanguageService.stringForCurrentLanguage(selectedItem.title);
+        delete LanguageService.languages[this.languageKeyTextField.text][key];
+        this.dropdown.drawingData.removeElementAtIndex(rowIndex);
+        this.dropdown.selectedData.removeElementAtIndex(0);
+        this.dropdown.selectedIndices.removeElementAtIndex(0);
+        this.dropdown.selectionDidChange(this.dropdown.selectedData);
+      }
+      this.reloadTableData();
+    };
+    this.deleteLanguageButton.controlEventTargetAccumulator.PointerUpInside = () => {
+      if (this.languageKeyTextField.text && confirm("Are you sure you want to delete this language?")) {
+        if (confirm("This will REMOVE THE LANGUAGE FROM THE SERVER, are you definitely sure?")) {
+          import_cbcore_ts6.CBCore.sharedInstance.socketClient.sendMessageForKey(
+            "DeleteLanguageWithKey",
+            this.languageKeyTextField.text,
+            function(responseMessage, respondWithMessage) {
+              LanguageService.useStoredLanguageValues(responseMessage);
+              this.updateAvailableKeys();
+              this.languageKeyTextField.text = import_uicore_ts17.nil;
+              this.dropdown.data = [];
+              this.updateitemDetailsView();
+            }.bind(this)
+          );
         }
-      }.bind(this)
-    );
-    this.clearLanguageButton.addTargetForControlEvent(
-      import_uicore_ts15.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
-        if (this.languageKeyTextField.text && confirm("Are you sure you want to clear this language?")) {
-          import_cbcore_ts13.LanguageService.languages[this.languageKeyTextField.text] = {};
-          this.dropdown.data = [];
-          this.dropdown.selectedData = [];
-          this.dropdown.selectedIndices = [];
-          this.updateitemDetailsView();
-        }
-      }.bind(this)
-    );
-    this.loadJSONDataButton.addTargetForControlEvent(
-      import_uicore_ts15.UIView.controlEvent.PointerUpInside,
-      function(sender, event2) {
-        this.loadJSONData();
-      }.bind(this)
-    );
+      }
+    };
+    this.clearLanguageButton.controlEventTargetAccumulator.PointerUpInside = () => {
+      if (this.languageKeyTextField.text && confirm("Are you sure you want to clear this language?")) {
+        LanguageService.languages[this.languageKeyTextField.text] = {};
+        this.dropdown.data = [];
+        this.dropdown.selectedData = [];
+        this.dropdown.selectedIndices = [];
+        this.updateitemDetailsView();
+      }
+    };
+    this.loadJSONDataButton.controlEventTargetAccumulator.PointerUpInside = () => this.loadJSONData();
   }
   reloadTableData() {
     this.dropdown._tableView.reloadData();
     const dataToShow = {};
-    this.dropdown.drawingData.forEach(function(dataItem, index, array) {
-      dataToShow[(0, import_uicore_ts15.FIRST)(dataItem.itemCode, dataItem._id)] = dataItem.attachedObject;
+    this.dropdown.drawingData.forEach((dataItem, index, array) => {
+      dataToShow[(0, import_uicore_ts17.FIRST)(dataItem.itemCode, dataItem._id)] = dataItem.attachedObject;
     });
     this.dataTextArea.text = JSON.stringify(dataToShow, null, 2);
   }
   updateAvailableKeys() {
-    const codes = import_cbcore_ts13.LanguageService.languages.allKeys;
+    const codes = LanguageService.languages.allKeys;
     this.languageKeysTextArea.text = "Saved keys: " + JSON.stringify(codes);
-    if (codes.length && (0, import_uicore_ts15.IS_NOT)(this.languageKeyTextField.text)) {
+    if (codes.length && (0, import_uicore_ts17.IS_NOT)(this.languageKeyTextField.text)) {
       this.languageKeyTextField.text = codes.firstElement;
       this.loadData();
     }
   }
   updateitemDetailsView() {
-    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts15.nil;
-    if ((0, import_uicore_ts15.IS)(selectedItem)) {
-      this.itemKeyTextField.text = import_cbcore_ts13.LanguageService.stringForCurrentLanguage(selectedItem.title);
+    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts17.nil;
+    if ((0, import_uicore_ts17.IS)(selectedItem)) {
+      this.itemKeyTextField.text = LanguageService.stringForCurrentLanguage(selectedItem.title);
       this.itemTitleOrAttachedObjectTextArea.text = selectedItem.attachedObject;
       this.itemTitleDidChange();
     }
@@ -21946,14 +22271,14 @@ var _InternalLanguageSettingsViewController = class extends import_uicore_ts15.U
   loadData() {
     this._triggerLayoutViewSubviews();
     const dropdownData = [];
-    import_cbcore_ts13.LanguageService.languages[this.languageKeyTextField.text].forEach(function(value, key) {
+    LanguageService.languages[this.languageKeyTextField.text].forEach((value, key) => {
       dropdownData.push({
         _id: key,
-        title: import_cbcore_ts13.LanguageService.localizedTextObjectForText(key),
+        title: LanguageService.localizedTextObjectForText(key),
         itemCode: key,
         dropdownCode: "Aasdasdasdasdasdasdasd",
-        isADropdownDataRow: import_uicore_ts15.YES,
-        isADropdownDataSection: import_uicore_ts15.NO,
+        isADropdownDataRow: import_uicore_ts17.YES,
+        isADropdownDataSection: import_uicore_ts17.NO,
         attachedObject: value
       });
     });
@@ -21964,48 +22289,40 @@ var _InternalLanguageSettingsViewController = class extends import_uicore_ts15.U
     this.updateitemDetailsView();
   }
   saveData() {
-    const languageObject = {};
-    const languageKey = this.languageKeyTextField.text;
-    this.dropdown.drawingData.forEach(function(dataItem, index, array) {
-      const staticLanguageObject = import_cbcore_ts13.LanguageService.languageValues[languageKey];
-      if ((0, import_uicore_ts15.IS_NOT)(staticLanguageObject[dataItem.itemCode] == dataItem.attachedObject)) {
-        languageObject[dataItem.itemCode] = dataItem.attachedObject;
+    return __async(this, null, function* () {
+      const languageObject = {};
+      const languageKey = this.languageKeyTextField.text;
+      this.dropdown.drawingData.forEach((dataItem, index, array) => {
+        const staticLanguageObject = LanguageService.languageValues[languageKey];
+        if ((0, import_uicore_ts17.IS_NOT)(staticLanguageObject[dataItem.itemCode] == dataItem.attachedObject)) {
+          languageObject[dataItem.itemCode] = dataItem.attachedObject;
+        }
+      });
+      const responseMessage = (yield import_cbcore_ts6.SocketClient.RetrieveLanguageData(import_uicore_ts17.nil)).result;
+      responseMessage[this.languageKeyTextField.text] = languageObject;
+      const response = yield import_cbcore_ts6.SocketClient.SaveLanguagesData(responseMessage);
+      if ((0, import_uicore_ts17.IS_NOT)(response.errorResult)) {
+        CBDialogViewShower.alert("Saved successfully.");
+        LanguageService.useStoredLanguageValues(response.result);
+        this.loadData();
+        LanguageService.broadcastLanguageChangeEvent();
+        this.view.rootView.setNeedsLayout();
+      } else {
+        CBDialogViewShower.alert("Failed to save dropdown data.");
       }
+      this.updateAvailableKeys();
     });
-    import_cbcore_ts11.CBCore.sharedInstance.socketClient.sendMessageForKey(
-      "RetrieveLanguageData",
-      import_uicore_ts15.nil,
-      function(responseMessage, respondWithMessage) {
-        responseMessage[this.languageKeyTextField.text] = languageObject;
-        import_cbcore_ts11.CBCore.sharedInstance.socketClient.sendMessageForKey(
-          "SaveLanguagesData",
-          responseMessage,
-          function(response) {
-            if ((0, import_cbcore_ts12.IS_NOT_SOCKET_ERROR)(response)) {
-              CBDialogViewShower.alert("Saved successfully.");
-              import_cbcore_ts13.LanguageService.useStoredLanguageValues(response);
-              this.loadData();
-              import_cbcore_ts13.LanguageService.broadcastLanguageChangeEvent();
-              this.view.rootView.setNeedsLayout();
-            } else {
-              CBDialogViewShower.alert("Failed to save dropdown data.");
-            }
-            this.updateAvailableKeys();
-          }.bind(this)
-        );
-      }.bind(this)
-    );
   }
   loadJSONData() {
     let itemTitles = {};
     try {
       itemTitles = JSON.parse(this.dataTextArea.text);
     } catch (exception) {
-      CBDialogViewShower.alert(exception);
+      CBDialogViewShower.alert("" + exception);
       return;
     }
-    import_cbcore_ts13.LanguageService.languages[this.languageKeyTextField.text] = JSON.parse(JSON.stringify(
-      import_cbcore_ts13.LanguageService.languageValues[this.languageKeyTextField.text]
+    LanguageService.languages[this.languageKeyTextField.text] = JSON.parse(JSON.stringify(
+      LanguageService.languageValues[this.languageKeyTextField.text]
     )).objectByCopyingValuesRecursivelyFromObject(itemTitles);
     this.loadData();
     this.reloadTableData();
@@ -22015,9 +22332,9 @@ var _InternalLanguageSettingsViewController = class extends import_uicore_ts15.U
     this.updateitemDetailsView();
   }
   itemTitleDidChange() {
-    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts15.nil;
+    const selectedItem = this.dropdown.selectedData.firstElement || import_uicore_ts17.nil;
     selectedItem.attachedObject = this.itemTitleOrAttachedObjectTextArea.text;
-    const languageObject = import_cbcore_ts13.LanguageService.languages[this.languageKeyTextField.text] || {};
+    const languageObject = LanguageService.languages[this.languageKeyTextField.text] || {};
     languageObject[selectedItem.itemCode] = this.itemTitleOrAttachedObjectTextArea.text;
   }
   loadSubjectData() {
@@ -22062,57 +22379,31 @@ var _InternalLanguageSettingsViewController = class extends import_uicore_ts15.U
   }
 };
 var InternalLanguageSettingsViewController = _InternalLanguageSettingsViewController;
+__name(InternalLanguageSettingsViewController, "InternalLanguageSettingsViewController");
 InternalLanguageSettingsViewController.routeComponentName = "internal_language_settings";
 InternalLanguageSettingsViewController.ParameterIdentifierName = {};
 
 // scripts/LanguagesDialogView.ts
-var import_cbcore_ts15 = __toESM(require_compiledScripts3());
-var import_uicore_ts17 = __toESM(require_compiledScripts());
-
-// scripts/LanguageService.ts
-var import_cbcore_ts14 = __toESM(require_compiledScripts3());
-var import_uicore_ts16 = __toESM(require_compiledScripts());
-var LanguageService7 = class extends import_cbcore_ts14.CBLanguageService {
-};
-LanguageService7.languageValues = {
-  en: {
-    languageName: "English",
-    languageNameShort: "ENG",
-    topBarTitle: "UICore application",
-    selectLanguageTitle: "Select language",
-    leftBarTitle: "Title"
-  },
-  est: {
-    languageName: "Eesti keel",
-    languageNameShort: "EST",
-    topBarTitle: "UICore rakendus",
-    selectLanguageTitle: "Vali keel",
-    leftBarTitle: "Pealkiri"
-  }
-};
-import_uicore_ts16.UICore.languageService = LanguageService7;
-
-// scripts/LanguagesDialogView.ts
-var LanguagesDialogView = class extends import_uicore_ts17.UIView {
+var import_cbcore_ts7 = __toESM(require_compiledScripts3());
+var import_uicore_ts18 = __toESM(require_compiledScripts());
+var LanguagesDialogView = class extends import_uicore_ts18.UIView {
   constructor(elementID, element) {
     super(elementID, element);
-  }
-  initView(elementID, viewHTMLElement) {
-    super.initView(elementID, viewHTMLElement);
-    this.titleLabel = new import_uicore_ts17.UITextView("LanguagesDialogTitleLabel", import_uicore_ts17.UITextView.type.header1);
+    this._previousLanguageKey = import_uicore_ts18.nil;
+    this.titleLabel = new import_uicore_ts18.UITextView("LanguagesDialogTitleLabel", import_uicore_ts18.UITextView.type.header1);
     this.titleLabel.setText("selectLanguageTitle", "Select language");
-    this.titleLabel.textAlignment = import_uicore_ts17.UITextView.textAlignment.center;
-    this.titleLabel.textColor = import_uicore_ts17.UIColor.whiteColor;
+    this.titleLabel.textAlignment = import_uicore_ts18.UITextView.textAlignment.center;
+    this.titleLabel.textColor = import_uicore_ts18.UIColor.whiteColor;
     this.addSubview(this.titleLabel);
     this.buttons = [];
-    const languageKeys = Object.keys(LanguageService7.languages);
-    languageKeys.forEach(function(languageKey, index, array) {
-      const language = LanguageService7.languages[languageKey];
-      const languageButton = new import_uicore_ts17.UIButton("LeftBarLanguageButton" + language.languageNameShort);
+    const languageKeys = Object.keys(LanguageService.languages);
+    languageKeys.forEach((languageKey) => {
+      const language = LanguageService.languages[languageKey];
+      const languageButton = new import_uicore_ts18.UIButton("LeftBarLanguageButton" + language.languageNameShort);
       languageButton.titleLabel.text = language.languageName;
       this.buttons.push(languageButton);
       this.addSubview(languageButton);
-      const selectedImageView = new import_uicore_ts17.UIImageView("SelectedImage" + language.languageNameShort);
+      const selectedImageView = new import_uicore_ts18.UIImageView("SelectedImage" + language.languageNameShort);
       selectedImageView.imageSource = "images/baseline-check-24px.svg";
       selectedImageView.style.filter = "invert(0.35) sepia(1) saturate(5) hue-rotate(175deg)";
       languageButton.addSubview(selectedImageView);
@@ -22121,62 +22412,57 @@ var LanguagesDialogView = class extends import_uicore_ts17.UIView {
         const bounds = languageButton.bounds;
         const padding = 10;
         const imageHeight = bounds.height - 2 * padding;
-        selectedImageView.frame = new import_uicore_ts17.UIRectangle(bounds.width - imageHeight - padding, padding, imageHeight, imageHeight);
+        selectedImageView.frame = new import_uicore_ts18.UIRectangle(bounds.width - imageHeight - padding, padding, imageHeight, imageHeight);
         buttonLayoutFunction.call(languageButton);
       };
       languageButton.setNeedsLayout();
       languageButton.updateContentForNormalState = function() {
         languageButton.titleLabel.textColor = CBColor.primaryContentColor;
-        languageButton.backgroundColor = import_uicore_ts17.UIColor.whiteColor;
-        selectedImageView.hidden = import_uicore_ts17.YES;
+        languageButton.backgroundColor = import_uicore_ts18.UIColor.whiteColor;
+        selectedImageView.hidden = import_uicore_ts18.YES;
       };
       languageButton.updateContentForHighlightedState = function() {
         languageButton.titleLabel.textColor = CBColor.primaryContentColor;
-        languageButton.backgroundColor = import_uicore_ts17.UIColor.colorWithRGBA(200, 200, 200);
+        languageButton.backgroundColor = import_uicore_ts18.UIColor.colorWithRGBA(200, 200, 200);
       };
       languageButton.updateContentForSelectedAndHighlightedState = languageButton.updateContentForHighlightedState;
       languageButton.updateContentForSelectedState = function() {
         languageButton.titleLabel.textColor = CBColor.primaryContentColor;
-        languageButton.backgroundColor = import_uicore_ts17.UIColor.whiteColor;
-        selectedImageView.hidden = import_uicore_ts17.NO;
+        languageButton.backgroundColor = import_uicore_ts18.UIColor.whiteColor;
+        selectedImageView.hidden = import_uicore_ts18.NO;
       };
       languageButton.updateContentForCurrentState();
-      const currentLanguageKey = import_uicore_ts17.UIRoute.currentRoute.componentWithName("settings").parameters.language;
-      if ((0, import_uicore_ts17.IS)(currentLanguageKey)) {
+      const currentLanguageKey = import_uicore_ts18.UIRoute.currentRoute.componentWithName("settings").parameters.language;
+      if ((0, import_uicore_ts18.IS)(currentLanguageKey)) {
         if (currentLanguageKey == languageKey) {
-          languageButton.selected = import_uicore_ts17.YES;
+          languageButton.selected = import_uicore_ts18.YES;
         }
       } else if (languageKey == "en") {
-        languageButton.selected = import_uicore_ts17.YES;
+        languageButton.selected = import_uicore_ts18.YES;
       }
-      languageButton.addTargetForControlEvents([
-        import_uicore_ts17.UIView.controlEvent.EnterDown,
-        import_uicore_ts17.UIView.controlEvent.PointerUpInside
-      ], function(sender, event2) {
-        import_cbcore_ts15.CBCore.sharedInstance.languageKey = languageKey;
-        this.buttons.forEach(function(button, index2, array2) {
-          button.selected = import_uicore_ts17.NO;
-        });
-        languageButton.selected = import_uicore_ts17.YES;
-        LanguageService7.updateCurrentLanguageKey();
+      languageButton.controlEventTargetAccumulator.EnterDown.PointerUpInside = (sender, event2) => {
+        import_cbcore_ts7.CBCore.sharedInstance.languageKey = languageKey;
+        this.buttons.everyElement.selected = import_uicore_ts18.NO;
+        languageButton.selected = import_uicore_ts18.YES;
+        LanguageService.updateCurrentLanguageKey();
         this.rootView.broadcastEventInSubtree({
-          name: import_uicore_ts17.UIView.broadcastEventName.LanguageChanged,
-          parameters: import_uicore_ts17.nil
+          name: import_uicore_ts18.UIView.broadcastEventName.LanguageChanged,
+          parameters: import_uicore_ts18.nil
         });
-      }.bind(this));
-    }, this);
+      };
+    });
   }
   wasAddedToViewTree() {
     super.wasAddedToViewTree();
-    this._previousLanguageKey = LanguageService7.currentLanguageKey;
+    this._previousLanguageKey = LanguageService.currentLanguageKey;
   }
   didReceiveBroadcastEvent(event2) {
     super.didReceiveBroadcastEvent(event2);
-    if (event2.name == import_uicore_ts17.UICore.broadcastEventName.RouteDidChange && this._previousLanguageKey != LanguageService7.currentLanguageKey) {
-      this._previousLanguageKey = LanguageService7.currentLanguageKey;
+    if (event2.name == import_uicore_ts18.UICore.broadcastEventName.RouteDidChange && this._previousLanguageKey != LanguageService.currentLanguageKey) {
+      this._previousLanguageKey = LanguageService.currentLanguageKey;
       this.rootView.broadcastEventInSubtree({
-        name: import_uicore_ts17.UIView.broadcastEventName.LanguageChanged,
-        parameters: import_uicore_ts17.nil
+        name: import_uicore_ts18.UIView.broadcastEventName.LanguageChanged,
+        parameters: import_uicore_ts18.nil
       });
     }
   }
@@ -22191,8 +22477,8 @@ var LanguagesDialogView = class extends import_uicore_ts17.UIView {
     }
     const bounds = this.bounds;
     const sidePadding = 20 * 0;
-    this.titleLabel.frame = new import_uicore_ts17.UIRectangle(sidePadding, sidePadding, 50, bounds.width - sidePadding * 2);
-    var previousFrame = this.titleLabel.frame;
+    this.titleLabel.frame = new import_uicore_ts18.UIRectangle(sidePadding, sidePadding, 50, bounds.width - sidePadding * 2);
+    let previousFrame = this.titleLabel.frame;
     this.buttons.forEach(function(button, index, array) {
       button.frame = previousFrame.rectangleWithY(previousFrame.max.y + 1).rectangleWithWidth(bounds.width - sidePadding * 2);
       previousFrame = button.frame;
@@ -22202,14 +22488,15 @@ var LanguagesDialogView = class extends import_uicore_ts17.UIView {
     this.centerInContainer();
   }
 };
+__name(LanguagesDialogView, "LanguagesDialogView");
 
 // scripts/SomeContentViewController.ts
-var import_uicore_ts18 = __toESM(require_compiledScripts());
-var _SomeContentViewController = class extends import_uicore_ts18.UIViewController {
+var import_uicore_ts19 = __toESM(require_compiledScripts());
+var _SomeContentViewController = class extends import_uicore_ts19.UIViewController {
   constructor(view) {
     super(view);
-    this.view.backgroundColor = import_uicore_ts18.UIColor.whiteColor;
-    this.titleLabel = new import_uicore_ts18.UITextView(this.view.elementID + "TitleLabel", import_uicore_ts18.UITextView.type.header2);
+    this.view.backgroundColor = import_uicore_ts19.UIColor.whiteColor;
+    this.titleLabel = new import_uicore_ts19.UITextView(this.view.elementID + "TitleLabel", import_uicore_ts19.UITextView.type.header2);
     this.titleLabel.localizedTextObject = { en: "Some content", est: "Mingi sisu" };
     this.view.addSubview(this.titleLabel);
   }
@@ -22245,24 +22532,21 @@ var _SomeContentViewController = class extends import_uicore_ts18.UIViewControll
   }
 };
 var SomeContentViewController = _SomeContentViewController;
+__name(SomeContentViewController, "SomeContentViewController");
 SomeContentViewController.routeComponentName = "somecontent";
 SomeContentViewController.ParameterIdentifierName = {};
 
 // scripts/TopBarView.ts
-var import_uicore_ts19 = __toESM(require_compiledScripts());
-var TopBarView = class extends import_uicore_ts19.UIView {
+var import_uicore_ts20 = __toESM(require_compiledScripts());
+var TopBarView = class extends import_uicore_ts20.UIView {
   constructor(elementID, element) {
     super(elementID, element);
-  }
-  initView() {
-    super.initView(import_uicore_ts19.nil, import_uicore_ts19.nil);
     this.backgroundColor = CBColor.whiteColor;
-    this.initStyleSelector("." + this.styleClassName, "position: static; left: 0; right: 0; top: 0; height: 50px;");
     this.addStyleClass("TopBarView");
-    this.setBorder(import_uicore_ts19.nil, 0, CBColor.primaryContentColor);
+    this.setBorder(import_uicore_ts20.nil, 0, CBColor.primaryContentColor);
     this.style.borderBottomWidth = "1px";
     this.style.fontSize = "15pt";
-    this.titleLabel = new import_uicore_ts19.UITextView("TopBarTitleLabel");
+    this.titleLabel = new import_uicore_ts20.UITextView("TopBarTitleLabel");
     this.titleLabel.setText("topBarTitle", "TestPage");
     this.titleLabel.textColor = CBColor.primaryContentColor;
     this.titleLabel.fontSize = 25;
@@ -22276,37 +22560,47 @@ var TopBarView = class extends import_uicore_ts19.UIView {
     this.titleLabel.centerInContainer();
   }
 };
+__name(TopBarView, "TopBarView");
 
 // scripts/RootViewController.ts
-var RootViewController = class extends import_uicore_ts20.UIRootViewController {
+var RootViewController = class extends import_uicore_ts21.UIRootViewController {
   constructor(view) {
     super(view);
-    this.languagesDialogViewController = new import_uicore_ts20.UIViewController(new LanguagesDialogView("LanguagesDialogView"));
+    this.topBarView = new TopBarView("TopBarView", import_uicore_ts21.nil).configuredWithObject({
+      titleLabel: { setText: (0, import_uicore_ts21.CALL)("topBarTitle", "UICore application") }
+    }).performingFunctionWithSelf((self2) => this.view.addSubview(self2));
+    this.bottomBarView = new BottomBarView("BottomBarView").configuredWithObject({
+      style: { overflow: "hidden" }
+    }).performingFunctionWithSelf((self2) => this.view.addSubview(self2));
+    this.languagesDialogViewController = new import_uicore_ts21.UIViewController(new LanguagesDialogView("LanguagesDialogView"));
     this.contentViewControllers = {
       informationViewController: this.lazyViewControllerObjectWithClass(InformationViewController),
       internalDropdownSettingsViewController: this.lazyViewControllerObjectWithClass(
         InternalDropdownSettingsViewController,
         () => __async(this, null, function* () {
-          return (0, import_uicore_ts20.IS)((yield import_cbcore_ts16.SocketClient.AreCBInternalSettingsAvailableForCurrentUser()).result) || import_uicore_ts20.YES;
+          return (0, import_uicore_ts21.IS)((yield import_cbcore_ts8.SocketClient.AreCBInternalSettingsAvailableForCurrentUser()).result) || import_uicore_ts21.YES;
         })
       ),
       internalLanguageSettingsViewController: this.lazyViewControllerObjectWithClass(
         InternalLanguageSettingsViewController,
         () => __async(this, null, function* () {
-          return (0, import_uicore_ts20.IS)((yield import_cbcore_ts16.SocketClient.AreCBInternalSettingsAvailableForCurrentUser()).result) || import_uicore_ts20.YES;
+          return (0, import_uicore_ts21.IS)((yield import_cbcore_ts8.SocketClient.AreCBInternalSettingsAvailableForCurrentUser()).result) || import_uicore_ts21.YES;
         })
       ),
       mainViewController: this.lazyViewControllerObjectWithClass(SomeContentViewController)
     };
-    import_uicore_ts20.UITextView.defaultTextColor = CBColor.primaryContentColor;
-    this.topBarView = new TopBarView("TopBarView", import_uicore_ts20.nil);
-    this.topBarView.titleLabel.setText("topBarTitle", "UICore application");
-    this.view.addSubview(this.topBarView);
-    this.bottomBarView = new BottomBarView("BottomBarView").configuredWithObject({
-      style: { overflow: "hidden" }
+    import_uicore_ts21.UITextView.defaultTextColor = CBColor.primaryContentColor;
+    document.addEventListener("keydown", (event2) => {
+      if (event2.ctrlKey && event2.key === "e") {
+        const isEditorOpen = (0, import_uicore_ts21.IS)(import_uicore_ts21.UIRoute.currentRoute.componentWithName("settings").parameters["editorOpen"]);
+        if (!isEditorOpen) {
+          import_uicore_ts21.UIRoute.currentRoute.routeBySettingParameterInComponent("settings", "editorOpen", "YES").applyByReplacingCurrentRouteInHistory();
+        } else {
+          import_uicore_ts21.UIRoute.currentRoute.routeByRemovingParameterInComponent("settings", "editorOpen").applyByReplacingCurrentRouteInHistory();
+        }
+      }
     });
-    this.view.addSubview(this.bottomBarView);
-    import_cbcore_ts16.CBCore.initIfNeededWithViewCore(this.view.core);
+    import_cbcore_ts8.CBCore.initIfNeededWithViewCore(this.view.core);
   }
   viewDidAppear() {
     return __async(this, null, function* () {
@@ -22317,23 +22611,46 @@ var RootViewController = class extends import_uicore_ts20.UIRootViewController {
   handleRoute(route) {
     return __async(this, null, function* () {
       yield __superGet(RootViewController.prototype, this, "handleRoute").call(this, route);
-      LanguageService7.updateCurrentLanguageKey(route);
+      LanguageService.updateCurrentLanguageKey(route);
       const currentURL = "" + window.location;
-      if ((0, import_uicore_ts20.IS)(currentURL)) {
-        import_cbcore_ts16.SocketClient.RouteDidChange(currentURL).then(import_uicore_ts20.nil);
+      if ((0, import_uicore_ts21.IS)(currentURL)) {
+        import_cbcore_ts8.SocketClient.RouteDidChange(currentURL).then(import_uicore_ts21.nil);
+      }
+      if (route.componentWithName("settings").parameters["editorOpen"]) {
+        this.showEditor();
+      } else {
+        this.hideEditor();
       }
     });
   }
   viewDidReceiveBroadcastEvent(event2) {
     super.viewDidReceiveBroadcastEvent(event2);
-    if ([import_cbcore_ts16.CBCore.broadcastEventName.userDidLogIn, import_cbcore_ts16.CBCore.broadcastEventName.userDidLogOut].contains(event2.name)) {
-      this.handleRoute(import_uicore_ts20.UIRoute.currentRoute).then(import_uicore_ts20.nil);
+    if ([import_cbcore_ts8.CBCore.broadcastEventName.userDidLogIn, import_cbcore_ts8.CBCore.broadcastEventName.userDidLogOut].contains(event2.name)) {
+      this.handleRoute(import_uicore_ts21.UIRoute.currentRoute).then(import_uicore_ts21.nil);
     }
-    if (event2.name == import_uicore_ts20.UIView.broadcastEventName.LanguageChanged) {
-      this.detailsViewController = import_uicore_ts20.nil;
+    if (event2.name == import_uicore_ts21.UIView.broadcastEventName.LanguageChanged) {
+      this.detailsViewController = import_uicore_ts21.nil;
       this._detailsDialogView.dismiss();
       this._triggerLayoutViewSubviews();
     }
+  }
+  showEditor() {
+    var _a, _b, _c;
+    if ((0, import_uicore_ts21.IS_NOT)(this.editor)) {
+      this.editor = new EditorViewController(new import_uicore_ts21.UIView("CBEditorView"));
+    }
+    this.editor.view.pointerDraggingPoint = new import_uicore_ts21.UIPoint(0, 0);
+    (_a = this.editor) == null ? void 0 : _a.viewWillAppear();
+    (_b = this.editor) == null ? void 0 : _b.view.willAppear();
+    this.addChildViewController(this.editor);
+    (_c = this.editor) == null ? void 0 : _c.viewDidAppear();
+  }
+  hideEditor() {
+    var _a, _b, _c;
+    (_a = this.editor) == null ? void 0 : _a.viewWillDisappear();
+    (_b = this.editor) == null ? void 0 : _b.removeFromParentViewController();
+    (_c = this.editor) == null ? void 0 : _c.viewDidDisappear();
+    this.editor = import_uicore_ts21.nil;
   }
   updateViewStyles() {
   }
@@ -22342,19 +22659,48 @@ var RootViewController = class extends import_uicore_ts20.UIRootViewController {
   }
   layoutViewSubviews() {
     super.layoutViewSubviews();
-    this.updatePageScale();
-    const contentViewMaxWidth = 1e3;
-    const topBarHeight = 65;
-    const bottomBarMinHeight = 100;
-    this.performDefaultLayout(
-      this.core.paddingLength,
-      contentViewMaxWidth,
-      topBarHeight,
-      bottomBarMinHeight
-    );
+    this.updatePageScale({
+      minScaleWidth: 700,
+      maxScaleWidth: 1500,
+      minScale: 0.7,
+      maxScale: 1
+    });
+    this.performDefaultLayout({
+      paddingLength: this.core.paddingLength,
+      contentViewMaxWidth: 1e3,
+      topBarHeight: 65,
+      bottomBarMinHeight: 100
+    });
   }
 };
-export {
-  RootViewController
-};
+__name(RootViewController, "RootViewController");
+
+// scripts/RunApplication.ts
+function setLoadingLabelTextIfNeeded() {
+  const languageKey = (localStorage.getItem("CBLanguageKey") || CBCoreInitializerObject.defaultLanguageKey || "en").replace(
+    '"',
+    ""
+  ).replace('"', "");
+  const loadingLabelElement = document.getElementById("LoadingLabel");
+  if (loadingLabelElement) {
+    const loadingTextObject = { "en": "Loading." };
+    loadingLabelElement.innerHTML = loadingTextObject[languageKey] || loadingTextObject["en"];
+  }
+}
+__name(setLoadingLabelTextIfNeeded, "setLoadingLabelTextIfNeeded");
+function removeLoadingView() {
+  const loadingViewElement = document.getElementById("LoadingView");
+  const rootViewElement = document.getElementById("RootView");
+  if (rootViewElement && loadingViewElement) {
+    rootViewElement.removeChild(loadingViewElement);
+  }
+}
+__name(removeLoadingView, "removeLoadingView");
+try {
+  setLoadingLabelTextIfNeeded();
+  import_uicore_ts22.UICore.main = new import_uicore_ts22.UICore("RootView", RootViewController);
+  removeLoadingView();
+} catch (exception) {
+  console.log(exception);
+}
 //# sourceMappingURL=webclient.js.map

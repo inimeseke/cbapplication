@@ -1,6 +1,6 @@
 import { UIButton, UIColor } from "uicore-ts"
-import { CBColor } from "./CBColor"
 import { CBButton } from "./CBButton"
+import { CBColor } from "./CBColor"
 
 
 export class CBFlatButton extends CBButton {
@@ -30,13 +30,6 @@ export class CBFlatButton extends CBButton {
         
         super(elementID, elementType)
         
-    }
-    
-    
-    initView(elementID: string, viewHTMLElement: HTMLElement, initViewData) {
-        
-        super.initView(elementID, viewHTMLElement, initViewData)
-        
         this.colors = {
             
             titleLabel: {
@@ -60,9 +53,6 @@ export class CBFlatButton extends CBButton {
     }
     
     
-    
-    
-    
     set titleLabelColor(titleLabelColor: UIColor) {
         
         
@@ -84,9 +74,6 @@ export class CBFlatButton extends CBButton {
     }
     
     
-    
-    
-    
     updateContentForNormalState() {
         
         UIButton.prototype.updateContentForNormalState.call(this)
@@ -101,7 +88,6 @@ export class CBFlatButton extends CBButton {
         UIButton.prototype.updateContentForHoveredState.call(this)
         
         
-        
         //this.titleLabel.textColor = CBColor.whiteColor.colorByMultiplyingRGB(0.85);
         
         //this.style.boxShadow = "0 2px 2px 0 rgba(0,0,0,0.18)";
@@ -113,7 +99,6 @@ export class CBFlatButton extends CBButton {
         UIButton.prototype.updateContentForFocusedState.call(this)
         
         
-        
         //this.titleLabel.textColor = CBColor.whiteColor.colorByMultiplyingRGB(0.85);
         
         //this.style.boxShadow = "0 2px 2px 0 rgba(0,0,0,0.18)"
@@ -121,11 +106,9 @@ export class CBFlatButton extends CBButton {
     }
     
     
-    
     updateContentForHighlightedState() {
         
         UIButton.prototype.updateContentForHighlightedState.call(this)
-        
         
         
         //this.titleLabel.textColor = CBColor.whiteColor.colorByMultiplyingRGB(0.7);
@@ -133,9 +116,6 @@ export class CBFlatButton extends CBButton {
         //this.style.boxShadow = "0 2px 2px 0 rgba(0,0,0,0.12)"
         
     }
-    
-    
-    
     
     
 }

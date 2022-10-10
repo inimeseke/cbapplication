@@ -18,10 +18,7 @@ onmessage = function (event) {
 }
 
 
-
-
-
-function valueForKeyPath(keyPath, object) {
+function valueForKeyPath(keyPath: string, object: any) {
     
     var keys = keyPath.split(".")
     var currentObject = object
@@ -42,7 +39,7 @@ function valueForKeyPath(keyPath, object) {
             
             var currentArray = currentObject
             
-            currentObject = currentArray.map(function (subObject, index, array) {
+            currentObject = currentArray.map(function (subObject: any, index: any, array: any) {
                 
                 var result = valueForKeyPath(remainingKeyPath, subObject)
                 
@@ -64,54 +61,37 @@ function valueForKeyPath(keyPath, object) {
 }
 
 
-
-
-
-function compare(firstObject, secondObject, sortingInstructions) {
-    
+function compare(
+    firstObject: { [x: string]: any },
+    secondObject: { [x: string]: any },
+    sortingInstructions: string | any[]
+): number {
     
     if (sortingInstructions.length == 0) {
         return 0
     }
     
+    const sortingInstruction = sortingInstructions[0]
     
-    var sortingInstruction = sortingInstructions[0]
-    
-    
-    var directionMultiplier = 1
+    let directionMultiplier = 1
     if (sortingInstruction.direction == "descending") {
         directionMultiplier = -1
     }
     
-    
-    var firstDataString = firstObject[sortingInstruction.keyPath]
-    
-    var secondDataString = secondObject[sortingInstruction.keyPath]
-    
-    
-    
+    const firstDataString = firstObject[sortingInstruction.keyPath]
+    const secondDataString = secondObject[sortingInstruction.keyPath]
     
     if (firstDataString < secondDataString) {
-        
         return -1 * directionMultiplier
-        
     }
     
     if (firstDataString > secondDataString) {
-        
-        return 1 * directionMultiplier
-        
+        return directionMultiplier
     }
     
     if (sortingInstructions.length > 1) {
-        
-        var remainingSortingInstructions = sortingInstructions.slice(1)
-        
-        
-        
+        const remainingSortingInstructions = sortingInstructions.slice(1)
         return compare(firstObject, secondObject, remainingSortingInstructions)
-        
-        
     }
     
     return 0
@@ -119,64 +99,45 @@ function compare(firstObject, secondObject, sortingInstructions) {
 }
 
 
-
-
-
-function sortData(data, sortingInstructions) {
+function sortData(data: any[], sortingInstructions: any[]) {
     
     
-    var sortingObjects = data.map(function (dataItem, index, array) {
+    const sortingObjects = data.map(function (dataItem: any, index: any, array: any) {
         
-        var result = {
+        const result: { _UIKeyValueStringSorterWebWorkerSortingObjectIndex: any } & Record<string, string> = {
             
             "_UIKeyValueStringSorterWebWorkerSortingObjectIndex": index
             
         }
         
         
-        sortingInstructions.forEach(function (instruction, index, instructionsArray) {
+        sortingInstructions.forEach((instruction: { keyPath: string | number }) => {
             
-            result[instruction.keyPath] = JSON.stringify(valueForKeyPath(instruction.keyPath, dataItem) || {})
+            result[instruction.keyPath] = JSON.stringify(valueForKeyPath("" + instruction.keyPath, dataItem) || {})
                 .toLowerCase()
-            
         })
-        
-        
-        
         
         return result
         
-        
     })
     
     
-    var sortedData = sortingObjects.sort(function (firstObject, secondObject) {
-        
-        return compare(firstObject, secondObject, sortingInstructions)
-        
-    })
+    const sortedData = sortingObjects.sort((firstObject: any, secondObject: any) => compare(
+        firstObject,
+        secondObject,
+        sortingInstructions
+    ))
     
-    var sortedIndexes = sortedData.map(function (object, index, array) {
-        
-        var sortedIndex = object._UIKeyValueStringSorterWebWorkerSortingObjectIndex
-        
-        return sortedIndex
-        
-    })
+    const sortedIndexes = sortedData.map((
+        object: { _UIKeyValueStringSorterWebWorkerSortingObjectIndex: any }
+    ) => object._UIKeyValueStringSorterWebWorkerSortingObjectIndex)
     
-    var result = {
+    return {
         
-        "sortedData": sortedIndexes.map(function (sortedIndex, index, array) {
-            
-            return data[sortedIndex]
-            
-        }),
+        "sortedData": sortedIndexes.map(sortedIndex => data[sortedIndex]),
         "sortedIndexes": sortedIndexes
         
     }
-    
-    
-    return result
     
     
 }

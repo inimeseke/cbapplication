@@ -1,55 +1,37 @@
 import { nil } from "./UIObject"
 import { UIPoint } from "./UIPoint"
-import { UIView } from "./UIView"
-
-
-
+import { LooseObject, UIView } from "./UIView"
 
 
 export class UINativeScrollView extends UIView {
     
-    
     animationDuration = 0
     
-    constructor(elementID, viewHTMLElement?) {
+    constructor(elementID?: string, viewHTMLElement?: (HTMLElement & LooseObject) | null | undefined) {
         
         super(elementID, viewHTMLElement)
         
         this.style.cssText = this.style.cssText + "-webkit-overflow-scrolling: touch;"
-        
         this.style.overflow = "auto"
         
-        // this.scrollsX = YES;
-        // this.scrollsY = YES;
-        
-        this.viewHTMLElement.addEventListener("scroll", function (this: UINativeScrollView, event: UIEvent) {
-            
+        this.viewHTMLElement.addEventListener("scroll", () => {
             
             this.didScrollToPosition(new UIPoint(this.viewHTMLElement.scrollLeft, this.viewHTMLElement.scrollTop))
             
             this.broadcastEventInSubtree({
-                
                 name: UIView.broadcastEventName.PageDidScroll,
                 parameters: nil
-                
             })
             
-            
-        }.bind(this))
-        
+        })
         
     }
-    
-    
-    
     
     
     didScrollToPosition(offsetPosition: UIPoint) {
         
         
-        
     }
-    
     
     
     get scrollsX() {
@@ -67,7 +49,6 @@ export class UINativeScrollView extends UIView {
     }
     
     
-    
     get scrollsY() {
         const result = (this.style.overflowY == "scroll")
         return result
@@ -81,7 +62,6 @@ export class UINativeScrollView extends UIView {
             this.style.overflowY = "hidden"
         }
     }
-    
     
     
     get contentOffset() {
@@ -134,18 +114,15 @@ export class UINativeScrollView extends UIView {
     }
     
     
-    
-    
-    
-    scrollYTo(element, to, duration) {
+    scrollYTo(element: HTMLElement & LooseObject, to: number, duration: number) {
         
         duration = duration * 1000
-    
+        
         const start = element.scrollTop
         const change = to - start
         const increment = 10
-    
-        const animateScroll = function (elapsedTime) {
+        
+        const animateScroll = (elapsedTime: number) => {
             elapsedTime += increment
             const position = this.easeInOut(elapsedTime, start, change, duration)
             element.scrollTop = position
@@ -154,20 +131,20 @@ export class UINativeScrollView extends UIView {
                     animateScroll(elapsedTime)
                 }, increment)
             }
-        }.bind(this)
-    
+        }
+        
         animateScroll(0)
     }
     
-    scrollXTo(element, to, duration) {
+    scrollXTo(element: HTMLElement & LooseObject, to: number, duration: number) {
         
         duration = duration * 1000
-    
+        
         const start = element.scrollTop
         const change = to - start
         const increment = 10
-    
-        const animateScroll = function (elapsedTime) {
+        
+        const animateScroll = (elapsedTime: number) => {
             elapsedTime += increment
             const position = this.easeInOut(elapsedTime, start, change, duration)
             element.scrollLeft = position
@@ -176,12 +153,12 @@ export class UINativeScrollView extends UIView {
                     animateScroll(elapsedTime)
                 }, increment)
             }
-        }.bind(this)
-    
+        }
+        
         animateScroll(0)
     }
     
-    easeInOut(currentTime, start, change, duration) {
+    easeInOut(currentTime: number, start: number, change: number, duration: number) {
         currentTime /= duration / 2
         if (currentTime < 1) {
             return change / 2 * currentTime * currentTime + start
@@ -189,9 +166,6 @@ export class UINativeScrollView extends UIView {
         currentTime -= 1
         return -change / 2 * (currentTime * (currentTime - 2) - 1) + start
     }
-    
-    
-    
     
     
 }

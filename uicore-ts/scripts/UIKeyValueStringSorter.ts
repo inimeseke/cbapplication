@@ -1,6 +1,6 @@
-import { IS, IS_NOT, MAKE_ID, NO, UIObject, YES } from "./UIObject"
 // @ts-ignore
 import UIKeyValueStringSorterWebWorker from "./UIKeyValueStringSorterWebWorker.worker.js"
+import { IS, IS_NOT, MAKE_ID, NO, UIObject, YES } from "./UIObject"
 
 
 export interface UIKeyValueStringSorterSortingInstruction {
@@ -15,32 +15,44 @@ export interface UIKeyValueStringSorterSortingInstruction {
 }
 
 
-
-
-
 export class UIKeyValueStringSorter extends UIObject {
     
-    
-    static _sharedWebWorkerHolder = { webWorker: new UIKeyValueStringSorterWebWorker() }
+    static _sharedWebWorkerHolder = {
+        UICore_completionFunctions: {},
+        UICore_isWorking: false,
+        UICore_messagesToPost: undefined,
+        webWorker: new UIKeyValueStringSorterWebWorker()
+    }
     
     static _instanceNumber = -1
     
-    
     _instanceNumber: number
-    
     _isThreadClosed = NO
     
-    private _webWorkerHolder = UIKeyValueStringSorter._sharedWebWorkerHolder
+    private readonly _webWorkerHolder: {
+        webWorker: any;
+        UICore_isWorking: boolean
+        UICore_messagesToPost: any
+        UICore_completionFunctions: Record<string, (
+            filteredData: string[],
+            filteredIndexes: number[],
+            identifier: any
+        ) => void>
+    } = UIKeyValueStringSorter._sharedWebWorkerHolder
     
     
     constructor(useSeparateWebWorkerHolder = NO) {
         
-        
         super()
         
         if (useSeparateWebWorkerHolder) {
-    
-            this._webWorkerHolder = { webWorker: new UIKeyValueStringSorterWebWorker() }
+            
+            this._webWorkerHolder = {
+                webWorker: new UIKeyValueStringSorterWebWorker(),
+                UICore_isWorking: false,
+                UICore_messagesToPost: undefined,
+                UICore_completionFunctions: {}
+            }
             
         }
         
@@ -48,12 +60,12 @@ export class UIKeyValueStringSorter extends UIObject {
         this._instanceNumber = UIKeyValueStringSorter._instanceNumber
         
         if (IS_NOT(this._webWorkerHolder.webWorker.onmessage)) {
-            
-            this._webWorkerHolder.webWorker.onmessage = message => {
     
-                this.isWorkerBusy = NO;
-                this.postNextMessageIfNeeded();
-                
+            this._webWorkerHolder.webWorker.onmessage = (message: { data: { identifier: string; instanceIdentifier: string; sortedData: any[]; sortedIndexes: number[]; }; }) => {
+        
+                this.isWorkerBusy = NO
+                this.postNextMessageIfNeeded()
+        
                 const key = "" + message.data.identifier + message.data.instanceIdentifier
         
                 const completionFunction = this.completionFunctions[key]
@@ -65,27 +77,17 @@ export class UIKeyValueStringSorter extends UIObject {
                     completionFunction(message.data.sortedData, message.data.sortedIndexes, message.data.identifier)
             
                 }
-                
-                delete this.completionFunctions[key];
-                
-                var asd = 1;
+        
+                delete this.completionFunctions[key]
+        
+                var asd = 1
                 
             }
             
         }
         
         
-        
-        
-        
-        
-        
-        
-        
     }
-    
-    
-    
     
     
     get instanceIdentifier() {
@@ -95,54 +97,52 @@ export class UIKeyValueStringSorter extends UIObject {
     }
     
     
-    
-    
     get completionFunctions() {
-        
-        const key = "UICore_completionFunctions";
+    
+        const key = "UICore_completionFunctions"
         var result: {
         
             [x: string]: (sortedData: any[], sortedIndexes: number[], identifier: any) => void
-            
-        } = this._webWorkerHolder[key];
+        
+        } = this._webWorkerHolder[key]
         
         if (IS_NOT(result)) {
-            
-            result = {};
-            this._webWorkerHolder[key] = result;
-            
+    
+            result = {}
+            this._webWorkerHolder[key] = result
+    
         }
-        
-        return result;
+    
+        return result
         
     }
     
     get messagesToPost() {
-        
-        const key = "UICore_messagesToPost";
-        var result: any[] = this._webWorkerHolder[key];
-        
+    
+        const key = "UICore_messagesToPost"
+        var result: any[] = this._webWorkerHolder[key]
+    
         if (IS_NOT(result)) {
-            
-            result = [];
-            this._webWorkerHolder[key] = result;
-            
-        }
         
-        return result;
+            result = []
+            this._webWorkerHolder[key] = result
+        
+        }
+    
+        return result
         
     }
     
     
     set isWorkerBusy(isWorkerBusy: boolean) {
-        
-        this._webWorkerHolder["UICore_isWorking"] = isWorkerBusy;
+    
+        this._webWorkerHolder["UICore_isWorking"] = isWorkerBusy
         
     }
     
     get isWorkerBusy() {
-        
-        return IS(this._webWorkerHolder["UICore_isWorking"]);
+    
+        return IS(this._webWorkerHolder["UICore_isWorking"])
         
     }
     
@@ -150,18 +150,15 @@ export class UIKeyValueStringSorter extends UIObject {
     postNextMessageIfNeeded() {
         
         if (this.messagesToPost.length && IS_NOT(this.isWorkerBusy)) {
-            
-            this._webWorkerHolder.webWorker.postMessage(this.messagesToPost.firstElement);
-            this.messagesToPost.removeElementAtIndex(0);
-            
-            this.isWorkerBusy = YES;
-            
+    
+            this._webWorkerHolder.webWorker.postMessage(this.messagesToPost.firstElement)
+            this.messagesToPost.removeElementAtIndex(0)
+    
+            this.isWorkerBusy = YES
+    
         }
         
     }
-    
-    
-    
     
     
     static dataType = {
@@ -179,9 +176,6 @@ export class UIKeyValueStringSorter extends UIObject {
     }
     
     
-    
-    
-    
     sortData<T>(
         data: T[],
         sortingInstructions: UIKeyValueStringSorterSortingInstruction[],
@@ -196,26 +190,26 @@ export class UIKeyValueStringSorter extends UIObject {
             
         }
     
-        
+    
         const instanceIdentifier = this.instanceIdentifier
         
         const key = "" + identifier + instanceIdentifier
-        
-        this.completionFunctions[key] = completion;
+    
+        this.completionFunctions[key] = completion
         
         
         try {
             
             this.messagesToPost.push({
-                
+    
                 "data": data,
                 "sortingInstructions": sortingInstructions,
                 "identifier": identifier,
                 "instanceIdentifier": instanceIdentifier
-                
-            });
-            
-            this.postNextMessageIfNeeded();
+    
+            })
+    
+            this.postNextMessageIfNeeded()
             
         } catch (exception) {
             
@@ -224,13 +218,7 @@ export class UIKeyValueStringSorter extends UIObject {
         }
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
     sortedData<T>(
@@ -248,23 +236,21 @@ export class UIKeyValueStringSorter extends UIObject {
         }> = new Promise((resolve, reject) => {
         
             this.sortData(data, sortingInstructions, identifier, (sortedData, sortedIndexes, sortedIdentifier) => {
-    
+            
                 if (sortedIdentifier == identifier) {
-    
+                
                     resolve({
-        
+                    
                         sortedData: sortedData,
                         sortedIndexes: sortedIndexes,
                         identifier: sortedIdentifier
-        
+                    
                     })
-        
+                
                 }
                 
                 
-            
             })
-        
         
         
         })
@@ -274,25 +260,18 @@ export class UIKeyValueStringSorter extends UIObject {
     }
     
     
-    
-    
-    
     closeThread() {
         
         this._isThreadClosed = YES
         
         if (this._webWorkerHolder != UIKeyValueStringSorter._sharedWebWorkerHolder) {
-            
-            this._webWorkerHolder.webWorker.terminate();
+    
+            this._webWorkerHolder.webWorker.terminate()
             
         }
         
         
-        
     }
-    
-    
-    
     
     
 }

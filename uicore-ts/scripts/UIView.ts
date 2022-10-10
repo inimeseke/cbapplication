@@ -2,8 +2,9 @@ import { IS_FIREFOX, IS_SAFARI } from "./ClientCheckers"
 import { UIColor } from "./UIColor"
 import { UICore } from "./UICore"
 import "./UICoreExtensions"
+import type { UIDialogView } from "./UIDialogView"
 import { UILocalizedTextObject } from "./UIInterfaces"
-import { FIRST, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST, FIRST_OR_NIL, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, UIObject, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIViewController } from "./UIViewController"
@@ -60,8 +61,7 @@ if (!window.AutoLayout) {
 }
 
 
-
-interface LooseObject {
+export interface LooseObject {
     [key: string]: any
 }
 
@@ -83,36 +83,45 @@ export interface UIViewBroadcastEvent {
 }
 
 
-
-export type UIViewAddControlEventTargetObject<T extends typeof UIView.controlEvent> = {
+export type UIViewAddControlEventTargetObject<T extends typeof UIView> = {
     
-    [K in keyof T]: ((sender: UIView, event: Event) => void) & Partial<UIViewAddControlEventTargetObject<T>>
+    [K in keyof T["controlEvent"]]: ((sender: T, event: Event) => void) & Partial<UIViewAddControlEventTargetObject<T>>
     
 }
 
 
-
+interface Constraint {
+    constant: number;
+    multiplier: number;
+    view1: any;
+    attr2: any;
+    priority: number;
+    attr1: any;
+    view2: any;
+    relation: any
+}
 
 
 export class UIView extends UIObject {
     
     _nativeSelectionEnabled: boolean = YES
-    _shouldLayout: boolean
-    _UITableViewRowIndex: number
+    _shouldLayout?: boolean
+    _UITableViewRowIndex?: number
     _UITableViewReusabilityIdentifier: any
-    _UIViewIntrinsicTemporaryWidth: string
-    _UIViewIntrinsicTemporaryHeight: string
+    _UIViewIntrinsicTemporaryWidth?: string
+    _UIViewIntrinsicTemporaryHeight?: string
     _enabled: boolean = YES
-    _frame: any
+    _frame?: UIRectangle & { zIndex?: number }
     _backgroundColor: UIColor = UIColor.transparentColor
     
-    _viewHTMLElement: HTMLElement & LooseObject
+    _viewHTMLElement!: HTMLElement & LooseObject
     
-    _innerHTMLKey: string
-    _defaultInnerHTML: string
-    _parameters: { [x: string]: (string | UILocalizedTextObject) }
+    // Dynamic innerHTML
+    _innerHTMLKey?: string
+    _defaultInnerHTML?: string
+    _parameters?: { [x: string]: (string | UILocalizedTextObject) }
     
-    _localizedTextObject: UILocalizedTextObject = nil
+    _localizedTextObject?: UILocalizedTextObject = nil
     
     _controlEventTargets: ControlEventTargetsObject = {} //{ "PointerDown": Function[]; "PointerMove": Function[]; "PointerLeave": Function[]; "PointerEnter": Function[]; "PointerUpInside": Function[]; "PointerUp": Function[]; "PointerHover": Function[]; };
     _frameTransform: string
@@ -127,10 +136,13 @@ export class UIView extends UIObject {
     
     pausesPointerEvents: boolean = NO
     stopsPointerEventPropagation: boolean = YES
-    _isPointerInside: boolean
-    _isPointerValid: boolean
-    _initialPointerPosition: UIPoint
-    _hasPointerDragged: boolean
+    pointerDraggingPoint: UIPoint = new UIPoint(0, 0)
+    _previousClientPoint: UIPoint = new UIPoint(0, 0)
+    _isPointerInside?: boolean
+    _isPointerValid?: boolean
+    _isPointerDown = NO
+    _initialPointerPosition?: UIPoint
+    _hasPointerDragged?: boolean
     _pointerDragThreshold = 2
     
     ignoresTouches: boolean = NO
@@ -144,15 +156,14 @@ export class UIView extends UIObject {
     static _viewsToLayout: UIView[] = []
     
     forceIntrinsicSizeZero: boolean = NO
-    _touchEventTime: number
+    _touchEventTime?: number
     
     static _pageScale = 1
     
     constructor(
-        elementID: string = ("UIView" +
-            UIView.nextIndex),
-        viewHTMLElement: HTMLElement & LooseObject = null,
-        elementType: string = null,
+        elementID: string = ("UIView" + UIView.nextIndex),
+        viewHTMLElement: HTMLElement & LooseObject | null = null,
+        elementType: string | null = null,
         initViewData?: any
     ) {
         
@@ -164,103 +175,47 @@ export class UIView extends UIObject {
         this._UIViewIndex = UIView._UIViewIndex
         
         this._styleClasses = []
-        // Object.defineProperty(this, "styleClasses", { get: this.styleClasses, set: this.setStyleClasses });
-        // Object.defineProperty(this, "styleClassName", { get: this.styleClassName });
         
         this._initViewHTMLElement(elementID, viewHTMLElement, elementType)
         
         this.subviews = []
         this.superview = nil
         
-        // Object.defineProperty(this, "elementID", { get: this.elementID });
-        
-        // Object.defineProperty(this, "constraints", { get: this.constraints, set: this.setConstraints });
         this._constraints = []
-        
         this._updateLayoutFunction = nil
-        
-        //Object.defineProperty(this, "backgroundColor", { get: this.backgroundColor, set: this.setBackgroundColor });
-        //this.backgroundColor = "transparent";
-        
-        // Object.defineProperty(this, "alpha", { get: this.alpha, set: this.setAlpha });
-        
-        // Object.defineProperty(this, "frame", { get: this.frame, set: this.setFrame });
-        // Object.defineProperty(this, "bounds", { get: this.bounds, set: this.setBounds });
-        
-        // Object.defineProperty(this, "userInteractionEnabled", { get: this.userInteractionEnabled, set: this.setUserInteractionEnabled });
-        
-        // this._controlEventTargets = {
-        //     "PointerDown": [],
-        //     "PointerMove": [],
-        //     "PointerLeave": [],
-        //     "PointerEnter": [],
-        //     "PointerUpInside": [],
-        //     "PointerUp": [],
-        //     "PointerHover": []
-        // }
         
         
         this._frameTransform = ""
         
-        this.initView(this.viewHTMLElement.id, this.viewHTMLElement, initViewData)
-        
         this._initViewCSSSelectorsIfNeeded()
         
         this._loadUIEvents()
-        
-        
         this.setNeedsLayout()
-        
         
     }
     
     
     static get nextIndex() {
-        
         return UIView._UIViewIndex + 1
-        
     }
     
     static get pageHeight() {
-        
         const body = document.body
         const html = document.documentElement
-        
-        const height = Math.max(
+        return Math.max(
             body.scrollHeight,
             body.offsetHeight,
             html.clientHeight,
             html.scrollHeight,
             html.offsetHeight
         )
-        
-        return height
-        
     }
     
     static get pageWidth() {
-        
         const body = document.body
         const html = document.documentElement
-        
-        const width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-        
-        return width
-        
+        return Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
     }
-    
-    
-    
-    
-    
-    initView(elementID: string, viewHTMLElement: HTMLElement, initViewData?: any) {
-    
-    
-    
-    }
-    
-    
-    
     
     
     centerInContainer() {
@@ -280,14 +235,14 @@ export class UIView extends UIObject {
     }
     
     
-    
-    _initViewHTMLElement(elementID, viewHTMLElement, elementType = "div") {
-        
+    _initViewHTMLElement(
+        elementID: string,
+        viewHTMLElement: (HTMLElement & LooseObject) | null,
+        elementType?: string | null
+    ) {
         
         if (!IS(elementType)) {
-            
             elementType = "div"
-            
         }
         
         if (!IS(viewHTMLElement)) {
@@ -305,33 +260,29 @@ export class UIView extends UIObject {
         }
         
         if (IS(elementID)) {
-            
-            
             this.viewHTMLElement.id = elementID
-            
-            
         }
         
-        
         this.viewHTMLElement.obeyAutolayout = YES
-        
         this.viewHTMLElement.UIView = this
-        
         this.addStyleClass(this.styleClassName)
         
     }
-    
     
     
     set nativeSelectionEnabled(selectable: boolean) {
         this._nativeSelectionEnabled = selectable
         if (!selectable) {
             this.style.cssText = this.style.cssText +
-                " -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
+                " -webkit-touch-callout: none; -webkit-user-select: none; " +
+                "-khtml-user-select: none; -moz-user-select: none; " +
+                "-ms-user-select: none; user-select: none;"
         }
         else {
             this.style.cssText = this.style.cssText +
-                " -webkit-touch-callout: text; -webkit-user-select: text; -khtml-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;"
+                " -webkit-touch-callout: text; -webkit-user-select: text; " +
+                "-khtml-user-select: text; -moz-user-select: text; " +
+                "-ms-user-select: text; user-select: text;"
         }
     }
     
@@ -341,25 +292,15 @@ export class UIView extends UIObject {
     }
     
     
-    
     get styleClassName() {
-        
-        const result = "UICore_UIView_" + this.class.name
-        
-        return result
-        
+        return "UICore_UIView_" + this.class.name
     }
     
-    _initViewCSSSelectorsIfNeeded() {
-        
+    protected _initViewCSSSelectorsIfNeeded() {
         if (!this.class._areViewCSSSelectorsInitialized) {
-            
             this.initViewStyleSelectors()
-            
             this.class._areViewCSSSelectorsInitialized = YES
-            
         }
-        
     }
     
     initViewStyleSelectors() {
@@ -368,20 +309,15 @@ export class UIView extends UIObject {
         
     }
     
-    initStyleSelector(selector, style) {
-        
+    initStyleSelector(selector: string, style: string) {
         const styleRules = UIView.getStyleRules(selector)
-        
         if (!styleRules) {
-            
             UIView.createStyleSelector(selector, style)
-            
         }
-        
     }
     
     
-    createElement(elementID, elementType) {
+    createElement(elementID: string, elementType: string) {
         let result = document.getElementById(elementID)
         if (!result) {
             result = document.createElement(elementType)
@@ -394,9 +330,7 @@ export class UIView extends UIObject {
     }
     
     public get elementID() {
-        
         return this.viewHTMLElement.id
-        
     }
     
     
@@ -408,45 +342,32 @@ export class UIView extends UIObject {
         
         const languageName = UICore.languageService.currentLanguageKey
         const result = UICore.languageService.stringForKey(key, languageName, defaultString, parameters)
-        
-        this.innerHTML = result
+    
+        this.innerHTML = result ?? ""
         
     }
     
     
-    _setInnerHTMLFromKeyIfPossible() {
-        
+    protected _setInnerHTMLFromKeyIfPossible() {
         if (this._innerHTMLKey && this._defaultInnerHTML) {
-            
             this.setInnerHTML(this._innerHTMLKey, this._defaultInnerHTML, this._parameters)
-            
         }
-        
     }
     
-    _setInnerHTMLFromLocalizedTextObjectIfPossible() {
-        
+    protected _setInnerHTMLFromLocalizedTextObjectIfPossible() {
         if (IS(this._localizedTextObject)) {
-            
             this.innerHTML = UICore.languageService.stringForCurrentLanguage(this._localizedTextObject)
-            
         }
-        
     }
     
     
     get localizedTextObject() {
-        
         return this._localizedTextObject
-        
     }
     
-    set localizedTextObject(localizedTextObject: UILocalizedTextObject) {
-        
+    set localizedTextObject(localizedTextObject: UILocalizedTextObject | undefined) {
         this._localizedTextObject = localizedTextObject
-        
         this._setInnerHTMLFromLocalizedTextObjectIfPossible()
-        
     }
     
     
@@ -456,15 +377,10 @@ export class UIView extends UIObject {
     
     
     set innerHTML(innerHTML) {
-        
         if (this.innerHTML != innerHTML) {
-            
             this.viewHTMLElement.innerHTML = FIRST(innerHTML, "")
-            
         }
-        
     }
-    
     
     
     set hoverText(hoverText: string) {
@@ -472,25 +388,20 @@ export class UIView extends UIObject {
     }
     
     get hoverText() {
-        return this.viewHTMLElement.getAttribute("title")
+        return this.viewHTMLElement.getAttribute("title") ?? ""
     }
     
     
     get scrollSize() {
-        
-        const result = new UIRectangle(0, 0, this.viewHTMLElement.scrollHeight, this.viewHTMLElement.scrollWidth)
-        
-        return result
-        
+        return new UIRectangle(0, 0, this.viewHTMLElement.scrollHeight, this.viewHTMLElement.scrollWidth)
     }
-    
     
     
     get dialogView(): UIDialogView {
         if (!IS(this.superview)) {
             return nil
         }
-        if (!(this["_isAUIDialogView"])) {
+        if (!((this as any)["_isAUIDialogView"])) {
             return this.superview.dialogView
         }
         return this as any as UIDialogView
@@ -520,38 +431,42 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
     public get tabIndex(): number {
-        
         return Number(this.viewHTMLElement.getAttribute("tabindex"))
-        
     }
-    
     
     public set tabIndex(index: number) {
-        
         this.viewHTMLElement.setAttribute("tabindex", "" + index)
-        
     }
     
     
-    
+    get propertyDescriptors(): { object: object; name: string }[] {
+        let result: any[] = []
+        this.allSuperviews.forEach(view => {
+            FIRST_OR_NIL(view.viewController).forEach((value, key, stopLooping) => {
+                if (this == value) {
+                    result.push({ object: view.viewController, name: key })
+                }
+            })
+            view.forEach((value, key, stopLooping) => {
+                if (this == value) {
+                    result.push({ object: view, name: key })
+                }
+            })
+        })
+        return result
+    }
     
     
     get styleClasses() {
-        
         return this._styleClasses
-        
     }
     
     set styleClasses(styleClasses) {
-        
         this._styleClasses = styleClasses
-        
     }
     
-    hasStyleClass(styleClass) {
+    hasStyleClass(styleClass: string) {
         
         // This is for performance reasons
         if (!IS(styleClass)) {
@@ -565,8 +480,6 @@ export class UIView extends UIObject {
         return NO
         
     }
-    
-    
     
     addStyleClass(styleClass: string) {
         
@@ -589,14 +502,10 @@ export class UIView extends UIObject {
         
         const index = this.styleClasses.indexOf(styleClass)
         if (index > -1) {
-            
             this.styleClasses.splice(index, 1)
-            
         }
         
-        
     }
-    
     
     
     static findViewWithElementID(elementID: string): UIView {
@@ -605,120 +514,153 @@ export class UIView extends UIObject {
             return nil
         }
         // @ts-ignore
-        const result = viewHTMLElement.UIView
-        return result
+        return viewHTMLElement.UIView
     }
     
     
-    
-    
-    static createStyleSelector(selector, style) {
+    static createStyleSelector(selector: string, style: string) {
         
         return
         
-        // @ts-ignore
-        if (!document.styleSheets) {
-            return
-        }
-        if (document.getElementsByTagName("head").length == 0) {
-            return
-        }
-        
-        var styleSheet
-        var mediaType
-        
-        if (document.styleSheets.length > 0) {
-            for (var i = 0, l: any = document.styleSheets.length; i < l; i++) {
-                if (document.styleSheets[i].disabled) {
-                    continue
-                }
-                const media = document.styleSheets[i].media
-                mediaType = typeof media
-                
-                if (mediaType === "string") {
-                    if (media as any === "" || ((media as any).indexOf("screen") !== -1)) {
-                        styleSheet = document.styleSheets[i]
-                    }
-                }
-                else if (mediaType == "object") {
-                    if (media.mediaText === "" || (media.mediaText.indexOf("screen") !== -1)) {
-                        styleSheet = document.styleSheets[i]
-                    }
-                }
-                
-                if (typeof styleSheet !== "undefined") {
-                    break
-                }
-            }
-        }
-        
-        if (typeof styleSheet === "undefined") {
-            const styleSheetElement = document.createElement("style")
-            styleSheetElement.type = "text/css"
-            document.getElementsByTagName("head")[0].appendChild(styleSheetElement)
-            
-            for (i = 0; i < document.styleSheets.length; i++) {
-                if (document.styleSheets[i].disabled) {
-                    continue
-                }
-                styleSheet = document.styleSheets[i]
-            }
-            
-            mediaType = typeof styleSheet.media
-        }
-        
-        if (mediaType === "string") {
-            for (var i = 0, l = styleSheet.rules.length; i < l; i++) {
-                if (styleSheet.rules[i].selectorText && styleSheet.rules[i].selectorText.toLowerCase() ==
-                    selector.toLowerCase()) {
-                    styleSheet.rules[i].style.cssText = style
-                    return
-                }
-            }
-            styleSheet.addRule(selector, style)
-        }
-        else if (mediaType === "object") {
-            
-            var styleSheetLength = 0
-            
-            try {
-                
-                styleSheetLength = (styleSheet.cssRules) ? styleSheet.cssRules.length : 0
-                
-            } catch (error) {
-                
-            }
-            
-            
-            for (var i = 0; i < styleSheetLength; i++) {
-                if (styleSheet.cssRules[i].selectorText && styleSheet.cssRules[i].selectorText.toLowerCase() ==
-                    selector.toLowerCase()) {
-                    styleSheet.cssRules[i].style.cssText = style
-                    return
-                }
-            }
-            styleSheet.insertRule(selector + "{" + style + "}", styleSheetLength)
-        }
+        // // @ts-ignore
+        // if (!document.styleSheets) {
+        //     return
+        // }
+        // if (document.getElementsByTagName("head").length == 0) {
+        //     return
+        // }
+        //
+        // let styleSheet
+        // let mediaType
+        //
+        // if (document.styleSheets.length > 0) {
+        //     for (var i = 0, l: any = document.styleSheets.length; i < l; i++) {
+        //         if (document.styleSheets[i].disabled) {
+        //             continue
+        //         }
+        //         const media = document.styleSheets[i].media
+        //         mediaType = typeof media
+        //
+        //         if (mediaType === "string") {
+        //             if (media as any === "" || ((media as any).indexOf("screen") !== -1)) {
+        //                 styleSheet = document.styleSheets[i]
+        //             }
+        //         }
+        //         else if (mediaType == "object") {
+        //             if (media.mediaText === "" || (media.mediaText.indexOf("screen") !== -1)) {
+        //                 styleSheet = document.styleSheets[i]
+        //             }
+        //         }
+        //
+        //         if (typeof styleSheet !== "undefined") {
+        //             break
+        //         }
+        //     }
+        // }
+        //
+        // if (typeof styleSheet === "undefined") {
+        //     const styleSheetElement = document.createElement("style")
+        //     styleSheetElement.type = "text/css"
+        //     document.getElementsByTagName("head")[0].appendChild(styleSheetElement)
+        //
+        //     for (i = 0; i < document.styleSheets.length; i++) {
+        //         if (document.styleSheets[i].disabled) {
+        //             continue
+        //         }
+        //         styleSheet = document.styleSheets[i]
+        //     }
+        //
+        //     mediaType = typeof styleSheet.media
+        // }
+        //
+        // if (mediaType === "string") {
+        //     for (var i = 0, l = styleSheet.rules.length; i < l; i++) {
+        //         if (styleSheet.rules[i].selectorText && styleSheet.rules[i].selectorText.toLowerCase() ==
+        //             selector.toLowerCase()) {
+        //             styleSheet.rules[i].style.cssText = style
+        //             return
+        //         }
+        //     }
+        //     styleSheet.addRule(selector, style)
+        // }
+        // else if (mediaType === "object") {
+        //
+        //     var styleSheetLength = 0
+        //
+        //     try {
+        //
+        //         styleSheetLength = (styleSheet.cssRules) ? styleSheet.cssRules.length : 0
+        //
+        //     } catch (error) {
+        //
+        //     }
+        //
+        //
+        //     for (var i = 0; i < styleSheetLength; i++) {
+        //         if (styleSheet.cssRules[i].selectorText && styleSheet.cssRules[i].selectorText.toLowerCase() ==
+        //             selector.toLowerCase()) {
+        //             styleSheet.cssRules[i].style.cssText = style
+        //             return
+        //         }
+        //     }
+        //     styleSheet.insertRule(selector + "{" + style + "}", styleSheetLength)
+        // }
     }
     
-    static getStyleRules(selector) {
-        var selector = selector.toLowerCase()
-        for (var i = 0; i < document.styleSheets.length; i++) {
-            const styleSheet = document.styleSheets[i] as any
-            var styleRules
-            
-            try {
-                
-                styleRules = styleSheet.cssRules ? styleSheet.cssRules : styleSheet.rules
-                
-            } catch (error) {
-                
+    
+    static getStyleRules(selector: string) {
+        
+        // https://stackoverflow.com/questions/324486/how-do-you-read-css-rule-values-with-javascript
+        //Inside closure so that the inner functions don't need regeneration on every call.
+        const getCssClasses = (function () {
+            function normalize(str: string) {
+                if (!str) {
+                    return ""
+                }
+                str = String(str).replace(/\s*([>~+])\s*/g, " $1 ")  //Normalize symbol spacing.
+                return str.replace(/(\s+)/g, " ").trim()           //Normalize whitespace
             }
             
-            return styleRules
-        }
+            function split(str: string, on: string) {               //Split, Trim, and remove empty elements
+                return str.split(on).map(x => x.trim()).filter(x => x)
+            }
+            
+            function containsAny(selText: string | any[], ors: any[]) {
+                return selText ? ors.some(x => selText.indexOf(x) >= 0) : false
+            }
+            
+            return function (selector: string) {
+                const logicalORs = split(normalize(selector), ",")
+                const sheets = Array.from(window.document.styleSheets)
+                const ruleArrays = sheets.map((x) => Array.from(x.rules || x.cssRules || []))
+                const allRules = ruleArrays.reduce((all, x) => all.concat(x), [])
+                // @ts-ignore
+                return allRules.filter((x) => containsAny(normalize(x.selectorText), logicalORs))
+            }
+        })()
+        
+        return getCssClasses(selector)
+        
+        // selector = selector.toLowerCase()
+        // let styleRules
+        // for (let i = 0; i < document.styleSheets.length; i++) {
+        //     const styleSheet = document.styleSheets[i] as any
+        //
+        //     try {
+        //
+        //         styleRules = styleSheet.cssRules ? styleSheet.cssRules : styleSheet.rules
+        //
+        //     } catch (error) {
+        //
+        //         console.log(error)
+        //
+        //     }
+        //
+        // }
+        //
+        // return styleRules
+        
     }
-    
     
     
     get style() {
@@ -762,13 +704,8 @@ export class UIView extends UIObject {
     }
     
     static get pageScale() {
-        
         return UIView._pageScale
-        
     }
-    
-    
-    
     
     
     calculateAndSetViewFrame() {
@@ -780,59 +717,38 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
-    public get frame(): UIRectangle {
-        
-        // var result = new UIRectangle(1 * this.viewHTMLElement.offsetLeft, 1 * this.viewHTMLElement.offsetTop, 1 * this.viewHTMLElement.offsetHeight, 1 * this.viewHTMLElement.offsetWidth);
-        
-        // result.zIndex = 1 * this.style.zIndex;
-        
-        var result = this._frame
-        
+    public get frame() {
+        let result: UIRectangle & { zIndex?: number } = this._frame?.copy() as any
         if (!result) {
-            
-            result = new UIRectangle(1 * this.viewHTMLElement.offsetLeft, 1 * this.viewHTMLElement.offsetTop, 1 *
-                this.viewHTMLElement.offsetHeight, 1 * this.viewHTMLElement.offsetWidth)
+            result = new UIRectangle(
+                this.viewHTMLElement.offsetLeft,
+                this.viewHTMLElement.offsetTop,
+                this.viewHTMLElement.offsetHeight,
+                this.viewHTMLElement.offsetWidth
+            ) as any
             result.zIndex = 0
-            
         }
-        
-        return result.copy()
-        
+        return result
     }
     
-    public set frame(rectangle: UIRectangle) {
-        
+    public set frame(rectangle: UIRectangle & { zIndex?: number }) {
         if (IS(rectangle)) {
-            this.setFrame(rectangle)
+            this.setFrame(rectangle, rectangle.zIndex)
         }
-        
     }
     
-    setFrame(rectangle, zIndex = 0, performUncheckedLayout = NO) {
+    setFrame(rectangle: UIRectangle & { zIndex?: number }, zIndex = 0, performUncheckedLayout = NO) {
         
-        
-        const frame = this._frame || new UIRectangle(nil, nil, nil, nil)
+        const frame: (UIRectangle & { zIndex?: number }) = this._frame || new UIRectangle(nil, nil, nil, nil) as any
         
         if (zIndex != undefined) {
             rectangle.zIndex = zIndex
         }
         this._frame = rectangle
         
-        // This is useless because frames are copied
-        // frame.didChange = function () {
-        //     // Do nothing
-        // }
-        // rectangle.didChange = function () {
-        //     this.frame = rectangle;
-        // }.bind(this);
-        
-        if (frame && frame.isEqualTo(rectangle) && !performUncheckedLayout) {
+        if (frame && frame.isEqualTo(rectangle) && frame.zIndex == rectangle.zIndex && !performUncheckedLayout) {
             return
         }
-        
         
         UIView._setAbsoluteSizeAndPosition(
             this.viewHTMLElement,
@@ -843,62 +759,37 @@ export class UIView extends UIObject {
             rectangle.zIndex
         )
         
-        
         if (frame.height != rectangle.height || frame.width != rectangle.width || performUncheckedLayout) {
-            
             this.setNeedsLayout()
-            
             this.boundsDidChange()
-            
-            //this.layoutSubviews();
-            
         }
         
-        
-        
     }
-    
     
     
     get bounds() {
-        
-        var result: UIRectangle
-        
-        // if (IS_NOT(this._frame) && this.style.height == "" && this.style.width  == "" && this.style.left == "" && this.style.right == "" && this.style.bottom == "" && this.style.top == "") {
-        
-        //     result = new UIRectangle(0, 0, 0, 0)
-        
-        // }
-        // else
+        let result: UIRectangle
         if (IS_NOT(this._frame)) {
-            
-            result = new UIRectangle(0, 0, 1 * this.viewHTMLElement.offsetHeight, 1 * this.viewHTMLElement.offsetWidth)
-            
+            result = new UIRectangle(0, 0, this.viewHTMLElement.offsetHeight, this.viewHTMLElement.offsetWidth)
         }
         else {
-            
             result = this.frame.copy()
-            
             result.x = 0
             result.y = 0
-            
         }
-        
         return result
-        
     }
     
     set bounds(rectangle) {
-        
         const frame = this.frame
-        
-        this.frame = new UIRectangle(frame.topLeft.x, frame.topLeft.y, rectangle.height, rectangle.width)
-        
+        const newFrame = new UIRectangle(frame.topLeft.x, frame.topLeft.y, rectangle.height, rectangle.width)
+        // @ts-ignore
+        newFrame.zIndex = frame.zIndex
+        this.frame = newFrame
     }
     
     
     boundsDidChange() {
-        
         
         
     }
@@ -1038,9 +929,6 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     setBorder(
         radius: number | string = nil,
         width: number | string = 1,
@@ -1059,56 +947,41 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     setStyleProperty(propertyName: string, value?: number | string) {
         
-        
         try {
-            
+    
             if (IS_NIL(value)) {
                 return
             }
             if (IS_DEFINED(value) && (value as Number).isANumber) {
                 value = "" + (value as number).integerValue + "px"
             }
+    
+            // @ts-ignore
             this.style[propertyName] = value
-            
+    
         } catch (exception) {
             
             console.log(exception)
             
         }
         
-        
     }
-    
     
     
     get userInteractionEnabled() {
-        
-        const result = (this.style.pointerEvents != "none")
-        
-        return result
-        
+        return (this.style.pointerEvents != "none")
     }
     
     set userInteractionEnabled(userInteractionEnabled) {
-        
         if (userInteractionEnabled) {
-            
             this.style.pointerEvents = ""
-            
         }
         else {
-            
             this.style.pointerEvents = "none"
-            
         }
-        
     }
-    
     
     
     get backgroundColor() {
@@ -1116,13 +989,9 @@ export class UIView extends UIObject {
     }
     
     set backgroundColor(backgroundColor: UIColor) {
-        
         this._backgroundColor = backgroundColor
-        
         this.style.backgroundColor = backgroundColor.stringValue
-        
     }
-    
     
     
     get alpha() {
@@ -1134,9 +1003,6 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     static animateViewOrViewsWithDurationDelayAndFunction(
         viewOrViews: UIView | HTMLElement | UIView[] | HTMLElement[],
         duration: number,
@@ -1146,49 +1012,45 @@ export class UIView extends UIObject {
         transitioncompletionFunction: Function
     ) {
         
-        
         function callTransitioncompletionFunction() {
-            
             (transitioncompletionFunction || nil)();
-            
-            (viewOrViews as UIView[]).forEach(function (view, index, array) {
-                
-                view.animationDidFinish()
-                
+            (viewOrViews as UIView[] | HTMLElement[]).forEach(view => {
+                if (view instanceof UIView) {
+                    view.animationDidFinish()
+                }
             })
-            
         }
-        
         
         if (IS_FIREFOX) {
-            
+    
             // Firefox does not fire the transition completion event properly
             new UIObject().performFunctionWithDelay(delay + duration, callTransitioncompletionFunction)
-            
-            
-            
+    
         }
-        
-        
+    
+    
         if (!(viewOrViews instanceof Array)) {
             viewOrViews = [viewOrViews] as any
         }
-        
-        const transitionStyles = []
-        const transitionDurations = []
-        const transitionDelays = []
-        const transitionTimings = []
-        
+    
+        const transitionStyles: any[] = []
+        const transitionDurations: any[] = []
+        const transitionDelays: any[] = []
+        const transitionTimings: any[] = []
+    
+        function isUIView(view: any): view is UIView {
+            return IS(view.viewHTMLElement)
+        }
+    
         for (var i = 0; i < (viewOrViews as any).length; i++) {
-            
-            var view = viewOrViews[i]
-            
-            if (view.viewHTMLElement) {
-                
+        
+            let view = (viewOrViews as UIView[] | HTMLElement[])[i]
+        
+            if (isUIView(view)) {
                 view = view.viewHTMLElement
-                
             }
-            
+        
+            // @ts-ignore
             view.addEventListener("transitionend", transitionDidFinish, true)
             
             transitionStyles.push(view.style.transition)
@@ -1203,24 +1065,19 @@ export class UIView extends UIObject {
             
         }
         
-        
-        
         transformFunction()
         
-        
         const transitionObject = {
-            
             "finishImmediately": finishTransitionImmediately,
             "didFinish": transitionDidFinishManually,
             "views": viewOrViews,
             "registrationTime": Date.now()
-            
         }
         
         function finishTransitionImmediately() {
             for (var i = 0; i < (viewOrViews as any).length; i++) {
-                var view = viewOrViews[i]
-                if (view.viewHTMLElement) {
+                let view = (viewOrViews as UIView[] | HTMLElement[])[i]
+                if (isUIView(view)) {
                     view = view.viewHTMLElement
                 }
                 view.style.transition = "all"
@@ -1232,13 +1089,13 @@ export class UIView extends UIObject {
                 view.style.transitionTimingFunction = transitionTimings[i]
             }
         }
-        
-        function transitionDidFinish(event) {
-            var view = event.srcElement
+    
+        function transitionDidFinish(this: HTMLElement, event: { srcElement: HTMLElement | UIView }) {
+            let view = event.srcElement
             if (!view) {
                 return
             }
-            if (view.viewHTMLElement) {
+            if (isUIView(view)) {
                 view = view.viewHTMLElement
             }
             view.style.transition = transitionStyles[i]
@@ -1247,29 +1104,30 @@ export class UIView extends UIObject {
             view.style.transitionTimingFunction = transitionTimings[i]
             
             callTransitioncompletionFunction()
-            
+        
+            // @ts-ignore
             view.removeEventListener("transitionend", transitionDidFinish, true)
             
         }
         
         function transitionDidFinishManually() {
-            for (var i = 0; i < (viewOrViews as any).length; i++) {
-                
-                var view = viewOrViews[i]
-                
-                if (view.viewHTMLElement) {
+            for (let i = 0; i < (viewOrViews as any).length; i++) {
+        
+                let view = (viewOrViews as UIView[] | HTMLElement[])[i]
+        
+                if (isUIView(view)) {
                     view = view.viewHTMLElement
                 }
-                
+        
                 view.style.transition = transitionStyles[i]
                 view.style.transitionDuration = transitionDurations[i]
                 view.style.transitionDelay = transitionDelays[i]
                 view.style.transitionTimingFunction = transitionTimings[i]
-                
+        
+                // @ts-ignore
                 view.removeEventListener("transitionend", transitionDidFinish, true)
                 
             }
-            
             
             
         }
@@ -1279,17 +1137,10 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     animationDidFinish() {
-        
-        
-        
+    
+    
     }
-    
-    
-    
     
     
     static _transformAttribute = (("transform" in document.documentElement.style) ? "transform" : undefined) ||
@@ -1298,27 +1149,17 @@ export class UIView extends UIObject {
         (("-ms-transform" in document.documentElement.style) ? "-ms-transform" : "undefined") ||
         (("-o-transform" in document.documentElement.style) ? "-o-transform" : "undefined")
     
-    static _setAbsoluteSizeAndPosition(element, left, top, width, height, zIndex = 0) {
-        
-        // if (!UIView._transformAttribute) {
-        
-        //     UIView._transformAttribute = (('transform' in document.documentElement.style) ? 'transform' : undefined);
-        //     UIView._transformAttribute = UIView._transformAttribute || (('-webkit-transform' in document.documentElement.style) ? '-webkit-transform' : 'undefined');
-        //     UIView._transformAttribute = UIView._transformAttribute || (('-moz-transform' in document.documentElement.style) ? '-moz-transform' : 'undefined');
-        //     UIView._transformAttribute = UIView._transformAttribute || (('-ms-transform' in document.documentElement.style) ? '-ms-transform' : 'undefined');
-        //     UIView._transformAttribute = UIView._transformAttribute || (('-o-transform' in document.documentElement.style) ? '-o-transform' : 'undefined');
-        
-        // }
+    static _setAbsoluteSizeAndPosition(
+        element: HTMLElement & LooseObject,
+        left: number,
+        top: number,
+        width: string | number,
+        height: string | number,
+        zIndex = 0
+    ) {
         
         if (!IS(element) || !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) {
             return
-        }
-        
-        if (element.id == "mainView") {
-            
-            
-            var asd = 1
-            
         }
         
         if (IS(height)) {
@@ -1329,10 +1170,10 @@ export class UIView extends UIObject {
             width = width.integerValue + "px"
         }
         
-        var str = element.style.cssText
+        let str = element.style.cssText
         
-        const frameTransform = UIView._transformAttribute + ": translate3d(" + (1 * left).integerValue + "px, " +
-            (1 * top).integerValue + "px, " + zIndex.integerValue + "px)"
+        const frameTransform = UIView._transformAttribute + ": translate3d(" + (left).integerValue + "px, " +
+            (top).integerValue + "px, 0px)"
         
         if (element.UIView) {
             str = str + frameTransform + ";"
@@ -1341,25 +1182,25 @@ export class UIView extends UIObject {
             element.UIView._frameTransform = frameTransform
         }
         
-        if (height == nil) {
+        if (IS_NIL(height)) {
             str = str + " height: unset;"
         }
         else {
             str = str + " height:" + height + ";"
         }
         
-        if (width == nil) {
+        if (IS_NIL(width)) {
             str = str + " width: unset;"
         }
         else {
             str = str + " width:" + width + ";"
         }
         
-        if (element.id == "mainView") {
-            
-            
-            var asd = 1
-            
+        if (IS_NIL(zIndex)) {
+            str = str + " z-index: unset;"
+        }
+        else {
+            str = str + " z-index:" + zIndex + ";"
         }
         
         element.style.cssText = element.style.cssText + str
@@ -1367,9 +1208,11 @@ export class UIView extends UIObject {
     }
     
     
-    
-    static performAutoLayout(parentElement, visualFormatArray, constraintsArray) {
-        
+    static performAutoLayout(
+        parentElement: HTMLElement & LooseObject,
+        visualFormatArray: string | any[] | null,
+        constraintsArray: string | any[]
+    ) {
         
         const view = new AutoLayout.View()
         
@@ -1381,7 +1224,7 @@ export class UIView extends UIObject {
             view.addConstraints(constraintsArray)
         }
         
-        const elements = {}
+        const elements: Record<string, HTMLElement> = {}
         for (var key in view.subViews) {
             
             if (!view.subViews.hasOwnProperty(key)) {
@@ -1399,27 +1242,18 @@ export class UIView extends UIObject {
                 //console.log("Error occurred " + error);
                 
             }
-            
-            if (element && !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) {
-            
-            
-            
-            }
-            else if (element) {
-                
+    
+            if (!(element && !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) && element) {
                 element.className += element.className ? " abs" : "abs"
                 elements[key] = element
-                
             }
             
         }
         
-        var parentUIView = nil
+        let parentUIView = nil
         
         if (parentElement.UIView) {
-            
             parentUIView = parentElement.UIView
-            
         }
         
         const updateLayout = function () {
@@ -1563,34 +1397,13 @@ export class UIView extends UIObject {
     }
     
     
-    
     applyClassesAndStyles() {
-        
-        
-        
-        //var classesString = "";
-        
-        for (var i = 0; i < this.styleClasses.length; i++) {
-            
+        for (let i = 0; i < this.styleClasses.length; i++) {
             const styleClass = this.styleClasses[i]
-            
             if (styleClass) {
-                
                 this.viewHTMLElement.classList.add(styleClass)
-                
             }
-            
-            
-            
-            //classesString = classesString + " " + styleClass;
-    
         }
-    
-    
-        //this.viewHTMLElement.className = classesString;
-    
-    
-    
     }
     
     willLayoutSubviews() {
@@ -1613,27 +1426,31 @@ export class UIView extends UIObject {
         this._constraints = constraints
     }
     
-    addConstraint(constraint) {
-        
+    addConstraint(constraint: any) {
         this.constraints.push(constraint)
-        
     }
     
     
-    
-    addConstraintsWithVisualFormat(visualFormatArray) {
-        
+    addConstraintsWithVisualFormat(visualFormatArray: string[]) {
         this.constraints = this.constraints.concat(AutoLayout.VisualFormat.parse(
             visualFormatArray,
             { extended: true }
         ))
-        
     }
     
-    static constraintWithView(view, attribute, relation, toView, toAttribute, multiplier, constant, priority) {
+    static constraintWithView(
+        view: { isKindOfClass: (arg0: typeof UIView) => any; viewHTMLElement: any; id: any },
+        attribute: any,
+        relation: any,
+        toView: { isKindOfClass: any; viewHTMLElement: any; id: any },
+        toAttribute: any,
+        multiplier: number,
+        constant: number,
+        priority: number
+    ): Constraint {
         
-        var UIViewObject = nil
-        var viewID = null
+        let UIViewObject = nil
+        let viewID = null
         if (view) {
             if (view.isKindOfClass && view.isKindOfClass(UIView)) {
                 UIViewObject = view
@@ -1642,8 +1459,8 @@ export class UIView extends UIObject {
             viewID = view.id
         }
         
-        var toUIViewObject = nil
-        var toViewID = null
+        let toUIViewObject = nil
+        let toViewID = null
         if (toView) {
             if (toView.isKindOfClass && view.isKindOfClass(UIView)) {
                 toUIViewObject = toView
@@ -1695,18 +1512,13 @@ export class UIView extends UIObject {
     }
     
     
-    
-    subviewWithID(viewID) {
-        
-        
-        var resultHTMLElement = nil
+    subviewWithID(viewID: string): UIView {
+        let resultHTMLElement = nil
         
         try {
-            
             resultHTMLElement = this.viewHTMLElement.querySelector("#" + viewID)
-            
         } catch (error) {
-        
+            console.log(error)
         }
         
         if (resultHTMLElement && resultHTMLElement.UIView) {
@@ -1716,32 +1528,18 @@ export class UIView extends UIObject {
     }
     
     
-    
     rectangleContainingSubviews() {
-        
         const center = this.bounds.center
-        
-        var result = new UIRectangle(center.x, center.y, 0, 0)
-        
-        for (var i = 0; i < this.subviews.length; i++) {
-            
+        let result = new UIRectangle(center.x, center.y, 0, 0)
+        for (let i = 0; i < this.subviews.length; i++) {
             const subview = this.subviews[i]
-            
-            var frame = subview.frame
-            
+            let frame = subview.frame
             const rectangleContainingSubviews = subview.rectangleContainingSubviews()
-            
             frame = frame.concatenateWithRectangle(rectangleContainingSubviews)
-            
             result = result.concatenateWithRectangle(frame)
-            
         }
-        
         return result
-        
     }
-    
-    
     
     
     hasSubview(view: UIView) {
@@ -1750,8 +1548,8 @@ export class UIView extends UIObject {
         if (!IS(view)) {
             return NO
         }
-        
-        for (var i = 0; i < this.subviews.length; i++) {
+    
+        for (let i = 0; i < this.subviews.length; i++) {
             const subview = this.subviews[i]
             if (subview == view) {
                 return YES
@@ -1791,10 +1589,8 @@ export class UIView extends UIObject {
             if (this.superview && this.isMemberOfViewTree) {
         
                 view.broadcastEventInSubtree({
-            
                     name: UIView.broadcastEventName.AddedToViewTree,
                     parameters: nil
-            
                 })
                 
             }
@@ -1806,9 +1602,7 @@ export class UIView extends UIObject {
     }
     
     addSubviews(views: UIView[]) {
-        views.forEach(function (this: UIView, view: UIView, index, array) {
-            this.addSubview(view)
-        }, this)
+        views.forEach(view => this.addSubview(view))
     }
     
     
@@ -1819,21 +1613,14 @@ export class UIView extends UIObject {
             const bottomView = this.superview.subviews.firstElement
             
             if (bottomView == this) {
-                
                 return
-                
             }
             
             this.superview.subviews.removeElement(this)
-            
             this.superview.subviews.insertElementAtIndex(0, this)
-            
             this.superview.viewHTMLElement.insertBefore(this.viewHTMLElement, bottomView.viewHTMLElement)
             
-            
         }
-        
-        
         
     }
     
@@ -1844,45 +1631,29 @@ export class UIView extends UIObject {
             const topView = this.superview.subviews.lastElement
             
             if (topView == this) {
-                
                 return
-                
             }
             
             this.superview.subviews.removeElement(this)
-            
             this.superview.subviews.push(this)
-            
             this.superview.viewHTMLElement.appendChild(this.viewHTMLElement)
             
-            
         }
-        
-        
         
     }
     
     
     removeFromSuperview() {
         if (IS(this.superview)) {
-            
-            this.forEachViewInSubtree(function (view) {
-                
-                view.blur()
-                
-            })
-            
+            this.forEachViewInSubtree(view => view.blur())
             const index = this.superview.subviews.indexOf(this)
             if (index > -1) {
                 this.superview.subviews.splice(index, 1)
                 this.superview.viewHTMLElement.removeChild(this.viewHTMLElement)
                 this.superview = nil
-                
                 this.broadcastEventInSubtree({
-                    
                     name: UIView.broadcastEventName.RemovedFromViewTree,
                     parameters: nil
-                    
                 })
                 
             }
@@ -1893,23 +1664,16 @@ export class UIView extends UIObject {
     willAppear() {
         
         
-        
     }
-    
     
     
     willMoveToSuperview(superview: UIView) {
-        
         this._setInnerHTMLFromKeyIfPossible()
-        
         this._setInnerHTMLFromLocalizedTextObjectIfPossible()
-        
     }
     
     didMoveToSuperview(superview: UIView) {
-        
         this.superview = superview
-        
     }
     
     wasAddedToViewTree() {
@@ -1921,8 +1685,8 @@ export class UIView extends UIObject {
     }
     
     get isMemberOfViewTree() {
-        var element = this.viewHTMLElement
-        for (var i = 0; element; i = i) {
+        let element: HTMLElement & LooseObject | null = this.viewHTMLElement
+        for (let i = 0; element; i = i) {
             if (element.parentElement && element.parentElement == document.body) {
                 return YES
             }
@@ -1934,8 +1698,8 @@ export class UIView extends UIObject {
     
     get allSuperviews() {
         const result = []
-        var view: UIView = this
-        for (var i = 0; IS(view); i = i) {
+        let view: UIView = this
+        for (let i = 0; IS(view); i = i) {
             result.push(view)
             view = view.superview
         }
@@ -1944,45 +1708,32 @@ export class UIView extends UIObject {
     
     
     setNeedsLayoutOnAllSuperviews() {
-        
-        this.allSuperviews.reverse().forEach(function (view: UIView, index, array) {
-            
-            view.setNeedsLayout()
-            
-        })
-        
+        this.allSuperviews.reverse().everyElement.setNeedsLayout()
     }
     
     
     setNeedsLayoutUpToRootView() {
-        
         this.setNeedsLayoutOnAllSuperviews()
-        
         this.setNeedsLayout()
-        
     }
     
     
     focus() {
-        
         this.viewHTMLElement.focus()
-        
     }
     
     
     blur() {
-        
         this.viewHTMLElement.blur()
-        
     }
     
     
+    static pointerUpInsideCalled(view: UIView) {
+    
+    }
     
     
-    
-    _loadUIEvents() {
-        
-        //this.viewHTMLElement = nil;
+    protected _loadUIEvents() {
         
         
         const isTouchEventClassDefined: boolean = NO || (window as any).TouchEvent
@@ -2009,7 +1760,7 @@ export class UIView extends UIObject {
             
         }
         
-        const onMouseDown = (event) => {
+        const onMouseDown = (event: MouseEvent) => {
             
             if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
                 ((this.ignoresMouse || (IS(this._touchEventTime) && (Date.now() - this._touchEventTime) > 500)) &&
@@ -2021,39 +1772,41 @@ export class UIView extends UIObject {
             
             this._isPointerInside = YES
             this._isPointerValid = YES
+            this._isPointerDown = YES
             this._initialPointerPosition = new UIPoint(event.clientX, event.clientY)
             if (isTouchEventClassDefined && event instanceof TouchEvent) {
-                
                 this._touchEventTime = Date.now()
-                
                 this._initialPointerPosition = new UIPoint(event.touches[0].clientX, event.touches[0].clientY)
-                
                 if (event.touches.length > 1) {
-                    
                     onTouchCancel(event)
-                    
                     return
-                    
                 }
-                
-                
             }
             else {
-                
                 this._touchEventTime = nil
-                
                 pauseEvent(event)
-                
             }
             
-            
             this._hasPointerDragged = NO
+            
+            window.addEventListener("mousemove", onMouseMove, true)
+            window.addEventListener("mouseup", (event) => {
+                
+                window.removeEventListener("mousemove", onMouseMove, true)
+                onmouseup(event)
+                
+            })
+            
+            window.addEventListener("touchmove", onTouchMove, true)
+            window.addEventListener("mouseup", () => window.removeEventListener("touchmove", onTouchMove, true))
             
         }
         
         const onTouchStart = onMouseDown as any
         
-        const onmouseup = (event) => {
+        const onmouseup = (event: MouseEvent) => {
+            
+            this._isPointerDown = NO
             
             if (!this._isPointerValid) {
                 return
@@ -2065,16 +1818,10 @@ export class UIView extends UIObject {
             }
             
             if (this._isPointerInside) {
-                
                 onPointerUpInside(event)
-                
                 if (!this._hasPointerDragged) {
-                    
                     this.sendControlEventForKey(UIView.controlEvent.PointerTap, event)
-                    
                 }
-                
-                
             }
             
             // This has to be sent after the more specific event so that UIButton can ignore it when not highlighted
@@ -2086,17 +1833,7 @@ export class UIView extends UIObject {
         
         const onTouchEnd = onmouseup
         
-        // function onMouseEnter(event) {
-        
-        //     this.sendControlEventForKey(UIView.controlEvent.PointerEnter, event);
-        
-        //     this._isPointerInside = YES;
-        
-        //     pauseEvent(event);
-        
-        // }
-        
-        const onmouseout = (event) => {
+        const onmouseout = (event: MouseEvent) => {
             
             if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
                 (this.ignoresMouse && event instanceof MouseEvent)) {
@@ -2113,24 +1850,7 @@ export class UIView extends UIObject {
         
         const onTouchLeave = onmouseout
         
-        var onTouchCancel = function (event) {
-            
-            if (!this._isPointerValid) {
-                return
-            }
-            
-            if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
-                (this.ignoresMouse && event instanceof MouseEvent)) {
-                return
-            }
-            
-            this._isPointerValid = NO
-            
-            this.sendControlEventForKey(UIView.controlEvent.PointerCancel, event)
-            
-        }.bind(this)
-        
-        const onmouseover = (event) => {
+        const onmouseover = (event: MouseEvent) => {
             
             if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
                 (this.ignoresMouse && event instanceof MouseEvent)) {
@@ -2140,14 +1860,19 @@ export class UIView extends UIObject {
             this.sendControlEventForKey(UIView.controlEvent.PointerHover, event)
             
             this._isPointerInside = YES
-            
             this._isPointerValid = YES
             
             pauseEvent(event)
             
         }
         
-        const onMouseMove = (event) => {
+        const onMouseMove = (event: MouseEvent) => {
+            
+            // if (this._isPointerDown) {
+            //
+            //     console.log("Mouse move")
+            //
+            // }
             
             if (!this._isPointerValid) {
                 return
@@ -2158,27 +1883,35 @@ export class UIView extends UIObject {
                 return
             }
             
+            const clientPoint = new UIPoint(
+                event.clientX,
+                event.clientY
+            )
             if (IS_NOT(this._initialPointerPosition)) {
-                
-                this._initialPointerPosition = new UIPoint(event.clientX, event.clientY)
-                
+                this._initialPointerPosition = clientPoint
             }
             
-            if (new UIPoint(event.clientX, event.clientY).to(this._initialPointerPosition).length >
-                this._pointerDragThreshold) {
-                
+            const distanceToInitialPoint = clientPoint.to(this._initialPointerPosition).length
+            if (distanceToInitialPoint > this._pointerDragThreshold) {
                 this._hasPointerDragged = YES
-                
             }
-            
             
             this.sendControlEventForKey(UIView.controlEvent.PointerMove, event)
+            
+            if (this._hasPointerDragged && this._isPointerDown) {
+                const movementPoint = this._previousClientPoint.to(clientPoint)
+                this.pointerDraggingPoint = new UIPoint(movementPoint.x, movementPoint.y).scale(1 / UIView.pageScale)
+                    .add(this.pointerDraggingPoint)
+                this.sendControlEventForKey(UIView.controlEvent.PointerDrag, event)
+            }
+            
+            this._previousClientPoint = clientPoint
             
             pauseEvent(event)
             
         }
         
-        const onTouchMove = function (event: TouchEvent) {
+        const onTouchMove = (event: TouchEvent) => {
             
             if (!this._isPointerValid) {
                 return
@@ -2190,69 +1923,89 @@ export class UIView extends UIObject {
             }
             
             if (event.touches.length > 1) {
-                
                 onTouchZoom(event)
-                
                 return
-                
             }
             
             const touch = event.touches[0]
             
-            if (new UIPoint(touch.clientX, touch.clientY).to(this._initialPointerPosition).length >
-                this._pointerDragThreshold) {
-                
+            const clientPoint = new UIPoint(
+                touch.clientX,
+                touch.clientY
+            )
+            const distanceToInitialPoint = clientPoint.to(this._initialPointerPosition!).length
+            if (distanceToInitialPoint > this._pointerDragThreshold) {
                 this._hasPointerDragged = YES
-                
             }
-            
             
             if (this._isPointerInside && this.viewHTMLElement !=
                 document.elementFromPoint(touch.clientX, touch.clientY)) {
-                
                 this._isPointerInside = NO
-                
                 this.sendControlEventForKey(UIView.controlEvent.PointerLeave, event)
-                
             }
-            
             
             this.sendControlEventForKey(UIView.controlEvent.PointerMove, event)
             
-            //pauseEvent(event);
             
+            if (this._hasPointerDragged) {
+                const movementPoint = this._previousClientPoint.to(clientPoint)
+                this.pointerDraggingPoint = new UIPoint(movementPoint.x, movementPoint.y).scale(1 / UIView.pageScale)
+                    .add(this.pointerDraggingPoint)
+                this.sendControlEventForKey(UIView.controlEvent.PointerDrag, event)
+            }
+            
+            this._previousClientPoint = clientPoint
             
         }
         
-        var onTouchZoom = function onTouchZoom(event: TouchEvent) {
-            
+        const onTouchZoom = (event: TouchEvent) => {
             this.sendControlEventForKey(UIView.controlEvent.MultipleTouches, event)
+        }
+        const onPointerUpInside = (event: Event) => {
             
-        }.bind(this)
-        
-        
-        var onPointerUpInside = (event) => {
             pauseEvent(event)
-            
+            this._isPointerDown = NO
             this.sendControlEventForKey(UIView.controlEvent.PointerUpInside, event)
+            
+            
+            UIView.pointerUpInsideCalled(this)
+            
         }
         
-        function eventKeyIsEnter(event) {
+        const onTouchCancel = (event: Event) => {
+            
+            if (!this._isPointerValid) {
+                return
+            }
+            
+            if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
+                (this.ignoresMouse && event instanceof MouseEvent)) {
+                return
+            }
+            
+            this._isPointerValid = NO
+            this._isPointerDown = NO
+            
+            this.sendControlEventForKey(UIView.controlEvent.PointerCancel, event)
+            
+        }
+        
+        function eventKeyIsEnter(event: { keyCode: number }) {
             if (event.keyCode !== 13) {
                 return NO
             }
             return YES
         }
         
-        function eventKeyIsTab(event) {
+        function eventKeyIsTab(event: { keyCode: number }) {
             if (event.keyCode !== 9) {
                 return NO
             }
             return YES
         }
         
-        function eventKeyIsEsc(event) {
-            var result = false
+        function eventKeyIsEsc(event: { key: string; keyCode: number }) {
+            let result: boolean
             if ("key" in event) {
                 result = (event.key == "Escape" || event.key == "Esc")
             }
@@ -2262,135 +2015,117 @@ export class UIView extends UIObject {
             return result
         }
         
-        function eventKeyIsLeft(event) {
-            if (event.keyCode != "37") {
+        function eventKeyIsLeft(event: KeyboardEvent) {
+            if (event.keyCode != 37) {
                 return NO
             }
             return YES
         }
         
-        function eventKeyIsRight(event) {
-            if (event.keyCode != "39") {
+        function eventKeyIsRight(event: KeyboardEvent) {
+            if (event.keyCode != 39) {
                 return NO
             }
             return YES
         }
         
-        function eventKeyIsDown(event) {
-            if (event.keyCode != "40") {
+        function eventKeyIsDown(event: KeyboardEvent) {
+            if (event.keyCode != 40) {
                 return NO
             }
             return YES
         }
         
-        function eventKeyIsUp(event) {
-            if (event.keyCode != "38") {
+        function eventKeyIsUp(event: KeyboardEvent) {
+            if (event.keyCode != 38) {
                 return NO
             }
             return YES
         }
         
-        const onKeyDown = function (event) {
+        const onKeyDown = (event: KeyboardEvent) => {
             
             if (eventKeyIsEnter(event)) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.EnterDown, event)
-                
             }
             
             if (eventKeyIsEsc(event)) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.EscDown, event)
-                
             }
             
             if (eventKeyIsTab(event) && this._controlEventTargets.TabDown && this._controlEventTargets.TabDown.length) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.TabDown, event)
-                
                 pauseEvent(event, YES)
-                
             }
             
             if (eventKeyIsLeft(event)) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.LeftArrowDown, event)
-                
             }
             
             if (eventKeyIsRight(event)) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.RightArrowDown, event)
-                
             }
             
             if (eventKeyIsDown(event)) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.DownArrowDown, event)
-                
             }
             
             if (eventKeyIsUp(event)) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.UpArrowDown, event)
-                
             }
             
-        }.bind(this)
+        }
         
-        const onKeyUp = function (event) {
+        const onKeyUp = (event: KeyboardEvent) => {
             
             if (eventKeyIsEnter(event)) {
-                
                 this.sendControlEventForKey(UIView.controlEvent.EnterUp, event)
-                
             }
             
-        }.bind(this)
+        }
         
         
-        const onfocus = function (event: Event) {
-            
+        const onfocus = (event: Event) => {
             this.sendControlEventForKey(UIView.controlEvent.Focus, event)
-            
-        }.bind(this)
+        }
         
-        const onblur = function (event: Event) {
-            
+        const onblur = (event: Event) => {
             this.sendControlEventForKey(UIView.controlEvent.Blur, event)
-            
-        }.bind(this)
+        }
         
         
         // Mouse and touch start events
-        this._viewHTMLElement.onmousedown = onMouseDown.bind(this)
-        this._viewHTMLElement.ontouchstart = onTouchStart.bind(this)
-        // this.viewHTMLElement.addEventListener("mousedown", onMouseDown.bind(this), false)
-        // this.viewHTMLElement.addEventListener('touchstart', onTouchStart.bind(this), false)
+        // this._viewHTMLElement.onmousedown = onMouseDown
+        // this._viewHTMLElement.ontouchstart = onTouchStart
+        this.viewHTMLElement.addEventListener("mousedown", onMouseDown, false)
+        this.viewHTMLElement.addEventListener("touchstart", onTouchStart, false)
         // //this.viewHTMLElement.addEventListener("mouseenter", onMouseEnter.bind(this), false);
         
         // Mouse and touch move events
-        this._viewHTMLElement.onmousemove = onMouseMove.bind(this)
-        this._viewHTMLElement.ontouchmove = onTouchMove.bind(this)
-        // this.viewHTMLElement.addEventListener("mousemove", onMouseMove.bind(this), false)
-        // this.viewHTMLElement.addEventListener('touchmove', onTouchMove.bind(this), false)
+        // this._viewHTMLElement.onmousemove = onMouseMove
+        // this._viewHTMLElement.ontouchmove = onTouchMove
+        //this.viewHTMLElement.addEventListener("mousemove", onMouseMove, false)
+        this.viewHTMLElement.addEventListener("touchmove", onTouchMove, false)
         
         //this.viewHTMLElement.addEventListener("mousewheel", onmousewheel.bind(this), false)
         
-        this._viewHTMLElement.onmouseover = onmouseover.bind(this)
+        this._viewHTMLElement.onmouseover = onmouseover
         // this.viewHTMLElement.addEventListener("mouseover", onmouseover.bind(this), false)
         
         // Mouse and touch end events
-        this._viewHTMLElement.onmouseup = onmouseup.bind(this)
-        this._viewHTMLElement.ontouchend = onTouchEnd.bind(this)
-        this._viewHTMLElement.ontouchcancel = onTouchCancel.bind(this)
-        // this.viewHTMLElement.addEventListener("mouseup", onmouseup.bind(this), false)
-        // this.viewHTMLElement.addEventListener('touchend', onTouchEnd.bind(this), false)
-        // this.viewHTMLElement.addEventListener('touchcancel', onTouchCancel.bind(this), false)
+        // this._viewHTMLElement.onmouseup = onmouseup
+        // // @ts-ignore
+        // this._viewHTMLElement.ontouchend = onTouchEnd
+        // this._viewHTMLElement.ontouchcancel = onTouchCancel
+        this.viewHTMLElement.addEventListener("mouseup", onmouseup, false)
+        // @ts-ignore
+        this.viewHTMLElement.addEventListener("touchend", onTouchEnd, false)
+        this.viewHTMLElement.addEventListener("touchcancel", onTouchCancel, false)
         
-        this._viewHTMLElement.onmouseout = onmouseout.bind(this)
-        // this.viewHTMLElement.addEventListener("mouseout", onmouseout.bind(this), false)
-        this._viewHTMLElement.addEventListener("touchleave", onTouchLeave.bind(this), false)
+        //this._viewHTMLElement.onmouseout = onmouseout
+        this.viewHTMLElement.addEventListener("mouseout", onmouseout, false)
+        // @ts-ignore
+        this._viewHTMLElement.addEventListener("touchleave", onTouchLeave, true)
         
         // this.viewHTMLElement.onkeydown = onkeydown
         // this.viewHTMLElement.onkeyup = onkeyup
@@ -2407,13 +2142,11 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     public static controlEvent = {
-        
+    
         "PointerDown": "PointerDown",
         "PointerMove": "PointerMove",
+        "PointerDrag": "PointerDrag",
         "PointerLeave": "PointerLeave",
         "PointerEnter": "PointerEnter",
         "PointerUpInside": "PointerUpInside",
@@ -2438,27 +2171,24 @@ export class UIView extends UIObject {
     controlEvent = UIView.controlEvent
     
     
-    
-    public get addControlEventTarget() {
+    public get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UIView> {
         
-        const eventKeys = []
+        const eventKeys: string[] = []
         
-        
-        const result: UIViewAddControlEventTargetObject<typeof UIView.controlEvent> = new Proxy(
+        const result: any = new Proxy(
             (this.constructor as any).controlEvent,
             {
                 
-                get: (target, key, receiver) => {
+                get: (target, key: string, _receiver) => {
                     
                     eventKeys.push(key)
                     
                     return result
                     
                 },
-                set: (target, key, value, receiver) => {
+                set: (target, key: string, value, _receiver) => {
                     
                     eventKeys.push(key)
-                    
                     this.addTargetForControlEvents(eventKeys, value)
                     
                     return true
@@ -2473,24 +2203,14 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     addTargetForControlEvents(eventKeys: string[], targetFunction: (sender: UIView, event: Event) => void) {
-        
-        eventKeys.forEach(function (this: UIView, key: string, index: number, array: string[]) {
-            
-            this.addTargetForControlEvent(key, targetFunction)
-            
-        }, this)
-        
+        eventKeys.forEach(key => this.addTargetForControlEvent(key, targetFunction))
     }
     
     
-    
     addTargetForControlEvent(eventKey: string, targetFunction: (sender: UIView, event: Event) => void) {
-        
-        var targets = this._controlEventTargets[eventKey]
+    
+        let targets = this._controlEventTargets[eventKey]
         
         if (!targets) {
             // @ts-ignore
@@ -2516,29 +2236,20 @@ export class UIView extends UIObject {
     }
     
     removeTargetForControlEvents(eventKeys: string[], targetFunction: (sender: UIView, event: Event) => void) {
-        
-        eventKeys.forEach(function (key, index, array) {
-            
-            this.removeTargetForControlEvent(key, targetFunction)
-            
-        }, this)
-        
+        eventKeys.forEach(key => this.removeTargetForControlEvent(key, targetFunction))
     }
     
     sendControlEventForKey(eventKey: string, nativeEvent: Event) {
-        var targets = this._controlEventTargets[eventKey]
+        let targets = this._controlEventTargets[eventKey]
         if (!targets) {
             return
         }
         targets = targets.copy()
-        for (var i = 0; i < targets.length; i++) {
+        for (let i = 0; i < targets.length; i++) {
             const target = targets[i]
             target(this, nativeEvent)
         }
     }
-    
-    
-    
     
     
     static broadcastEventName = {
@@ -2552,73 +2263,41 @@ export class UIView extends UIObject {
     
     
     broadcastEventInSubtree(event: UIViewBroadcastEvent) {
-        
-        this.forEachViewInSubtree(function (view) {
-            
+        this.forEachViewInSubtree(view => {
             view.didReceiveBroadcastEvent(event)
-    
             if (IS(view.viewController)) {
-        
                 view.viewController.viewDidReceiveBroadcastEvent(event)
-        
             }
-            
         })
-        
-        
     }
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         if (event.name == UIView.broadcastEventName.PageDidScroll) {
-            
             this._isPointerValid = NO
-            
         }
         
         if (event.name == UIView.broadcastEventName.AddedToViewTree) {
-            
             this.wasAddedToViewTree()
-            
         }
         
         if (event.name == UIView.broadcastEventName.RemovedFromViewTree) {
-            
             this.wasRemovedFromViewTree()
-            
         }
         
         if (event.name == UIView.broadcastEventName.LanguageChanged || event.name ==
             UIView.broadcastEventName.AddedToViewTree) {
-            
             this._setInnerHTMLFromKeyIfPossible()
-            
             this._setInnerHTMLFromLocalizedTextObjectIfPossible()
-            
         }
         
-        
-        
     }
-    
-    
-    
     
     
     forEachViewInSubtree(functionToCall: (view: UIView) => void) {
-        
         functionToCall(this)
-        
-        this.subviews.forEach(function (subview, index, array) {
-            
-            subview.forEachViewInSubtree(functionToCall)
-            
-        })
-        
+        this.subviews.everyElement.forEachViewInSubtree(functionToCall)
     }
-    
-    
-    
     
     
     rectangleInView(rectangle: UIRectangle, view: UIView) {
@@ -2642,29 +2321,26 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     intrinsicContentSizeWithConstraints(constrainingHeight: number = 0, constrainingWidth: number = 0) {
-        
+    
         // This works but is slow
-        
+    
         const result = new UIRectangle(0, 0, 0, 0)
         if (this.rootView.forceIntrinsicSizeZero) {
             return result
         }
-        
-        var temporarilyInViewTree = NO
-        var nodeAboveThisView: Node
+    
+        let temporarilyInViewTree = NO
+        let nodeAboveThisView: Node | null = null
         if (!this.isMemberOfViewTree) {
             document.body.appendChild(this.viewHTMLElement)
             temporarilyInViewTree = YES
             nodeAboveThisView = this.viewHTMLElement.nextSibling
         }
-        
+    
         const height = this.style.height
         const width = this.style.width
-        
+    
         this.style.height = "" + constrainingHeight
         this.style.width = "" + constrainingWidth
         
@@ -2689,7 +2365,6 @@ export class UIView extends UIObject {
         const resultWidth = this.viewHTMLElement.scrollWidth
         
         this.style.whiteSpace = whiteSpace
-        
         
         
         this.style.height = height
@@ -2721,22 +2396,15 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
     intrinsicContentWidth(constrainingHeight: number = 0): number {
-        
-        const result = this.intrinsicContentSizeWithConstraints(constrainingHeight).width
-        
-        return result
+    
+        return this.intrinsicContentSizeWithConstraints(constrainingHeight).width
         
     }
     
     intrinsicContentHeight(constrainingWidth: number = 0): number {
-        
-        const result = this.intrinsicContentSizeWithConstraints(undefined, constrainingWidth).height
-        
-        return result
+    
+        return this.intrinsicContentSizeWithConstraints(undefined, constrainingWidth).height
         
         
     }
@@ -2748,47 +2416,8 @@ export class UIView extends UIObject {
     }
     
     
-    
-    
-    
 }
 
-
-// This is here because modules fail with circular imports but they are needed here
-declare class UIDialogView<ViewType extends UIView = UIView> extends UIView {
-    _view: ViewType
-    _appearedAnimated: boolean
-    animationDuration: number
-    _zIndex: number
-    isVisible: boolean
-    dismissesOnTapOutside: boolean
-    
-    constructor(elementID?: string, viewHTMLElement?: HTMLElement);
-    
-    didDetectTapOutside(sender: UIView, event: Event): void;
-    
-    set zIndex(zIndex: number);
-    get zIndex(): number;
-    
-    set view(view: ViewType);
-    get view(): ViewType;
-    
-    willAppear(animated?: boolean): void;
-    
-    animateAppearing(): void;
-    
-    animateDisappearing(): void;
-    
-    showInView(containerView: UIView, animated: boolean): void;
-    
-    showInRootView(animated: boolean): void;
-    
-    dismiss(animated?: boolean): void;
-    
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent): void;
-    
-    layoutSubviews(): void;
-}
 
 
 

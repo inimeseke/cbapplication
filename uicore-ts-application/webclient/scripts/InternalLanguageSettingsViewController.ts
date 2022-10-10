@@ -1,3 +1,4 @@
+import { CBCore, CBDropdownDataItem, CBSocketMessageSendResponseFunction, SocketClient } from "cbcore-ts"
 import {
     FIRST,
     IS,
@@ -9,26 +10,19 @@ import {
     UIButton,
     UIColor,
     UIRoute,
-    UITableView,
     UITextArea,
     UITextView,
     UIView,
     UIViewController,
     YES
 } from "uicore-ts"
-import { CBColor } from "./Custom components/CBColor"
-import { CBCore } from "cbcore-ts"
-import { CBDropdownDataItem, CBSocketMessageSendResponseFunction } from "../../../cbcore-ts/scripts/CBDataInterfaces"
-import { IS_NOT_SOCKET_ERROR } from "cbcore-ts"
 import { CBButton } from "./Custom components/CBButton"
+import { CBColor } from "./Custom components/CBColor"
 import { CBDialogViewShower } from "./Custom components/CBDialogViewShower"
 import { CBTextField } from "./Custom components/CBTextField"
-import { LanguageService } from "cbcore-ts"
 import { SearchableDropdown } from "./Custom components/SearchableDropdown"
 import { SearchableDropdownRow } from "./Custom components/SearchableDropdownRow"
-
-
-
+import { LanguageService } from "./LanguageService"
 
 
 export class InternalLanguageSettingsViewController extends UIViewController {
@@ -37,8 +31,6 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     titleLabel: UITextView
     loadButton: UIButton
     languageKeyTextField: CBTextField
-    tableView: UITableView
-    textArea: UITextArea
     dropdown: SearchableDropdown<string>
     saveButton: CBButton
     deleteButton: CBButton
@@ -55,24 +47,11 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     dataTextJSONLabel: UITextView
     loadJSONDataButton: CBButton
     
-    constructor(view) {
+    constructor(view: UIView) {
         
         super(view)
         
         // Code for further setup if necessary
-        
-        this.loadSubviews()
-        
-    }
-    
-    
-    static readonly routeComponentName = "internal_language_settings"
-    
-    static readonly ParameterIdentifierName = {}
-    
-    
-    loadSubviews() {
-        
         
         this.view.backgroundColor = UIColor.whiteColor
         
@@ -80,9 +59,6 @@ export class InternalLanguageSettingsViewController extends UIViewController {
         this.titleLabel = new UITextView(this.view.elementID + "TitleLabel", UITextView.type.header2)
         this.titleLabel.text = "Internal language settings"
         this.view.addSubview(this.titleLabel)
-        
-        
-        
         
         
         this.languageKeyTextField = new CBTextField(this.view.elementID + "LanguageKeyTextField")
@@ -122,8 +98,6 @@ export class InternalLanguageSettingsViewController extends UIViewController {
         this.view.addSubview(this.dropdown._tableView)
         
         
-        
-        
         this.addButton = new CBButton(this.view.elementID + "AddButton")
         this.addButton.titleLabel.text = "Add text"
         this.addButton.setBackgroundColorsWithNormalColor(UIColor.greenColor)
@@ -146,9 +120,6 @@ export class InternalLanguageSettingsViewController extends UIViewController {
         this.view.addSubview(this.clearLanguageButton)
         
         
-        
-        
-        
         this.itemKeyTextField = new CBTextField(this.view.elementID + "ItemKeyTextField")
         this.itemKeyTextField.placeholderText = "Item key"
         this.view.addSubview(this.itemKeyTextField)
@@ -159,9 +130,6 @@ export class InternalLanguageSettingsViewController extends UIViewController {
         this.view.addSubview(this.itemTitleOrAttachedObjectTextArea)
         
         this.itemTitleDidChange()
-        
-        
-        
         
         
         this.dataTextJSONLabel = new UITextView(this.view.elementID + "DataTextJSONLabel")
@@ -178,25 +146,12 @@ export class InternalLanguageSettingsViewController extends UIViewController {
         this.view.addSubview(this.loadJSONDataButton)
         
         
-        this.dropdown.addTargetForControlEvent(
-            SearchableDropdown.controlEvent.SelectionDidChange,
-            function (
-                this: InternalLanguageSettingsViewController,
-                sender: SearchableDropdown<undefined>,
-                event: Event
-            ) {
-                
-                this.updateitemDetailsView()
-                
-            }.bind(this)
-        )
+        // @ts-ignore
+        this.dropdown.controlEventTargetAccumulator.SelectionDidChange = () => this.updateitemDetailsView()
         
         const dropdownViewForRowWithIndexFunction = this.dropdown._tableView.viewForRowWithIndex.bind(this.dropdown._tableView)
         
-        this.dropdown._tableView.viewForRowWithIndex = function (
-            this: InternalLanguageSettingsViewController,
-            rowIndex: number
-        ) {
+        this.dropdown._tableView.viewForRowWithIndex = (rowIndex: number) => {
             
             const row = dropdownViewForRowWithIndexFunction(rowIndex)
             const dataItem = this.dropdown.drawingData[rowIndex]
@@ -217,212 +172,178 @@ export class InternalLanguageSettingsViewController extends UIViewController {
             
             return row
             
-        }.bind(this)
+        }
         
         
+        this.itemKeyTextField.textField.controlEventTargetAccumulator.TextChange = () => {
+            
+            const selectedItem: CBDropdownDataItem<string> = this.dropdown.selectedData.firstElement || nil
+            const previousKey = selectedItem.itemCode
+            const languageObject = LanguageService.languages[this.languageKeyTextField.text]
+            const languageValuesValue = languageObject[previousKey]
+            
+            if (IS_NOT(languageValuesValue)) {
+                delete languageObject[previousKey]
+            }
+            
+            languageObject[this.itemKeyTextField.text] = selectedItem.attachedObject
+            
+            selectedItem.title = LanguageService.localizedTextObjectForText(this.itemKeyTextField.text)
+            selectedItem.itemCode = this.itemKeyTextField.text
+            selectedItem._id = this.itemKeyTextField.text
+            
+            this.reloadTableData()
+            
+        }
         
         
+        this.itemTitleOrAttachedObjectTextArea.controlEventTargetAccumulator.TextChange = () => {
+            
+            this.itemTitleDidChange()
+            this.reloadTableData()
+            
+        }
         
-        this.itemKeyTextField.textField.addTargetForControlEvent(
-            UITextArea.controlEvent.TextChange,
-            function (this: InternalLanguageSettingsViewController, sender: CBTextField, event: Event) {
-                
-                const selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
-                const previousKey = selectedItem.itemCode
-                const languageObject = LanguageService.languages[this.languageKeyTextField.text]
-                const languageValuesValue = languageObject[previousKey]
-                
-                if (IS_NOT(languageValuesValue)) {
-                    delete languageObject[previousKey]
-                }
-                
-                languageObject[this.itemKeyTextField.text] = selectedItem.attachedObject
-                
-                selectedItem.title = LanguageService.localizedTextObjectForText(this.itemKeyTextField.text)
-                selectedItem.itemCode = this.itemKeyTextField.text
-                selectedItem._id = this.itemKeyTextField.text
-                
-                this.reloadTableData()
-                
-            }.bind(this)
-        )
-        
-        this.itemTitleOrAttachedObjectTextArea.addTargetForControlEvent(
-            UITextArea.controlEvent.TextChange,
-            function (this: InternalLanguageSettingsViewController, sender: CBTextField, event: Event) {
-                
-                this.itemTitleDidChange()
-                this.reloadTableData()
-                
-            }.bind(this)
-        )
         
         //this.loadSubjectData()
         
         this.updateAvailableKeys()
         
-        this.loadButton.addTargetForControlEvent(
-            UIView.controlEvent.PointerUpInside,
-            function (this: InternalLanguageSettingsViewController, sender: UIButton, event: Event) {
-                
-                this.loadData()
-                
-            }.bind(this)
-        )
         
-        this.saveButton.addTargetForControlEvent(
-            UIView.controlEvent.PointerUpInside,
-            function (this: InternalLanguageSettingsViewController, sender: UIButton, event: Event) {
-                
-                CBCore.sharedInstance.socketClient.sendMessageForKey(
-                    "RetrieveLanguageData",
-                    nil,
-                    function (this: InternalLanguageSettingsViewController, codes: string[]) {
-                        
-                        this.saveData()
-                        
-                    }.bind(this)
-                )
-                
-            }.bind(this)
-        )
+        this.loadButton.controlEventTargetAccumulator.PointerUpInside = () => this.loadData()
+        
+        this.saveButton.controlEventTargetAccumulator.PointerUpInside = async () => {
+            
+            // This is to make sure that everything is in the correct state
+            const codes = (await SocketClient.RetrieveLanguageData(nil)).result
+            await this.saveData()
+            
+        }
         
         
-        this.addButton.addTargetForControlEvent(
-            UIView.controlEvent.PointerUpInside,
-            function (this: InternalLanguageSettingsViewController, sender: UIButton, event: Event) {
+        this.addButton.controlEventTargetAccumulator.PointerUpInside = () => {
+            
+            const title = LanguageService.localizedTextObjectForText(this.itemKeyTextField.text)
+            const itemID = MAKE_ID()
+            
+            const dataRow: CBDropdownDataItem<string> = {
                 
-                const title = LanguageService.localizedTextObjectForText(this.itemKeyTextField.text)
-                const itemID = MAKE_ID()
+                _id: itemID,
+                title: title,
+                isADropdownDataRow: YES,
+                isADropdownDataSection: NO,
                 
-                const dataRow: CBDropdownDataItem<undefined> = {
-                    
-                    _id: itemID,
-                    title: title,
-                    isADropdownDataRow: YES,
-                    isADropdownDataSection: NO,
-                    
-                    attachedObject: undefined,
-                    
-                    itemCode: nil,
-                    dropdownCode: (this.dropdown.selectedData.firstElement || {} as any).dropdownCodes
-                    
-                }
+                attachedObject: "",
                 
-                const rowIndex = this.dropdown.selectedIndices.firstElement
+                itemCode: nil,
+                dropdownCode: this.dropdown.selectedData.firstElement?.dropdownCode
                 
-                if (IS_DEFINED(rowIndex)) {
-                    
-                    this.dropdown.drawingData.insertElementAtIndex(rowIndex + 1, dataRow)
-                    this.reloadTableData()
-                    
-                }
-                else {
-                    
-                    this.dropdown.drawingData.push(dataRow)
-                    this.reloadTableData()
-                    this.dropdown._tableView.scrollToBottom()
-                    
-                }
+            }
+            
+            const rowIndex = this.dropdown.selectedIndices.firstElement
+            
+            if (IS_DEFINED(rowIndex)) {
                 
-            }.bind(this)
-        )
-        
-        this.deleteButton.addTargetForControlEvent(
-            UIView.controlEvent.PointerUpInside,
-            function (this: InternalLanguageSettingsViewController, sender: UIButton, event: Event) {
-                
-                const rowIndex = this.dropdown.selectedIndices.firstElement
-                
-                if (IS_DEFINED(rowIndex)) {
-                    
-                    var selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
-                    var key = LanguageService.stringForCurrentLanguage(selectedItem.title)
-                    
-                    delete LanguageService.languages[this.languageKeyTextField.text][key]
-                    
-                    this.dropdown.drawingData.removeElementAtIndex(rowIndex)
-                    
-                    this.dropdown.selectedData.removeElementAtIndex(0)
-                    this.dropdown.selectedIndices.removeElementAtIndex(0)
-                    
-                    this.dropdown.selectionDidChange(this.dropdown.selectedData)
-                    
-                }
-                
+                this.dropdown.drawingData.insertElementAtIndex(rowIndex + 1, dataRow)
                 this.reloadTableData()
                 
-            }.bind(this)
-        )
-        
-        this.deleteLanguageButton.addTargetForControlEvent(
-            UIView.controlEvent.PointerUpInside,
-            function (this: InternalLanguageSettingsViewController, sender: UIButton, event: Event) {
+            }
+            else {
                 
-                if (this.languageKeyTextField.text && confirm("Are you sure you want to delete this language?")) {
+                this.dropdown.drawingData.push(dataRow)
+                this.reloadTableData()
+                this.dropdown._tableView.scrollToBottom()
+                
+            }
+            
+        }
+        
+        
+        this.deleteButton.controlEventTargetAccumulator.PointerUpInside = () => {
+            
+            const rowIndex = this.dropdown.selectedIndices.firstElement
+            
+            if (IS_DEFINED(rowIndex)) {
+                
+                const selectedItem: CBDropdownDataItem<string> = this.dropdown.selectedData.firstElement || nil
+                const key = LanguageService.stringForCurrentLanguage(selectedItem.title)
+                
+                delete LanguageService.languages[this.languageKeyTextField.text][key]
+                
+                this.dropdown.drawingData.removeElementAtIndex(rowIndex)
+                
+                this.dropdown.selectedData.removeElementAtIndex(0)
+                this.dropdown.selectedIndices.removeElementAtIndex(0)
+                
+                this.dropdown.selectionDidChange(this.dropdown.selectedData)
+                
+            }
+            
+            this.reloadTableData()
+            
+        }
+        
+        
+        this.deleteLanguageButton.controlEventTargetAccumulator.PointerUpInside = () => {
+            
+            if (this.languageKeyTextField.text && confirm("Are you sure you want to delete this language?")) {
+                
+                if (confirm("This will REMOVE THE LANGUAGE FROM THE SERVER, are you definitely sure?")) {
                     
-                    if (confirm("This will REMOVE THE LANGUAGE FROM THE SERVER, are you definitely sure?")) {
-                        
-                        CBCore.sharedInstance.socketClient.sendMessageForKey(
-                            "DeleteLanguageWithKey",
-                            this.languageKeyTextField.text,
-                            function (
-                                this: InternalLanguageSettingsViewController,
-                                responseMessage: any,
-                                respondWithMessage: CBSocketMessageSendResponseFunction
-                            ) {
-                                
-                                LanguageService.useStoredLanguageValues(responseMessage)
-                                this.updateAvailableKeys()
-                                this.languageKeyTextField.text = nil
-                                this.dropdown.data = []
-                                this.updateitemDetailsView()
-                                
-                            }.bind(this)
-                        )
-                        
-                    }
+                    CBCore.sharedInstance.socketClient.sendMessageForKey(
+                        "DeleteLanguageWithKey",
+                        this.languageKeyTextField.text,
+                        function (
+                            this: InternalLanguageSettingsViewController,
+                            responseMessage: any,
+                            respondWithMessage: CBSocketMessageSendResponseFunction
+                        ) {
+                            
+                            LanguageService.useStoredLanguageValues(responseMessage)
+                            this.updateAvailableKeys()
+                            this.languageKeyTextField.text = nil
+                            this.dropdown.data = []
+                            this.updateitemDetailsView()
+                            
+                        }.bind(this)
+                    )
                     
                 }
                 
-            }.bind(this)
-        )
-        
-        this.clearLanguageButton.addTargetForControlEvent(
-            UIView.controlEvent.PointerUpInside,
-            function (this: InternalLanguageSettingsViewController, sender: UIButton, event: Event) {
-                
-                if (this.languageKeyTextField.text && confirm("Are you sure you want to clear this language?")) {
-                    
-                    LanguageService.languages[this.languageKeyTextField.text] = {}
-                    this.dropdown.data = []
-                    this.dropdown.selectedData = []
-                    this.dropdown.selectedIndices = []
-                    this.updateitemDetailsView()
-                    
-                }
-                
-            }.bind(this)
-        )
+            }
+            
+        }
         
         
-        this.loadJSONDataButton.addTargetForControlEvent(
-            UIView.controlEvent.PointerUpInside,
-            function (this: InternalLanguageSettingsViewController, sender: UIButton, event: Event) {
+        this.clearLanguageButton.controlEventTargetAccumulator.PointerUpInside = () => {
+            
+            if (this.languageKeyTextField.text && confirm("Are you sure you want to clear this language?")) {
                 
-                this.loadJSONData()
+                LanguageService.languages[this.languageKeyTextField.text] = {}
+                this.dropdown.data = []
+                this.dropdown.selectedData = []
+                this.dropdown.selectedIndices = []
+                this.updateitemDetailsView()
                 
-            }.bind(this)
-        )
+            }
+            
+        }
+        
+        
+        this.loadJSONDataButton.controlEventTargetAccumulator.PointerUpInside = () => this.loadJSONData()
         
         
     }
     
     
+    static readonly routeComponentName = "internal_language_settings"
+    
+    static readonly ParameterIdentifierName = {}
+    
     reloadTableData() {
         this.dropdown._tableView.reloadData()
-        const dataToShow = {}
-        this.dropdown.drawingData.forEach(function (dataItem, index, array) {
+        const dataToShow: Record<string, string> = {}
+        this.dropdown.drawingData.forEach((dataItem, index, array) => {
             
             dataToShow[FIRST(dataItem.itemCode, dataItem._id)] = dataItem.attachedObject
             
@@ -442,7 +363,7 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     
     
     updateitemDetailsView() {
-        const selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
+        const selectedItem: CBDropdownDataItem<string> = this.dropdown.selectedData.firstElement || nil
         if (IS(selectedItem)) {
             this.itemKeyTextField.text = LanguageService.stringForCurrentLanguage(selectedItem.title)
             this.itemTitleOrAttachedObjectTextArea.text = selectedItem.attachedObject
@@ -455,7 +376,7 @@ export class InternalLanguageSettingsViewController extends UIViewController {
         this._triggerLayoutViewSubviews()
         const dropdownData: CBDropdownDataItem<string>[] = []
         
-        LanguageService.languages[this.languageKeyTextField.text].forEach(function (value, key) {
+        LanguageService.languages[this.languageKeyTextField.text].forEach((value: string, key: string) => {
             
             dropdownData.push({
                 
@@ -482,68 +403,48 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     }
     
     
-    saveData() {
+    async saveData() {
         
-        const languageObject = {}
+        const languageObject: Record<string, string> = {}
         const languageKey = this.languageKeyTextField.text
-        this.dropdown.drawingData.forEach(function (dataItem, index, array) {
+        this.dropdown.drawingData.forEach((dataItem, index, array) => {
             const staticLanguageObject = LanguageService.languageValues[languageKey]
             if (IS_NOT(staticLanguageObject[dataItem.itemCode] == dataItem.attachedObject)) {
                 languageObject[dataItem.itemCode] = dataItem.attachedObject
             }
         })
         
-        CBCore.sharedInstance.socketClient.sendMessageForKey(
-            "RetrieveLanguageData",
-            nil,
-            function (
-                this: InternalLanguageSettingsViewController,
-                responseMessage: any,
-                respondWithMessage: CBSocketMessageSendResponseFunction
-            ) {
-                
-                responseMessage[this.languageKeyTextField.text] = languageObject
-                
-                // Send the data to server to be saved
-                CBCore.sharedInstance.socketClient.sendMessageForKey(
-                    "SaveLanguagesData",
-                    responseMessage,
-                    function (this: InternalLanguageSettingsViewController, response) {
-                        
-                        if (IS_NOT_SOCKET_ERROR(response)) {
-                            CBDialogViewShower.alert("Saved successfully.")
-                            LanguageService.useStoredLanguageValues(response)
-                            this.loadData()
-                            LanguageService.broadcastLanguageChangeEvent()
-                            this.view.rootView.setNeedsLayout()
-                        }
-                        else {
-                            CBDialogViewShower.alert("Failed to save dropdown data.")
-                        }
-                        
-                        this.updateAvailableKeys()
-                        
-                    }.bind(this)
-                )
-                
-            }.bind(this)
-        )
+        const responseMessage = (await SocketClient.RetrieveLanguageData(nil)).result
+        
+        responseMessage[this.languageKeyTextField.text] = languageObject
+        
+        // Send the data to server to be saved
+        const response = await SocketClient.SaveLanguagesData(responseMessage)
+        
+        if (IS_NOT(response.errorResult)) {
+            CBDialogViewShower.alert("Saved successfully.")
+            LanguageService.useStoredLanguageValues(response.result)
+            this.loadData()
+            LanguageService.broadcastLanguageChangeEvent()
+            this.view.rootView.setNeedsLayout()
+        }
+        else {
+            CBDialogViewShower.alert("Failed to save dropdown data.")
+        }
+        
+        this.updateAvailableKeys()
         
     }
     
     
     loadJSONData() {
         
-        let itemTitles: {
-            
-            [x: string]: string
-            
-        } = {}
+        let itemTitles: Record<string, string> = {}
         
         try {
             itemTitles = JSON.parse(this.dataTextArea.text)
         } catch (exception) {
-            CBDialogViewShower.alert(exception)
+            CBDialogViewShower.alert("" + exception)
             return
         }
         
@@ -577,7 +478,6 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     loadSubjectData() {
         
     
-        
     }
     
     
@@ -594,7 +494,7 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     layoutViewSubviews() {
         
         super.layoutViewSubviews()
-    
+        
         const padding = this.core.paddingLength
         const labelHeight = padding
         

@@ -5,25 +5,19 @@ export class StepSliderView extends UIView {
     
     slideScroller: UISlideScrollerView
     
-    constructor(elementID) {
-        
-        super(elementID)
-        
-    }
+    constructor(elementID?: string) {
     
-
-    initView() {
-        
+        super(elementID)
+    
         this.slideScroller = new UISlideScrollerView(this.elementID + "SlideScroller")
-        
         this.addSubview(this.slideScroller)
     
         const buttonWithIndex = this.slideScroller.buttonForPageIndicatorWithIndex.bind(this.slideScroller)
     
         this.slideScroller.buttonForPageIndicatorWithIndex = function (index: number) {
-    
+        
             const result = buttonWithIndex(index)
-    
+        
             result.titleLabel.text = " " + (index + 1) + ". step"
             
             return result
@@ -31,12 +25,9 @@ export class StepSliderView extends UIView {
         }
         
         this.slideScroller.layoutPageIndicators = nil
-        
         this.slideScroller.pageIndicatorsView.removeFromSuperview()
-        
         this.addSubview(this.slideScroller.pageIndicatorsView)
     
-        
     
         let originalFunction = this.slideScroller.willScrollToPageWithIndex
     
@@ -58,14 +49,10 @@ export class StepSliderView extends UIView {
             
         }.bind(this)
         
-        
-        
     }
     
     
-    
     addSlideView(view: UIView) {
-        
         
         this.slideScroller.addSlideView(view)
         
@@ -77,7 +64,6 @@ export class StepSliderView extends UIView {
         
         
         this.slideScroller.slideViews = views
-        
         
         
     }
@@ -102,17 +88,14 @@ export class StepSliderView extends UIView {
     }
     
     
-    
-    
-    
     updateStepButtonStates() {
     
         var allowed = YES
     
         this.stepButtons.forEach(function (this: StepSliderView, button, index, array) {
-    
+        
             const view = this.slideViews[index]
-    
+        
             button.enabled = allowed
             
             if ((view as any).isNextStepAllowed != undefined && allowed) {
@@ -127,23 +110,15 @@ export class StepSliderView extends UIView {
                 (button as any).stepcompleted = NO
                 
                 
-                
             }
             
             button.updateContentForCurrentState()
             
             
-            
-            
         }, this)
         
         
-        
-        
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -178,26 +153,18 @@ export class StepSliderView extends UIView {
             
             
             button.style.position = "absolute"
-    
+        
             var frame = pageIndicatorsBounds.rectangleWithWidth(pageIndicatorsBounds.width / array.length)
-    
+        
             frame = frame.rectangleWithX(frame.width * index)
             
             button.frame = frame
             
             
-            
-            
         })
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
 }

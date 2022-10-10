@@ -1,10 +1,10 @@
-import { CBLanguageService } from "cbcore-ts"
+import { CBLanguageService, LanguageValues } from "cbcore-ts"
 import { UICore } from "uicore-ts"
 
 
 export class LanguageService extends CBLanguageService {
     
-    static languageValues = {
+    static languageValues: LanguageValues = {
         
         en: {
             

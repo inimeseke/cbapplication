@@ -2,29 +2,26 @@ import { UICoreExtensionValueObject } from "./UICoreExtensionValueObject"
 import { UIObject } from "./UIObject"
 
 
-
-
-
 declare global {
     
     
     interface Array<T> {
-        
-        removeElementAtIndex(index: number);
-        
-        removeElement(element: T);
-        
-        insertElementAtIndex(index: number, element: T);
-        
-        replaceElementAtIndex(index: number, element: T);
-        
-        
+    
+        removeElementAtIndex(index: number): void;
+    
+        removeElement(element: T): void;
+    
+        insertElementAtIndex(index: number, element: T): void;
+    
+        replaceElementAtIndex(index: number, element: T): void;
+    
+    
         contains(element: T): boolean;
-        
+    
         findAsyncSequential(functionToCall: (value: any) => Promise<boolean>): Promise<any>;
-        
+    
         groupedBy(keyFunction: (item: T) => any): { [key: string]: Array<T> } & Object;
-        
+    
         copy(): Array<T>;
         
         arrayByRepeating(numberOfRepetitions: number): Array<T>;
@@ -52,16 +49,15 @@ declare global {
     }
     
     
-    
     interface String {
-        
-        contains(string): boolean;
-        
-        readonly numericalValue: number;
-        isAString: boolean;
-        
-    }
     
+        contains(string: string): boolean;
+    
+        readonly numericalValue: number;
+        readonly integerValue: number;
+        isAString: boolean;
+    
+    }
     
     
     interface Number {
@@ -73,7 +69,6 @@ declare global {
     }
     
     
-    
     interface Date {
         
         readonly dateString: string;
@@ -82,15 +77,13 @@ declare global {
     
     
     interface Object {
-        
-        forEach(callbackFunction: (value: any, key: string) => void): void;
-        
-        readonly allValues: Array<any>;
-        
-        readonly allKeys: string[];
-        
-    }
     
+        forEach(callbackFunction: (value: any, key: string, stopLooping: () => void) => void): void;
+    
+        readonly allValues: Array<any>;
+        readonly allKeys: string[];
+    
+    }
     
 }
 
@@ -105,9 +98,7 @@ if ("removeElementAtIndex" in Array.prototype == NO) {
         
         // @ts-ignore
         if (index >= 0 && index < this.length) {
-            
             this.splice(index, 1)
-            
         }
         
     }
@@ -124,10 +115,8 @@ if ("removeElementAtIndex" in Array.prototype == NO) {
 
 if ("removeElement" in Array.prototype == NO) {
     
-    (Array.prototype as any).removeElement = function (this: Array<any>, element) {
-        
+    (Array.prototype as any).removeElement = function (this: Array<any>, element: any) {
         this.removeElementAtIndex(this.indexOf(element))
-        
     }
     
 }
@@ -145,9 +134,7 @@ if ("insertElementAtIndex" in Array.prototype == NO) {
     (Array.prototype as any).insertElementAtIndex = function (this: Array<any>, index: number, element: any) {
         
         if (index >= 0 && index <= this.length) {
-            
             this.splice(index, 0, element)
-            
         }
         
     }
@@ -183,11 +170,8 @@ if ("replaceElementAtIndex" in Array.prototype == NO) {
 
 if ("contains" in Array.prototype == NO) {
     
-    (Array.prototype as any).contains = function (this: Array<any>, element) {
-        
-        const result = (this.indexOf(element) != -1)
-        return result
-        
+    (Array.prototype as any).contains = function (this: Array<any>, element: any) {
+        return (this.indexOf(element) != -1)
     }
     
 }
@@ -195,13 +179,7 @@ if ("contains" in Array.prototype == NO) {
 if ("containsAny" in Array.prototype == NO) {
     
     (Array.prototype as any).containsAny = function (this: Array<any>, elements: any[]) {
-        
-        const result = this.anyMatch(function (element, index, array) {
-            return elements.contains(element)
-        })
-        
-        return result
-        
+        return this.anyMatch(element => elements.contains(element))
     }
     
 }
@@ -222,12 +200,8 @@ if ("anyMatch" in Array.prototype == NO) {
         this: Array<any>,
         functionToCall: (value: any, index: number, array: any[]) => boolean
     ) {
-        
         // @ts-ignore
-        const result = (this.findIndex(functionToCall) > -1)
-        
-        return result
-        
+        return (this.findIndex(functionToCall) > -1)
     }
     
 }
@@ -238,12 +212,8 @@ if ("noneMatch" in Array.prototype == NO) {
         this: Array<any>,
         functionToCall: (value: any, index: number, array: any[]) => boolean
     ) {
-        
         // @ts-ignore
-        const result = (this.findIndex(functionToCall) == -1)
-        
-        return result
-        
+        return (this.findIndex(functionToCall) == -1)
     }
     
 }
@@ -260,9 +230,7 @@ if ("allMatch" in Array.prototype == NO) {
         }
         
         // @ts-ignore
-        const result = (this.findIndex(reversedFunction) == -1)
-        
-        return result
+        return (this.findIndex(reversedFunction) == -1)
         
     }
     
@@ -287,15 +255,12 @@ if ("findAsyncSequential" in Array.prototype == NO) {
             }
             return undefined
         }
-        
-        const result = findAsyncSequential(this, functionToCall)
-        
-        return result
+    
+        return findAsyncSequential(this, functionToCall)
         
     }
     
 }
-
 
 
 // interface Array<T> {
@@ -331,8 +296,7 @@ if ("groupedBy" in Array.prototype == NO) {
 if ("firstElement" in Array.prototype == NO) {
     Object.defineProperty(Array.prototype, "firstElement", {
         get: function firstElement(this: Array<any>) {
-            const result = this[0]
-            return result
+            return this[0]
         },
         set: function (this: Array<any>, element: any) {
             if (this.length == 0) {
@@ -347,8 +311,7 @@ if ("firstElement" in Array.prototype == NO) {
 if ("lastElement" in Array.prototype == NO) {
     Object.defineProperty(Array.prototype, "lastElement", {
         get: function lastElement(this: Array<any>) {
-            const result = this[this.length - 1]
-            return result
+            return this[this.length - 1]
         },
         set: function (this: Array<any>, element: any) {
             if (this.length == 0) {
@@ -365,18 +328,18 @@ if ("everyElement" in Array.prototype == NO) {
     Object.defineProperty(Array.prototype, "everyElement", {
         
         get: function everyElement(this: Array<any>) {
+    
+            const valueKeys: string[] = []
+    
+            const targetFunction = (objects: any) => {
+        
+                return this.map((element) => {
             
-            const valueKeys = []
-            
-            const targetFunction = (objects) => {
-                
-                const result = this.map((element, index, array) => {
-                    
                     const thisObject = UIObject.valueForKeyPath(
                         valueKeys.arrayByTrimmingToLengthIfLonger(valueKeys.length - 1).join("."),
                         element
                     ) || element
-                    
+            
                     const elementFunction = (UIObject.valueForKeyPath(valueKeys.join("."), element) as Function).bind(
                         thisObject,
                         objects
@@ -386,42 +349,32 @@ if ("everyElement" in Array.prototype == NO) {
                     
                 })
                 
-                return result
-                
             }
-            
-            const result = new Proxy(
+    
+            const result: any = new Proxy(
                 targetFunction,
                 {
-                    
-                    get: (target, key, receiver) => {
-                        
+            
+                    get: (target, key: string, _receiver) => {
+                
                         if (key == "UI_elementValues") {
-                            
-                            return this.map((element, index, array) => UIObject.valueForKeyPath(
+                            return this.map(element => UIObject.valueForKeyPath(
                                 valueKeys.join("."),
                                 element
                             ))
-                            
                         }
-                        
+                
                         valueKeys.push(key)
                         
                         return result
                         
                     },
-                    set: (target, key, value, receiver) => {
-                        
+                    set: (target, key: string, value, _receiver) => {
+                
                         valueKeys.push(key)
-                        
-                        this.forEach((element, index, array) => {
-                            
-                            UIObject.setValueForKeyPath(valueKeys.join("."), value, element, YES)
-                            
-                        })
-                        
+                        this.forEach(element => UIObject.setValueForKeyPath(valueKeys.join("."), value, element, YES))
                         return true
-                        
+                
                     }
                     
                 }
@@ -431,13 +384,9 @@ if ("everyElement" in Array.prototype == NO) {
             
         },
         set: function (this: Array<any>, element: any) {
-            
-            for (var i = 0; i < this.length; ++i) {
-                
+            for (let i = 0; i < this.length; ++i) {
                 this[i] = element
-                
             }
-            
         }
         
     })
@@ -468,10 +417,7 @@ export type UIEveryElementItem<T> = {
 if ("copy" in Array.prototype == NO) {
     
     (Array.prototype as any).copy = function (this: Array<any>) {
-        
-        const result = this.slice(0)
-        return result
-        
+        return this.slice(0)
     }
     
 }
@@ -487,11 +433,9 @@ if ("copy" in Array.prototype == NO) {
 if ("arrayByRepeating" in Array.prototype == NO) {
     
     (Array.prototype as any).arrayByRepeating = function (this: Array<any>, numberOfRepetitions: number) {
-        const result = []
-        for (var i = 0; i < numberOfRepetitions; i++) {
-            this.forEach(function (element, index, array) {
-                result.push(element)
-            })
+        const result: any[] = []
+        for (let i = 0; i < numberOfRepetitions; i++) {
+            this.forEach(element => result.push(element))
         }
         return result
     }
@@ -509,7 +453,7 @@ if ("arrayByRepeating" in Array.prototype == NO) {
 if ("arrayByTrimmingToLengthIfLonger" in Array.prototype == NO) {
     (Array.prototype as any).arrayByTrimmingToLengthIfLonger = function (this: Array<any>, maxLength: number) {
         const result = []
-        for (var i = 0; i < maxLength && i < this.length; i++) {
+        for (let i = 0; i < maxLength && i < this.length; i++) {
             result.push(this[i])
         }
         return result
@@ -528,10 +472,9 @@ if ("summedValue" in Array.prototype == NO) {
     
     Object.defineProperty(Array.prototype, "summedValue", {
         get: function summedValue(this: Array<any>) {
-            const result = this.reduce(function (a, b) {
+            return this.reduce(function (a, b) {
                 return a + b
             }, 0)
-            return result
         }
     })
     
@@ -619,16 +562,27 @@ if ("isEqualToArray" in Array.prototype == NO) {
 }
 
 
-
-
-
 if ("forEach" in Object.prototype == NO) {
     
-    (Object.prototype as any).forEach = function (this: Object, callbackFunction: (value: any, key: string) => void) {
+    (Object.prototype as any).forEach = function (
+        this: Record<string, any>,
+        callbackFunction: (
+            value: any,
+            key: string,
+            stopLooping: Function
+        ) => void
+    ) {
         const keys = Object.keys(this)
-        keys.forEach(function (key, index, array) {
-            callbackFunction(this[key], key)
-        }.bind(this))
+        let shouldStopLooping = NO
+        
+        function stopLooping() {
+            shouldStopLooping = YES
+        }
+        
+        keys.anyMatch(key => {
+            callbackFunction(this[key], key, stopLooping)
+            return shouldStopLooping
+        })
     }
     
     // Hide method from for-in loops
@@ -647,8 +601,8 @@ if ("forEach" in Object.prototype == NO) {
 if ("allValues" in Object.prototype == NO) {
     Object.defineProperty(Object.prototype, "allValues", {
         get: function (this: Object) {
-            const values = []
-            this.forEach(function (value: any) {
+            const values: any[] = []
+            this.forEach((value: any) => {
                 values.push(value)
             })
             return values
@@ -667,8 +621,7 @@ if ("allValues" in Object.prototype == NO) {
 if ("allKeys" in Object.prototype == NO) {
     Object.defineProperty(Object.prototype, "allKeys", {
         get: function (this: Object) {
-            const values = Object.keys(this)
-            return values
+            return Object.keys(this)
         }
     })
 }
@@ -725,10 +678,8 @@ if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO) {
             return output
             
         }
-        
-        const result = mergeRecursively(this, object)
-        
-        return result
+    
+        return mergeRecursively(this, object)
         
     }
     
@@ -741,10 +692,8 @@ if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO) {
 if ("asValueObject" in Object.prototype == NO) {
     
     (Object.prototype as any).asValueObject = function () {
-        
-        const result = new UICoreExtensionValueObject(this)
-        
-        return result
+    
+        return new UICoreExtensionValueObject(this)
         
     }
     
@@ -762,36 +711,36 @@ if ("asValueObject" in Object.prototype == NO) {
 //
 // }
 
-export type Unpacked<T> =
-    T extends (infer U)[]
-        ? U
-        : T extends (...args: any[]) => infer U
-            ? U
-            : T extends Promise<infer U>
-                ? U
-                : T
+// export type Unpacked<T> =
+//     T extends (infer U)[]
+//         ? U
+//         : T extends (...args: any[]) => infer U
+//             ? U
+//             : T extends Promise<infer U>
+//                 ? U
+//                 : T
+//
+// export type UnpackedObject<T> = {
+//     [P in keyof T]: Unpacked<T[P]>
+// }
 
-export type UnpackedObject<T> = {
-    [P in keyof T]: Unpacked<T[P]>
-}
-
-export function promisedProperties<ObjectType extends object>(object: ObjectType): UnpackedObject<ObjectType> {
-    
-    let promisedProperties = []
-    const objectKeys = Object.keys(object)
-    
-    objectKeys.forEach((key) => promisedProperties.push(object[key]))
-    
-    // @ts-ignore
-    return Promise.all(promisedProperties)
-        .then((resolvedValues) => {
-            return resolvedValues.reduce((resolvedObject, property, index) => {
-                resolvedObject[objectKeys[index]] = property
-                return resolvedObject
-            }, object)
-        })
-    
-}
+// export function promisedProperties<ObjectType extends Record<string, any>>(object: ObjectType): UnpackedObject<ObjectType> {
+//
+//     let promisedProperties: any[] = []
+//     const objectKeys = Object.keys(object)
+//
+//     objectKeys.forEach((key) => promisedProperties.push(object[key]))
+//
+//     // @ts-ignore
+//     return Promise.all(promisedProperties)
+//         .then((resolvedValues) => {
+//             return resolvedValues.reduce((resolvedObject, property, index) => {
+//                 resolvedObject[objectKeys[index]] = property
+//                 return resolvedObject
+//             }, object)
+//         })
+//
+// }
 
 // if ("promisedProperties" in Object.prototype == NO) {
 //
@@ -818,11 +767,8 @@ export function promisedProperties<ObjectType extends object>(object: ObjectType
 
 if ("contains" in String.prototype == NO) {
     
-    (String.prototype as any).contains = function (this: String, string) {
-        
-        const result = (this.indexOf(string) != -1)
-        return result
-        
+    (String.prototype as any).contains = function (this: String, string: string) {
+        return (this.indexOf(string) != -1)
     }
     
     // Hide method from for-in loops
@@ -841,8 +787,7 @@ if ("contains" in String.prototype == NO) {
 if ("capitalizedString" in String.prototype == NO) {
     Object.defineProperty(Object.prototype, "capitalizedString", {
         get: function (this: String) {
-            const result = this.charAt(0).toUpperCase() + this.slice(1).toLowerCase()
-            return result
+            return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase()
         }
     })
 }
@@ -858,8 +803,15 @@ if ("capitalizedString" in String.prototype == NO) {
 if ("numericalValue" in String.prototype == NO) {
     Object.defineProperty(String.prototype, "numericalValue", {
         get: function numericalValue(this: string) {
-            const result = Number(this)
-            return result
+            return Number(this)
+        }
+    })
+}
+
+if ("integerValue" in String.prototype == NO) {
+    Object.defineProperty(String.prototype, "integerValue", {
+        get: function integerValue(this: string) {
+            return Number(this).integerValue
         }
     })
 }
@@ -900,14 +852,10 @@ if ("isANumber" in Number.prototype == NO) {
 // }
 
 
-
-
-
 if ("integerValue" in Number.prototype == NO) {
     Object.defineProperty(Number.prototype, "integerValue", {
         get: function (this: number) {
-            const result = parseInt("" + (Math.round(this) + 0.5))
-            return result
+            return parseInt("" + (Math.round(this) + 0.5))
         }
     })
 }
@@ -920,30 +868,14 @@ if ("integerValue" in Number.prototype == NO) {
 // }
 
 
-
-export class PrimitiveNumber {
-    
-    // @ts-ignore
-    static [Symbol.hasInstance](x) {
-        return
-    }
-    
-}
-
-
 if ("integerValue" in Boolean.prototype == NO) {
     
     Object.defineProperty(Boolean.prototype, "integerValue", {
         get: function (this: boolean) {
-            
             if (this == true) {
-                
                 return 1
-                
             }
-            
             return 0
-            
         }
     })
     
@@ -961,16 +893,11 @@ if ("dateString" in Date.prototype == NO) {
     
     Object.defineProperty(Date.prototype, "dateString", {
         get: function dateString(this: Date) {
-            
-            const result = ("0" + this.getDate()).slice(-2) + "-" + ("0" + (this.getMonth() + 1)).slice(-2) + "-" +
+            return ("0" + this.getDate()).slice(-2) + "-" + ("0" + (this.getMonth() + 1)).slice(-2) + "-" +
                 this.getFullYear() + " " + ("0" + this.getHours()).slice(-2) + ":" +
                 ("0" + this.getMinutes()).slice(-2)
-            
-            return result
-            
         }
     })
-    
     
     
 }

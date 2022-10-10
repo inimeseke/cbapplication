@@ -1,11 +1,11 @@
-import { UIColor, UIRoute, UITextView, UIViewController } from "uicore-ts"
+import { UIColor, UIRoute, UITextView, UIView, UIViewController } from "uicore-ts"
 
 
 export class SomeContentViewController extends UIViewController {
     
     readonly titleLabel: UITextView
     
-    constructor(view) {
+    constructor(view: UIView) {
         
         super(view)
         

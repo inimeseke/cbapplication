@@ -12,10 +12,10 @@ import {
     wrapInNil,
     YES
 } from "uicore-ts"
+import { LanguageService } from "../LanguageService"
 import { CBColor } from "./CBColor"
 import { CBTableViewCellDescriptor } from "./CBDataView"
 import { CellView } from "./CellView"
-import { LanguageService } from "cbcore-ts"
 import { RowView } from "./RowView"
 
 
@@ -23,7 +23,7 @@ export class CBTableRowView extends RowView {
     
     private readonly backgroundView: UIView
     private readonly _bottomLineView: UIView
-    private dataCells: CellView[]
+    private dataCells: CellView[] = []
     private _data: any
     private _descriptors: CBTableViewCellDescriptor[] = []
     
@@ -48,18 +48,15 @@ export class CBTableRowView extends RowView {
         
         this.leftCell = new CellView()
         this.rightCell = new CellView()
-        
-        this._rowHeight = nil;
+    
+        this._rowHeight = nil
         
     }
     
-
+    
     set descriptors(descriptors) {
-        
         this._descriptors = descriptors
-        
         this.updateContentForCurrentDescriptors()
-        
     }
     
     get descriptors() {
@@ -90,22 +87,24 @@ export class CBTableRowView extends RowView {
                 (sender, event) => {
                     
                     const buttonWasPressed = FIRST_OR_NIL(descriptor.buttonWasPressed)
-                    
                     buttonWasPressed(view, this.data)
                     
                 }
             )
             
             view.isAButton = IS(descriptor.buttonWasPressed)
-            
-            var initCell = descriptor.initCell
+    
+            let initCell = descriptor.initCell
             
             if (!initCell) {
                 
                 initCell = (cellView: CellView) => {
-                    
-                    cellView.titleLabel.text = LanguageService.stringForCurrentLanguage(FIRST(descriptor.defaultTitle, descriptor.title))
-                    
+    
+                    cellView.titleLabel.text = LanguageService.stringForCurrentLanguage(FIRST(
+                        descriptor.defaultTitle,
+                        descriptor.title
+                    ))
+    
                 }
                 
             }
@@ -140,25 +139,17 @@ export class CBTableRowView extends RowView {
     }
     
     
-    
-    
-    
     set data(data) {
-        
         this._data = data
-        
         this.updateContentForCurrentData(data)
-        
     }
     
     get data() {
-        
         return this._data
-        
     }
     
     
-    private updateContentForCurrentData(data) {
+    private updateContentForCurrentData(data: any) {
         
         if (IS_NOT(data)) {
             
@@ -175,7 +166,7 @@ export class CBTableRowView extends RowView {
                 descriptor.defaultTitle
             )
             
-            cellView.titleLabel.changesOften = YES;
+            cellView.titleLabel.changesOften = YES
             
             cellView.setNeedsLayout()
             
@@ -195,14 +186,11 @@ export class CBTableRowView extends RowView {
     
     
         const tableView = wrapInNil(this.superview as UITableView)
-        
-        tableView.invalidateSizeOfRowWithIndex(this._UITableViewRowIndex)
+    
+        tableView.invalidateSizeOfRowWithIndex(this._UITableViewRowIndex ?? 0)
         
         
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -214,35 +202,22 @@ export class CBTableRowView extends RowView {
         
         const bounds = this.bounds.rectangleWithInset(padding)
     
-        
-        
+    
         this.backgroundView.frame = this.bounds.rectangleWithInsets(padding, padding, 0, 0)
         
         this._bottomLineView.frame = this.bounds.rectangleWithHeight(1, 1).rectangleWithInsets(padding, padding, 0, 0)
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
     intrinsicContentHeight(constrainingWidth = 0) {
-        
-        
-        
-        
-        return this.cells.map((value, index, array) => value.intrinsicContentHeight(constrainingWidth)).max();
-        
+    
+    
+        return this.cells.map((value, index, array) => value.intrinsicContentHeight(constrainingWidth)).max()
         
         
     }
-    
-    
-    
     
     
 }

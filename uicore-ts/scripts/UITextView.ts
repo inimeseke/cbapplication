@@ -5,14 +5,11 @@ import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
-
-
-
 export class UITextView extends UIView {
     
     
     _textColor: UIColor = UITextView.defaultTextColor
-    _textAlignment: string
+    _textAlignment?: string
     
     _isSingleLine = YES
     
@@ -40,7 +37,7 @@ export class UITextView extends UIView {
     
     static _ptToPx: number
     static _pxToPt: number
-    _text: string
+    _text?: string
     
     
     constructor(elementID?: string, textViewType = UITextView.type.paragraph, viewHTMLElement = null) {
@@ -74,22 +71,20 @@ export class UITextView extends UIView {
     }
     
     
-    
-    
-    
     static _determinePXAndPTRatios() {
-        
+    
+        if (UITextView._ptToPx) {
+            return
+        }
+    
         const o = document.createElement("div")
         o.style.width = "1000pt"
         document.body.appendChild(o)
         UITextView._ptToPx = o.clientWidth / 1000
         document.body.removeChild(o)
         UITextView._pxToPt = 1 / UITextView._ptToPx
-        
+    
     }
-    
-    
-    
     
     
     static type = {
@@ -107,7 +102,6 @@ export class UITextView extends UIView {
         "label": "label"
         
     }
-    
     
     
     static textAlignment = {
@@ -128,7 +122,6 @@ export class UITextView extends UIView {
         this._textAlignment = textAlignment
         this.style.textAlign = textAlignment
     }
-    
     
     
     get textColor() {
@@ -197,13 +190,7 @@ export class UITextView extends UIView {
     notificationAmountDidChange(notificationAmount: number) {
     
     
-    
-    
-    
     }
-    
-    
-    
     
     
     get text() {
@@ -251,7 +238,6 @@ export class UITextView extends UIView {
     }
     
     
-    
     setText(key: string, defaultString: string, parameters?: { [x: string]: string | UILocalizedTextObject }) {
         
         this.setInnerHTML(key, defaultString, parameters)
@@ -281,9 +267,6 @@ export class UITextView extends UIView {
     }
     
     
-    
-    
-    
     useAutomaticFontSize(minFontSize: number = nil, maxFontSize: number = nil) {
         
         
@@ -298,9 +281,6 @@ export class UITextView extends UIView {
         
         
     }
-    
-    
-    
     
     
     static automaticallyCalculatedFontSize(
@@ -321,8 +301,6 @@ export class UITextView extends UIView {
         const widthMultiplier = bounds.width / (currentSize.width + 1)
         
         
-        
-        
         var multiplier = heightMultiplier
         
         if (heightMultiplier > widthMultiplier) {
@@ -330,10 +308,7 @@ export class UITextView extends UIView {
             multiplier = widthMultiplier
             
             
-            
         }
-        
-        
         
         
         const maxFittingFontSize = currentFontSize * multiplier
@@ -355,11 +330,7 @@ export class UITextView extends UIView {
         return maxFittingFontSize
         
         
-        
     }
-    
-    
-    
     
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
@@ -374,9 +345,6 @@ export class UITextView extends UIView {
         super.willMoveToSuperview(superview)
         
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -397,16 +365,10 @@ export class UITextView extends UIView {
             )
             
             
-            
-            
         }
         
         
-        
-        
-        
     }
-    
     
     
     intrinsicContentHeight(constrainingWidth = 0) {
@@ -480,8 +442,6 @@ export class UITextView extends UIView {
     }
     
     
-    
-    
     intrinsicContentSize() {
         
         // This works but is slow
@@ -492,19 +452,10 @@ export class UITextView extends UIView {
     }
     
     
-    
-    
-    
 }
 
 
-
-
-
 UITextView._determinePXAndPTRatios()
-
-
-
 
 
 // /**

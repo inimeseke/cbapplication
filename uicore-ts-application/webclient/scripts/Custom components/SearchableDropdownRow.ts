@@ -1,7 +1,7 @@
-import { NO, UIButton, UIColor, YES } from "uicore-ts"
-import { CBColor } from "./CBColor"
+import { IS, NO, UIButton, UIColor, YES } from "uicore-ts"
+import { LanguageService } from "../LanguageService"
 import { CBCheckbox } from "./CBCheckbox"
-import { LanguageService } from "cbcore-ts"
+import { CBColor } from "./CBColor"
 
 
 export class SearchableDropdownRow extends UIButton {
@@ -15,90 +15,43 @@ export class SearchableDropdownRow extends UIButton {
         
         super(elementID)
         
-    }
-    
-
-    initView(elementID: string, viewHTMLElement: HTMLElement, initViewData) {
-        
-        super.initView(elementID, viewHTMLElement, initViewData)
-        
-        
-        
         this._checkbox = new CBCheckbox(elementID + "Checkbox")
         this._checkbox.userInteractionEnabled = NO
-        
         this.addSubview(this._checkbox)
-        
-        
-        
-        
         
         this.style.outline = "none"
         
-        
-        
-        
-        
     }
-    
-    
-    
     
     
     set titleText(titleText: string) {
-        
         this.titleLabel.text = titleText
         this._checkbox.titleLabel.text = titleText
-        
     }
     
     get titleText() {
-        
         return this.titleLabel.text
-        
     }
-    
     
     
     set selected(selected: boolean) {
-        
         super.selected = selected
-        
         this._checkbox.selected = selected
-        
-        
-        
     }
     
     get selected() {
-        
         return super.selected
-        
     }
-    
-    
-    
     
     
     set focused(focused: boolean) {
-        
         this._focused = focused
-        
         this.updateContentForCurrentState()
-        
-        
-        
-        
     }
     
     get focused() {
-        
-        return this._focused
-        
+        return this._focused ?? NO
     }
-    
-    
-    
     
     
     static type = {
@@ -111,14 +64,10 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    
-    
-    
     updateContentForNormalState() {
         
         
         if (this.type == SearchableDropdownRow.type.sectionTitle) {
-            
             
             
             this.backgroundColor = UIColor.transparentColor
@@ -137,8 +86,6 @@ export class SearchableDropdownRow extends UIButton {
             }
             
             this.titleLabel.hidden = NO
-            
-            
             
             
         }
@@ -193,7 +140,6 @@ export class SearchableDropdownRow extends UIButton {
         else {
             
             
-            
             this.backgroundColor = UIColor.transparentColor
             this.titleLabel.textColor = CBColor.primaryTintColor
             
@@ -215,8 +161,6 @@ export class SearchableDropdownRow extends UIButton {
         }
         
         this.userInteractionEnabled = YES
-        
-        
         
         
     }
@@ -263,7 +207,6 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    
     updateContentForSelectedState() {
         
         
@@ -271,20 +214,22 @@ export class SearchableDropdownRow extends UIButton {
         
         if (this.type == SearchableDropdownRow.type.selectableItem || this.type ==
             SearchableDropdownRow.type.customItem) {
-            
+    
             this._checkbox.hidden = NO
             //this._checkbox.titleLabel.hidden = YES;
-            
+    
             this._checkbox.titleLabel.textColor = CBColor.primaryTintColor
-            
-            this._titleLabel.hidden = YES
-            
+    
+            if (IS(this._titleLabel)) {
+        
+                this._titleLabel.hidden = YES
+        
+            }
+    
         }
         
         
-        
     }
-    
     
     
     wasRemovedFromViewTree() {
@@ -295,11 +240,7 @@ export class SearchableDropdownRow extends UIButton {
         this.hovered = NO
         
         
-        
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -308,7 +249,6 @@ export class SearchableDropdownRow extends UIButton {
         
         
         if (this._checkbox) {
-            
             
             
             this._checkbox.style.top = "25%"
@@ -322,13 +262,7 @@ export class SearchableDropdownRow extends UIButton {
         }
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
 }

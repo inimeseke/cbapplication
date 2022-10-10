@@ -5,30 +5,26 @@ import { UITextView } from "./UITextView"
 import { UIView, UIViewAddControlEventTargetObject, UIViewBroadcastEvent } from "./UIView"
 
 
-
-
-
 export class UITextField extends UITextView {
     
+    _placeholderTextKey?: string
+    _defaultPlaceholderText?: string
     
-    _placeholderTextKey: string
-    _defaultPlaceholderText: string
-    
-    _viewHTMLElement: HTMLInputElement
+    _viewHTMLElement!: HTMLInputElement
     
     constructor(elementID?: string, viewHTMLElement = null, type = UITextView.type.textField) {
-    
+        
         super(elementID, type, viewHTMLElement)
-    
+        
         this.viewHTMLElement.setAttribute("type", "text")
-    
+        
         this.backgroundColor = UIColor.whiteColor
     
         this.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
             (sender, event) => sender.focus()
         )
-    
+        
         this.viewHTMLElement.oninput = (event) => {
             this.sendControlEventForKey(UITextField.controlEvent.TextChange, event)
         }
@@ -44,31 +40,21 @@ export class UITextField extends UITextView {
     }
     
     
-    
-    
-    static controlEvent = Object.assign({}, UIView.controlEvent, {
-        
+    static controlEvent = Object.assign({}, UITextView.controlEvent, {
         
         "TextChange": "TextChange"
-        
         
     })
     
     
-    
-    
-    
-    get addControlEventTarget(): UIViewAddControlEventTargetObject<typeof UITextField.controlEvent> {
-        
-        // @ts-ignore
-        return super.addControlEventTarget as any;
-        
+    // @ts-ignore
+    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UITextField> {
+        return (super.controlEventTargetAccumulator as any)
     }
     
     public get viewHTMLElement() {
         return this._viewHTMLElement
     }
-    
     
     
     public set text(text: string) {

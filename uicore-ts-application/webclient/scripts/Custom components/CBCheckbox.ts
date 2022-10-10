@@ -1,4 +1,4 @@
-import { nil, NO, UITextView, UIView } from "uicore-ts"
+import { nil, NO, UITextView, UIView, UIViewAddControlEventTargetObject } from "uicore-ts"
 
 
 export class CBCheckbox extends UIView {
@@ -9,13 +9,6 @@ export class CBCheckbox extends UIView {
     constructor(elementID: string) {
         
         super(elementID, nil, "label")
-        
-    }
-    
-
-    initView(elementID: string, viewHTMLElement: HTMLElement) {
-        
-        super.initView(elementID, viewHTMLElement)
         
         this.checkbox = new UIView(elementID + "Checkbox", nil, "input")
         this.checkbox.viewHTMLElement.setAttribute("type", "checkbox")
@@ -39,24 +32,20 @@ export class CBCheckbox extends UIView {
         this.viewHTMLElement.onchange = (event) => {
             this.sendControlEventForKey(CBCheckbox.controlEvent.SelectionChange, event)
         }
-        
-        
+    
     }
-    
-    
-    
     
     
     static controlEvent = Object.assign({}, UIView.controlEvent, {
         
-        
         "SelectionChange": "SelectionChange"
-        
         
     })
     
-    
-    
+    // @ts-ignore
+    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof CBCheckbox> {
+        return (super.controlEventTargetAccumulator as any)
+    }
     
     
     get isStatic() {
@@ -81,9 +70,7 @@ export class CBCheckbox extends UIView {
         }
         
         
-        
     }
-    
     
     
     get selected() {
@@ -97,9 +84,6 @@ export class CBCheckbox extends UIView {
         (this.checkbox.viewHTMLElement as HTMLInputElement).checked = selected
         
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -120,13 +104,7 @@ export class CBCheckbox extends UIView {
         ).replace(this.titleLabel.textSuffix, "")
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
 }

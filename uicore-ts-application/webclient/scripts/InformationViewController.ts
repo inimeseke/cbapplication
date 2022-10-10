@@ -1,16 +1,16 @@
-import { UIColor, UIRoute, UIViewController } from "uicore-ts"
 import { CBCore } from "cbcore-ts"
+import { UIColor, UIRoute, UIView, UIViewController } from "uicore-ts"
 
 
 export class InformationViewController extends UIViewController {
     
     
-    constructor(view) {
+    constructor(view: UIView) {
         
         super(view)
         
         // Code for further setup if necessary
-    
+        
         this.view.backgroundColor = UIColor.whiteColor
         
     }
@@ -26,8 +26,8 @@ export class InformationViewController extends UIViewController {
     
     
     async handleRoute(route: UIRoute) {
-        
-        super.handleRoute(route)
+    
+        await super.handleRoute(route)
         
         CBCore.sharedInstance.didSetLanguageKey()
     
@@ -36,22 +36,22 @@ export class InformationViewController extends UIViewController {
         const key = inquiryComponent.parameters[InformationViewController.ParameterIdentifierName.key]
     
         this.view.setInnerHTML(key, "Failed to load data for key")
-        
+    
         this.view.setNeedsLayoutUpToRootView()
-        
+    
         // @ts-ignore
         const imgLoad = imagesLoaded(this.view.viewHTMLElement)
     
-        const imagesDidLoad = function (this: InformationViewController, instance) {
-            
+        const imagesDidLoad = () => {
+        
             console.log("ALWAYS - all images have been loaded")
             this.view.setNeedsLayoutUpToRootView()
-            
-            imgLoad.off("always", imagesDidLoad)
-            
-            
-        }.bind(this)
         
+            imgLoad.off("always", imagesDidLoad)
+        
+        
+        }
+    
         imgLoad.on("always", imagesDidLoad)
         
     }

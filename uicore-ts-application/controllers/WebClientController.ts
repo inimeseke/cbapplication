@@ -1,11 +1,10 @@
-import { UICore } from "uicore-ts"
-import { promisify } from "util"
 import { CBCoreInitializer } from "cbcore-ts"
-import { RootViewController } from "../webclient/scripts/RootViewController"
-import { RoutesController } from "./RoutesController"
 import { Application, Request, Response } from "express"
-import { InternalSettingsController } from "./InternalSettingsController"
 import * as fs from "fs"
+import { Server } from "socket.io"
+import { promisify } from "util"
+import { InternalSettingsController } from "./InternalSettingsController"
+import { RoutesController } from "./RoutesController"
 
 
 export class WebClientController extends RoutesController {
@@ -72,7 +71,7 @@ export class WebClientController extends RoutesController {
         return this._instance
     }
     
-    public static Instance(expressApp: Application, socketIO: SocketIO.Server) {
+    public static Instance(expressApp: Application, socketIO: Server) {
         return this._instance || (this._instance = new this(expressApp, socketIO))
     }
     

@@ -5,21 +5,27 @@ import UIStringFilterWebWorker from "./UIStringFilterWebWorker.worker.js"
 
 export class UIStringFilter extends UIObject {
     
-    
-    
-    
-    
-    static _sharedWebWorkerHolder = { webWorker: new UIStringFilterWebWorker() }
+    static _sharedWebWorkerHolder: {
+        webWorker: any;
+        UICore_completionFunctions: Record<string, (
+            filteredData: string[],
+            filteredIndexes: number[],
+            identifier: any
+        ) => void>
+        UICore_messagesToPost: any
+        UICore_isWorking: boolean
+    } = {
+        webWorker: new UIStringFilterWebWorker(),
+        UICore_isWorking: false,
+        UICore_messagesToPost: undefined,
+        UICore_completionFunctions: {}
+    }
     
     static _instanceNumber = -1
     
-    
     _instanceNumber: number
-    
     _isThreadClosed = NO
-    
     private readonly _webWorkerHolder = UIStringFilter._sharedWebWorkerHolder
-    
     
     
     constructor(useSeparateWebWorkerHolder = NO) {
@@ -29,7 +35,10 @@ export class UIStringFilter extends UIObject {
         if (useSeparateWebWorkerHolder) {
     
             this._webWorkerHolder = {
-                webWorker: new UIStringFilterWebWorker()
+                webWorker: new UIStringFilterWebWorker(),
+                UICore_isWorking: false,
+                UICore_messagesToPost: undefined,
+                UICore_completionFunctions: {}
             }
     
         }
@@ -38,98 +47,73 @@ export class UIStringFilter extends UIObject {
         this._instanceNumber = UIStringFilter._instanceNumber
         
         if (IS_NOT(this._webWorkerHolder.webWorker.onmessage)) {
-            
-            this._webWorkerHolder.webWorker.onmessage = message => {
     
+            this._webWorkerHolder.webWorker.onmessage = (message: {
+                data: {
+                    identifier: string;
+                    instanceIdentifier: string;
+                    filteredData: string[];
+                    filteredIndexes: number[]
+                }
+            }) => {
+        
                 this.isWorkerBusy = NO
                 this.postNextMessageIfNeeded()
-    
+        
                 const key = "" + message.data.identifier + message.data.instanceIdentifier
-    
+        
                 const completionFunction = this.completionFunctions[key]
-    
+        
                 if (IS(completionFunction)) {
-        
+            
                     //console.log("Filtering took " + (Date.now() - startTime) + " ms");
-        
+            
                     completionFunction(message.data.filteredData, message.data.filteredIndexes, message.data.identifier)
-        
+            
                 }
-    
+        
                 delete this.completionFunctions[key]
-    
-                var asd = 1
                 
             }
             
         }
-    
-    
-    
-    
-    
+        
+        
     }
     
     
-    
-    
-    
     get instanceIdentifier() {
-        
         return this._instanceNumber
-        
     }
     
     
     get completionFunctions() {
-    
-        const key = "UICore_completionFunctions"
-        var result: {
-        
-            [x: string]: (filteredData: string[], filteredIndexes: number[], identifier: any) => void;
-        
-        } = this._webWorkerHolder[key]
-        
+        let result = this._webWorkerHolder.UICore_completionFunctions
         if (IS_NOT(result)) {
-    
             result = {}
-            this._webWorkerHolder[key] = result
-    
+            this._webWorkerHolder.UICore_completionFunctions = result
         }
-    
         return result
-        
     }
     
     get messagesToPost() {
-    
         const key = "UICore_messagesToPost"
-        var result: any[] = this._webWorkerHolder[key]
-    
+        let result: any[] = this._webWorkerHolder[key]
         if (IS_NOT(result)) {
-        
             result = []
             this._webWorkerHolder[key] = result
-        
         }
-    
         return result
-        
     }
     
     
     set isWorkerBusy(isWorkerBusy: boolean) {
-    
-        this._webWorkerHolder["UICore_isWorking"] = isWorkerBusy
-        
+        this._webWorkerHolder.UICore_isWorking = isWorkerBusy
     }
     
     get isWorkerBusy() {
-    
-        return IS(this._webWorkerHolder["UICore_isWorking"])
-        
+        return IS(this._webWorkerHolder.UICore_isWorking)
     }
-    
     
     
     postNextMessageIfNeeded() {
@@ -144,9 +128,6 @@ export class UIStringFilter extends UIObject {
         }
         
     }
-    
-    
-    
     
     
     filterData(
@@ -232,9 +213,6 @@ export class UIStringFilter extends UIObject {
     }
     
     
-    
-    
-    
     closeThread() {
         
         this._isThreadClosed = YES
@@ -246,11 +224,7 @@ export class UIStringFilter extends UIObject {
         }
         
         
-        
     }
-    
-    
-    
     
     
 }

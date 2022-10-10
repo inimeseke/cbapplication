@@ -3,9 +3,6 @@ import { IS, nil, NO, YES } from "./UIObject"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
-
-
-
 export class UIBaseButton extends UIView {
     
     _selected: boolean = NO
@@ -15,81 +12,66 @@ export class UIBaseButton extends UIView {
     
     
     _isToggleable: boolean = NO
-    _hovered: boolean
-    _focused: boolean
+    _hovered?: boolean
+    _focused?: boolean
     
     
-    
-    
-    
-    constructor(elementID: string, elementType?: string, initViewData?: any) {
+    constructor(elementID?: string, elementType?: string, initViewData?: any) {
         
         super(elementID, nil, elementType, initViewData)
-        
-        this.initViewStateControl()
-        
-    }
-    
-    
-    
-    
-    
-    initViewStateControl() {
-        
-        this.class.superclass = UIView
         
         // Instance variables
         
         
         this._isPointerInside = NO
-    
-    
-        const setHovered = function () {
+        
+        
+        const setHovered = () => {
             this.hovered = YES
-        }.bind(this)
+        }
         this.addTargetForControlEvent(UIView.controlEvent.PointerHover, setHovered)
-    
-        const setNotHovered = function () {
         
+        const setNotHovered = () => {
+            
             this.hovered = NO
+            
+        }
         
-        }.bind(this)
-    
         this.addTargetForControlEvents([
             UIView.controlEvent.PointerLeave, UIView.controlEvent.PointerCancel, UIView.controlEvent.MultipleTouches
         ], setNotHovered)
-    
-    
-        var highlightingTime
-        const setHighlighted = function () {
+        
+        
+        var highlightingTime: number
+        const setHighlighted = () => {
             this.highlighted = YES
             highlightingTime = Date.now()
-        }.bind(this)
+        }
         this.addTargetForControlEvent(UIView.controlEvent.PointerDown, setHighlighted)
         this.addTargetForControlEvent(UIView.controlEvent.PointerEnter, setHighlighted)
-    
-        const setNotHighlighted = function () {
+        
+        const setNotHighlighted = () => {
             this.highlighted = NO
-        }.bind(this)
-        const setNotHighlightedWithMinimumDuration = function () {
+        }
+        const setNotHighlightedWithMinimumDuration = () => {
             const minimumDurationInMilliseconds = 50
             const elapsedTime = Date.now() - highlightingTime
             if (minimumDurationInMilliseconds < elapsedTime) {
                 this.highlighted = NO
             }
             else {
-                setTimeout(function () {
+                setTimeout(() => {
                     this.highlighted = NO
-                }.bind(this), minimumDurationInMilliseconds - elapsedTime)
+                }, minimumDurationInMilliseconds - elapsedTime)
             }
-        }.bind(this)
+        }
         this.addTargetForControlEvents([
             UIView.controlEvent.PointerLeave, UIView.controlEvent.PointerCancel, UIView.controlEvent.MultipleTouches
         ], setNotHighlighted)
         this.addTargetForControlEvent(UIView.controlEvent.PointerUp, setNotHighlightedWithMinimumDuration)
         
         // Handle enter key press
-        this.addTargetForControlEvent(UIView.controlEvent.EnterDown, function () {
+        this.addTargetForControlEvent(UIView.controlEvent.EnterDown, () => {
             
             setHighlighted()
             setNotHighlightedWithMinimumDuration()
@@ -99,24 +81,22 @@ export class UIBaseButton extends UIView {
         
         this.addTargetForControlEvent(
             UIView.controlEvent.Focus,
-            function (this: UIBaseButton, sender: UIView, event: Event) {
-                
+            (sender: UIView, event: Event) => {
+        
                 this.focused = YES
-                
-            }.bind(this)
+        
+            }
         )
         
         this.addTargetForControlEvent(
             UIView.controlEvent.Blur,
-            function (this: UIBaseButton, sender: UIView, event: Event) {
-                
+            (sender: UIView, event: Event) => {
+        
                 this.focused = NO
-                
-            }.bind(this)
+        
+            }
         )
         
-        
-        this.updateContentForCurrentState()
         
         this.pausesPointerEvents = YES
         this.tabIndex = 1
@@ -131,22 +111,17 @@ export class UIBaseButton extends UIView {
         
         this.addTargetForControlEvents([
             UIView.controlEvent.EnterDown, UIView.controlEvent.PointerUpInside
-        ], function (this: UIBaseButton, sender, event) {
-            
+        ], () => {
+    
             if (this.isToggleable) {
-                
-                this.toggleSelectedState()
-                
-            }
-            
-        }.bind(this))
         
+                this.toggleSelectedState()
+        
+            }
+    
+        })
         
     }
-    
-    
-    
-    
     
     public set hovered(hovered: boolean) {
         this._hovered = hovered
@@ -154,7 +129,7 @@ export class UIBaseButton extends UIView {
     }
     
     public get hovered(): boolean {
-        return this._hovered
+        return this._hovered ?? NO
     }
     
     public set highlighted(highlighted: boolean) {
@@ -178,7 +153,7 @@ export class UIBaseButton extends UIView {
     }
     
     public get focused(): boolean {
-        return this._focused
+        return this._focused ?? NO
     }
     
     public set selected(selected: boolean) {
@@ -191,12 +166,9 @@ export class UIBaseButton extends UIView {
     }
     
     
-    
-    
-    
     updateContentForCurrentState() {
     
-        var updateFunction: Function = this.updateContentForNormalState
+        let updateFunction: Function = this.updateContentForNormalState
         if (this.selected && this.highlighted) {
             updateFunction = this.updateContentForSelectedAndHighlightedState
         }
@@ -225,7 +197,6 @@ export class UIBaseButton extends UIView {
     updateContentForNormalState() {
         
         
-        
     }
     
     updateContentForHoveredState() {
@@ -243,11 +214,9 @@ export class UIBaseButton extends UIView {
     updateContentForHighlightedState() {
         
         
-        
     }
     
     updateContentForSelectedState() {
-        
         
         
     }
@@ -260,17 +229,12 @@ export class UIBaseButton extends UIView {
     
     
     set enabled(enabled: boolean) {
-        
         super.enabled = enabled
-        
         this.updateContentForCurrentEnabledState()
-        
     }
     
     get enabled() {
-        
         return super.enabled
-        
     }
     
     updateContentForCurrentEnabledState() {
@@ -287,7 +251,6 @@ export class UIBaseButton extends UIView {
     }
     
     
-    
     addStyleClass(styleClassName: string) {
         
         super.addStyleClass(styleClassName)
@@ -301,28 +264,23 @@ export class UIBaseButton extends UIView {
     }
     
     
-    
-    
-    
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
         if (event.name == UIView.broadcastEventName.PageDidScroll || event.name ==
             UIView.broadcastEventName.AddedToViewTree) {
-            
+    
             this.hovered = NO
-            
+    
             this.highlighted = NO
-            
-            
+    
+            this.updateContentForCurrentState()
+    
         }
         
         
     }
-    
-    
-    
     
     
     toggleSelectedState() {
@@ -346,8 +304,6 @@ export class UIBaseButton extends UIView {
     }
     
     
-    
-    
     layoutSubviews() {
         
         super.layoutSubviews()
@@ -355,12 +311,7 @@ export class UIBaseButton extends UIView {
         const bounds = this.bounds
     
     
-    
-    
     }
-    
-    
-    
     
     
     sendControlEventForKey(eventKey: string, nativeEvent: Event) {
@@ -382,10 +333,7 @@ export class UIBaseButton extends UIView {
     }
     
     
-    
-    
-    
-    static getEventCoordinatesInDocument(touchOrMouseEvent) {
+    static getEventCoordinatesInDocument(touchOrMouseEvent: any) {
         // http://www.quirksmode.org/js/events_properties.html
         var posx = 0
         var posy = 0
@@ -404,20 +352,19 @@ export class UIBaseButton extends UIView {
                 + document.documentElement.scrollTop
         }
         // posx and posy contain the mouse position relative to the document
-    
+        
         const coordinates = { "x": posx, "y": posy }
-    
+        
         return coordinates
         
     }
     
     
-    
-    static getElementPositionInDocument(el) {
+    static getElementPositionInDocument(el: { tagName: string; offsetLeft: number; scrollLeft: number; clientLeft: number; offsetTop: number; scrollTop: number; clientTop: number; offsetParent: any }) {
         //https://www.kirupa.com/html5/getting_mouse_click_position.htm
         var xPosition = 0
         var yPosition = 0
-    
+        
         while (el) {
             if (el.tagName == "BODY") {
                 
@@ -443,13 +390,13 @@ export class UIBaseButton extends UIView {
         }
     }
     
-    static convertCoordinatesFromDocumentToElement(x, y, element) {
+    static convertCoordinatesFromDocumentToElement(x: number, y: number, element: any) {
         const elementPositionInDocument = this.getElementPositionInDocument(element)
         const coordinatesInElement = { "x": x - elementPositionInDocument.x, "y": y - elementPositionInDocument.y }
         return coordinatesInElement
     }
     
-    static getEventCoordinatesInElement(touchOrMouseEvent, element) {
+    static getEventCoordinatesInElement(touchOrMouseEvent: any, element: any) {
         const coordinatesInDocument = this.getEventCoordinatesInDocument(touchOrMouseEvent)
         const coordinatesInElement = this.convertCoordinatesFromDocumentToElement(
             coordinatesInDocument.x,
@@ -458,9 +405,6 @@ export class UIBaseButton extends UIView {
         )
         return coordinatesInElement
     }
-    
-    
-    
     
     
 }

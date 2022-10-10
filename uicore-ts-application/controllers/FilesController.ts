@@ -1,14 +1,14 @@
-import { FileAccessorModel, FileDataModel } from "../models"
+import * as AWS from "aws-sdk"
+import * as bent from "bent"
 import { Application } from "express"
+import * as passport from "passport"
+import { Server } from "socket.io"
+import { FileAccessorModel, FileDataModel } from "../models"
+import Utils from "../Utils"
 import { RoutesController } from "./RoutesController"
 
 import { SocketController } from "./SocketController"
 import SocketSession from "./SocketSession"
-
-import * as AWS from "aws-sdk"
-import * as bent from "bent"
-import Utils from "../Utils"
-import * as passport from "passport"
 
 
 const kFileAccessorExpiryTime = 5000
@@ -396,8 +396,8 @@ export class FilesController extends RoutesController {
             response.end(fileData)
             
         } catch (exception) {
-            
-            response.set("Content-Type", "text/plain")
+    
+            response.set()
             response.sendStatus(400)
             
         }
@@ -407,7 +407,7 @@ export class FilesController extends RoutesController {
         return this._instance
     }
     
-    public static Instance(expressApp: Application, socketIO: SocketIO.Server) {
+    public static Instance(expressApp: Application, socketIO: Server) {
         return this._instance || (this._instance = new this(expressApp, socketIO))
     }
     

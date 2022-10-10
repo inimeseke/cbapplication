@@ -6,57 +6,29 @@ import { UIRoute } from "./UIRoute"
 import { UIViewBroadcastEvent } from "./UIView"
 
 
-
-
-
 export class UILink extends UIBaseButton {
     
-    private _colors: UIButtonColorSpecifier
+    private _colors?: UIButtonColorSpecifier | undefined
     
-    
-    constructor(elementID: string, initViewData = nil) {
+    constructor(elementID?: string, initViewData = nil) {
         
         super(elementID, "a", initViewData)
         
         this.stopsPointerEventPropagation = NO
         this.pausesPointerEvents = NO
         
-    }
-    
-    
-    initView(elementID, viewHTMLElement, initViewData: { titleType: string }) {
-        
-        super.initView(elementID, viewHTMLElement, initViewData)
-        
-        this.class.superclass = UIBaseButton
-        
-        // Instance variables
-        
-        
-        //this.style.position = "relative"
-        
-        
-        viewHTMLElement.onclick = this.blur.bind(this)
-        
-        
-        
+        this.viewHTMLElement.onclick = this.blur.bind(this)
         
     }
     
     
-    
-    
-    
-    get colors(): UIButtonColorSpecifier {
+    get colors(): UIButtonColorSpecifier | undefined {
         return this._colors
     }
     
-    set colors(value: UIButtonColorSpecifier) {
+    set colors(value: UIButtonColorSpecifier | undefined) {
         this._colors = value
     }
-    
-    
-    
     
     
     get viewHTMLElement() {
@@ -67,61 +39,36 @@ export class UILink extends UIBaseButton {
     }
     
     set text(text: string) {
-        
         this.viewHTMLElement.textContent = text
-        
     }
     
     get text() {
-        
-        return this.viewHTMLElement.textContent
-        
+        return this.viewHTMLElement.textContent ?? ""
     }
     
     
     set target(target: string) {
-        
         this.viewHTMLElement.setAttribute("href", target)
-        
     }
     
     get target() {
-    
-        const result = this.viewHTMLElement.getAttribute("href")
-    
-        return result
-        
+        return this.viewHTMLElement.getAttribute("href") ?? ""
     }
-    
-    
-    
     
     
     set targetRouteForCurrentState(targetRouteForCurrentState: () => (UIRoute | string)) {
-        
         this._targetRouteForCurrentState = targetRouteForCurrentState
-        
         this.updateTarget()
-        
     }
     
     get targetRouteForCurrentState() {
-        
         return this._targetRouteForCurrentState
-        
     }
     
     
     _targetRouteForCurrentState() {
-    
-        const result = UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"]) as (UIRoute | string)
-    
-        return result
-        
+        return UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"]) as (UIRoute | string)
     }
-    
-    
-    
     
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
@@ -137,9 +84,6 @@ export class UILink extends UIBaseButton {
     }
     
     
-    
-    
-    
     wasAddedToViewTree() {
         
         super.wasAddedToViewTree()
@@ -148,9 +92,6 @@ export class UILink extends UIBaseButton {
         
         
     }
-    
-    
-    
     
     
     updateTarget() {
@@ -170,9 +111,6 @@ export class UILink extends UIBaseButton {
     }
     
     
-    
-    
-    
     layoutSubviews() {
         
         super.layoutSubviews()
@@ -180,9 +118,6 @@ export class UILink extends UIBaseButton {
         const bounds = this.bounds
     
     }
-    
-    
-    
     
     
 }

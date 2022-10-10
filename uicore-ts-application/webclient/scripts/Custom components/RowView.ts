@@ -3,12 +3,12 @@ import { IF, IS, IS_NOT_NIL, nil, UIRectangle, UIView } from "uicore-ts"
 
 export class RowView<CellType extends UIView = UIView> extends UIView {
     
-    _previousLayoutBounds: UIRectangle
+    _previousLayoutBounds?: UIRectangle
     _cells: CellType[]
     _cellWeights: number[]
     
     padding = 0
-    _cellWidths: number[]
+    _cellWidths: number[] = []
     _rowHeight = 50
     
     
@@ -22,47 +22,44 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     }
     
     
-    
     get cells() {
         return this._cells
     }
     
     
     set cells(cells: CellType[]) {
-        
+    
         const previousCells = this.cells
-        
-        const cellWeights = this.cellWeights.copy();
+        const cellWeights = this.cellWeights.copy()
     
     
         // The cells are added to this._cells in this.addCell()
+    
+        previousCells.copy().forEach((cell: CellType, index: number) => {
         
-        previousCells.copy().forEach(function (this: RowView, cell: CellType, index: number, array: CellType[]) {
-            
             if (!cells.contains(cell)) {
-                
+            
                 cell.removeFromSuperview()
                 this._cells.removeElement(cell)
-                
-                cellWeights[index] = nil;
-                
-            }
             
-        }.bind(this))
+                cellWeights[index] = nil
+            
+            }
         
-        this.cellWeights = cellWeights.filter((value, index, array) => IS_NOT_NIL(value))
-        
-        cells.copy().forEach(function (this: RowView, cell: CellType, index: number, array: CellType[]) {
+        })
+    
+        this.cellWeights = cellWeights.filter((cellWeight) => IS_NOT_NIL(cellWeight))
+    
+        cells.copy().forEach((cell: CellType, index: number) => {
             if (!IS(cell.superview)) {
                 this.addCell(cell, 1, index)
             }
-        }, this)
+        })
         
         this._previousLayoutBounds = nil
         this.setNeedsLayout()
         
     }
-    
     
     
     removeCellAtIndex(index: number) {
@@ -79,7 +76,6 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     removeLastCell() {
         this.removeCellAtIndex(this.cells.length - 1)
     }
-    
     
     
     addCell(cell: CellType, weight: number = 1, index = this.cells.length) {
@@ -117,21 +113,10 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     }
     
     
-    
     get rowHeight() {
-        
-        var result = IF(this._rowHeight)(() => this._rowHeight)
-        .ELSE(() => this.cells.map((value, index, array) => value.intrinsicContentHeight(this.bounds.width)).max())
-        
-        
-        
-        
-        return result //this.bounds.height
-        
+        return IF(this._rowHeight)(() => this._rowHeight)
+            .ELSE(() => this.cells.map(cell => cell.intrinsicContentHeight(this.bounds.width)).max())
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -139,31 +124,17 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
         const bounds = this.bounds
         
         if (bounds.isEqualTo(this._previousLayoutBounds)) {
-            
             return
-            
         }
         
         super.layoutSubviews()
         
-        
         this._previousLayoutBounds = bounds
-        
+    
         bounds.distributeViewsAlongWidth(this._cells, this._cellWeights, this.padding, this._cellWidths)
-        
-        this.cells.forEach(function (this: RowView, cell: UIView, index: number, array: UIView[]) {
-            
-            cell.frame = cell.frame.rectangleWithHeight(this.rowHeight)
-            
-        }.bind(this))
-        
-        
-        
+        this.cells.forEach(cell => cell.frame = cell.frame.rectangleWithHeight(this.rowHeight))
         
     }
-    
-    
-    
     
     
 }

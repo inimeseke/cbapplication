@@ -7,6 +7,7 @@ import {
     SocketClientInterface
 } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import * as mongoose from "mongoose"
+import { Server, Socket } from "socket.io"
 import { CBDocument } from "TypeUtil"
 import { LoginKeyModel, UserModel, UserPasswordModel } from "../models"
 import Utils from "../Utils"
@@ -62,9 +63,9 @@ export class SocketController {
     messageTargets: SocketServer = {} as any
     private _sessions: { [x: string]: SocketSession[] } & Object = {}
     
-    constructor(private _socketIO: SocketIO.Server) {
+    constructor(private _socketIO: Server) {
         
-        _socketIO.on("connect", (socket: SocketIO.Socket) => {
+        _socketIO.on("connect", (socket: Socket) => {
             
             //console.log('Socket.io client connected. clientID = ' + socket.client.id);
             let currentSession: SocketSession = null
@@ -330,7 +331,7 @@ export class SocketController {
         return this._instance
     }
     
-    public static Instance(socketIO: SocketIO.Server) {
+    public static Instance(socketIO: Server) {
         return this._instance || (this._instance = new this(socketIO))
     }
     

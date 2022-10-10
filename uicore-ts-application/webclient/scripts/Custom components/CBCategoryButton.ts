@@ -11,7 +11,7 @@ export class CBCategoryButton extends UIButton {
         
     }
     
-
+    
     updateContentForNormalState() {
         
         this.backgroundColor = UIColor.transparentColor
@@ -23,29 +23,18 @@ export class CBCategoryButton extends UIButton {
     }
     
     updateContentForHoveredState() {
-        
-        //this.backgroundColor = new UIColor("#F8F8F8"); //UIColor.whiteColor;
-        
-        this.titleLabel.textColor = CBColor.primaryContentColor//.colorWithAlpha(0.75) //CBColor.primaryTintColor; //new UIColor("#347FE6")
-        
-        //this.style.boxShadow = "0 3px 6px 0 rgba(0,0,0,0.16)"
-        
-        //this.imageView.alpha = 0.75;
-        //this.imageView.style.filter = "invert(0.35) sepia(1) saturate(5) hue-rotate(175deg)"
+    
+        this.titleLabel.textColor = CBColor.primaryContentColor
         
     }
     
     updateContentForHighlightedState() {
-        
-        //this.backgroundColor = UIColor.whiteColor;
+    
         this.style.color = "#7dadef"
-        this.titleLabel.textColor = CBColor.primaryTintColor //new UIColor("#7dadef");
+        this.titleLabel.textColor = CBColor.primaryTintColor
         
         this.backgroundColor = CBColor.primaryTintColor
-        //this.style.color = "#7dadef";
         this.titleLabel.textColor = CBColor.whiteColor
-        
-        //this.style.boxShadow = "0 3px 6px 0 rgba(0,0,0,0.12)"
         
         this.imageView.style.filter = "invert(1)"
         this.imageView.alpha = 1
@@ -53,16 +42,9 @@ export class CBCategoryButton extends UIButton {
     }
     
     
-    
-    
-    
     layoutSubviews() {
         
-        
-        
         //super.layoutSubviews();
-    
-    
     
         const padding = this.core.paddingLength
         const labelHeight = padding * 1.5
@@ -72,8 +54,6 @@ export class CBCategoryButton extends UIButton {
         this.titleLabel.text = this.titleLabel.text.toUpperCase()
         
         if (this.imageView.imageSource) {
-            
-            //this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight, 1);
             
             this.titleLabel.setPosition(padding, padding, padding, nil, labelHeight)
             
@@ -91,9 +71,6 @@ export class CBCategoryButton extends UIButton {
             
             this.imageView.hidden = YES
             
-            
-            
-            
         }
         
         this.imageView.hidden = IS(this.bounds.height < 50)
@@ -101,21 +78,12 @@ export class CBCategoryButton extends UIButton {
         if (this.imageView.hidden) {
             
             this.titleLabel.centerInContainer()
-            
             this.titleLabel.style.maxHeight = "" + this.bounds.height.integerValue + "px"
-            
             this.titleLabel.style.maxWidth = "" + bounds.width.integerValue + "px"
             
         }
         
-        
-        
-        
-        
     }
-    
-    
-    
     
     
 }

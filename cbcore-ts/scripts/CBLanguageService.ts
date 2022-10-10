@@ -8,16 +8,13 @@ import {
     UILanguageService,
     UILocalizedTextObject,
     UIRoute,
-    UIView, wrapInNil
+    UIView
 } from "uicore-ts"
 import { CBCore } from "./CBCore"
 import { CBLocalizedTextObject } from "./CBDataInterfaces"
 
 
-
-
-
-interface ParticularLanguageValues {
+export interface ParticularLanguageValues {
     
     [x: string]: string
     
@@ -30,7 +27,7 @@ interface ParticularLanguageValues {
 }
 
 
-interface LanguageValues {
+export interface LanguageValues {
     
     [x: string]: ParticularLanguageValues
     

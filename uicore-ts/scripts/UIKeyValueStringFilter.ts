@@ -1,50 +1,59 @@
-import { IS, IS_NOT, NO, UIObject, YES } from "./UIObject"
 // @ts-ignore
 import UIKeyValueStringFilterWebWorker from "./UIKeyValueStringFilterWebWorker.worker.js"
-
-
-
+import { IS, IS_NOT, NO, UIObject, YES } from "./UIObject"
 
 
 export class UIKeyValueStringFilter extends UIObject {
     
-    
-    static _sharedWebWorkerHolder = { webWorker: new UIKeyValueStringFilterWebWorker() }
-    
+    static _sharedWebWorkerHolder: {
+        webWorker: any
+        UICore_completionFunctions: Record<string, (
+            filteredData: string[],
+            filteredIndexes: number[],
+            identifier: any
+        ) => void>
+        UICore_messagesToPost: any
+        UICore_isWorking: boolean
+    } = {
+        webWorker: new UIKeyValueStringFilterWebWorker(),
+        UICore_isWorking: false,
+        UICore_messagesToPost: undefined,
+        UICore_completionFunctions: {}
+    }
     static _instanceNumber = -1
     
-    
     _instanceNumber: number
-    
     _isThreadClosed = NO
     
-    private _webWorkerHolder = UIKeyValueStringFilter._sharedWebWorkerHolder
+    private readonly _webWorkerHolder = UIKeyValueStringFilter._sharedWebWorkerHolder
     
     constructor(useSeparateWebWorkerHolder = NO) {
-        
         
         super()
         
         if (useSeparateWebWorkerHolder) {
-    
-            this._webWorkerHolder = { webWorker: new UIKeyValueStringFilterWebWorker() }
-            
+            this._webWorkerHolder = {
+                webWorker: new UIKeyValueStringFilterWebWorker(),
+                UICore_isWorking: false,
+                UICore_messagesToPost: undefined,
+                UICore_completionFunctions: {}
+            }
         }
         
         UIKeyValueStringFilter._instanceNumber = UIKeyValueStringFilter._instanceNumber + 1
         this._instanceNumber = UIKeyValueStringFilter._instanceNumber
         
         if (IS_NOT(this._webWorkerHolder.webWorker.onmessage)) {
-            
-            this._webWorkerHolder.webWorker.onmessage = message => {
-                
+    
+            this._webWorkerHolder.webWorker.onmessage = (message: { data: { identifier: string; instanceIdentifier: string; filteredData: any[]; filteredIndexes: number[] } }) => {
+        
                 this.isWorkerBusy = NO
                 this.postNextMessageIfNeeded()
-                
+        
                 const key = "" + message.data.identifier + message.data.instanceIdentifier
-                
+        
                 const completionFunction = this.completionFunctions[key]
-                
+        
                 if (IS(completionFunction)) {
                     
                     //console.log("Filtering took " + (Date.now() - startTime) + " ms");
@@ -62,13 +71,7 @@ export class UIKeyValueStringFilter extends UIObject {
         }
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
     get instanceIdentifier() {
@@ -79,12 +82,12 @@ export class UIKeyValueStringFilter extends UIObject {
     
     
     get completionFunctions() {
-        
+    
         const key = "UICore_completionFunctions"
-        var result: {
-            
-            [x: string]: (filteredData: string[], filteredIndexes: number[], identifier: any) => void;
-            
+        let result: {
+        
+            [x: string]: (filteredData: any[], filteredIndexes: number[], identifier: any) => void;
+        
         } = this._webWorkerHolder[key]
         
         if (IS_NOT(result)) {
@@ -142,15 +145,13 @@ export class UIKeyValueStringFilter extends UIObject {
     }
     
     
-    
-    
-    filterData(
+    filterData<T extends object>(
         filteringString: string,
-        data: any[],
+        data: T[],
         excludedData: string[],
         dataKeyPath: string,
         identifier: any,
-        completion: (filteredData: string[], filteredIndexes: number[], identifier: any) => void
+        completion: (filteredData: T[], filteredIndexes: number[], identifier: any) => void
     ) {
         
         
@@ -159,7 +160,6 @@ export class UIKeyValueStringFilter extends UIObject {
             return
             
         }
-        
         
         
         const instanceIdentifier = this.instanceIdentifier
@@ -191,13 +191,7 @@ export class UIKeyValueStringFilter extends UIObject {
         }
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
     closeThread() {
@@ -211,11 +205,7 @@ export class UIKeyValueStringFilter extends UIObject {
         }
         
         
-        
     }
-    
-    
-    
     
     
 }

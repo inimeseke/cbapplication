@@ -1,6 +1,6 @@
 import { FIRST_OR_NIL, IF, IS, IS_NOT, nil, NO, RETURNER, UIButton, UIColor, UITextView, UIView, YES } from "uicore-ts"
+import { LanguageService } from "../LanguageService"
 import { CBFlatButton } from "./CBFlatButton"
-import { LanguageService } from "cbcore-ts"
 import { RowView } from "./RowView"
 
 
@@ -20,17 +20,13 @@ export class CBDialogView extends UIView {
     noButtonDismissesDialog = YES
     
     constructor(elementID?: string) {
-        
+    
         super(elementID)
-        
-        this.updateContent()
-        
-    }
     
-    
-    initView(elementID: string, viewHTMLElement: HTMLElement) {
-        super.initView(elementID, viewHTMLElement)
         this.style.borderRadius = "5px"
+    
+        this.updateContent()
+    
     }
     
     
@@ -96,7 +92,6 @@ export class CBDialogView extends UIView {
         }
         
         
-        
     }
     
     initQuestionLabelIfNeeded() {
@@ -153,27 +148,21 @@ export class CBDialogView extends UIView {
     }
     
     updateContent() {
-        
-        function stringFromValue(value) {
+    
+        function stringFromValue(value: any) {
             if (IS(value)) {
                 return value
             }
             return "-"
         }
         
-        
-        
         this.layoutSubviews()
-        
         
     }
     
     
-    
-    
-    
     layoutSubviews() {
-        
+    
         super.layoutSubviews()
     
         const padding = this.core.paddingLength
@@ -184,25 +173,22 @@ export class CBDialogView extends UIView {
         const topObject = { frame: bounds.rectangleWithHeight(0) }
     
     
-        this.titleLabel.frame = bounds.rectangleWithHeight(this.titleLabel.intrinsicContentHeight(bounds.width)).rectangleWithY(
-            bounds.y +
-            padding * 0.5)
+        this.titleLabel.frame = bounds.rectangleWithHeight(this.titleLabel.intrinsicContentHeight(bounds.width))
+            .rectangleWithY(
+                bounds.y +
+                padding * 0.5)
         this.titleLabel.style.marginLeft = "" + (padding * 0.5) + "px"
-        
+    
         this.titleRow.frame = FIRST_OR_NIL(this.titleLabel, topObject).frame.rectangleForNextRow(
             0,
             this.titleRow.intrinsicContentHeight(bounds.width)
         )
-        
-        
-        
-        
-        
+    
+    
         this.view.frame = FIRST_OR_NIL(this.titleRow, this.titleLabel, topObject).frame.rectangleForNextRow(
             padding,
             this.view.intrinsicContentHeight(bounds.width)
         ).rectangleWithWidth(bounds.width).rectangleWithX(bounds.x)
-        
         
         
         this.questionLabel.frame = FIRST_OR_NIL(
@@ -216,8 +202,6 @@ export class CBDialogView extends UIView {
         ).rectangleWithWidth(bounds.width).rectangleWithX(bounds.x)
     
     
-    
-
         const buttons = [this.yesButton, this.noButton]
     
         const buttonsFrame = FIRST_OR_NIL(
@@ -228,17 +212,17 @@ export class CBDialogView extends UIView {
             topObject
         ).frame.rectangleForNextRow(padding, labelHeight *
             2)
-            .rectangleWithWidth([(buttons.everyElement.titleLabel.intrinsicContentWidth() as any as number[]).max(), 120].max() * 2 + padding * 3, 0.5)
+            .rectangleWithWidth([
+                (buttons.everyElement.titleLabel.intrinsicContentWidth() as any as number[]).max(),
+                120
+            ].max() * 2 + padding * 3, 0.5)
         
         buttonsFrame.distributeViewsAlongWidth(buttons)
         
         this.cancelButton.frame = buttonsFrame.rectangleWithWidth(150, 0.5)
         
         
-        
-        
         this.placeholderLabel.frame = bounds.rectangleWithInsets(padding * 0.5, padding * 0.5, 0, 0)
-        
         
         
         if (IS(this.view)) {
@@ -258,15 +242,10 @@ export class CBDialogView extends UIView {
             // this.titleRow.hidden = YES
             
             
-            
         }
         
         
-        
-        
-        
     }
-    
     
     
     intrinsicContentHeight(constrainingWidth: number = 0) {
@@ -283,7 +262,7 @@ export class CBDialogView extends UIView {
             
         }
     
-        var result = padding
+        let result = padding
     
         result = result + addPaddingIfNeeded(this.titleLabel.intrinsicContentHeight(constrainingWidth))
         
@@ -296,14 +275,9 @@ export class CBDialogView extends UIView {
         result = result + IF<number>(FIRST_OR_NIL(this.yesButton, this.cancelButton))(RETURNER(labelHeight))()
         
         
-        
-        
         return result
         
     }
-    
-    
-    
     
     
 }

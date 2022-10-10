@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <link
+            rel="stylesheet"
+            data-name="vs/editor/editor.main"
+            href="./node_modules/monaco-editor/min/vs/editor/editor.main.css"
+    />
+    <title>Test</title>
+</head>
+<body>
+
+
+<div id="container" style="width: 100%; height: 580px"></div>
+
+<script>
+
+    // This has to be var
+    var require = {paths: {vs: "./node_modules/monaco-editor/min/vs"}}
+
+</script>
+<script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+<script src="./node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+<script src="./node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
+
+<script>
+
+    self.MonacoEnvironment = {
+        getWorkerUrl: function (moduleId, label) {
+            if (label === "json") {
+                return "compiledScripts/vs/language/json/json.worker.js"
+            }
+            if (label === "css" || label === "scss" || label === "less") {
+                return "compiledScripts/vs/language/css/css.worker.js"
+            }
+            if (label === "html" || label === "handlebars" || label === "razor") {
+                return "compiledScripts/vs/language/html/html.worker.js"
+            }
+            if (label === "typescript" || label === "javascript") {
+                return "compiledScripts/vs/language/typescript/ts.worker.js"
+            }
+            return "compiledScripts/vs/editor/editor.worker.js"
+        }
+    }
+
+    const editorObject = monaco.editor.create(document.getElementById("container"), {
+        // value: [
+        //     "\n\n\n\n\n\n\nfunction x() {\n",
+        //     "\tconsole.log(\"Autopood\");",
+        //     "\n\n\n\n\n}\n\n"
+        // ].join("\n"),
+        language: "typescript",
+        lineNumbers: "off",
+        minimap: {enabled: false}
+    })
+
+    // // Initialize auto typing on monaco editor. Imports will now automatically be typed!
+    // const autoTypings = await AutoTypings.create(editorObject, {
+    //     sourceCache: new LocalStorageCache(), // Cache loaded sources in localStorage. May be omitted
+    //     // Other options...
+    // });
+
+    monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true)
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+
+        moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+        target: "ES2016",
+        module: "ES2020",
+        lib: ["ES2016", "dom"],
+        declaration: true,
+        outDir: "./compiledScripts",
+        rootDir: "./scripts/",
+        downlevelIteration: true,
+        strict: true,
+        strictFunctionTypes: false,
+        strictBindCallApply: true,
+        types: ["socket.io"],
+        esModuleInterop: true
+
+    })
+
+    editorObject.addExtraLibFromContents = (fileText, path) => {
+
+        const fakePath = `file:///${path}`
+
+        console.log("Adding extra lib at " + fakePath)
+
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(
+            fileText,
+            fakePath
+        )
+
+    }
+    editorObject.addModelFromContents = (fileText, path) => monaco.editor.createModel(fileText, "typescript", monaco.Uri.parse("file:///" + path))
+    editorObject.loadModelFromContents = (fileText, path) => editorObject.setModel(monaco.editor.createModel(fileText, "typescript", monaco.Uri.parse("file:///" + path)))
+
+
+    addEventListener("message", (messageEvent) => {
+
+        if (messageEvent.data.type === "CBEditorFrameMessage") {
+
+            try {
+
+                const result = editorObject[messageEvent.data.key](...messageEvent.data.parameters)
+
+                // respond on the received port
+                messageEvent.ports[0].postMessage({type: "CBEditorFrameMessageResponse", result: result})
+
+            } catch (exception) {
+
+                // console.log(exception)
+                const asd = 1
+
+            }
+
+        }
+
+    }, false)
+
+    window.top.postMessage("CBEditorFrameReady", "*")
+
+</script>
+
+</body>
+</html>

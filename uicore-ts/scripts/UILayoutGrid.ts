@@ -4,12 +4,8 @@ import { UIRectangle } from "./UIRectangle"
 
 export class UILayoutGrid extends UIObject {
     
-    
-    
     _frame: UIRectangle
-    
     _subframes: UILayoutGrid[] = []
-    
     
     constructor(frame: UIRectangle) {
         
@@ -20,12 +16,7 @@ export class UILayoutGrid extends UIObject {
     }
     
     
-    
-    
-    
     splitXInto(numberOfFrames: number) {
-        
-        
         
         if (this._subframes.length == 0) {
             

@@ -1,3 +1,4 @@
+import { CBCore, CBDropdownData, CBDropdownDataItem, CBLocalizedTextObject, SocketClient } from "cbcore-ts"
 import {
     FIRST,
     IS,
@@ -9,26 +10,19 @@ import {
     UIButton,
     UIColor,
     UIRoute,
-    UITableView,
     UITextArea,
     UITextView,
     UIView,
     UIViewController,
     YES
 } from "uicore-ts"
-import { CBColor } from "./Custom components/CBColor"
-import { CBCore } from "cbcore-ts"
-import { CBDropdownData, CBDropdownDataItem } from "../../../cbcore-ts/scripts/CBDataInterfaces"
-import { SocketClient } from "cbcore-ts"
 import { CBButton } from "./Custom components/CBButton"
 import { CBCheckbox } from "./Custom components/CBCheckbox"
+import { CBColor } from "./Custom components/CBColor"
 import { CBDialogViewShower } from "./Custom components/CBDialogViewShower"
 import { CBTextField } from "./Custom components/CBTextField"
-import { LanguageService } from "cbcore-ts"
 import { SearchableDropdown } from "./Custom components/SearchableDropdown"
-
-
-
+import { LanguageService } from "./LanguageService"
 
 
 export class InternalDropdownSettingsViewController extends UIViewController {
@@ -37,8 +31,6 @@ export class InternalDropdownSettingsViewController extends UIViewController {
     titleLabel: UITextView
     loadButton: UIButton
     dropdownCodeTextField: CBTextField
-    tableView: UITableView
-    textArea: UITextArea
     dropdown: SearchableDropdown<undefined>
     saveButton: CBButton
     deleteButton: CBButton
@@ -61,24 +53,11 @@ export class InternalDropdownSettingsViewController extends UIViewController {
     itemAttachedObjectCheckbox: CBCheckbox
     
     
-    constructor(view) {
+    constructor(view: UIView) {
         
         super(view)
         
         // Code for further setup if necessary
-        
-        this.loadSubviews()
-        
-    }
-    
-    
-    static readonly routeComponentName = "internal_dropdown_settings"
-    
-    static readonly ParameterIdentifierName = {}
-    
-    
-    loadSubviews() {
-        
         
         this.view.backgroundColor = UIColor.whiteColor
         
@@ -86,7 +65,6 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.titleLabel = new UITextView(this.view.elementID + "TitleLabel", UITextView.type.header2)
         this.titleLabel.text = "Internal dropdown settings"
         this.view.addSubview(this.titleLabel)
-        
         
         
         this.dropdownCodeTextField = new CBTextField(this.view.elementID + "DropdownCodeTextField")
@@ -148,8 +126,7 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.view.addSubview(this.clearDropdownButton)
         
         
-        
-        // Selecting of purpose of itemtitleTextArea
+        // Selecting of purpose of itemTitleTextArea
         this.itemTitleCheckbox = new CBCheckbox(this.view.elementID + "ItemTitleCheckbox")
         this.itemAttachedObjectCheckbox = new CBCheckbox(this.view.elementID + "ItemTitleCheckbox")
         
@@ -159,7 +136,6 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.itemTitleCheckbox.selected = YES
         
         this.view.addSubviews([this.itemTitleCheckbox, this.itemAttachedObjectCheckbox])
-        
         
         
         this.itemTitleOrAttachedObjectTextArea = new UITextArea(this.view.elementID +
@@ -178,11 +154,9 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.view.addSubview(this.isASectionCheckbox)
         
         
-        
         this.itemCodeTextField = new CBTextField(this.view.elementID + "ItemCodeTextField")
         this.itemCodeTextField.placeholderText = "Item code"
         this.view.addSubview(this.itemCodeTextField)
-        
         
         
         this.downButton = new CBButton(this.view.elementID + "DownButton")
@@ -192,7 +166,6 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.upButton = new CBButton(this.view.elementID + "UpButton")
         this.upButton.titleLabel.text = "Up"
         this.view.addSubview(this.upButton)
-        
         
         
         this.dataTextJSONLabel = new UITextView(this.view.elementID + "DataTextJSONLabel")
@@ -212,54 +185,36 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.view.addSubview(this.loadJSONDataButton);
         
         
-        
-        
-        
-        [
-            this.itemTitleCheckbox, this.itemAttachedObjectCheckbox
-        ].forEach(function (
-            this: InternalDropdownSettingsViewController,
-            checkbox: CBCheckbox,
-            index: number,
-            array: CBCheckbox[]
-        ) {
+        [this.itemTitleCheckbox, this.itemAttachedObjectCheckbox].everyElement.controlEventTargetAccumulator
+            .EnterDown.SelectionChange = sender => {
             
-            checkbox.addTargetForControlEvents([
-                CBCheckbox.controlEvent.EnterDown, CBCheckbox.controlEvent.SelectionChange
-            ], function (this: InternalDropdownSettingsViewController, sender: CBCheckbox, event: Event) {
+            [this.itemTitleCheckbox, this.itemAttachedObjectCheckbox].forEach(checkboxObject => {
                 
-                [
-                    this.itemTitleCheckbox, this.itemAttachedObjectCheckbox
-                ].forEach(function (checkboxObject, index, array) {
-                    
-                    checkboxObject.selected = (checkboxObject == sender)
-                    
-                })
+                // @ts-ignore
+                checkboxObject.selected = (checkboxObject == sender)
                 
-                this.updateitemDetailsView()
-                
-            }.bind(this))
+            })
             
+            this.updateitemDetailsView()
             
-            
-        }.bind(this))
-        
-        
-        
+        }
         
         
         this.downButton.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
-            function (this: InternalDropdownSettingsViewController, sender: UIButton, event: Event) {
-    
+            (
+                sender: UIButton,
+                event: Event
+            ) => {
+                
                 const data = this.dropdown.drawingData
-    
+                
                 const rowIndex = this.dropdown.selectedIndices.firstElement
-    
+                
                 if (this.dropdown.selectedData.firstElement && rowIndex < data.length - 1) {
-    
+                    
                     const row = data[rowIndex]
-    
+                    
                     data.removeElementAtIndex(rowIndex)
                     
                     data.insertElementAtIndex(rowIndex + 1, row)
@@ -273,21 +228,24 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                 }
                 
                 
-            }.bind(this)
+            }
         )
         
         this.upButton.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
-            function (this: InternalDropdownSettingsViewController, sender: UIButton, event: Event) {
-    
+            (
+                sender: UIButton,
+                event: Event
+            ) => {
+                
                 const data = this.dropdown.drawingData
-    
+                
                 const rowIndex = this.dropdown.selectedIndices.firstElement
-    
+                
                 if (this.dropdown.selectedData.firstElement && rowIndex > 0) {
-    
+                    
                     const row = data[rowIndex]
-    
+                    
                     data.removeElementAtIndex(rowIndex)
                     
                     data.insertElementAtIndex(rowIndex - 1, row)
@@ -301,29 +259,31 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                 }
                 
                 
-            }.bind(this)
+            }
         )
         
         
         this.dropdown.addTargetForControlEvent(
             SearchableDropdown.controlEvent.SelectionDidChange,
-            function (
-                this: InternalDropdownSettingsViewController,
+            (
                 sender: SearchableDropdown<undefined>,
                 event: Event
-            ) {
+            ) => {
                 
                 this.updateitemDetailsView()
                 
-            }.bind(this)
+            }
         )
         
         this.isASectionCheckbox.addTargetForControlEvent(
             CBCheckbox.controlEvent.SelectionChange,
-            function (this: InternalDropdownSettingsViewController, sender: CBCheckbox, event: Event) {
-    
+            (
+                sender: CBCheckbox,
+                event: Event
+            ) => {
+                
                 const selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
-    
+                
                 selectedItem.isADropdownDataSection = sender.selected
                 selectedItem.isADropdownDataRow = IS_NOT(sender.selected)
                 
@@ -331,23 +291,29 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                 this.reloadTableData()
                 
                 
-            }.bind(this)
+            }
         )
         
         this.itemCodeTextField.textField.addTargetForControlEvent(
             UITextArea.controlEvent.TextChange,
-            function (this: InternalDropdownSettingsViewController, sender: CBTextField, event: Event) {
-    
+            (
+                sender: CBTextField,
+                event: Event
+            ) => {
+                
                 const selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
-    
+                
                 selectedItem.itemCode = this.itemCodeTextField.text
                 
-            }.bind(this)
+            }
         )
         
         this.itemTitleOrAttachedObjectTextArea.addTargetForControlEvent(
             UITextArea.controlEvent.TextChange,
-            function (this: InternalDropdownSettingsViewController, sender: CBTextField, event: Event) {
+            (
+                sender: CBTextField,
+                event: Event
+            ) => {
                 
                 if (this.itemTitleCheckbox.selected) {
                     
@@ -361,11 +327,10 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                 }
                 
                 
-                
                 this.reloadTableData()
                 
                 
-            }.bind(this)
+            }
         )
         
         
@@ -393,13 +358,11 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                     function (this: InternalDropdownSettingsViewController, codes: string[]) {
                         
                         
-                        
                         this.saveData()
                         
                         
                     }.bind(this)
                 )
-                
                 
                 
             }.bind(this)
@@ -408,34 +371,34 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.addButton.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
             function (this: InternalDropdownSettingsViewController, sender: UIButton, event: Event) {
-    
+                
                 const title = JSON.parse(this.itemTitleOrAttachedObjectTextArea.text)
-    
+                
                 if (IS_NOT(LanguageService.stringForCurrentLanguage(title))) {
                     
                     title[LanguageService.defaultLanguageKey] = "<Title>"
                     
                 }
-    
-    
-                const itemID = MAKE_ID();
-    
+                
+                
+                const itemID = MAKE_ID()
+                
                 const dataRow: CBDropdownDataItem<undefined> = {
-        
+                    
                     _id: itemID,
                     title: title,
                     isADropdownDataRow: !this.isASectionCheckbox.selected,
                     isADropdownDataSection: this.isASectionCheckbox.selected,
-        
+                    
                     attachedObject: undefined,
-        
+                    
                     itemCode: nil,
-                    dropdownCode: (this.dropdown.selectedData.firstElement || {} as any).dropdownCodes
-        
+                    dropdownCode: this.dropdown.selectedData.firstElement?.dropdownCode
+                    
                 }
-    
+                
                 const rowIndex = this.dropdown.selectedIndices.firstElement
-    
+                
                 if (IS_DEFINED(rowIndex)) {
                     
                     this.dropdown.drawingData.insertElementAtIndex(rowIndex + 1, dataRow)
@@ -454,17 +417,15 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                 }
                 
                 
-                
-                
             }.bind(this)
         )
         
         this.deleteButton.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
             function (this: InternalDropdownSettingsViewController, sender: UIButton, event: Event) {
-    
+                
                 const rowIndex = this.dropdown.selectedIndices.firstElement
-    
+                
                 if (IS_DEFINED(rowIndex)) {
                     
                     this.dropdown.drawingData.removeElementAtIndex(rowIndex)
@@ -518,15 +479,11 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             UIView.controlEvent.PointerUpInside,
             function (this: InternalDropdownSettingsViewController, sender: UIButton, event: Event) {
                 
-                
                 if (this.dropdownCodeTextField.text && confirm("Are you sure you want to clear this dropdown?")) {
                     
                     this.dropdown.data = []
-                    
                     this.dropdown.selectedData = []
-                    
                     this.dropdown.selectedIndices = []
-                    
                     this.updateitemDetailsView()
                     
                 }
@@ -553,90 +510,50 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             }.bind(this)
         )
         
-        
-        
-        
-        
     }
     
     
+    static readonly routeComponentName = "internal_dropdown_settings"
     
-    
+    static readonly ParameterIdentifierName = {}
     
     reloadTableData() {
         
         this.dropdown._tableView.reloadData()
-    
-    
-        const dataToShow = {}
-    
-    
-        this.dropdown.drawingData.forEach(function (dataItem, index, array) {
-            
-            dataToShow[FIRST(dataItem.itemCode, dataItem._id)] = dataItem.title
-            
-        })
         
+        const dataToShow: Record<string, CBLocalizedTextObject> = {}
+        this.dropdown.drawingData.forEach((dataItem: CBDropdownDataItem<undefined>) =>
+            dataToShow[FIRST(dataItem.itemCode, dataItem._id)] = dataItem.title)
         
         this.dataTextArea.text = JSON.stringify(dataToShow, null, 2)
         
     }
     
     
-    
-    
-    
     async updateAvailableCodes() {
-    
-    
-        var { result: codes } = await SocketClient.RetrieveDropdownCodes()
-    
+        const { result: codes } = await SocketClient.RetrieveDropdownCodes()
         this.dropdownCodesTextArea.text = "Saved codes: " + JSON.stringify(codes)
-        
         if (codes.length && IS_NOT(this.dropdownCodeTextField.text)) {
-            
             this.dropdownCodeTextField.text = codes.firstElement
-            
-            this.loadData()
-            
+            await this.loadData()
         }
-        
-        
-        
-        
     }
     
     
     updateitemDetailsView() {
-    
         const selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
-    
-    
         if (IS(selectedItem)) {
-            
             if (this.itemTitleCheckbox.selected) {
-                
                 this.itemTitleOrAttachedObjectTextArea.text = JSON.stringify(selectedItem.title, null, 2)
                 this.itemTitleDidChange()
-                
             }
             else {
-                
                 this.itemTitleOrAttachedObjectTextArea.text = JSON.stringify(selectedItem.attachedObject, null, 2)
                 this.itemAttachedObjectDidChange()
-                
             }
-            
-            
-            
             this.itemCodeTextField.text = selectedItem.itemCode
-            
         }
-        
         this.isASectionCheckbox.selected = IS(selectedItem.isADropdownDataSection)
-        
-        
-        
     }
     
     async loadData() {
@@ -648,9 +565,9 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             return
             
         }
-    
-        var { result: responseMessage } = await SocketClient.RetrieveDropdownDataForCode(this.dropdownCodeTextField.text)
-    
+        
+        const { result: responseMessage } = await SocketClient.RetrieveDropdownDataForCode(this.dropdownCodeTextField.text)
+        
         this._triggerLayoutViewSubviews()
         
         if (IS(responseMessage)) {
@@ -665,34 +582,34 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             return
             
         }
-    
+        
         const dropdownData: CBDropdownDataItem<undefined>[] = []
-    
+        
         responseMessage.data.forEach(function (sectionOrRow, index, array) {
             
             if (sectionOrRow.isADropdownDataSection) {
-    
-    
+                
+                
                 const dataSection: CBDropdownDataItem<undefined> = {
-        
+                    
                     _id: sectionOrRow._id,
                     title: sectionOrRow.title,
                     rowsData: [],
                     isADropdownDataSection: YES,
                     isADropdownDataRow: NO,
-        
+                    
                     attachedObject: sectionOrRow.attachedObject,
-        
+                    
                     itemCode: sectionOrRow.itemCode,
                     dropdownCode: sectionOrRow.dropdownCode
-        
-                }
-    
-                const rowsData = dataSection.rowsData
-    
-                sectionOrRow.rowsData.forEach(function (rowData, index, array) {
                     
-                    rowsData.push({
+                }
+                
+                const rowsData = dataSection.rowsData
+                
+                sectionOrRow.rowsData?.forEach((rowData, index, array) => {
+                    
+                    rowsData?.push({
                         
                         _id: rowData._id,
                         title: rowData.title,
@@ -729,10 +646,6 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                 
             }
             
-            
-            
-            
-            
         })
         
         this.dropdown.selectedData.removeElementAtIndex(0)
@@ -744,44 +657,29 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         
         this.updateitemDetailsView()
         
-        
-        
-        
-        
     }
     
     
-    
-    
-    
     async saveData() {
-    
-    
-        const uploadData: CBDropdownData<undefined> = {
         
+        const uploadData: CBDropdownData<undefined> = {
+            
             dropdownCode: this.dropdownCodeTextField.text,
             data: []
-        
+            
         } as any
-    
-        var currentRowsTarget = uploadData.data
-    
-        this.dropdown.drawingData.forEach(function (
-            this: InternalDropdownSettingsViewController,
-            item: CBDropdownDataItem<undefined>,
-            index: number,
-            array: CBDropdownDataItem<undefined>[]
-        ) {
-            
-            
+        
+        let currentRowsTarget = uploadData.data
+        
+        this.dropdown.drawingData.forEach((item: CBDropdownDataItem<undefined>) => {
             
             if ((item as CBDropdownDataItem<undefined>).isADropdownDataSection) {
-                
                 
                 currentRowsTarget = []
                 
                 uploadData.data.push({
                     
+                    _id: "",
                     title: item.title,
                     attachedObject: item.attachedObject,
                     rowsData: currentRowsTarget,
@@ -791,16 +689,15 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                     itemCode: FIRST(item.itemCode, item._id),
                     dropdownCode: uploadData.dropdownCode
                     
-                } as any)
-                
-                
+                })
                 
             }
             else {
                 
-                
                 currentRowsTarget.push({
                     
+                    _id: "",
+                    rowsData: [],
                     
                     title: item.title,
                     attachedObject: item.attachedObject,
@@ -810,66 +707,48 @@ export class InternalDropdownSettingsViewController extends UIViewController {
                     itemCode: FIRST(item.itemCode, item._id),
                     dropdownCode: uploadData.dropdownCode
                     
-                } as any)
-                
+                })
                 
             }
             
-            
-        }.bind(this))
+        })
         
         
         // Send the data to server to be saved
-    
-        var { result: response } = await SocketClient.SaveDropdownData(uploadData)
-    
-        this.updateAvailableCodes()
+        const { result: response } = await SocketClient.SaveDropdownData(uploadData)
+        
+        this.updateAvailableCodes().then(nil)
         
         if (IS(response)) {
-            
             CBDialogViewShower.alert("Saved successfully.")
-            
-            this.loadData()
-            
+            await this.loadData()
         }
         else {
-            
             CBDialogViewShower.alert("Failed to save dropdown data.")
-            
         }
-        
-        
-        
-        
         
     }
     
     
-    
-    
-    
     loadPlainData() {
-    
-    
+        
+        
         const drawingData: CBDropdownDataItem<undefined>[] = []
-    
+        
         const lines = this.dataTextArea.text.split("\n")
-    
-    
-    
+        
+        
         lines.forEach(function (
             this: InternalDropdownSettingsViewController,
             line: string,
             index: number,
             array: string[]
         ) {
-    
-    
-    
+            
+            
             const lineItems = line.trim().split(" ")
-    
-    
-    
+            
+            
             drawingData.push({
                 
                 _id: "" + index,
@@ -905,59 +784,36 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             
         }
         
-        
-        
         this.updateitemDetailsView()
-        
-        
-        
         
     }
     
     
-    
-    
-    
     loadJSONData() {
-    
-    
+        
         const drawingData: CBDropdownDataItem<undefined>[] = []
-    
-    
-        var itemTitles: {
         
-            [x: string]: {
-            
-                [x: string]: string;
-            
-            }
+        let itemTitles: Record<string, Record<string, string>> = {}
         
-        } = {}
-    
-    
-    
         try {
             
             itemTitles = JSON.parse(this.dataTextArea.text)
             
         } catch (exception) {
             
-            CBDialogViewShower.alert(exception)
+            CBDialogViewShower.alert("" + exception)
             
             return
             
         }
-    
-    
-    
-    
-        var index = 0
-    
-        itemTitles.forEach(function (this: InternalDropdownSettingsViewController, itemTitle: {
-            
-            [x: string]: string;
-            
-        }, itemCode: string) {
+        
+        
+        let index = 0
+        
+        itemTitles.forEach((
+            itemTitle: Record<string, string>,
+            itemCode: string
+        ) => {
             
             drawingData.push({
                 
@@ -977,7 +833,7 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             
             index = index + 1
             
-        }.bind(this))
+        })
         
         
         this.dropdown._drawingData = drawingData
@@ -986,26 +842,18 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.reloadTableData()
         
         if (this.dropdown.selectedIndices.length) {
-            
             this.dropdown._selectedData = [this.dropdown.drawingData[this.dropdown.selectedIndices.firstElement]]
-            
         }
         
         this.updateitemDetailsView()
         
-        
-        
-        
     }
     
     
-    
-    
-    
     itemTitleDidChange() {
-    
+        
         const selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
-    
+        
         if (IS_NOT(this.itemTitleOrAttachedObjectTextArea.text) || this.itemTitleOrAttachedObjectTextArea.text ==
             "undefined") {
             
@@ -1016,17 +864,14 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         }
         
         
-        
         try {
-    
+            
             const selectedItemTitle = JSON.parse(this.itemTitleOrAttachedObjectTextArea.text)
-    
+            
             if (selectedItemTitle instanceof Object && !(selectedItemTitle instanceof Array)) {
                 
                 this.itemTitleJSONLabel.textColor = CBColor.primaryContentColor
                 this.itemTitleJSONLabel.text = "No issues detected"
-                
-                //this.itemtitleTextArea.text = JSON.stringify(selectedItemTitle, null, 2)
                 
                 selectedItem.title = selectedItemTitle
                 
@@ -1039,41 +884,34 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             }
             
             
-            
         } catch (error) {
             
+            // @ts-ignore
             this.itemTitleJSONLabel.text = error.message
             this.itemTitleJSONLabel.textColor = UIColor.redColor
             
         }
         
         
-        
     }
     
     
-    
-    
-    
     itemAttachedObjectDidChange() {
-    
+        
         const selectedItem: CBDropdownDataItem<undefined> = this.dropdown.selectedData.firstElement || nil
-    
+        
         if (IS_NOT(this.itemTitleOrAttachedObjectTextArea.text) || this.itemTitleOrAttachedObjectTextArea.text ==
             "undefined") {
             
-            
             this.itemTitleOrAttachedObjectTextArea.text = "{ undefined }"
-            
             
         }
         
         
-        
         try {
-    
+            
             var selectedItemAttachedObject
-    
+            
             if (this.itemTitleOrAttachedObjectTextArea.text != "{ undefined }") {
                 
                 selectedItemAttachedObject = JSON.parse(this.itemTitleOrAttachedObjectTextArea.text)
@@ -1081,14 +919,11 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             }
             
             
-            
             if (selectedItemAttachedObject == null ||
                 (selectedItemAttachedObject instanceof Object && !(selectedItemAttachedObject instanceof Array))) {
                 
                 this.itemTitleJSONLabel.textColor = CBColor.primaryContentColor
                 this.itemTitleJSONLabel.text = "No issues detected"
-                
-                //this.itemtitleTextArea.text = JSON.stringify(selectedItemTitle, null, 2)
                 
                 selectedItem.attachedObject = selectedItemAttachedObject
                 
@@ -1101,64 +936,46 @@ export class InternalDropdownSettingsViewController extends UIViewController {
             }
             
             
-            
         } catch (error) {
             
+            // @ts-ignore
             this.itemTitleJSONLabel.text = error.message
             this.itemTitleJSONLabel.textColor = UIColor.redColor
             
         }
         
         
-        
     }
-    
-    
-    
     
     
     loadSubjectData() {
         
     
-        
     }
-    
-    
-    
     
     
     async viewDidAppear() {
         
     
-        
     }
     
     
     async viewWillDisappear() {
         
         
-        
     }
-    
-    
-    
     
     
     async handleRoute(route: UIRoute) {
         
         super.handleRoute(route)
         const inquiryComponent = route.componentWithName(InternalDropdownSettingsViewController.routeComponentName)
-    
-    
+        
+        
         this.reloadTableData()
         
         
-        
-        
     }
-    
-    
-    
     
     
     updateViewConstraints() {
@@ -1168,13 +985,11 @@ export class InternalDropdownSettingsViewController extends UIViewController {
     }
     
     
-    
     updateViewStyles() {
         
         super.updateViewStyles()
         
     }
-    
     
     
     viewDidLayoutSubviews() {
@@ -1184,21 +999,18 @@ export class InternalDropdownSettingsViewController extends UIViewController {
     }
     
     
-    
-    
-    
     layoutViewSubviews() {
         
         super.layoutViewSubviews()
-    
+        
         const padding = this.core.paddingLength
         const labelHeight = padding
-    
+        
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)
-    
+        
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
-    
+        
         var rowFrame = this.titleLabel.frame.rectangleForNextRow(padding)
         rowFrame.distributeViewsAlongWidth([this.dropdownCodeTextField, this.loadButton, this.saveButton], [
             2, 1, 1
@@ -1213,8 +1025,6 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.dropdown._tableView.frame = this.dropdown.frame.rectangleForNextRow(padding, 500)
         
         this.dropdown._tableView.setMargins(0, 0, padding, 0)
-        
-        
         
         
         var deleteAddFrame = this.dropdown.frame.rectangleForNextColumn(padding * 0.5, this.dropdown.frame.width +
@@ -1242,10 +1052,10 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         )
         
         this.isASectionCheckbox.frame = this.itemTitleJSONLabel.frame.rectangleForNextRow(padding, labelHeight)
-    
-    
+        
+        
         const downUpFrame = this.isASectionCheckbox.frame.rectangleForNextRow(padding, labelHeight * 2)
-    
+        
         downUpFrame.distributeViewsAlongWidth([this.downButton, this.upButton], 1, padding)
         
         
@@ -1265,12 +1075,7 @@ export class InternalDropdownSettingsViewController extends UIViewController {
         this.loadPlainDataButton.setMargins(0, 0, padding, 0)
         
         
-        
-        
     }
-    
-    
-    
     
     
 }

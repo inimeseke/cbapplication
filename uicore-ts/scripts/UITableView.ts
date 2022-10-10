@@ -6,6 +6,13 @@ import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
+interface UITableViewRowView extends UIView {
+    
+    _UITableViewRowIndex: number;
+    
+}
+
+
 export interface UITableViewReusableViewsContainerObject {
     
     [key: string]: UIView[];
@@ -23,17 +30,12 @@ export interface UITableViewReusableViewPositionObject {
 }
 
 
-
-
-
 export class UITableView extends UINativeScrollView {
     
     
-    
-    
     allRowsHaveEqualHeight: boolean = NO
-    _visibleRows: UIView[] = []
-    _firstLayoutVisibleRows: UIView[] = []
+    _visibleRows: UITableViewRowView[] = []
+    _firstLayoutVisibleRows: UITableViewRowView[] = []
     
     _rowPositions: UITableViewReusableViewPositionObject[] = []
     
@@ -54,32 +56,23 @@ export class UITableView extends UINativeScrollView {
     _persistedData: any[] = []
     _needsDrawingOfVisibleRowsBeforeLayout = NO
     _isDrawVisibleRowsScheduled = NO
-    _shouldAnimateNextLayout: boolean
+    _shouldAnimateNextLayout?: boolean
     
     animationDuration = 0.25
     
     
-    constructor(elementID) {
+    constructor(elementID?: string) {
         
         super(elementID)
-        
-        this.scrollsX = NO
-        
-    }
-    
-    
-    
-    initView(elementID, viewHTMLElement) {
-        
-        super.initView(elementID, viewHTMLElement)
         
         this._fullHeightView = new UIView()
         this._fullHeightView.hidden = YES
         this._fullHeightView.userInteractionEnabled = NO
         this.addSubview(this._fullHeightView)
         
+        this.scrollsX = NO
+        
     }
-    
     
     
     loadData() {
@@ -90,12 +83,6 @@ export class UITableView extends UINativeScrollView {
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
         
         this.setNeedsLayout()
-        
-        // this.forEachViewInSubtree(function(view) {
-        
-        //     view.setNeedsLayout();
-        
-        // })
         
     }
     
@@ -112,56 +99,38 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    
     highlightChanges(previousData: any[], newData: any[]) {
-        
-        previousData = previousData.map(function (dataPoint, index, array) {
-            
-            return JSON.stringify(dataPoint)
-            
-        })
-        
-        newData = newData.map(function (dataPoint, index, array) {
-            
-            return JSON.stringify(dataPoint)
-            
-        })
-        
-        
+    
+        previousData = previousData.map(dataPoint => JSON.stringify(dataPoint))
+        newData = newData.map(dataPoint => JSON.stringify(dataPoint))
+    
         const newIndexes: number[] = []
+    
+        newData.forEach((value, index) => {
         
-        newData.forEach(function (value, index, array) {
-            
             if (!previousData.contains(value)) {
-                
+            
                 newIndexes.push(index)
-                
-            }
             
-        })
+            }
         
-        newIndexes.forEach(function (this: UITableView, index) {
-            
+        })
+    
+        newIndexes.forEach(index => {
+        
             if (this.isRowWithIndexVisible(index)) {
-                
-                this.highlightRowAsNew(this.viewForRowWithIndex(index))
-                
+                this.highlightRowAsNew(this.viewForRowWithIndex(index) as UIView)
             }
-            
-        }.bind(this))
+        
+        })
         
     }
-    
     
     
     highlightRowAsNew(row: UIView) {
         
         
-        
     }
-    
-    
-    
     
     
     invalidateSizeOfRowWithIndex(index: number, animateChange = NO) {
@@ -185,7 +154,6 @@ export class UITableView extends UINativeScrollView {
         this._shouldAnimateNextLayout = animateChange
         
     }
-    
     
     
     _calculateAllPositions() {
@@ -229,8 +197,6 @@ export class UITableView extends UINativeScrollView {
             }
             
             
-            
-            
             const positionObject: UITableViewReusableViewPositionObject = {
                 bottomY: previousBottomY + height,
                 topY: previousBottomY,
@@ -249,7 +215,6 @@ export class UITableView extends UINativeScrollView {
         }
         
     }
-    
     
     
     indexesForVisibleRows(paddingRatio = 0.5): number[] {
@@ -306,42 +271,39 @@ export class UITableView extends UINativeScrollView {
     
     
     _removeVisibleRows() {
+    
+        const visibleRows: UITableViewRowView[] = []
+        this._visibleRows.forEach((row: UIView) => {
         
-        const visibleRows = []
-        this._visibleRows.forEach(function (this: UITableView, row: UIView, index: number, array: UIView[]) {
-            
-            this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
-                row._UITableViewRowIndex,
+            this._persistedData[row._UITableViewRowIndex as number] = this.persistenceDataItemForRowWithIndex(
+                row._UITableViewRowIndex as number,
                 row
             )
             row.removeFromSuperview()
             this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row)
-            
-            
-        }, this)
+        
+        
+        })
         this._visibleRows = visibleRows
         
     }
     
     
-    
     _removeAllReusableRows() {
-        // @ts-ignore
-        this._reusableViews.forEach(function (this: UITableView, rows: UIView[]) {
-            rows.forEach(function (this: UITableView, row: UIView, index: number, array: UIView[]) {
-                
-                this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
-                    row._UITableViewRowIndex,
+        this._reusableViews.forEach((rows: UIView[]) =>
+            rows.forEach((row: UIView) => {
+            
+                this._persistedData[row._UITableViewRowIndex as number] = this.persistenceDataItemForRowWithIndex(
+                    row._UITableViewRowIndex as number,
                     row
                 )
                 row.removeFromSuperview()
-                
+            
                 this._markReusableViewAsUnused(row)
-                
-            }.bind(this))
-        }.bind(this))
+            
+            })
+        )
     }
-    
     
     
     _markReusableViewAsUnused(row: UIView) {
@@ -355,60 +317,59 @@ export class UITableView extends UINativeScrollView {
         if (!this.isMemberOfViewTree) {
             return
         }
-        
+    
         const visibleIndexes = this.indexesForVisibleRows()
-        
+    
         const minIndex = visibleIndexes[0]
         const maxIndex = visibleIndexes[visibleIndexes.length - 1]
-        
-        const removedViews = []
-        
-        const visibleRows = []
-        this._visibleRows.forEach(function (this: UITableView, row: UIView, index: number, array: UIView[]) {
+    
+        const removedViews: UITableViewRowView[] = []
+    
+        const visibleRows: UITableViewRowView[] = []
+        this._visibleRows.forEach((row) => {
             if (row._UITableViewRowIndex < minIndex || row._UITableViewRowIndex > maxIndex) {
-                
+            
                 //row.removeFromSuperview();
-                
+            
                 this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
                     row._UITableViewRowIndex,
                     row
                 )
-                
+            
                 this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row)
-                
+            
                 removedViews.push(row)
-                
+            
             }
             else {
                 visibleRows.push(row)
             }
-        }, this)
+        })
         this._visibleRows = visibleRows
+    
+        visibleIndexes.forEach((rowIndex: number) => {
         
-        visibleIndexes.forEach(function (this: UITableView, rowIndex: number, index: number, array: number) {
-            
-            
             if (this.isRowWithIndexVisible(rowIndex)) {
                 return
             }
-            const view: UIView = this.viewForRowWithIndex(rowIndex)
+            const view: UITableViewRowView = this.viewForRowWithIndex(rowIndex)
             //view._UITableViewRowIndex = rowIndex;
             this._firstLayoutVisibleRows.push(view)
             this._visibleRows.push(view)
             this.addSubview(view)
-            
-        } as any, this)
         
-        for (var i = 0; i < removedViews.length; i++) {
-            
-            var view: UIView = removedViews[i]
+        })
+    
+        for (let i = 0; i < removedViews.length; i++) {
+        
+            const view = removedViews[i]
             if (this._visibleRows.indexOf(view) == -1) {
-                
+            
                 //this._persistedData[view._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(view._UITableViewRowIndex, view);
                 view.removeFromSuperview()
-                
+            
                 //this._removedReusableViews[view._UITableViewReusabilityIdentifier].push(view);
-                
+            
             }
             
         }
@@ -418,7 +379,7 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    visibleRowWithIndex(rowIndex: number): UIView {
+    visibleRowWithIndex(rowIndex: number | undefined): UIView {
         for (var i = 0; i < this._visibleRows.length; i++) {
             const row = this._visibleRows[i]
             if (row._UITableViewRowIndex == rowIndex) {
@@ -434,8 +395,7 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    
-    reusableViewForIdentifier(identifier: string, rowIndex: number) {
+    reusableViewForIdentifier(identifier: string, rowIndex: number): UITableViewRowView {
         
         if (!this._removedReusableViews[identifier]) {
             this._removedReusableViews[identifier] = []
@@ -443,12 +403,9 @@ export class UITableView extends UINativeScrollView {
         
         if (this._removedReusableViews[identifier] && this._removedReusableViews[identifier].length) {
             
-            const view = this._removedReusableViews[identifier].pop()
-            
+            const view = this._removedReusableViews[identifier].pop() as UITableViewRowView
             view._UITableViewRowIndex = rowIndex
-            
             Object.assign(view, this._persistedData[rowIndex] || this.defaultRowPersistenceDataItem())
-            
             return view
             
         }
@@ -457,17 +414,10 @@ export class UITableView extends UINativeScrollView {
             this._reusableViews[identifier] = []
         }
         
-        const newView = this.newReusableViewForIdentifier(identifier, this._rowIDIndex)
+        const newView = this.newReusableViewForIdentifier(identifier, this._rowIDIndex) as UITableViewRowView
         this._rowIDIndex = this._rowIDIndex + 1
         
-        if (this._rowIDIndex > 40) {
-            
-            const asd = 1
-            
-        }
-        
         newView._UITableViewReusabilityIdentifier = identifier
-        
         newView._UITableViewRowIndex = rowIndex
         
         Object.assign(newView, this._persistedData[rowIndex] || this.defaultRowPersistenceDataItem())
@@ -498,25 +448,20 @@ export class UITableView extends UINativeScrollView {
         return 10000
     }
     
-    defaultRowPersistenceDataItem() {
-        
-        
-        
-    }
-    
-    persistenceDataItemForRowWithIndex(rowIndex: number, row: UIView) {
-        
+    defaultRowPersistenceDataItem(): any {
         
         
     }
     
-    viewForRowWithIndex(rowIndex: number): UIView {
+    persistenceDataItemForRowWithIndex(rowIndex: number, row: UIView): any {
         
+        
+    }
+    
+    viewForRowWithIndex(rowIndex: number): UITableViewRowView {
         const row = this.reusableViewForIdentifier("Row", rowIndex);
         (row as UIButton).titleLabel.text = "Row " + rowIndex
-        
         return row
-        
     }
     
     // Functions that should be overridden to draw the correct content END
@@ -570,9 +515,6 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    
-    
-    
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
@@ -587,33 +529,29 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    
-    
-    
     private _layoutAllRows(positions = this._rowPositions) {
         
         const bounds = this.bounds
+    
+        this._visibleRows.forEach(row => {
         
-        this._visibleRows.forEach(function (this: UITableView, row: UIView, index: number, array: UIView[]) {
-            
             const frame = bounds.copy()
-            
+        
             const positionObject = positions[row._UITableViewRowIndex]
             frame.min.y = positionObject.topY
             frame.max.y = positionObject.bottomY
             row.frame = frame
-            
+        
             row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px"
             row.style.left = "" + this.sidePadding.integerValue + "px"
-            
-            
-        }, this)
+        
+        
+        })
         
         this._fullHeightView.frame = bounds.rectangleWithHeight((positions.lastElement ||
             nil).bottomY).rectangleWithWidth(bounds.width * 0.5)
         
         this._firstLayoutVisibleRows = []
-        
         
     }
     
@@ -640,9 +578,6 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    
-    
-    
     layoutSubviews() {
         
         const previousPositions: UITableViewReusableViewPositionObject[] = JSON.parse(JSON.stringify(this._rowPositions))
@@ -660,7 +595,6 @@ export class UITableView extends UINativeScrollView {
         }
         
         
-        
         super.layoutSubviews()
         
         
@@ -671,11 +605,7 @@ export class UITableView extends UINativeScrollView {
         }
         
         
-        
-        
-        
         if (this._shouldAnimateNextLayout) {
-            
             
             
             // Need to do layout with the previous positions
@@ -721,17 +651,10 @@ export class UITableView extends UINativeScrollView {
         }
         
         
-        
-        
-        
     }
     
     
-    
-    
-    
     intrinsicContentHeight(constrainingWidth = 0) {
-        
         
         
         var result = 0
@@ -747,9 +670,6 @@ export class UITableView extends UINativeScrollView {
         return result
         
     }
-    
-    
-    
     
     
 }

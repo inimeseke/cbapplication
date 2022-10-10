@@ -18,30 +18,17 @@ import { CBColor } from "./Custom components/CBColor"
 import { LanguageService } from "./LanguageService"
 
 
-
-
-
 export class LanguagesDialogView extends UIView {
     
     
     
     titleLabel: UITextView
     buttons: UIButton[]
-    _previousLanguageKey: string
+    _previousLanguageKey: string = nil
     
     constructor(elementID: string, element?: HTMLElement) {
         
         super(elementID, element)
-        
-    }
-    
-    
-    
-    
-    
-    initView(elementID, viewHTMLElement) {
-        
-        super.initView(elementID, viewHTMLElement)
         
         // Adding a title label
         this.titleLabel = new UITextView("LanguagesDialogTitleLabel", UITextView.type.header1)
@@ -54,17 +41,17 @@ export class LanguagesDialogView extends UIView {
         this.buttons = []
         
         const languageKeys = Object.keys(LanguageService.languages)
+    
+        languageKeys.forEach(languageKey => {
         
-        languageKeys.forEach(function (this: LanguagesDialogView, languageKey: string, index: number, array: string[]) {
-            
             const language = LanguageService.languages[languageKey]
-            
+        
             // Creating a language button
             const languageButton = new UIButton("LeftBarLanguageButton" + language.languageNameShort)
             languageButton.titleLabel.text = language.languageName
             this.buttons.push(languageButton)
             this.addSubview(languageButton)
-            
+        
             // Adding a selected image view to the button
             const selectedImageView = new UIImageView("SelectedImage" + language.languageNameShort)
             selectedImageView.imageSource = "images/baseline-check-24px.svg"
@@ -119,40 +106,25 @@ export class LanguagesDialogView extends UIView {
             }
             
             // Adding the button press action
-            languageButton.addTargetForControlEvents([
-                UIView.controlEvent.EnterDown, UIView.controlEvent.PointerUpInside
-            ], function (this: LanguagesDialogView, sender: UIButton, event: Event) {
-                
+            languageButton.controlEventTargetAccumulator.EnterDown.PointerUpInside = (sender, event) => {
+            
                 CBCore.sharedInstance.languageKey = languageKey
-                
-                this.buttons.forEach(function (button, index, array) {
-                    button.selected = NO
-                })
+            
+                this.buttons.everyElement.selected = NO
                 languageButton.selected = YES
-                
+            
                 LanguageService.updateCurrentLanguageKey()
-                
+            
                 this.rootView.broadcastEventInSubtree({
-                    
                     name: UIView.broadcastEventName.LanguageChanged,
                     parameters: nil
-                    
                 })
-                
-                
-                
-                
-            }.bind(this))
             
-            
-        }, this)
+            }
         
-        
-        
+        })
+    
     }
-    
-    
-    
     
     
     wasAddedToViewTree() {
@@ -161,17 +133,12 @@ export class LanguagesDialogView extends UIView {
         
         this._previousLanguageKey = LanguageService.currentLanguageKey
         
-        
     }
-    
-    
-    
     
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
-    
     
         if (event.name == UICore.broadcastEventName.RouteDidChange && this._previousLanguageKey !=
             LanguageService.currentLanguageKey) {
@@ -179,23 +146,13 @@ export class LanguagesDialogView extends UIView {
             this._previousLanguageKey = LanguageService.currentLanguageKey
         
             this.rootView.broadcastEventInSubtree({
-            
                 name: UIView.broadcastEventName.LanguageChanged,
                 parameters: nil
-            
             })
-            
-            
-            
             
         }
         
-        
-        
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -205,28 +162,28 @@ export class LanguagesDialogView extends UIView {
         if (this.hidden) {
             return
         }
-        
+    
         const maxWidth = 350
         if (this.bounds.width > maxWidth) {
             this.bounds = this.bounds.rectangleWithWidth(maxWidth)
         }
-        
+    
         // Variables
         const bounds = this.bounds
         const sidePadding = 20 * 0
-        
+    
         this.titleLabel.frame = new UIRectangle(sidePadding, sidePadding, 50, bounds.width - sidePadding * 2)
-        
-        var previousFrame = this.titleLabel.frame
+    
+        let previousFrame = this.titleLabel.frame
         this.buttons.forEach(function (button, index, array) {
-            
+        
             button.frame = previousFrame.rectangleWithY(previousFrame.max.y + 1).rectangleWithWidth(bounds.width -
                 sidePadding * 2)
             previousFrame = button.frame
-            
+        
         })
-        
-        
+    
+    
         this.bounds = bounds.rectangleWithHeight(this.intrinsicContentHeight(bounds.width))
         
         this.style.maxHeight = "" + bounds.height.integerValue + "px"
@@ -234,11 +191,7 @@ export class LanguagesDialogView extends UIView {
         this.centerInContainer()
         
         
-        
     }
-    
-    
-    
     
     
 }

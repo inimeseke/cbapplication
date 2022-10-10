@@ -8,17 +8,11 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     _isAUIDialogView = YES
-    
     _view: ViewType = nil
-    
-    _appearedAnimated: boolean
-    
+    _appearedAnimated?: boolean
     animationDuration: number = 0.25
-    
     _zIndex: number = 100
-    
     isVisible: boolean = NO
-    
     dismissesOnTapOutside = YES
     
     constructor(elementID?: string, viewHTMLElement?: HTMLElement) {
@@ -40,7 +34,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         this.zIndex = this._zIndex
         
     }
-    
     
     
     didDetectTapOutside(sender: UIView, event: Event) {
@@ -66,7 +59,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     }
     
     
-    
     set view(view: ViewType) {
         
         this._view.removeFromSuperview()
@@ -85,7 +77,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     }
     
     
-    
     willAppear(animated: boolean = NO) {
         
         if (animated) {
@@ -95,8 +86,8 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         }
         
         this.style.height = ""
-        
-        this._frame = null
+    
+        this._frame = nil
         
     }
     
@@ -112,7 +103,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         this.style.opacity = "0"
         
     }
-    
     
     
     showInView(containerView: UIView, animated: boolean) {
@@ -136,13 +126,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 this.animationDuration,
                 0,
                 undefined,
-                function () {
-                    
-                    
-                    this.animateAppearing()
-                    
-                    
-                }.bind(this),
+                () => this.animateAppearing(),
                 nil
             )
             
@@ -187,20 +171,20 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 this.animationDuration,
                 0,
                 undefined,
-                function () {
-                    
+                (() => {
+        
                     this.animateDisappearing()
-                    
-                }.bind(this),
-                function () {
-                    
+        
+                }).bind(this),
+                () => {
+        
                     if (this.isVisible == NO) {
-                        
+            
                         this.removeFromSuperview()
-                        
+            
                     }
-                    
-                }.bind(this)
+        
+                }
             )
             
         }
@@ -215,9 +199,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     }
     
     
-    
-    
-    
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
@@ -229,9 +210,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         }
         
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -260,17 +238,12 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         // this.view.style.maxWidth = "" + (bounds.width - margin * 2).integerValue + "px";
         
         
-        
-        
         // var viewIntrinsicRectangle = this.view.intrinsicContentSize();
         // this.view.frame = new UIRectangle((bounds.width - viewIntrinsicRectangle.width)*0.5,  )
         
         super.layoutSubviews()
         
     }
-    
-    
-    
     
     
 }

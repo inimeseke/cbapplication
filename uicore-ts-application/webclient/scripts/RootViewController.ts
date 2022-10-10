@@ -1,7 +1,10 @@
+import { CBCore, SocketClient } from "cbcore-ts"
 import {
+    CALL,
     IS,
+    IS_NOT,
     nil,
-    UICore,
+    UIPoint,
     UIRootViewController,
     UIRoute,
     UITextView,
@@ -10,9 +13,9 @@ import {
     UIViewController,
     YES
 } from "uicore-ts"
-import { CBCore, SocketClient } from "cbcore-ts"
 import { BottomBarView } from "./BottomBarView"
 import { CBColor } from "./Custom components/CBColor"
+import { EditorViewController } from "./EditorViewController"
 import { InformationViewController } from "./InformationViewController"
 import { InternalDropdownSettingsViewController } from "./InternalDropdownSettingsViewController"
 import { InternalLanguageSettingsViewController } from "./InternalLanguageSettingsViewController"
@@ -24,8 +27,13 @@ import { TopBarView } from "./TopBarView"
 
 export class RootViewController extends UIRootViewController {
     
-    readonly bottomBarView: BottomBarView
-    readonly topBarView: TopBarView
+    readonly topBarView: TopBarView = new TopBarView("TopBarView", nil).configuredWithObject({
+        titleLabel: { setText: CALL("topBarTitle", "UICore application") }
+    }).performingFunctionWithSelf(self => this.view.addSubview(self))
+    
+    readonly bottomBarView: BottomBarView = new BottomBarView("BottomBarView").configuredWithObject({
+        style: { overflow: "hidden" }
+    }).performingFunctionWithSelf(self => this.view.addSubview(self))
     
     readonly languagesDialogViewController = new UIViewController(new LanguagesDialogView("LanguagesDialogView"))
     
@@ -45,38 +53,29 @@ export class RootViewController extends UIRootViewController {
         mainViewController: this.lazyViewControllerObjectWithClass(SomeContentViewController)
         
     }
+    private editor?: EditorViewController
     
     
-    constructor(view) {
+    constructor(view: UIView) {
         
-        // Calling super
         super(view)
-        
-        // Instance variables, initialize to nil or empty function, do not leave undefined to avoid excessive if blocks
-        // this._firstView = nil;
-        // this._secondView = nil;
-        // this._testView = nil;
-        // this._button = nil;
-        
-        // The nil object avoids unnecessary crashes by allowing you to call any function or access any variable on it, returning nil
-        // Define properties with get and set functions, so they can be accessed and set like variables
-        // Name variables that should be private, like property variables, with a _ sign, this also holds for private functions
-        // Avoid accessing variables and functions named with _ from outside as this creates strong coupling and hinders stability
-        
-        // Code for further setup if necessary
         
         UITextView.defaultTextColor = CBColor.primaryContentColor
         
-        // Top bar
-        this.topBarView = new TopBarView("TopBarView", nil)
-        this.topBarView.titleLabel.setText("topBarTitle", "UICore application")
-        this.view.addSubview(this.topBarView)
-        
-        // Bottom bar
-        this.bottomBarView = new BottomBarView("BottomBarView").configuredWithObject({
-            style: { overflow: "hidden" }
+        document.addEventListener("keydown", event => {
+            if (event.ctrlKey && event.key === "e") {
+                const isEditorOpen = IS(UIRoute.currentRoute.componentWithName("settings").parameters["editorOpen"])
+                if (!isEditorOpen) {
+                    UIRoute.currentRoute.routeBySettingParameterInComponent("settings", "editorOpen", "YES")
+                        .applyByReplacingCurrentRouteInHistory()
+                }
+                else {
+                    UIRoute.currentRoute.routeByRemovingParameterInComponent("settings", "editorOpen")
+                        .applyByReplacingCurrentRouteInHistory()
+                }
+            }
         })
-        this.view.addSubview(this.bottomBarView)
+        
         
         // Initializing CBCore if needed
         CBCore.initIfNeededWithViewCore(this.view.core)
@@ -103,6 +102,13 @@ export class RootViewController extends UIRootViewController {
             SocketClient.RouteDidChange(currentURL).then(nil)
         }
         
+        if (route.componentWithName("settings").parameters["editorOpen"]) {
+            this.showEditor()
+        }
+        else {
+            this.hideEditor()
+        }
+        
     }
     
     
@@ -126,6 +132,28 @@ export class RootViewController extends UIRootViewController {
         
     }
     
+    showEditor() {
+        
+        if (IS_NOT(this.editor)) {
+            this.editor = new EditorViewController(new UIView("CBEditorView"))
+        }
+        
+        this.editor.view.pointerDraggingPoint = new UIPoint(0, 0)
+        this.editor?.viewWillAppear()
+        this.editor?.view.willAppear()
+        this.addChildViewController(this.editor)
+        this.editor?.viewDidAppear()
+        
+    }
+    
+    hideEditor() {
+        
+        this.editor?.viewWillDisappear()
+        this.editor?.removeFromParentViewController()
+        this.editor?.viewDidDisappear()
+        this.editor = nil
+        
+    }
     
     updateViewStyles() {
     
@@ -142,17 +170,19 @@ export class RootViewController extends UIRootViewController {
         
         super.layoutViewSubviews()
         
-        this.updatePageScale()
+        this.updatePageScale({
+            minScaleWidth: 700,
+            maxScaleWidth: 1500,
+            minScale: 0.7,
+            maxScale: 1
+        })
         
-        const contentViewMaxWidth = 1000
-        const topBarHeight = 65
-        const bottomBarMinHeight = 100
-        this.performDefaultLayout(
-            this.core.paddingLength,
-            contentViewMaxWidth,
-            topBarHeight,
-            bottomBarMinHeight
-        )
+        this.performDefaultLayout({
+            paddingLength: this.core.paddingLength,
+            contentViewMaxWidth: 1000,
+            topBarHeight: 65,
+            bottomBarMinHeight: 100
+        })
         
     }
     

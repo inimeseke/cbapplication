@@ -5,9 +5,6 @@ import { UIView, UIViewAddControlEventTargetObject } from "./UIView"
 export class UIDateTimeInput extends UIView {
     
     
-    
-    
-    
     constructor(elementID: string, type: string = UIDateTimeInput.type.DateTime) {
         
         super(elementID, nil, "input")
@@ -17,11 +14,8 @@ export class UIDateTimeInput extends UIView {
         this.viewHTMLElement.onchange = (event) => {
             this.sendControlEventForKey(UIDateTimeInput.controlEvent.ValueChange, event)
         }
-        
+    
     }
-    
-    
-    
     
     
     static controlEvent = Object.assign({}, UIView.controlEvent, {
@@ -30,14 +24,11 @@ export class UIDateTimeInput extends UIView {
         
     })
     
-    get addControlEventTarget(): UIViewAddControlEventTargetObject<typeof UIDateTimeInput.controlEvent> {
-        
-        return super.addControlEventTarget as any
-        
+    
+    // @ts-ignore
+    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UIDateTimeInput> {
+        return super.controlEventTargetAccumulator as any
     }
-    
-    
-    
     
     
     static type = {
@@ -59,9 +50,6 @@ export class UIDateTimeInput extends UIView {
     }
     
     
-    
-    
-    
     get date() {
         
         const result = new Date((this.viewHTMLElement as HTMLInputElement).value)
@@ -69,9 +57,6 @@ export class UIDateTimeInput extends UIView {
         return result
         
     }
-    
-    
-    
     
     
 }

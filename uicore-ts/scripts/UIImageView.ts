@@ -4,22 +4,19 @@ import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
-
-
-
 export class UIImageView extends UIView {
     
     
     //actionIndicator: UIActionIndicator;
-    _sourceKey: string
-    _defaultSource: string
+    _sourceKey?: string
+    _defaultSource?: string
     
     _fillMode: any
     
     _hiddenWhenEmpty = NO
     
     
-    constructor(elementID?, viewHTMLElement = null) {
+    constructor(elementID?: string, viewHTMLElement = null) {
         
         super(elementID, viewHTMLElement, "img")
         
@@ -28,8 +25,6 @@ export class UIImageView extends UIView {
         
         
     }
-    
-    
     
     
     static fillMode = {
@@ -43,9 +38,6 @@ export class UIImageView extends UIView {
     }
     
     
-    
-    
-    
     get viewHTMLElement() {
         
         return super.viewHTMLElement as HTMLImageElement
@@ -53,36 +45,20 @@ export class UIImageView extends UIView {
     }
     
     
-    
-    
-    
     static objectURLFromDataURL(dataURL: string) {
-        
-        // if (IS_NOT(dataURL)) {
-        
-        //     return nil;
-        
-        // }
-    
         // @ts-ignore
         const blob = dataURLtoBlob(dataURL)
-    
-        const objectURL = URL.createObjectURL(blob)
-    
-        return objectURL
-        
+        return URL.createObjectURL(blob)
     }
     
     
-    
-    
-    static dataURL(url, callback) {
+    static dataURL(url: string | URL, callback: (arg0: string | ArrayBuffer | null) => void) {
         const xhr = new XMLHttpRequest()
         xhr.open("get", url)
         xhr.responseType = "blob"
         xhr.onload = function () {
             const fr = new FileReader()
-    
+            
             fr.onload = function () {
                 callback(this.result)
             }
@@ -94,27 +70,23 @@ export class UIImageView extends UIView {
     }
     
     
-    
     static dataURLWithMaxSize(URLString: string, maxSize: number, completion: (resultURLString: string) => void) {
     
         const imageView = new UIImageView()
         imageView.imageSource = URLString
+    
+        imageView.viewHTMLElement.onload = () => {
         
-        imageView.viewHTMLElement.onload = function () {
-    
             const originalSize = imageView.intrinsicContentSize()
-    
-    
-            var multiplier = maxSize / Math.max(originalSize.height, originalSize.width)
-    
+        
+            let multiplier = maxSize / Math.max(originalSize.height, originalSize.width)
             multiplier = Math.min(1, multiplier)
-    
-    
+        
             const result = imageView.getDataURL((originalSize.height * multiplier).integerValue, (originalSize.width *
                 multiplier).integerValue)
-    
+        
             completion(result)
-            
+        
         }
         
     }
@@ -129,14 +101,14 @@ export class UIImageView extends UIView {
     
         const imageView = new UIImageView()
         imageView.imageSource = URLString
-        
-        imageView.viewHTMLElement.onload = function () {
     
+        imageView.viewHTMLElement.onload = () => {
+        
             const result = imageView.getDataURL(height, width)
             completion(result)
-            
-        }
         
+        }
+    
     }
     
     
@@ -145,27 +117,21 @@ export class UIImageView extends UIView {
         const img = this.viewHTMLElement
     
         // Create an empty canvas element
-        const canvas = document.createElement("canvas")
-        canvas.width = width
-        canvas.height = height
-        
+        const canvas: HTMLCanvasElement = document.createElement("canvas")
+        canvas.width = width ?? img.naturalWidth
+        canvas.height = height ?? img.naturalHeight
+    
         // Copy the image contents to the canvas
-        const ctx = canvas.getContext("2d")
-        ctx.drawImage(img, 0, 0, width, height)
-        
+        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
+        ctx.drawImage(img, 0, 0, width ?? img.naturalWidth, height ?? img.naturalHeight)
+    
         // Get the data-URL formatted image
         // Firefox supports PNG and JPEG. You could check img.src to
         // guess the original format, but be aware the using "image/jpg"
         // will re-encode the image.
-        const dataURL = canvas.toDataURL("image/png")
+        return canvas.toDataURL("image/png")
     
-        return dataURL
-        
-        //return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-        
     }
-    
-    
     
     
     get imageSource() {
@@ -195,27 +161,20 @@ export class UIImageView extends UIView {
             
         }
         else {
-            
+    
             this.hidden = NO
-            
+    
         }
-        
+    
         // this.superview.addSubview(this.actionIndicator);
         // this.actionIndicator.frame = this.frame;
         // this.actionIndicator.start();
         // this.actionIndicator.backgroundColor = UIColor.redColor
-        
-        // @ts-ignore
-        this.viewHTMLElement.onload = function (this: UIImageView, event: Event) {
-            
-            this.superview.setNeedsLayout()
-            
-            //this.actionIndicator.removeFromSuperview();
-            
-        }.bind(this)
-        
-    }
     
+        // @ts-ignore
+        this.viewHTMLElement.onload = () => this.superview.setNeedsLayout()
+    
+    }
     
     
     setImageSource(key: string, defaultString: string) {
@@ -224,7 +183,6 @@ export class UIImageView extends UIView {
         this.imageSource = UICore.languageService.stringForKey(key, languageName, defaultString, nil)
         
     }
-    
     
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
@@ -260,18 +218,13 @@ export class UIImageView extends UIView {
     }
     
     
-    
     get fillMode() {
-        
-        
         return this._fillMode
-        
     }
     
     set fillMode(fillMode) {
         
         this._fillMode = fillMode;
-        
         (this.style as any).objectFit = fillMode
         
     }
@@ -289,21 +242,12 @@ export class UIImageView extends UIView {
     }
     
     
-    
-    
-    
     didMoveToSuperview(superview: UIView) {
         
         super.didMoveToSuperview(superview)
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -311,20 +255,15 @@ export class UIImageView extends UIView {
         super.layoutSubviews()
         
         
-        
     }
-    
-    
     
     
     intrinsicContentSize() {
     
     
-        const result = new UIRectangle(0, 0, this.viewHTMLElement.naturalHeight, this.viewHTMLElement.naturalWidth)
+        return new UIRectangle(0, 0, this.viewHTMLElement.naturalHeight, this.viewHTMLElement.naturalWidth)
     
-        return result
-        
-        
+    
     }
     
     intrinsicContentSizeWithConstraints(constrainingHeight = 0, constrainingWidth = 0) {
@@ -335,16 +274,11 @@ export class UIImageView extends UIView {
     
         const multiplier = Math.max(heightRatio, widthRatio)
     
-        const result = new UIRectangle(0, 0, this.viewHTMLElement.naturalHeight *
+        return new UIRectangle(0, 0, this.viewHTMLElement.naturalHeight *
             multiplier, this.viewHTMLElement.naturalWidth * multiplier)
     
-        return result
-        
-        
+    
     }
-    
-    
-    
     
     
 }

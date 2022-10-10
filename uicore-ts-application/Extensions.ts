@@ -14,24 +14,27 @@ declare global {
         contains(element: T): boolean;
         
         groupedBy(keyFunction: (item: T) => any): { [key: string]: Array<T> } & Object;
-        
+    
         copy(): Array<T>;
-        
+    
         arrayByRepeating(numberOfRepetitions: number): Array<T>;
+    
         arrayByTrimmingToLengthIfLonger(maxLength: number): Array<T>;
-        
+    
         anyMatch(predicate: (value: T, index: number, obj: T[]) => boolean): boolean
+    
         noneMatch(predicate: (value: T, index: number, obj: T[]) => boolean): boolean
     
         allMatch(predicate: (value: T, index: number, obj: T[]) => boolean): boolean
-        
-        readonly firstElement: T;
-        readonly lastElement: T;
+    
+        firstElement: T;
+        lastElement: T;
         readonly summedValue: T;
     
         max(): number;
+    
         min(): number;
-        
+    
     }
     
     
@@ -176,25 +179,29 @@ const NO = false;
     
     
     Object.defineProperty(Array.prototype, "firstElement", {
-            
+    
         get: function firstElement(this: Array<any>) {
-            var result = this[0];
-            return result;
+            return this[0]
+        },
+        set: function firstElement(this: Array<any>, value) {
+            return this[0] = value
         },
         enumerable: false
-            
+    
     });
     
     
     
     Object.defineProperty(Array.prototype, "lastElement", {
-            
+    
         get: function lastElement(this: any[]) {
-            var result = this[this.length - 1];
-            return result;
+            return this[this.length - 1]
+        },
+        set: function firstElement(this: Array<any>, value) {
+            return this[this.length - 1] = value
         },
         enumerable: false
-            
+    
     });
     
     

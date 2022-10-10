@@ -20,7 +20,6 @@ export interface UIRouteComponent<T = any> {
 }
 
 
-// @ts-ignore
 export class UIRoute extends Array<UIRouteComponent> {
     
     constructor(hash?: string) {
@@ -40,52 +39,40 @@ export class UIRoute extends Array<UIRouteComponent> {
         hash = decodeURIComponent(hash)
         
         const components = hash.split("]")
-        components.forEach(function (this: UIRoute, component: string, index: number, array: string[]) {
-            
+        components.forEach(component => {
+    
             const componentName = component.split("[")[0]
-            const parameters = {}
-            
+            const parameters: Record<string, string> = {}
+    
             if (!componentName) {
-                
                 return
-                
             }
-            
+    
             const parametersString = component.split("[")[1] || ""
             const parameterPairStrings = parametersString.split(",") || []
-            
-            parameterPairStrings.forEach(function (pairString, index, array) {
-                
+    
+            parameterPairStrings.forEach(pairString => {
+        
                 const keyAndValueArray = pairString.split(":")
                 const key = decodeURIComponent(keyAndValueArray[0])
                 const value = decodeURIComponent(keyAndValueArray[1])
-                
+        
                 if (key) {
-                    
                     parameters[key] = value
-                    
                 }
-                
-                
-                
+        
             })
-            
-            
-            
+    
+    
             this.push({
                 name: componentName,
                 parameters: parameters
             })
-            
-            
-            
-            
-            
-        }, this)
+    
+        })
         
         
     }
-    
     
     
     static get currentRoute() {

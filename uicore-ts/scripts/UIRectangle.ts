@@ -3,32 +3,35 @@ import { UIPoint } from "./UIPoint"
 import { UIView } from "./UIView"
 
 
-
-
-
 export class UIRectangle extends UIObject {
     
     _isBeingUpdated: boolean
-    rectanglePointDidChange: (b: any) => void
+    rectanglePointDidChange: (b: any) => void = nil
     max: UIPoint
     min: UIPoint
     
     
     constructor(x: number = 0, y: number = 0, height: number = 0, width: number = 0) {
-        
+    
         super()
-        
+    
         this.min = new UIPoint(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY)
         this.max = new UIPoint(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY)
-        
-        this.min.didChange = this.rectanglePointDidChange
-        this.max.didChange = this.rectanglePointDidChange
-        
+    
+        this.min.didChange = (point) => {
+            this.rectanglePointDidChange(point)
+            this._rectanglePointDidChange()
+        }
+        this.max.didChange = (point) => {
+            this.rectanglePointDidChange(point)
+            this._rectanglePointDidChange()
+        }
+    
         this._isBeingUpdated = NO
-        
+    
         this.min = new UIPoint(x, y)
         this.max = new UIPoint(x + width, y + height)
-        
+    
         if (IS_NIL(height)) {
             this.max.y = height
         }
@@ -36,34 +39,20 @@ export class UIRectangle extends UIObject {
         if (IS_NIL(width)) {
             this.max.x = width
         }
-        
-        
+    
     }
-    
-    
-    
     
     
     copy() {
-        const result = new UIRectangle(this.x, this.y, this.height, this.width)
-        return result
+        return new UIRectangle(this.x, this.y, this.height, this.width)
     }
     
-    isEqualTo(rectangle: UIRectangle) {
-    
-    
-        const result = (IS(rectangle) && this.min.isEqualTo(rectangle.min) && this.max.isEqualTo(rectangle.max))
-    
-        return result
-        
+    isEqualTo(rectangle: UIRectangle | null | undefined) {
+        return (IS(rectangle) && this.min.isEqualTo(rectangle.min) && this.max.isEqualTo(rectangle.max))
     }
     
     static zero() {
-    
-        const result = new UIRectangle(0, 0, 0, 0)
-    
-        return result
-        
+        return new UIRectangle(0, 0, 0, 0)
     }
     
     containsPoint(point: UIPoint) {
@@ -116,7 +105,6 @@ export class UIRectangle extends UIObject {
     }
     
     
-    
     get width() {
         if (this.max.x === nil) {
             return nil
@@ -127,7 +115,6 @@ export class UIRectangle extends UIObject {
     set width(width: number) {
         this.max.x = this.min.x + width
     }
-    
     
     
     get x() {
@@ -165,12 +152,8 @@ export class UIRectangle extends UIObject {
     }
     
     
-    
-    
     get topLeft() {
-        
         return this.min.copy()
-        
     }
     
     get topRight() {
@@ -182,53 +165,35 @@ export class UIRectangle extends UIObject {
     }
     
     get bottomRight() {
-        
         return this.max.copy()
-        
     }
     
     
     get center() {
-    
-        const result = this.min.copy().add(this.min.to(this.max).scale(0.5))
-    
-        return result
-        
+        return this.min.copy().add(this.min.to(this.max).scale(0.5))
     }
     
     set center(center: UIPoint) {
-    
         const offset = this.center.to(center)
         this.offsetByPoint(offset)
-        
     }
     
     offsetByPoint(offset: UIPoint) {
-        
         this.min.add(offset)
         this.max.add(offset)
         
         return this
-        
     }
-    
     
     
     concatenateWithRectangle(rectangle: UIRectangle) {
-        
         this.updateByAddingPoint(rectangle.bottomRight)
         this.updateByAddingPoint(rectangle.topLeft)
-        
         return this
-        
     }
     
     
-    
-    
-    
     intersectionRectangleWithRectangle(rectangle: UIRectangle): UIRectangle {
-    
     
         const result = this.copy()
     
@@ -279,21 +244,14 @@ export class UIRectangle extends UIObject {
     }
     
     
-    
     get area() {
-        const result = this.height * this.width
-        return result
+        return this.height * this.width
     }
     
     
     intersectsWithRectangle(rectangle: UIRectangle) {
-        
         return (this.intersectionRectangleWithRectangle(rectangle).area != 0)
-        
     }
-    
-    
-    
     
     
     // add some space around the rectangle
@@ -307,8 +265,7 @@ export class UIRectangle extends UIObject {
     }
     
     rectangleWithInset(inset: number) {
-        const result = this.rectangleWithInsets(inset, inset, inset, inset)
-        return result
+        return this.rectangleWithInsets(inset, inset, inset, inset)
     }
     
     rectangleWithHeight(height: number, centeredOnPosition: number = nil) {
@@ -348,19 +305,11 @@ export class UIRectangle extends UIObject {
     }
     
     rectangleWithHeightRelativeToWidth(heightRatio: number = 1, centeredOnPosition: number = nil) {
-    
-        const result = this.rectangleWithHeight(this.width * heightRatio, centeredOnPosition)
-    
-        return result
-        
+        return this.rectangleWithHeight(this.width * heightRatio, centeredOnPosition)
     }
     
     rectangleWithWidthRelativeToHeight(widthRatio: number = 1, centeredOnPosition: number = nil) {
-    
-        const result = this.rectangleWithWidth(this.height * widthRatio, centeredOnPosition)
-    
-        return result
-        
+        return this.rectangleWithWidth(this.height * widthRatio, centeredOnPosition)
     }
     
     rectangleWithX(x: number, centeredOnPosition: number = 0) {
@@ -382,7 +331,6 @@ export class UIRectangle extends UIObject {
     }
     
     
-    
     rectangleByAddingX(x: number) {
     
         const result = this.copy()
@@ -402,71 +350,59 @@ export class UIRectangle extends UIObject {
     }
     
     
-    
-    
-    
     rectanglesBySplittingWidth(
         weights: number[],
         paddings: number | number[] = 0,
         absoluteWidths: number | number[] = nil
     ) {
-        
+    
         if (IS_NIL(paddings)) {
-            
             paddings = 1
-            
         }
-        
-        if (!(paddings instanceof Array)) {
-            
+        if (!((paddings as any) instanceof Array)) {
             paddings = [paddings].arrayByRepeating(weights.length - 1)
-            
         }
-        
-        paddings = paddings.arrayByTrimmingToLengthIfLonger(weights.length - 1)
-        
+        paddings = (paddings as number[]).arrayByTrimmingToLengthIfLonger(weights.length - 1)
         if (!(absoluteWidths instanceof Array) && IS_NOT_NIL(absoluteWidths)) {
             absoluteWidths = [absoluteWidths].arrayByRepeating(weights.length)
         }
     
         const result: UIRectangle[] = []
-        const sumOfWeights = weights.reduce(function (a, b, index) {
-            if (IS_NOT_NIL(absoluteWidths[index])) {
-                b = 0
-            }
-            return a + b
-        }, 0)
+        const sumOfWeights = weights.reduce(
+            (a, b, index) => {
+                if (IS_NOT_NIL((absoluteWidths as number[])[index])) {
+                    b = 0
+                }
+                return a + b
+            },
+            0
+        )
         const sumOfPaddings = paddings.summedValue
         const sumOfAbsoluteWidths = (absoluteWidths as number[]).summedValue
         const totalRelativeWidth = this.width - sumOfPaddings - sumOfAbsoluteWidths
-        var previousCellMaxX = this.x
+        let previousCellMaxX = this.x
     
-        for (var i = 0; i < weights.length; i++) {
-    
-            var resultWidth: number
+        for (let i = 0; i < weights.length; i++) {
+        
+            let resultWidth: number
             if (IS_NOT_NIL(absoluteWidths[i])) {
-                
                 resultWidth = absoluteWidths[i] || 0
-                
             }
             else {
-                
                 resultWidth = totalRelativeWidth * (weights[i] / sumOfWeights)
-                
             }
-    
+        
             const rectangle = this.rectangleWithWidth(resultWidth)
-    
-            var padding = 0
+        
+            let padding = 0
             if (paddings.length > i && paddings[i]) {
                 padding = paddings[i]
             }
-            
+        
             rectangle.x = previousCellMaxX
             previousCellMaxX = rectangle.max.x + padding
-            //rectangle = rectangle.rectangleWithInsets(0, padding, 0, 0);
             result.push(rectangle)
-            
+        
         }
         
         return result
@@ -478,32 +414,28 @@ export class UIRectangle extends UIObject {
         paddings: number | number[] = 0,
         absoluteHeights: number | number[] = nil
     ) {
-        
+    
         if (IS_NIL(paddings)) {
-            
             paddings = 1
-            
         }
-        
-        if (!(paddings instanceof Array)) {
-            
+        if (!((paddings as any) instanceof Array)) {
             paddings = [paddings].arrayByRepeating(weights.length - 1)
-            
         }
-        
-        paddings = paddings.arrayByTrimmingToLengthIfLonger(weights.length - 1)
-        
+        paddings = (paddings as number[]).arrayByTrimmingToLengthIfLonger(weights.length - 1)
         if (!(absoluteHeights instanceof Array) && IS_NOT_NIL(absoluteHeights)) {
             absoluteHeights = [absoluteHeights].arrayByRepeating(weights.length)
         }
     
         const result: UIRectangle[] = []
-        const sumOfWeights = weights.reduce(function (a, b, index) {
-            if (IS_NOT_NIL(absoluteHeights[index])) {
-                b = 0
-            }
-            return a + b
-        }, 0)
+        const sumOfWeights = weights.reduce(
+            (a, b, index) => {
+                if (IS_NOT_NIL((absoluteHeights as number[])[index])) {
+                    b = 0
+                }
+                return a + b
+            },
+            0
+        )
         const sumOfPaddings = paddings.summedValue
         const sumOfAbsoluteHeights = (absoluteHeights as number[]).summedValue
         const totalRelativeHeight = this.height - sumOfPaddings - sumOfAbsoluteHeights
@@ -512,7 +444,7 @@ export class UIRectangle extends UIObject {
         for (var i = 0; i < weights.length; i++) {
             var resultHeight: number
             if (IS_NOT_NIL(absoluteHeights[i])) {
-                
+            
                 resultHeight = absoluteHeights[i] || 0
                 
             }
@@ -521,9 +453,9 @@ export class UIRectangle extends UIObject {
                 resultHeight = totalRelativeHeight * (weights[i] / sumOfWeights)
                 
             }
-    
+        
             const rectangle = this.rectangleWithHeight(resultHeight)
-    
+        
             var padding = 0
             if (paddings.length > i && paddings[i]) {
                 padding = paddings[i]
@@ -538,9 +470,6 @@ export class UIRectangle extends UIObject {
         return result
         
     }
-    
-    
-    
     
     
     rectanglesByEquallySplittingWidth(numberOfFrames: number, padding: number = 0) {
@@ -566,24 +495,18 @@ export class UIRectangle extends UIObject {
     }
     
     
-    
     distributeViewsAlongWidth(
         views: UIView[],
         weights: number | number[] = 1,
         paddings?: number | number[],
         absoluteWidths?: number | number[]
     ) {
-        
         if (!(weights instanceof Array)) {
             weights = [weights].arrayByRepeating(views.length)
         }
-    
         const frames = this.rectanglesBySplittingWidth(weights, paddings, absoluteWidths)
-    
-        frames.forEach((frame, index, array) => FIRST_OR_NIL(views[index]).frame = frame)
-        
+        frames.forEach((frame, index) => FIRST_OR_NIL(views[index]).frame = frame)
         return this
-        
     }
     
     distributeViewsAlongHeight(
@@ -592,44 +515,26 @@ export class UIRectangle extends UIObject {
         paddings?: number | number[],
         absoluteHeights?: number | number[]
     ) {
-        
         if (!(weights instanceof Array)) {
             weights = [weights].arrayByRepeating(views.length)
         }
-    
         const frames = this.rectanglesBySplittingHeight(weights, paddings, absoluteHeights)
-    
-        frames.forEach((frame, index, array) => FIRST_OR_NIL(views[index]).frame = frame)
-        
+        frames.forEach((frame, index) => FIRST_OR_NIL(views[index]).frame = frame)
         return this
-        
     }
     
     
     distributeViewsEquallyAlongWidth(views: UIView[], padding: number) {
-    
         const frames = this.rectanglesByEquallySplittingWidth(views.length, padding)
-    
-        frames.forEach(function (frame, index, array) {
-            views[index].frame = frame
-        })
-        
+        frames.forEach((frame, index) => views[index].frame = frame)
         return this
-        
     }
     
     distributeViewsEquallyAlongHeight(views: UIView[], padding: number) {
-    
         const frames = this.rectanglesByEquallySplittingHeight(views.length, padding)
-    
-        frames.forEach(function (frame, index, array) {
-            views[index].frame = frame
-        })
-        
+        frames.forEach((frame, index) => views[index].frame = frame)
         return this
-        
     }
-    
     
     
     rectangleForNextRow(padding: number = 0, height = this.height) {
@@ -649,21 +554,18 @@ export class UIRectangle extends UIObject {
     }
     
     rectangleForPreviousRow(padding: number = 0) {
-        const result = this.rectangleWithY(this.min.y - this.height - padding)
-        return result
+        return this.rectangleWithY(this.min.y - this.height - padding)
     }
     
     rectangleForPreviousColumn(padding: number = 0) {
-        const result = this.rectangleWithX(this.min.x - this.width - padding)
-        return result
+        return this.rectangleWithX(this.min.x - this.width - padding)
     }
     
     
-    
     // Bounding box
-    static boundingBoxForPoints(points) {
+    static boundingBoxForPoints(points: string | any[]) {
         const result = new UIRectangle()
-        for (var i = 0; i < points.length; i++) {
+        for (let i = 0; i < points.length; i++) {
             result.updateByAddingPoint(points[i])
         }
         return result
@@ -687,17 +589,10 @@ export class UIRectangle extends UIObject {
     }
     
     _rectanglePointDidChange() {
-        
         if (!this._isBeingUpdated) {
-            
             this.didChange()
-            
         }
-        
     }
-    
-    
-    
     
     
 }

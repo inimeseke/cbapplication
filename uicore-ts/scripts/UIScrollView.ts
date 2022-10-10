@@ -1,27 +1,20 @@
-import { nil, NO, YES } from "./UIObject"
+import { IS_NOT, nil, NO, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIView } from "./UIView"
 
 
-
-
-
 export class UIScrollView extends UIView {
     
+    containerView: UIView
     
     _contentOffset: UIPoint = new UIPoint(0, 0)
     _contentScale: number = 1
     
-    containerView: UIView
-    
-    _pointerDown: boolean
-    
+    _pointerDown?: boolean
     _scrollEnabled: boolean = YES
-    
-    _previousClientPoint: UIPoint
-    
-    _intrinsicContentFrame: UIRectangle
+    _previousClientPoint: UIPoint = nil
+    _intrinsicContentFrame: UIRectangle = nil
     
     constructor(elementID: string, viewHTMLElement?: HTMLElement) {
         
@@ -30,27 +23,18 @@ export class UIScrollView extends UIView {
         this.containerView = new UIView(elementID + "ContainerView")
         super.addSubview(this.containerView)
         
-        
         this.style.overflow = "hidden"
-        
         this.pausesPointerEvents = NO //YES;
         
+        this.addTargetForControlEvent(UIView.controlEvent.PointerDown, () => this._pointerDown = YES)
         
-        this.addTargetForControlEvent(UIView.controlEvent.PointerDown, function () {
-            
-            this._pointerDown = YES
-            
-        }.bind(this))
-        
-        this.addTargetForControlEvent(UIView.controlEvent.PointerUp, function () {
+        this.addTargetForControlEvent(UIView.controlEvent.PointerUp, () => {
             
             this._pointerDown = NO
-            
-            this._previousClientPoint = null
-            
+            this._previousClientPoint = nil
             scrollStopped()
             
-        }.bind(this))
+        })
         
         
         function scrollStopped() {
@@ -60,16 +44,14 @@ export class UIScrollView extends UIView {
         }
         
         
-        this.addTargetForControlEvent(UIView.controlEvent.PointerMove, function (sender: UIScrollView, event: Event) {
+        this.addTargetForControlEvent(UIView.controlEvent.PointerMove, (sender, event) => {
             
             if (!(this._pointerDown && this._scrollEnabled && this._enabled)) {
-                
                 return
-                
             }
-    
+            
             const currentClientPoint = new UIPoint(nil, nil)
-    
+            
             if ((window as any).MouseEvent && event instanceof MouseEvent) {
                 
                 currentClientPoint.x = (event as MouseEvent).clientX
@@ -82,14 +64,10 @@ export class UIScrollView extends UIView {
                 const touchEvent: TouchEvent = event
     
                 if (touchEvent.touches.length != 1) {
-                    
                     this._pointerDown = NO
-                    this._previousClientPoint = null
-                    
+                    this._previousClientPoint = nil
                     scrollStopped()
-                    
                     return
-                    
                 }
                 
                 currentClientPoint.x = touchEvent.touches[0].clientX
@@ -97,17 +75,13 @@ export class UIScrollView extends UIView {
                 
             }
             
-            if (!this._previousClientPoint) {
-                
+            if (IS_NOT(this._previousClientPoint)) {
                 this._previousClientPoint = currentClientPoint
-                
                 return
-                
             }
-    
+            
             const changePoint = currentClientPoint.copy().subtract(this._previousClientPoint)
-    
-    
+            
             if (this.containerView.bounds.width <= this.bounds.width) {
                 changePoint.x = 0
             }
@@ -132,102 +106,43 @@ export class UIScrollView extends UIView {
             
             this._previousClientPoint = currentClientPoint
             
-        }.bind(this))
-        
-        
+        })
         
         
     }
-    
-    
-    
     
     
     invalidateIntrinsicContentFrame() {
-        
         this._intrinsicContentFrame = nil
-        
     }
-    
-    
-    
     
     
     get contentOffset() {
-        
         return this._contentOffset
-        
     }
     
     set contentOffset(offset: UIPoint) {
-        
         this._contentOffset = offset
         this.setNeedsLayout()
-        
     }
-    
     
     
     layoutSubviews() {
         
         super.layoutSubviews()
         
-        // var intrinsicContentFrame = this._intrinsicContentFrame;
-        // if (!IS(intrinsicContentFrame)) {
-        //     intrinsicContentFrame = this.containerView.intrinsicContentSizeWithConstraints();   
-        // }
-        // intrinsicContentFrame.offsetByPoint(this.contentOffset);
-        // intrinsicContentFrame.height = this.containerView.viewHTMLElement.scrollHeight;
-        // intrinsicContentFrame.width = this.containerView.viewHTMLElement.scrollWidth;
-        // this.containerView.frame = intrinsicContentFrame;
-        
         this.containerView.frame = this.containerView.bounds.offsetByPoint(this.contentOffset)
         
-        
-        
-        
     }
-    
-    
-    
-    // get _subviews() {
-    //     return super.subviews;
-    // }
-    
-    // set _subviews(subviews: UIView[]) {
-    //     super.subviews = subviews;
-    // }
-    
-    // get subviews() {
-    //     return this.containerView.subviews;
-    // }
-    
-    // set subviews(subviews: UIView[]) {
-    
-    //     this.containerView.subviews = subviews;
-    
-    //     this.invalidateIntrinsicContentFrame();
-    
-    
-    // }
-    
     
     hasSubview(view: UIView) {
         return this.containerView.hasSubview(view)
     }
     
     addSubview(view: UIView) {
-        
         this.containerView.addSubview(view)
-        
         this.invalidateIntrinsicContentFrame()
-        
-        
     }
-    
-    
-    
-    
     
 }
 

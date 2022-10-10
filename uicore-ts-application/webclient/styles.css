@@ -1,13 +1,13 @@
 
 html, body {
-  
+
 	width: 100%;
   height: 100%;
   padding: 0;
   margin: 0;
   font-family: helvetica;
   touch-action: manipulation;
-  
+
 }
 
 body,
@@ -41,26 +41,26 @@ textarea {
 
 
 .button {
-  background: rgb(44, 168, 255); 
-  border: 1px solid #2CA8FF;
-  border-radius: 30px;
-  font-family: "Montserrat", sans-serif;
-  font-weight: 400;
-  margin: 10px 0;
-  /* font-size: 13px; */
-  text-transform: uppercase;
-  transition: background 0.5s;
+	background: rgb(44, 168, 255);
+	border: 1px solid #2CA8FF;
+	border-radius: 30px;
+	font-family: "Montserrat", sans-serif;
+	font-weight: 400;
+	margin: 10px 0;
+	/* font-size: 13px; */
+	text-transform: uppercase;
+	transition: background 0.5s;
 }
 
 .button:hover {
-  background: rgb(0, 134, 230); 
-  border: 1px solid rgb(0, 134, 230);
+	background: rgb(0, 134, 230);
+	border: 1px solid rgb(0, 134, 230);
 }
 
 /* div#mainView {
-  
+
   z-index: 1;
-  
+
 } */
 
 .mainShadowPool:before {
@@ -75,9 +75,9 @@ textarea {
 }
 
 /* .UICore_UIView_TopBarView+UICore_UIView_UIButton+UICore_UIView_UITextView {
-  
+
   color: yellow;
-  
+
 } */
 
 
@@ -86,21 +86,21 @@ textarea {
 
 
 /* .InquiryRowView.odd:hover .InquiryRowViewBackground, .InquiryRowView.even:hover .InquiryRowViewBackground {
-  
+
   background-color: rgba(0, 0, 0, 0.151);
-  
+
 } */
 
 .InquiryRowView.odd .InquiryRowViewBackground {
-  
-  background-color: white;
-  
+
+	background-color: white;
+
 }
 
 .InquiryRowView.even .InquiryRowViewBackground {
-  
-  background-color: rgba(228, 228, 228, 1);
-  
+
+	background-color: rgba(228, 228, 228, 1);
+
 }
 
 
@@ -151,16 +151,16 @@ textarea {
 
 
 a {
-	
+
 	outline: none;
-	
+
 }
 
 
 /* #LoginViewGoogleLoginButton > div {
-	
+
 	pointer-events: none;
-	
+
 } */
 
 
@@ -226,7 +226,7 @@ input[type=text],
 input[type=time],
 input[type=url],
 textarea {
-	
+
 	background-color: transparent;
 	border: none;
 	outline: none;
@@ -244,7 +244,7 @@ textarea {
 	transition: border .3s, -webkit-box-shadow .3s;
 	transition: box-shadow .3s, border .3s;
 	transition: box-shadow .3s, border .3s, -webkit-box-shadow .3s;
-	
+
 }
 
 input:not([type]):not([readonly]),
@@ -260,11 +260,11 @@ input[type=text]:not([readonly]),
 input[type=time]:not([readonly]),
 input[type=url]:not([readonly]),
 textarea {
-	
-	
+
+
 	border-bottom: 1px solid rgba(0,0,0,0.12);
 	border-radius: 0;
-	
+
 }
 
 input:not([type]):focus:not([readonly])+label,
@@ -419,7 +419,7 @@ textarea+label:after {
 }
 
 .input--license-plate {
-	
+
 	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
@@ -433,7 +433,7 @@ textarea+label:after {
 	/* border-bottom-width: 7px;
 	border-radius: 6px; */
 	max-width: 200px;
-	
+
 }
 
 .input--license-plate button.input__button {
@@ -484,7 +484,7 @@ textarea+label:after {
 }
 
 .input--license-plate input.input__field {
-	
+
 	display: inline-block;
 	margin: 0;
 	padding: 0 .5rem 0 1rem;
@@ -497,7 +497,7 @@ textarea+label:after {
 	-webkit-box-sizing: inherit;
 	box-sizing: inherit;
 	text-align: center;
-	
+
 }
 
 .input--license-plate::-webkit-input-placeholder {
@@ -727,9 +727,9 @@ textarea+label:after {
 }
 
 [type="checkbox"].redCheckbox:checked+span {
-	
+
 	color: red;
-	
+
 }
 
 [type="checkbox"].staticCheckbox:checked+span {

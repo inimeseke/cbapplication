@@ -5,10 +5,7 @@ const NO = false
 export class UITimer {
     
     
-    
-    
-    
-    _intervalID: number
+    _intervalID!: number
     
     isValid: boolean = YES
     
@@ -20,18 +17,17 @@ export class UITimer {
     }
     
     
-    
     schedule() {
     
-        const callback = function () {
+        const callback = () => {
             if (this.repeats == NO) {
                 this.invalidate()
             }
             this.target()
-        }.bind(this)
+        }
     
         this._intervalID = window.setInterval(callback, this.interval * 1000)
-        
+    
     }
     
     
@@ -41,7 +37,6 @@ export class UITimer {
         this.schedule()
         
     }
-    
     
     
     fire() {
@@ -65,11 +60,7 @@ export class UITimer {
         }
         
         
-        
     }
-    
-    
-    
     
     
 }

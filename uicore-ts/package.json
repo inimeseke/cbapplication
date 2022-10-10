@@ -6,6 +6,7 @@
   "types": "compiledScripts/index.d.ts",
   "scripts": {
     "build": "etsc && tsc --emitDeclarationOnly",
+    "build-watch": "watch -p \"scripts/*.ts\" -c \"npm build\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "npm run build"
   },

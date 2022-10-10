@@ -5,7 +5,7 @@ import { CBColor } from "./CBColor"
 export class CellView extends UIButton {
     
     _isAButton = NO
-    _rightImageView: UIImageView
+    _rightImageView?: UIImageView
     
     leftInset = 0
     rightInset = 0
@@ -18,38 +18,29 @@ export class CellView extends UIButton {
         
     }
     
-
+    
     set isAButton(isAButton: boolean) {
-        
         this._isAButton = isAButton
-        
         this.updateForCurrentIsAButtonState()
-        
     }
     
     get isAButton() {
-        
         return this._isAButton
-        
     }
     
     
     updateForCurrentIsAButtonState() {
         
-        
         if (this._isAButton) {
-            
+    
             this.style.cursor = "pointer"
+            this.style.outline = ""
             
             this.titleLabel.userInteractionEnabled = NO
-            
             this.titleLabel.nativeSelectionEnabled = NO
-            
             this.titleLabel.textAlignment = UITextView.textAlignment.center
             
             this.nativeSelectionEnabled = NO
-            
-            this.style.outline = ""
             
             this.colors = {
                 
@@ -74,18 +65,15 @@ export class CellView extends UIButton {
             
         }
         else {
-            
+    
             this.style.cursor = ""
+            this.style.outline = "none"
             
             this.titleLabel.userInteractionEnabled = YES
-            
             this.titleLabel.nativeSelectionEnabled = YES
-            
             this.titleLabel.textAlignment = UITextView.textAlignment.left
             
             this.nativeSelectionEnabled = YES
-            
-            this.style.outline = "none"
             
             this.colors = {
                 
@@ -111,71 +99,44 @@ export class CellView extends UIButton {
         
         this.updateContentForCurrentState()
         
-        
-        
     }
     
     
-    
-    
-    
     initRightImageViewIfNeeded() {
-        
-        if (this._rightImageView) {
-            
+    
+        if (IS(this._rightImageView)) {
             return
-            
         }
         
-        
         this._rightImageView = new UIImageView(this.elementID + "RightImageView")
-        
         this._rightImageView.userInteractionEnabled = NO
-        
-        
-        
         
     }
     
     
     set rightImageSource(imageSource: string) {
         
-        
-        
         if (IS(imageSource)) {
-            
+    
             this.initRightImageViewIfNeeded()
-            
-            this._rightImageView.imageSource = imageSource
-            
-            this.addSubview(this._rightImageView)
-            
+    
+            const rightImageView: UIImageView = this._rightImageView ?? nil
+            rightImageView.imageSource = imageSource
+    
+            this.addSubview(this._rightImageView ?? nil)
+    
         }
         else {
-            
-            this._rightImageView.removeFromSuperview()
+    
+            this._rightImageView?.removeFromSuperview()
             
         }
-        
         
     }
     
     get rightImageSource() {
-        
-        var result = nil
-        
-        if (this._rightImageView) {
-            
-            result = this._rightImageView.imageSource
-            
-        }
-        
-        return result
-        
+        return this._rightImageView?.imageSource ?? nil
     }
-    
-    
-    
     
     
     layoutSubviews() {
@@ -214,9 +175,6 @@ export class CellView extends UIButton {
         }
         
         
-        
-        
-        
     }
     
     
@@ -234,11 +192,7 @@ export class CellView extends UIButton {
         return result
         
         
-        
     }
-    
-    
-    
     
     
 }

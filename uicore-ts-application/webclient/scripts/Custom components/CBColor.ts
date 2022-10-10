@@ -1,13 +1,7 @@
 import { UIColor } from "uicore-ts"
 
 
-
-
-
 export class CBColor extends UIColor {
-    
-    
-    
     
     
     constructor(stringValue: string) {
@@ -15,9 +9,6 @@ export class CBColor extends UIColor {
         super(stringValue)
         
     }
-    
-    
-    
     
     
     static get primaryTintColor() {
@@ -41,18 +32,15 @@ export class CBColor extends UIColor {
     
     static get greenTintColor() {
         
-        return new CBColor("rgba(51, 188, 125, 1)");
+        return new CBColor("rgba(51, 188, 125, 1)")
         
     }
     
     static get redTintColor() {
-        
-        return new CBColor("rgba(236, 88, 111, 1)");
+    
+        return new CBColor("rgba(236, 88, 111, 1)")
         
     }
-    
-    
-    
     
     
 }

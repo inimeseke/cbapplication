@@ -8,22 +8,14 @@ export class CBTextField extends UIView {
     textField: UITextField
     
     constructor(elementID?: string) {
-        
-        super(elementID)
-        
-    }
     
-
-    initView(elementID: string, viewHTMLElement: HTMLElement) {
-        
-        super.initView(elementID, viewHTMLElement)
-        
-        
-        viewHTMLElement.classList.add("input")
-        
+        super(elementID)
+    
+        this.viewHTMLElement.classList.add("input")
+    
         this.textField = new UITextField(elementID + "TextField")
         this.addSubview(this.textField)
-        
+    
         this.titleLabel = new UITextView(elementID + "TitleLabel", UITextView.type.label)
         this.titleLabel.textColor = UIColor.greyColor
         this.titleLabel.style.fontStyle = "italic"
@@ -53,9 +45,6 @@ export class CBTextField extends UIView {
     }
     
     
-    
-    
-    
     setPlaceholderText(key: string, defaultString: string, parameters?: { [x: string]: string }) {
         
         this.titleLabel.setText(key, defaultString, parameters)
@@ -74,9 +63,6 @@ export class CBTextField extends UIView {
         return this.titleLabel.text
         
     }
-    
-    
-    
     
     
     get text() {
@@ -109,9 +95,6 @@ export class CBTextField extends UIView {
     }
     
     
-    
-    
-    
     updateContentForCurrentEnabledState() {
         
         
@@ -129,11 +112,7 @@ export class CBTextField extends UIView {
         }
         
         
-        
-        
     }
-    
-    
     
     
     didMoveToSuperview(superview: UIView) {
@@ -145,13 +124,9 @@ export class CBTextField extends UIView {
     }
     
     
-    
-    
-    
     set enabled(enabled: boolean) {
         
         super.enabled = enabled
-        
         
         
         if (IS_NOT(enabled)) {
@@ -166,8 +141,6 @@ export class CBTextField extends UIView {
         }
         
         
-        
-        
     }
     
     get enabled() {
@@ -175,9 +148,6 @@ export class CBTextField extends UIView {
         return super.enabled
         
     }
-    
-    
-    
     
     
     focus() {
@@ -191,9 +161,6 @@ export class CBTextField extends UIView {
         this.textField.blur()
         
     }
-    
-    
-    
     
     
 }

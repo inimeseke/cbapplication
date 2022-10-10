@@ -6,7 +6,6 @@ import { UIView } from "./UIView"
 import { UIViewController } from "./UIViewController"
 
 
-
 export class UICore extends UIObject {
     
     rootViewController: UIViewController = nil
@@ -50,40 +49,40 @@ export class UICore extends UIObject {
                 UICore.RootViewControllerClass = UIViewController
                 
             }
-            
+    
             this.rootViewController = new UICore.RootViewControllerClass(rootView)
-            
+    
         }
         else {
-            
+    
             this.rootViewController = new UIViewController(rootView)
-            
+    
         }
-        
-        this.rootViewController.viewWillAppear()
-        this.rootViewController.viewDidAppear()
-        
-        
+    
+        this.rootViewController.viewWillAppear().then(() =>
+            this.rootViewController.viewDidAppear()
+        )
+    
+    
         this.rootViewController.view.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
-            function (sender, event) {
-                
+            () => {
+            
                 (document.activeElement as HTMLElement).blur()
-                
+            
             }
         )
+    
+    
+        const windowDidResize = () => {
         
-        
-        
-        const windowDidResize = function (this: UICore) {
-            
             // Doing layout two times to prevent page scrollbars from confusing the layout
             this.rootViewController._triggerLayoutViewSubviews()
             UIView.layoutViewsIfNeeded()
-            
+        
             this.rootViewController._triggerLayoutViewSubviews()
             //UIView.layoutViewsIfNeeded()
-            
+        
             this.rootViewController.view.broadcastEventInSubtree({
                 
                 name: UICore.broadcastEventName.WindowDidResize,
@@ -92,46 +91,44 @@ export class UICore extends UIObject {
             })
             
         }
+    
+        window.addEventListener("resize", windowDidResize)
+    
+        const didScroll = () => {
         
-        window.addEventListener("resize", windowDidResize.bind(this))
-        
-        const didScroll = function (this: UICore) {
-            
             //code
-            
+        
             this.rootViewController.view.broadcastEventInSubtree({
-                
+            
                 name: UIView.broadcastEventName.PageDidScroll,
                 parameters: nil
-                
+            
             })
-            
-            
-            
-        }.bind(this)
+        
+        
+        }
         
         window.addEventListener("scroll", didScroll, false)
+    
+        const hashDidChange = () => {
         
-        const hashDidChange = function (this: UICore) {
-            
             //code
-            
+        
             this.rootViewController.handleRouteRecursively(UIRoute.currentRoute)
-            
+        
             this.rootViewController.view.broadcastEventInSubtree({
-                
+            
                 name: UICore.broadcastEventName.RouteDidChange,
                 parameters: nil
-                
+            
             })
-            
-            
-        }.bind(this)
+        
+        
+        }
     
-        window.addEventListener("hashchange", hashDidChange.bind(this), false)
+        window.addEventListener("hashchange", hashDidChange, false)
     
         hashDidChange()
-    
     
     
     }
@@ -140,11 +137,8 @@ export class UICore extends UIObject {
 }
 
 
-
-
-
 Array.prototype.indexOf || (Array.prototype.indexOf = function (d, e) {
-    var a
+    let a
     if (null == this) {
         throw new TypeError("\"this\" is null or not defined")
     }
@@ -153,6 +147,7 @@ Array.prototype.indexOf || (Array.prototype.indexOf = function (d, e) {
     if (0 === b) {
         return -1
     }
+    // @ts-ignore
     a = +e || 0
     Infinity === Math.abs(a) && (a = 0)
     if (a >= b) {

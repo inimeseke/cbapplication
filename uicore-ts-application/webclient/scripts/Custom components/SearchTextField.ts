@@ -1,38 +1,28 @@
-import { nil, UITextField, UIView } from "uicore-ts"
+import { nil, UIView, UIViewAddControlEventTargetObject } from "uicore-ts"
 
 
 export class SearchTextField extends UIView {
     
-    _textField: UIView
-    _searchButton: UIView
+    private readonly _textField: UIView
+    private readonly _searchButton: UIView
     
     constructor(elementID: string) {
         
         super(elementID)
         
-    }
-    
-    
-    initView(elementID: string, viewHTMLElement: HTMLElement) {
         
-        super.initView(elementID, viewHTMLElement)
+        this.viewHTMLElement.classList.add("input", "input--search")
         
         
-        viewHTMLElement.classList.add("input", "input--search")
-        
-        
-        viewHTMLElement.innerHTML = "\
+        this.viewHTMLElement.innerHTML = "\
             <button type=\"button\" class=\"input__button\">\
                 <i class=\"material-icons\">search</i>\
             </button>\
             <input type=\"search\" class=\"input__field\" placeholder=\"Search\">"
         
         
-        
-        
         this._textField = new UIView(nil, this.textFieldElement)
         this._searchButton = new UIView(nil, this.searchButtonElement)
-        
         
         
         this._searchButton.addTargetForControlEvents([
@@ -53,24 +43,34 @@ export class SearchTextField extends UIView {
         )
         
         
-        
-        this._textField.viewHTMLElement.oninput = function (this: SearchTextField, event) {
+        this._textField.viewHTMLElement.oninput = (event) => {
             
+            this.sendControlEventForKey(SearchTextField.controlEvent.TextChange, event)
             
-            this._textField.sendControlEventForKey(UITextField.controlEvent.TextChange, event)
-            
-            
-        }.bind(this)
-        
-        
-        
+        }
         
         
     }
     
     
+    static controlEvent = Object.assign({}, UIView.controlEvent, {
+        
+        "TextChange": "TextChange"
+        
+    })
     
+    // @ts-ignore
+    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof SearchTextField> {
+        return (super.controlEventTargetAccumulator as any)
+    }
     
+    get searchButton(): UIView {
+        return this._searchButton
+    }
+    
+    get textField(): UIView {
+        return this._textField
+    }
     
     get searchButtonElement() {
         
@@ -95,10 +95,8 @@ export class SearchTextField extends UIView {
     }
     
     get placeholderText() {
-        
-        
-        return this.textFieldElement.getAttribute("placeholder")
-        
+    
+        return this.textFieldElement.getAttribute("placeholder") ?? ""
         
     }
     

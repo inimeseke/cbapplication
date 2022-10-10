@@ -9,13 +9,6 @@ export class CBButton extends UIButton {
         
         super(elementID, elementType)
         
-    }
-    
-
-    initView(elementID: string, viewHTMLElement: HTMLElement, initViewData) {
-        
-        super.initView(elementID, viewHTMLElement, initViewData)
-        
         this.style.outline = "none"
         
         this.colors.titleLabel.normal = CBColor.whiteColor
@@ -23,29 +16,20 @@ export class CBButton extends UIButton {
         
         this.colors.titleLabel.selected = CBColor.primaryTintColor
         
-        
     }
-    
-    
-    
     
     
     setBackgroundColorsWithNormalColor(normalBackgroundColor: UIColor) {
-        
-        this.colors.background.normal = normalBackgroundColor
-        
-        this.colors.background.hovered = UIColor.colorWithRGBA(40, 168, 183) // normalBackgroundColor.colorByMultiplyingRGB(0.85)
-        
-        this.colors.background.focused = normalBackgroundColor // normalBackgroundColor.colorByMultiplyingRGB(0.5)
-        
-        this.colors.background.highlighted = UIColor.colorWithRGBA(48, 196, 212) // normalBackgroundColor.colorByMultiplyingRGB(0.7)
-        
-        this.colors.background.selected = UIColor.whiteColor
-        
-        this.updateContentForCurrentState()
-        
-    }
     
+        this.colors.background.normal = normalBackgroundColor
+        this.colors.background.hovered = UIColor.colorWithRGBA(40, 168, 183)
+        this.colors.background.focused = normalBackgroundColor
+        this.colors.background.highlighted = UIColor.colorWithRGBA(48, 196, 212)
+        this.colors.background.selected = UIColor.whiteColor
+    
+        this.updateContentForCurrentState()
+    
+    }
     
     
     updateContentForNormalState() {
@@ -53,8 +37,6 @@ export class CBButton extends UIButton {
         super.updateContentForNormalState()
         
         this.setBorder(0, 0)
-        
-        //this.style.boxShadow = "0 2px 2px 0 rgba(0,0,0,0.24)"
         
     }
     
@@ -65,10 +47,6 @@ export class CBButton extends UIButton {
         
         this.setBorder(0, 0)
         
-        //this.titleLabel.textColor = CBColor.whiteColor.colorByMultiplyingRGB(0.85);
-        
-        //this.style.boxShadow = "0 2px 2px 0 rgba(0,0,0,0.18)"
-        
     }
     
     updateContentForFocusedState() {
@@ -77,12 +55,7 @@ export class CBButton extends UIButton {
         
         this.setBorder(0, 1, CBColor.primaryContentColor)
         
-        //this.titleLabel.textColor = CBColor.whiteColor.colorByMultiplyingRGB(0.85);
-        
-        //this.style.boxShadow = "0 2px 2px 0 rgba(0,0,0,0.18)"
-        
     }
-    
     
     
     updateContentForHighlightedState() {
@@ -91,14 +64,7 @@ export class CBButton extends UIButton {
         
         this.setBorder(0, 0)
         
-        //this.titleLabel.textColor = CBColor.whiteColor.colorByMultiplyingRGB(0.7);
-        
-        //this.style.boxShadow = "0 2px 2px 0 rgba(0,0,0,0.12)"
-        
     }
-    
-    
-    
     
     
     updateContentForCurrentEnabledState() {
@@ -116,9 +82,6 @@ export class CBButton extends UIButton {
         }
         
     }
-    
-    
-    
     
     
 }

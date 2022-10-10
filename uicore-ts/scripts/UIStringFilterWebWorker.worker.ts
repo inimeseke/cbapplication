@@ -25,13 +25,10 @@ if ("contains" in String.prototype == false) {
 }
 
 
-
-
-
 onmessage = function (event) {
     
     //console.log('Message received from main script');
-    var workerResult = filterData(event.data.filteringString, event.data.data, event.data.excludedData)
+    const workerResult = filterData(event.data.filteringString, event.data.data, event.data.excludedData)
     
     // @ts-ignore
     workerResult.identifier = event.data.identifier
@@ -44,57 +41,46 @@ onmessage = function (event) {
 }
 
 
-
-
-
-function filterData(filteringString, data, excludedData) {
+function filterData(filteringString: string, data: any[], excludedData: string | any[]) {
     
-    var filteredData = []
-    var filteredIndexes = []
+    let filteredData = []
+    const filteredIndexes: number[] = []
     
     if (filteringString) {
         
-        var filteringStringWords = []
-        filteringString.split(" ").forEach(function (word, index, array) {
+        const filteringStringWords: string[] = []
+        filteringString.split(" ").forEach(word => {
             if (word) {
                 filteringStringWords.push(word.toLowerCase())
             }
         })
         
-        data.forEach(function (dataString, index, array) {
+        data.forEach((dataString, index) => {
             
-            var lowercaseDataString = dataString.toLowerCase()
+            const lowercaseDataString = dataString.toLowerCase()
             
             // Look through all the words in the input
-            var wordsFound = []
+            const wordsFound: boolean[] = []
             filteringStringWords.forEach(function (word) {
                 wordsFound.push(lowercaseDataString.contains(word) && !excludedData.contains(dataString))
             })
             
             // Only show the dataString if it matches all of them
-            // @ts-ignore
             if (wordsFound.contains(true) && !wordsFound.contains(false)) {
-                
                 filteredData.push(dataString)
                 filteredIndexes.push(index)
-                
             }
             
         })
         
-        
-        
     }
     else if (excludedData.length) {
         
-        
-        filteredData = data.forEach(function (dataString, index, array) {
+        data.forEach((dataString, index) => {
             
             if (excludedData.indexOf(dataString) == -1) {
-                
                 filteredData.push(dataString)
                 filteredIndexes.push(index)
-                
             }
             
         })
@@ -103,20 +89,11 @@ function filterData(filteringString, data, excludedData) {
     else {
         
         filteredData = data
-        
-        data.forEach(function (string, index, array) {
-            
-            filteredIndexes.push(index)
-            
-        })
+        data.forEach((string, index) => filteredIndexes.push(index))
         
     }
     
-    
-    
     return { "filteredData": filteredData, "filteredIndexes": filteredIndexes }
-    
-    
     
 }
 

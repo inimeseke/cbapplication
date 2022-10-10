@@ -1,9 +1,6 @@
 import { UIObject } from "./UIObject"
 
 
-
-
-
 export class UIPoint extends UIObject {
     
     constructor(public x: number, public y: number) {
@@ -13,20 +10,13 @@ export class UIPoint extends UIObject {
     }
     
     
-    
-    
-    
     copy() {
         return new UIPoint(this.x, this.y)
     }
     
     
     isEqualTo(point: UIPoint) {
-    
-        const result = (this.x == point.x && this.y == point.y)
-    
-        return result
-        
+        return (this.x == point.x && this.y == point.y)
     }
     
     scale(zoom: number) {
@@ -38,23 +28,20 @@ export class UIPoint extends UIObject {
     }
     
     
-    
-    add(v: UIPoint) {
-        this.x = this.x + v.x
-        this.y = this.y + v.y
+    add(point: UIPoint) {
+        this.x = this.x + point.x
+        this.y = this.y + point.y
         return this
     }
     
-    subtract(v: UIPoint) {
-        this.x = this.x - v.x
-        this.y = this.y - v.y
+    subtract(point: UIPoint) {
+        this.x = this.x - point.x
+        this.y = this.y - point.y
         return this
     }
     
-    to(b: UIPoint) {
-        const a = this
-        const ab = b.copy().add(a.copy().scale(-1))
-        return ab
+    to(targetPoint: UIPoint) {
+        return targetPoint.copy().add(this.copy().scale(-1))
     }
     
     pointWithX(x: number) {
@@ -79,20 +66,17 @@ export class UIPoint extends UIObject {
     
     
     get length() {
-        var result = this.x * this.x + this.y * this.y
+        let result = this.x * this.x + this.y * this.y
         result = Math.sqrt(result)
         return result
     }
     
     
-    didChange(b) {
+    didChange(b: any) {
         
         // Callback to be set by delegate
         
     }
-    
-    
-    
     
     
 }

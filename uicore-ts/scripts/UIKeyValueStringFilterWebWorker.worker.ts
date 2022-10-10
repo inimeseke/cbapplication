@@ -25,9 +25,6 @@ if ("contains" in String.prototype == false) {
 }
 
 
-
-
-
 onmessage = function (event) {
     
     //console.log('Message received from main script');
@@ -50,17 +47,14 @@ onmessage = function (event) {
 }
 
 
-
-
-
-function filterKeyValuePathData(filteringString, data, excludedData, dataKeyPath) {
+function filterKeyValuePathData(filteringString: string, data: any[], excludedData: string | any[], dataKeyPath: any) {
     
-    function valueForKeyPath(keyPath, object) {
+    function valueForKeyPath(keyPath: string, object: any) {
         
         var keys = keyPath.split(".")
         var currentObject = object
         
-        keys.forEach(function (key, index, array) {
+        keys.forEach(function (key: string | number, index: any, array: any) {
             currentObject = currentObject[key]
         })
         
@@ -69,25 +63,25 @@ function filterKeyValuePathData(filteringString, data, excludedData, dataKeyPath
     }
     
     var filteredData = []
-    var filteredIndexes = []
+    var filteredIndexes: any[] = []
     
     if (filteringString) {
-        
-        var filteringStringWords = []
-        filteringString.split(" ").forEach(function (word, index, array) {
+    
+        var filteringStringWords: any[] = []
+        filteringString.split(" ").forEach(function (word: string, index: any, array: any) {
             if (word) {
                 filteringStringWords.push(word.toLowerCase())
             }
         })
+    
+        data.forEach(function (dataObject: any, index: any, array: any) {
         
-        data.forEach(function (dataObject, index, array) {
-            
             var dataString = valueForKeyPath(dataKeyPath, dataObject)
-            
+        
             var lowercaseDataString = dataString.toLowerCase()
-            
+        
             // Look through all the words in the input
-            var wordsFound = []
+            var wordsFound: boolean[] = []
             filteringStringWords.forEach(function (word) {
                 wordsFound.push(lowercaseDataString.contains(word) && !excludedData.contains(dataString))
             })
@@ -107,28 +101,28 @@ function filterKeyValuePathData(filteringString, data, excludedData, dataKeyPath
         
     }
     else if (excludedData.length) {
+    
+    
+        data.forEach(function (dataObject: any, index: any, array: any) {
         
-        
-        filteredData = data.forEach(function (dataObject, index, array) {
-            
             if (excludedData.indexOf(dataObject) == -1) {
-                
+            
                 filteredData.push(dataObject)
                 filteredIndexes.push(index)
-                
-            }
             
+            }
+        
         })
         
     }
     else {
         
         filteredData = data
+    
+        data.forEach(function (object: any, index: any, array: any) {
         
-        data.forEach(function (object, index, array) {
-            
             filteredIndexes.push(index)
-            
+        
         })
         
     }

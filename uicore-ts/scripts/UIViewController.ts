@@ -4,11 +4,7 @@ import { UIRoute } from "./UIRoute"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
-
-
-
 export class UIViewController extends UIObject {
-    
     
     
     parentViewController: UIViewController = nil
@@ -40,12 +36,10 @@ export class UIViewController extends UIObject {
     async handleRoute(route: UIRoute) {
     
     
-    
     }
     
     
     async viewWillAppear() {
-    
     
     
     }
@@ -54,18 +48,15 @@ export class UIViewController extends UIObject {
     async viewDidAppear() {
     
     
-    
     }
     
     
     async viewWillDisappear() {
     
     
-    
     }
     
     async viewDidDisappear() {
-    
     
     
     }
@@ -74,19 +65,14 @@ export class UIViewController extends UIObject {
     updateViewConstraints() {
     
     
-    
-    
-    
     }
     
     updateViewStyles() {
     
     
-    
     }
     
     layoutViewSubviews() {
-        
         
         
     }
@@ -115,17 +101,13 @@ export class UIViewController extends UIObject {
         // })
         
         
-        
     }
-    
     
     
     viewDidReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         
-        
     }
-    
     
     
     get core() {
@@ -157,22 +139,19 @@ export class UIViewController extends UIObject {
         if (!this.hasChildViewController(viewController)) {
             viewController.willMoveToParentViewController(this)
             this.childViewControllers.push(viewController)
-            //this.view.addSubview(viewController.view);
-            //viewController.didMoveToParentViewController(this);
+            this.view.addSubview(viewController.view)
+            viewController.didMoveToParentViewController(this)
         }
     }
     
     
     removeFromParentViewController() {
-        const index = this.parentViewController.childViewControllers.indexOf(this)
-        if (index > -1) {
-            this.parentViewController.childViewControllers.splice(index, 1)
-            //this.view.removeFromSuperview();
-            this.parentViewController = nil
-        }
+    
+        this.parentViewController.removeChildViewController(this)
+    
     }
     
-    willMoveToParentViewController(parentViewController) {
+    willMoveToParentViewController(parentViewController: UIViewController) {
     
     }
     
@@ -188,7 +167,14 @@ export class UIViewController extends UIObject {
         controller = FIRST_OR_NIL(controller)
         controller.viewWillDisappear()
         if (IS(controller.parentViewController)) {
-            controller.removeFromParentViewController()
+    
+            const index = this.parentViewController.childViewControllers.indexOf(this)
+            if (index > -1) {
+                this.parentViewController.childViewControllers.splice(index, 1)
+                this.view.removeFromSuperview()
+                this.parentViewController = nil
+            }
+    
         }
         if (IS(controller.view)) {
             controller.view.removeFromSuperview()
@@ -236,9 +222,6 @@ export class UIViewController extends UIObject {
         controller.handleRouteRecursively(UIRoute.currentRoute)
         
     }
-    
-    
-    
     
     
 }

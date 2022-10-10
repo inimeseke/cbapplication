@@ -11,12 +11,6 @@ export class LabeledSearchableDropdown<T> extends UIView {
         
         super(elementId)
         
-    }
-    
-
-    initView(elementId: string, viewHTMLElement: HTMLElement) {
-        
-        
         this.label = new UITextView(elementId + "Label", UITextView.type.header5)
         this.addSubview(this.label)
         
@@ -25,21 +19,11 @@ export class LabeledSearchableDropdown<T> extends UIView {
         
         this.dropdown.expandedContainerViewHeight = 350
         
-        
-        
     }
-    
-    
-    
-    
     
     get selectedItemCodes() {
-        
         return this.dropdown.selectedItemCodes
-        
     }
-    
-    
     
     
     layoutSubviews() {
@@ -56,15 +40,10 @@ export class LabeledSearchableDropdown<T> extends UIView {
         this.dropdown.frame = bounds.rectangleWithHeight(51).rectangleWithY(labelHeight)
         
         
-        
         //this.dropdown.expandedContainerViewHeight = this.superview.bounds.height - this.frame.max.y - padding
         
         
-        
     }
-    
-    
-    
     
     
 }

@@ -2,19 +2,16 @@ import { UICoreExtensionValueObject } from "./UICoreExtensionValueObject"
 import { UITimer } from "./UITimer"
 
 
-export function NilFunction() {
+function NilFunction() {
     return nil
 }
 
 
-
-export var nil: any = new Proxy(Object.assign(NilFunction, { "class": nil, "className": "Nil" }), {
-    
+// The nil object avoids unnecessary crashes by allowing you to call any function or access any variable on it, returning nil
+export var nil: any = new Proxy(Object.assign(NilFunction, { "class": null, "className": "Nil" }), {
     get(target, name) {
-        
         if (name == Symbol.toPrimitive) {
-            
-            return function (hint) {
+            return function (hint: string) {
                 if (hint == "number") {
                     return 0
                 }
@@ -23,157 +20,93 @@ export var nil: any = new Proxy(Object.assign(NilFunction, { "class": nil, "clas
                 }
                 return false
             }
-            
         }
-        
         if (name == "toString") {
-            
             return function toString() {
                 return ""
             }
-            
         }
-        
         return NilFunction()
     },
-    
-    set(target, name, value) {
+    set() {
         return NilFunction()
     }
-    
 })
 
 
-
-
-
 export function wrapInNil<T>(object?: T): T {
-    
-    
     let result = FIRST_OR_NIL(object)
-    
     if (object instanceof Object && !(object instanceof Function)) {
-        
         result = new Proxy(object as Object & T, {
-            
             get(target, name) {
-                
                 if (name == "wrapped_nil_target") {
-                    
                     return target
-                    
                 }
-                
-                
                 const value = Reflect.get(target, name)
-                
                 if (typeof value === "object") {
-                    
                     return wrapInNil(value)
-                    
                 }
-                
                 if (IS_NOT_LIKE_NULL(value)) {
-                    
                     return value
-                    
                 }
-                
                 return nil
-                
             },
-            
-            set(target, name, value) {
-                
+            set(target: Record<string, any> & T, name: string, value: any) {
                 if (IS(target)) {
-                    
+                    // @ts-ignore
                     target[name] = value
-                    
                 }
-                
                 return YES
-                
             }
-            
         })
-        
     }
-    
     return result
-    
 }
 
 
 export const YES = true
 export const NO = false
 
-export function IS(object) {
-    
+export function IS<T>(object: T | undefined | null | false): object is T {
     if (object && object !== nil) {
-        
         return YES
-        
     }
-    
     return NO
-    
-    //return (object != nil && object);
-    
 }
 
-export function IS_NOT(object) {
-    
+export function IS_NOT(object: any): object is undefined | null | false {
     return !IS(object)
-    
 }
 
-export function IS_DEFINED(object) {
-    
+export function IS_DEFINED<T>(object: T | undefined): object is T {
     if (object != undefined) {
-        
         return YES
-        
     }
-    
     return NO
-    
 }
 
-export function IS_UNDEFINED(object) {
-    
+export function IS_UNDEFINED(object: any): object is undefined {
     return !IS_DEFINED(object)
-    
 }
 
-export function IS_NIL(object) {
-    
+export function IS_NIL(object: any): object is typeof nil {
     if (object === nil) {
-        
         return YES
-        
     }
-    
     return NO
-    
 }
 
-export function IS_NOT_NIL(object) {
-    
+export function IS_NOT_NIL<T>(object: T | undefined | null): object is T | undefined | null {
     return !IS_NIL(object)
-    
 }
 
 
-export function IS_LIKE_NULL(object) {
-    
+export function IS_LIKE_NULL(object: any): object is undefined | null {
     return (IS_UNDEFINED(object) || IS_NIL(object) || object == null)
-    
 }
 
-export function IS_NOT_LIKE_NULL(object) {
-    
+export function IS_NOT_LIKE_NULL<T>(object: T | null | undefined): object is T {
     return !IS_LIKE_NULL(object)
-    
 }
 
 
@@ -183,71 +116,39 @@ export function IS_AN_EMAIL_ADDRESS(email: string) {
 }
 
 
-export function FIRST_OR_NIL<T>(...objects: T[]): T {
-    
-    const result = objects.find(function (object, index, array) {
-        
-        return IS(object)
-        
-    })
-    
+export function FIRST_OR_NIL<T>(...objects: (T | undefined | null)[]): T {
+    const result = objects.find(object => IS(object))
     return result || nil
-    
 }
 
-export function FIRST<T>(...objects: T[]): T {
-    
-    const result = objects.find(function (object, index, array) {
-        
-        return IS(object)
-        
-    })
-    
+export function FIRST<T>(...objects: (T | undefined | null)[]): T {
+    const result = objects.find(object => IS(object))
     return result || IF(IS_DEFINED(objects.lastElement))(RETURNER(objects.lastElement))()
-    
 }
 
 
 export function MAKE_ID(randomPartLength = 15) {
-    
     let result = ""
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    
     for (let i = 0; i < randomPartLength; i++) {
-        
         result = result + characters.charAt(Math.floor(Math.random() * characters.length))
-        
     }
-    
     result = result + Date.now()
-    
     return result
-    
 }
 
 
 export function RETURNER<T>(value?: T) {
-    
-    return (...objects: any[]) => value
-    
+    return (..._objects: any[]) => value
 }
-
-
-
 
 
 export type UIIFBlockReceiver<T> = (functionToCall: () => any) => UIIFEvaluator<T>;
-
 export type UIIFEvaluatorBase<T> = () => T;
-
-
 export interface UIIFEvaluator<T> extends UIIFEvaluatorBase<T> {
-    
     ELSE_IF: (otherValue: any) => UIIFBlockReceiver<T>;
     ELSE: (functionToCall: () => any) => T;
-    
 }
-
 
 export function IF<T = any>(value: any): UIIFBlockReceiver<T> {
     
@@ -259,14 +160,12 @@ export function IF<T = any>(value: any): UIIFBlockReceiver<T> {
         return result.evaluateConditions
     }
     
-    
     result.evaluateConditions = function () {
         if (IS(value)) {
             return thenFunction()
         }
         return elseFunction()
     }
-    
     
     result.evaluateConditions.ELSE_IF = function (otherValue: any) {
         
@@ -285,18 +184,13 @@ export function IF<T = any>(value: any): UIIFBlockReceiver<T> {
         
     }
     
-    
     result.evaluateConditions.ELSE = function (functionToCall: () => T) {
         elseFunction = functionToCall
         return result.evaluateConditions()
     }
     
-    
     return result
 }
-
-
-
 
 
 export class UIFunctionCall<T extends (...args: any) => any> {
@@ -305,27 +199,19 @@ export class UIFunctionCall<T extends (...args: any) => any> {
     parameters: Parameters<T>[]
     
     constructor(...parameters: Parameters<T>) {
-        
         this.parameters = parameters
-        
     }
     
     callFunction(functionToCall: T) {
-        
         const parameters = this.parameters
         functionToCall(...parameters)
-        
     }
-    
     
 }
 
 
 export function CALL<T extends (...args: any) => any>(...objects: Parameters<T>) {
-    
-    const result = new UIFunctionCall<T>(...objects)
-    return result
-    
+    return new UIFunctionCall<T>(...objects)
 }
 
 
@@ -335,38 +221,25 @@ export class UIFunctionExtender<T extends (...args: any) => any> {
     extendingFunction: T
     
     constructor(extendingFunction: T) {
-        
         this.extendingFunction = extendingFunction
-        
     }
     
     extendedFunction(functionToExtend: T) {
-        
         const extendingFunction = this.extendingFunction
-        
-        function extendedFunction(...objects: any[]) {
-            
+    
+        function extendedFunction(this: any, ...objects: any[]) {
             const boundFunctionToExtend = functionToExtend.bind(this)
             boundFunctionToExtend(...objects)
-            
             const boundExtendingFunction = extendingFunction.bind(this)
             boundExtendingFunction(...objects)
-            
         }
-        
         return extendedFunction
-        
     }
-    
     
 }
 
-
 export function EXTEND<T extends (...args: any) => any>(extendingFunction: T) {
-    
-    const result = new UIFunctionExtender(extendingFunction)
-    return result
-    
+    return new UIFunctionExtender(extendingFunction)
 }
 
 
@@ -376,9 +249,7 @@ export class UILazyPropertyValue<T> {
     initFunction: () => T
     
     constructor(initFunction: () => T) {
-        
         this.initFunction = initFunction
-        
     }
     
     setLazyPropertyValue(key: string, target: object) {
@@ -389,32 +260,24 @@ export class UILazyPropertyValue<T> {
         let _value = nil
         
         const initValue = () => {
-            
             _value = this.initFunction()
             isValueInitialized = YES
             this.initFunction = nil
-            
         }
-        
+    
+        // @ts-ignore
         if (delete target[key]) {
             
             // Create new property with getter and setter
             Object.defineProperty(target, key, {
                 get: function () {
-                    
                     if (IS_NOT(isValueInitialized)) {
-                        
                         initValue()
-                        
                     }
-                    
                     return _value
-                    
                 },
                 set: function (newValue) {
-                    
                     _value = newValue
-                    
                 },
                 enumerable: true,
                 configurable: true
@@ -424,16 +287,10 @@ export class UILazyPropertyValue<T> {
         
     }
     
-    
 }
 
-
 export function LAZY_VALUE<T>(initFunction: () => T) {
-    
-    const result = new UILazyPropertyValue(initFunction)
-    
-    return result
-    
+    return new UILazyPropertyValue(initFunction)
 }
 
 
@@ -464,23 +321,7 @@ export class UIObject {
         return Object.getPrototypeOf(Object.getPrototypeOf(this)).constructor
     }
     
-    
-    public static wrapObject<T>(object: T): UIObject & T {
-        
-        if (IS_NOT(object)) {
-            return nil
-        }
-        
-        if (object instanceof UIObject) {
-            return object
-        }
-    
-        return Object.assign(new UIObject(), object)
-        
-    }
-    
-    
-    isKindOfClass(classObject) {
+    isKindOfClass(classObject: any) {
         if (this.isMemberOfClass(classObject)) {
             return YES
         }
@@ -497,9 +338,22 @@ export class UIObject {
         return (this.class == classObject)
     }
     
+    public static wrapObject<T>(object: T): UIObject & T {
+        if (IS_NOT(object)) {
+            return nil
+        }
+        
+        if ((object as any) instanceof UIObject) {
+            // @ts-ignore
+            return object
+        }
+        
+        return Object.assign(new UIObject(), object)
+    }
     
     
     valueForKey(key: string) {
+        // @ts-ignore
         return this[key]
     }
     
@@ -529,9 +383,7 @@ export class UIObject {
                 
                 const remainingKeyPath = keys.slice(i + 1).join(".")
                 const currentArray = currentObject as unknown as any[]
-                currentObject = currentArray.map(function (subObject, index, array) {
-                    return UIObject.valueForKeyPath(remainingKeyPath, subObject)
-                })
+                currentObject = currentArray.map(subObject => UIObject.valueForKeyPath(remainingKeyPath, subObject))
                 
                 break
                 
@@ -552,12 +404,12 @@ export class UIObject {
         return UIObject.setValueForKeyPath(keyPath, value, this, createPath)
     }
     
-    static setValueForKeyPath(keyPath: string, value: any, currentObject: any, createPath) {
+    static setValueForKeyPath(keyPath: string, value: any, currentObject: any, createPath: boolean) {
         
         const keys = keyPath.split(".")
         let didSetValue = NO
-    
-        keys.forEach(function (key, index, array) {
+        
+        keys.forEach((key, index, array) => {
             if (index == array.length - 1 && IS_NOT_LIKE_NULL(currentObject)) {
                 currentObject[key] = value
                 didSetValue = YES
@@ -573,9 +425,9 @@ export class UIObject {
             }
             currentObject = currentObject[key]
         })
-    
+        
         return didSetValue
-    
+        
     }
     
     
@@ -589,34 +441,35 @@ export class UIObject {
     
     
     static configureWithObject<T extends object>(configurationTarget: T, object: UIInitializerObject<T>) {
-        
+    
         const isAnObject = (item: any) => (item && typeof item === "object" && !Array.isArray(item) &&
             !(item instanceof UICoreExtensionValueObject))
-        
-        function isAClass(funcOrClass) {
-            const isFunction = functionToCheck => (functionToCheck && {}.toString.call(functionToCheck) ===
+    
+        function isAClass(funcOrClass: object) {
+            const isFunction = (functionToCheck: object) => (functionToCheck && {}.toString.call(functionToCheck) ===
                 "[object Function]")
             const propertyNames = Object.getOwnPropertyNames(funcOrClass)
             return (isFunction(funcOrClass) && !propertyNames.includes("arguments") &&
                 propertyNames.includes("prototype"))
         }
+    
+        let keyPathsAndValues: { value: any, keyPath: string }[] = []
+    
+        function prepareKeyPathsAndValues(target: Record<string, any>, source: object, keyPath = "") {
         
-        let keyPathsAndValues = []
-        
-        function prepareKeyPathsAndValues(target: object, source: object, keyPath = "") {
-            
             if ((isAnObject(target) || isAClass(target)) && isAnObject(source)) {
-                
+            
                 source.forEach((sourceValue, key) => {
-                    
+                
                     const valueKeyPath = keyPath + "." + key
-                    function addValueAndKeyPath(sourceValue) {
+                
+                    function addValueAndKeyPath(sourceValue: any) {
                         keyPathsAndValues.push({
                             value: sourceValue,
                             keyPath: valueKeyPath.replace(".", "")
                         })
                     }
-                    
+                
                     if (isAnObject(sourceValue) || isAClass(sourceValue)) {
                         if (!(key in target) || target[key] instanceof Function) {
                             addValueAndKeyPath(sourceValue)
@@ -639,8 +492,8 @@ export class UIObject {
         }
         
         prepareKeyPathsAndValues(configurationTarget, object)
-        
-        // Sort based on key paths
+    
+        // Sort based on key path lengths
         keyPathsAndValues = keyPathsAndValues.sort((a, b) => {
             
             const firstKeyPath = (a.keyPath as string).split(".").length

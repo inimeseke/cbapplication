@@ -1,6 +1,6 @@
 export interface UILanguageService {
     
-    updateCurrentLanguageKey();
+    updateCurrentLanguageKey(): void;
     
     currentLanguageKey: string;
     
@@ -8,11 +8,10 @@ export interface UILanguageService {
         key: string,
         languageName: string,
         defaultString: string,
-        parameters: { [x: string]: string | UILocalizedTextObject; }
-    ): string | undefined;
+        parameters?: { [x: string]: string | UILocalizedTextObject; }
+    ): string;
     
-    stringForCurrentLanguage(localizedTextObject: UILocalizedTextObject);
-    
+    stringForCurrentLanguage(localizedTextObject: UILocalizedTextObject): string;
     
     
 }

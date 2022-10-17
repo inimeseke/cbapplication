@@ -133,17 +133,19 @@ export class RootViewController extends UIRootViewController {
     }
     
     showEditor() {
-        
+    
         if (IS_NOT(this.editor)) {
             this.editor = new EditorViewController(new UIView("CBEditorView"))
         }
-        
+    
         this.editor.view.pointerDraggingPoint = new UIPoint(0, 0)
         this.editor?.viewWillAppear()
         this.editor?.view.willAppear()
         this.addChildViewController(this.editor)
         this.editor?.viewDidAppear()
-        
+    
+        UIView.shouldCallPointerUpInsideOnView(this.view).then(nil)
+    
     }
     
     hideEditor() {

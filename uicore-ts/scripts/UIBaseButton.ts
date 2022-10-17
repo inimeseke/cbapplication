@@ -16,16 +16,16 @@ export class UIBaseButton extends UIView {
     _focused?: boolean
     
     
-    constructor(elementID?: string, elementType?: string, initViewData?: any) {
-        
-        super(elementID, nil, elementType, initViewData)
-        
+    constructor(elementID?: string, elementType?: string) {
+    
+        super(elementID, nil, elementType)
+    
         // Instance variables
-        
-        
+    
+    
         this._isPointerInside = NO
-        
-        
+    
+    
         const setHovered = () => {
             this.hovered = YES
         }
@@ -40,9 +40,9 @@ export class UIBaseButton extends UIView {
         this.addTargetForControlEvents([
             UIView.controlEvent.PointerLeave, UIView.controlEvent.PointerCancel, UIView.controlEvent.MultipleTouches
         ], setNotHovered)
-        
-        
-        var highlightingTime: number
+    
+    
+        let highlightingTime: number
         const setHighlighted = () => {
             this.highlighted = YES
             highlightingTime = Date.now()

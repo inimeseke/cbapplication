@@ -10,15 +10,15 @@ export class UILink extends UIBaseButton {
     
     private _colors?: UIButtonColorSpecifier | undefined
     
-    constructor(elementID?: string, initViewData = nil) {
-        
-        super(elementID, "a", initViewData)
-        
+    constructor(elementID?: string) {
+    
+        super(elementID, "a")
+    
         this.stopsPointerEventPropagation = NO
         this.pausesPointerEvents = NO
-        
+    
         this.viewHTMLElement.onclick = this.blur.bind(this)
-        
+    
     }
     
     

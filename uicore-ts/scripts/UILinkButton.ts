@@ -8,7 +8,7 @@ export class UILinkButton extends UILink {
     
     constructor(elementID?: string, elementType?: string, titleType?: string) {
     
-        super(elementID, { "elementType": elementType, "titleType": titleType })
+        super(elementID)
     
         // Instance variables
         this.button = new UIButton(this.elementID + "Button", elementType, titleType)
@@ -16,7 +16,7 @@ export class UILinkButton extends UILink {
     
         this.style.position = "absolute"
         this.button.controlEventTargetAccumulator.EnterDown.PointerUpInside = () => window.location = this.target as any
-        
+    
     }
     
     

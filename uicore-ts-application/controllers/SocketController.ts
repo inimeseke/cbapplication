@@ -5,7 +5,7 @@ import {
     CBSocketMessageSendResponseFunction,
     CBUserProfile,
     SocketClientInterface
-} from "cbcore-ts/compiledScripts/CBDataInterfaces"
+} from "../webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
 import * as mongoose from "mongoose"
 import { Server, Socket } from "socket.io"
 import { CBDocument } from "TypeUtil"

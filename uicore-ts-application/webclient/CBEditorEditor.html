@@ -52,7 +52,9 @@
         // ].join("\n"),
         language: "typescript",
         lineNumbers: "off",
-        minimap: {enabled: false}
+        minimap: {enabled: false},
+        wrappingIndent: "indent",
+        wordWrap: "on"
     })
 
     // // Initialize auto typing on monaco editor. Imports will now automatically be typed!
@@ -61,30 +63,60 @@
     //     // Other options...
     // });
 
-    monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true)
+    // monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true)
+    // monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true)
+
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
 
-        moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-        target: "ES2016",
-        module: "ES2020",
-        lib: ["ES2016", "dom"],
-        declaration: true,
-        outDir: "./compiledScripts",
-        rootDir: "./scripts/",
-        downlevelIteration: true,
-        strict: true,
-        strictFunctionTypes: false,
-        strictBindCallApply: true,
-        types: ["socket.io"],
-        esModuleInterop: true
+        moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs
 
     })
 
+    // monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    //
+    //     moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+    //     target: monaco.languages.typescript.ScriptTarget.ES2016,
+    //     module: monaco.languages.typescript.ModuleKind.ESNext,
+    //     lib: ["ES2016", "dom"],
+    //     declaration: true,
+    //     outDir: "file:///compiledScripts",
+    //     rootDir: "file:///scripts/",
+    //     downlevelIteration: true,
+    //     strict: true,
+    //     strictFunctionTypes: false,
+    //     strictBindCallApply: true,
+    //     types: ["socket.io"],
+    //     esModuleInterop: true
+    //
+    // })
+
+    // var highlightPositions = []
+    //
+    // monaco.languages.registerDocumentHighlightProvider("typescript", {
+    //
+    //     provideDocumentHighlights(model, position, token) {
+    //
+    //         var result = highlightPositions.find((positionObject, index, array) => position.startLineNumber == positionObject.startLineNumber && position.line == positionObject.line)
+    //
+    //         model.get
+    //
+    //         return result;
+    //
+    //     }
+    //
+    // })
+
+
+
     editorObject.addExtraLibFromContents = (fileText, path) => {
 
-        const fakePath = `file:///${path}`
+        let fakePath = `file:///${path}`
 
-        console.log("Adding extra lib at " + fakePath)
+        //fakePath = fakePath.replace("node_modules/", "node_modules/@types/")
+        fakePath = fakePath.replace("uicore-ts/scripts/", "uicore-ts/")
+        fakePath = fakePath.replace("cbcore-ts/scripts/", "cbcore-ts/")
+
+        // console.log("Adding extra lib at " + fakePath)
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
             fileText,

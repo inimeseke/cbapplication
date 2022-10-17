@@ -59,7 +59,7 @@ export class UIButton extends UIBaseButton {
     
     constructor(elementID?: string, elementType?: string, titleType = UITextView.type.span) {
         
-        super(elementID, elementType, { "titleType": titleType })
+        super(elementID, elementType)
         
         // Instance variables
         
@@ -71,8 +71,8 @@ export class UIButton extends UIBaseButton {
         
         
         if (IS_NOT_NIL(titleType)) {
-            
-            this._titleLabel = new UITextView(elementID + "TitleLabel", titleType)
+    
+            this._titleLabel = new UITextView(this.elementID + "TitleLabel", titleType)
             this.titleLabel.style.whiteSpace = "nowrap"
             this.addSubview(this.titleLabel)
             

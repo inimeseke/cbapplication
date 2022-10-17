@@ -25,8 +25,7 @@ export class UIDateTimeInput extends UIView {
     })
     
     
-    // @ts-ignore
-    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UIDateTimeInput> {
+    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UIDateTimeInput> {
         return super.controlEventTargetAccumulator as any
     }
     

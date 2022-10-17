@@ -83,9 +83,12 @@ export interface UIViewBroadcastEvent {
 }
 
 
-export type UIViewAddControlEventTargetObject<T extends typeof UIView> = {
+export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<string, any> }> = {
     
-    [K in keyof T["controlEvent"]]: ((sender: T, event: Event) => void) & Partial<UIViewAddControlEventTargetObject<T>>
+    [K in keyof T["controlEvent"]]: ((
+    sender: UIView,
+    event: Event
+) => void) & Partial<UIViewAddControlEventTargetObject<T>>
     
 }
 
@@ -440,7 +443,7 @@ export class UIView extends UIObject {
     }
     
     
-    get propertyDescriptors(): { object: object; name: string }[] {
+    get propertyDescriptors(): { object: UIObject; name: string }[] {
         let result: any[] = []
         this.allSuperviews.forEach(view => {
             FIRST_OR_NIL(view.viewController).forEach((value, key, stopLooping) => {
@@ -700,7 +703,7 @@ export class UIView extends UIObject {
         viewHTMLElement.style.transformOrigin = "left top"
         viewHTMLElement.style.transform = "scale(" + zoom + ")"
         viewHTMLElement.style.width = width + "%"
-        
+    
     }
     
     static get pageScale() {
@@ -708,12 +711,10 @@ export class UIView extends UIObject {
     }
     
     
+    // Use this method to calculate the frame for the view itself
+    // This can be used when adding subviews to existing views like buttons
     calculateAndSetViewFrame() {
-        
-        // Use this method to calculate the frame for the view itself
-        
-        // This can be used when adding subviews to existing views like buttons
-        
+    
     }
     
     
@@ -1112,18 +1113,18 @@ export class UIView extends UIObject {
         
         function transitionDidFinishManually() {
             for (let i = 0; i < (viewOrViews as any).length; i++) {
-        
+    
                 let view = (viewOrViews as UIView[] | HTMLElement[])[i]
-        
+    
                 if (isUIView(view)) {
                     view = view.viewHTMLElement
                 }
-        
+    
                 view.style.transition = transitionStyles[i]
                 view.style.transitionDuration = transitionDurations[i]
                 view.style.transitionDelay = transitionDelays[i]
                 view.style.transitionTimingFunction = transitionTimings[i]
-        
+    
                 // @ts-ignore
                 view.removeEventListener("transitionend", transitionDidFinish, true)
                 
@@ -1728,8 +1729,10 @@ export class UIView extends UIObject {
     }
     
     
-    static pointerUpInsideCalled(view: UIView) {
-    
+    static async shouldCallPointerUpInsideOnView(view: UIView) {
+        
+        return YES
+        
     }
     
     
@@ -1794,17 +1797,17 @@ export class UIView extends UIObject {
                 
                 window.removeEventListener("mousemove", onMouseMove, true)
                 onmouseup(event)
-                
+    
             })
-            
+    
             window.addEventListener("touchmove", onTouchMove, true)
             window.addEventListener("mouseup", () => window.removeEventListener("touchmove", onTouchMove, true))
-            
+    
         }
         
         const onTouchStart = onMouseDown as any
         
-        const onmouseup = (event: MouseEvent) => {
+        const onmouseup = async (event: MouseEvent) => {
             
             this._isPointerDown = NO
             
@@ -1817,7 +1820,7 @@ export class UIView extends UIObject {
                 return
             }
             
-            if (this._isPointerInside) {
+            if (this._isPointerInside && await UIView.shouldCallPointerUpInsideOnView(this)) {
                 onPointerUpInside(event)
                 if (!this._hasPointerDragged) {
                     this.sendControlEventForKey(UIView.controlEvent.PointerTap, event)
@@ -1967,8 +1970,6 @@ export class UIView extends UIObject {
             this._isPointerDown = NO
             this.sendControlEventForKey(UIView.controlEvent.PointerUpInside, event)
             
-            
-            UIView.pointerUpInsideCalled(this)
             
         }
         
@@ -2171,7 +2172,7 @@ export class UIView extends UIObject {
     controlEvent = UIView.controlEvent
     
     
-    public get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UIView> {
+    public get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UIView> {
         
         const eventKeys: string[] = []
         

@@ -35,8 +35,8 @@ export class UITextField extends UITextView {
         this.nativeSelectionEnabled = YES
         
         this.pausesPointerEvents = NO
-        
-        
+    
+    
     }
     
     
@@ -47,8 +47,7 @@ export class UITextField extends UITextView {
     })
     
     
-    // @ts-ignore
-    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UITextField> {
+    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UITextField> {
         return (super.controlEventTargetAccumulator as any)
     }
     

@@ -1,6 +1,10 @@
 
-import { CBAuthenticationSource, CBSubscription, CBUserProfile } from "cbcore-ts/compiledScripts/CBDataInterfaces"
-import { Application} from "express"
+import {
+    CBAuthenticationSource,
+    CBSubscription,
+    CBUserProfile
+} from "../webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
+import { Application } from "express"
 import * as mongoose from "mongoose"
 import { LoginKeyModel, SubscriptionModel, UserModel } from "../models"
 import { SocketController } from "./SocketController"

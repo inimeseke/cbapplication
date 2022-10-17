@@ -354,6 +354,7 @@ textarea+label:after {
 }
 
 .input--search button.input__button {
+	/*noinspection CssInvalidPropertyValue*/
 	display: -webkit-inline-box;
 	display: -ms-inline-flexbox;
 	display: inline-flex;
@@ -437,6 +438,7 @@ textarea+label:after {
 }
 
 .input--license-plate button.input__button {
+    /*noinspection CssInvalidPropertyValue*/
 	display: -webkit-inline-box;
 	display: -ms-inline-flexbox;
 	display: inline-flex;
@@ -586,18 +588,18 @@ textarea+label:after {
 	user-select: none;
 }
 
-[type="checkbox"]+span:before,
-[type="checkbox"]:not()+span:after {
-	content: "";
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 18px;
-	height: 18px;
-	z-index: 0;
-	border: 2px solid #5a5a5a;
-	border-radius: 1px;
-	margin-top: 3px;
+[type="checkbox"] + span:before,
+[type="checkbox"] + span:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    z-index: 0;
+    border: 2px solid #5a5a5a;
+    border-radius: 1px;
+    margin-top: 3px;
 	-webkit-transition: .2s;
 	transition: .2s;
 }

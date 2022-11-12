@@ -95,15 +95,15 @@ export class CBTextField extends UIView {
     }
     
     
-    updateContentForCurrentEnabledState() {
-        
-        
+    override updateContentForCurrentEnabledState() {
+    
+    
         this.userInteractionEnabled = this.enabled
-        
+    
         if (this.enabled) {
-            
+        
             this.alpha = 1
-            
+        
         }
         else {
             
@@ -115,7 +115,7 @@ export class CBTextField extends UIView {
     }
     
     
-    didMoveToSuperview(superview: UIView) {
+    override didMoveToSuperview(superview: UIView) {
         
         super.didMoveToSuperview(superview)
         
@@ -124,7 +124,7 @@ export class CBTextField extends UIView {
     }
     
     
-    set enabled(enabled: boolean) {
+    override set enabled(enabled: boolean) {
         
         super.enabled = enabled
         
@@ -143,20 +143,20 @@ export class CBTextField extends UIView {
         
     }
     
-    get enabled() {
+    override get enabled() {
         
         return super.enabled
         
     }
     
     
-    focus() {
+    override focus() {
         
         this.textField.focus()
         
     }
     
-    blur() {
+    override blur() {
         
         this.textField.blur()
         

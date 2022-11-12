@@ -15,8 +15,11 @@ import {
     YES
 } from "uicore-ts"
 import { CBButton } from "./Custom components/CBButton"
+import { CBColor } from "./Custom components/CBColor"
+import { CBColorSelector } from "./Custom components/CBColorSelector"
 import { CBFlatButton } from "./Custom components/CBFlatButton"
-import { CBEditorAnnotatedPropertyDescriptor } from "./SocketClientFunctions"
+import { CBTextField } from "./Custom components/CBTextField"
+import { CBEditorAnnotatedPropertyDescriptor, CBEditorEditingDescriptor } from "./SocketClientFunctions"
 
 
 interface UnwrappedPropertyDescriptor {
@@ -48,8 +51,8 @@ export class EditorViewController extends UIViewController {
                 .applyByReplacingCurrentRouteInHistory()
         }
     }).performingFunctionWithSelf(self => this.view.addSubview(self))
-    
     currentViewLabel = new UITextView().performingFunctionWithSelf(self => this.view.addSubview(self))
+    propertyEditors: CBColorSelector[] = []
     
     buttons: CBFlatButton[] = []
     
@@ -57,7 +60,6 @@ export class EditorViewController extends UIViewController {
         viewHTMLElement: { src: "CBEditorEditor.html" }
     }).performingFunctionWithSelf(self => this.view.addSubview(self))
     
-    private _selectedViewColor: UIColor = nil
     private _selectedView: UIView = nil
     
     private _editor: monaco.editor.IStandaloneCodeEditor & {
@@ -79,9 +81,9 @@ export class EditorViewController extends UIViewController {
         this.view.setBorder(2, 1)
         
         this.view.calculateAndSetViewFrame = () => {
-            
+    
             const width = 550
-            const height = 850
+            const height = 850 + this.propertyEditors.length * 70
             
             this.view.setFrame(
                 new UIRectangle(
@@ -92,16 +94,17 @@ export class EditorViewController extends UIViewController {
                 ),
                 500
             )
-            
+    
         }
-        
+    
         this.view.controlEventTargetAccumulator.PointerDrag = () => this.view.calculateAndSetViewFrame()
-        
+    
+        SocketClient.ReloadEditorFiles().then(nil)
+    
         this.initEditor().then(nil)
-        
-        UIView.shouldCallPointerUpInsideOnView = async eventView => await this.shouldCallPointerUpInsideOnView(eventView) ?? YES
-        
-        
+        UIView.shouldCallPointerUpInsideOnView = async eventView =>
+            await this.shouldCallPointerUpInsideOnView(eventView) ?? YES
+    
     }
     
     
@@ -153,14 +156,19 @@ export class EditorViewController extends UIViewController {
     }
     
     
-    private async shouldCallPointerUpInsideOnView(view: UIView) {
+    private async shouldCallPointerUpInsideOnView(view: UIView, forced = NO) {
         
-        if (!this.view.isMemberOfViewTree || view.allSuperviews.contains(this.view) || this._currentEditingView == view) {
+        if ((!this.view.isMemberOfViewTree || view.allSuperviews.contains(this.view) || this._currentEditingView == view) && !forced) {
             return
         }
         
+        this.view.userInteractionEnabled = NO
+        this.view.alpha = 0.5
+        
         this._currentEditingView = view
         //this.currentViewLabel.text = view.elementID
+        
+        this.highlightView(view)
         
         // Obtain data
         const propertyDescriptors = view.propertyDescriptors
@@ -172,18 +180,20 @@ export class EditorViewController extends UIViewController {
                 }
             })
         )).result
+        
         const unwrappedPropertyDescriptors = this.unwrapAnnotatedPropertyDescriptors(
             annotatedPropertyDescriptorObjects.firstElement,
             propertyDescriptors.firstElement
         )
-        
         const propertyDescriptorIndex = this.indexForPropertyDescriptor(unwrappedPropertyDescriptors)
-        const propertyDescriptor = unwrappedPropertyDescriptors[propertyDescriptorIndex]!
         
+        const propertyDescriptor = unwrappedPropertyDescriptors[propertyDescriptorIndex]!
         // Update views
         this.updateButtons(unwrappedPropertyDescriptors, propertyDescriptorIndex)
-        await this.showProperty(propertyDescriptor)
-        this.highlightView(view)
+        await this.showProperty(propertyDescriptor, forced)
+        
+        this.view.userInteractionEnabled = YES
+        this.view.alpha = 1
         
         return NO
         
@@ -290,9 +300,9 @@ export class EditorViewController extends UIViewController {
         
     }
     
-    private async showProperty(propertyDescriptor: { object: UIObject, className: string, name: string }) {
+    private async showProperty(propertyDescriptor: { object: UIObject, className: string, name: string }, forced = NO) {
         
-        if (!propertyDescriptor) {
+        if (!propertyDescriptor && !forced) {
             return
         }
         
@@ -300,7 +310,7 @@ export class EditorViewController extends UIViewController {
         this.currentViewLabel.text = propertyDescriptor?.object?.class?.name +
             "_" + propertyDescriptor?.name
         
-        if (isClassChanged) {
+        if (isClassChanged || forced) {
             await this.reloadEditor()
         }
         
@@ -309,7 +319,95 @@ export class EditorViewController extends UIViewController {
             propertyKey: propertyDescriptor.name
         })).result
         
-        if (isClassChanged) {
+        this.propertyEditors.everyElement.removeFromSuperview()
+        // @ts-ignore
+        this.propertyEditors = fileObject.editableProperties.map(property =>
+            
+            IF(propertyDescriptor.object.valueForKeyPath(property.path)?.isKindOfClass?.(UIColor))(() =>
+                
+                new CBColorSelector().configuredWithObject(
+                    {
+                        titleLabel: {
+                            text: property.path + " (" + propertyDescriptor.object.valueForKeyPath(property.path) + ")"
+                        },
+                        colors: { background: { normal: CBColor.primaryTintColor } }
+                    }
+                ).performingFunctionWithSelf(self => {
+                        
+                        self.imageView.backgroundColor = propertyDescriptor.object.valueForKeyPath(property.path)
+                        
+                        self.controlEventTargetAccumulator.ValueInput = async () => {
+                            
+                            propertyDescriptor.object.setValueForKeyPath(property.path, self.imageView.backgroundColor)
+                            self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
+                                property.path
+                            ) + ")"
+                            
+                        }
+                        
+                        self.controlEventTargetAccumulator.ValueChange = async () => {
+                            
+                            propertyDescriptor.object.setValueForKeyPath(property.path, self.imageView.backgroundColor)
+                            self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
+                                property.path
+                            ) + ")"
+                            
+                            await SocketClient.SetPropertyValue({
+                                className: this._currentClassName!,
+                                propertyKeyPath: property.path,
+                                valueString: self.imageView.backgroundColor.stringValue
+                            })
+                            
+                            await this.shouldCallPointerUpInsideOnView(
+                                // @ts-ignore
+                                propertyDescriptor.object[propertyDescriptor.name],
+                                YES
+                            )
+                            
+                        }
+                        
+                    }
+                )
+            ).ELSE_IF(propertyDescriptor.object.valueForKeyPath(property.path).isAString)(() =>
+                
+                new CBTextField().configuredWithObject(
+                    {
+                        titleLabel: { text: property.path }
+                    }
+                ).performingFunctionWithSelf(
+                    self => {
+                        
+                        let text: string = propertyDescriptor.object.valueForKeyPath(property.path)
+                        let outerHTMLIfNeeded = ""
+                        
+                        // if (property.path.split(".").lastElement == "innerHTML") {
+                        //     outerHTMLIfNeeded = this._selectedView.viewHTMLElement.querySelectorAll(
+                        //         ".CBEditorPropertyBorderAndOverlayElement"
+                        //     )[0].outerHTML
+                        //     text = text.replace(outerHTMLIfNeeded, "")
+                        // }
+                        
+                        self.text = text
+                        
+                        // @ts-ignore
+                        self.textField.controlEventTargetAccumulator.TextChange = () =>
+                            propertyDescriptor.object.setValueForKeyPath(
+                                property.path,
+                                self.text + IF(outerHTMLIfNeeded)(RETURNER(" " + outerHTMLIfNeeded))
+                                    .ELSE(RETURNER(""))
+                            )
+                        
+                        this.highlightView(this._currentEditingView!)
+                        
+                    }
+                )
+            )()
+        ).filter(editor => IS(editor))
+        this.view.addSubviews(this.propertyEditors)
+        
+        
+        if (isClassChanged || forced) {
+            
             
             fileObject.referencedFiles.forEach(object => {
                 
@@ -353,7 +451,6 @@ export class EditorViewController extends UIViewController {
         const propertyDescriptor = view.propertyDescriptors.firstElement
         
         this.removeElementChanges()
-        this._selectedViewColor = view.backgroundColor
         //view.backgroundColor = transformColor(view.backgroundColor)
         this._selectedView = view
         const overlayElement = view.viewHTMLElement.appendChild(UIObject.configureWithObject(
@@ -423,24 +520,25 @@ export class EditorViewController extends UIViewController {
             .forEach(element => element.remove())
         this._selectedView.viewHTMLElement.querySelectorAll(".CBEditorPropertyBorderAndOverlayElement")
             .forEach(element => element.remove())
-        this._selectedView.backgroundColor = this._selectedViewColor
         
     }
     
     private async reloadEditor() {
-        
+    
+        this.view.userInteractionEnabled = NO
         const editorIframe: HTMLIFrameElement = this.editorContainer.viewHTMLElement as HTMLIFrameElement
         editorIframe?.contentDocument?.location?.reload()
         await this.initEditor()
+        this.view.userInteractionEnabled = YES
         
     }
     
     
-    static readonly routeComponentName = "cb_editor"
+    static override readonly routeComponentName = "cb_editor"
     
-    static readonly ParameterIdentifierName = {}
+    static override readonly ParameterIdentifierName = {}
     
-    async viewDidAppear() {
+    override async viewDidAppear() {
         
         // this.editor = monaco.editor.create(document.getElementById("testContainer")!, {
         //     value: ["function x(asdasd: string) {", "\tconsole.log(\"Asdasd \" + asdasd)", "}"].join("\n"),
@@ -453,14 +551,14 @@ export class EditorViewController extends UIViewController {
     }
     
     
-    async viewWillDisappear() {
-    
+    override async viewWillDisappear() {
+        
         this.removeElementChanges()
         
     }
     
     
-    async handleRoute(route: UIRoute) {
+    override async handleRoute(route: UIRoute) {
         
         super.handleRoute(route)
         const inquiryComponent = route.componentWithName(EditorViewController.routeComponentName)
@@ -468,48 +566,52 @@ export class EditorViewController extends UIViewController {
     }
     
     
-    updateViewConstraints() {
+    override updateViewConstraints() {
         
         super.updateViewConstraints()
         
     }
     
     
-    updateViewStyles() {
+    override updateViewStyles() {
         
         super.updateViewStyles()
         
     }
     
     
-    viewDidLayoutSubviews() {
+    override viewDidLayoutSubviews() {
         
         super.viewDidLayoutSubviews()
         
     }
     
     
-    layoutViewSubviews() {
+    override layoutViewSubviews() {
         
         super.layoutViewSubviews()
         
         const padding = this.core.paddingLength
         const labelHeight = padding
-    
+        
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)
-    
+        
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
         this.closeButton.frame = bounds.rectangleWithHeight(28).rectangleWithWidth(28, 1)
-    
+        
         this.currentViewLabel.frame = this.titleLabel.frame.rectangleForNextRow(padding)
-    
-        const buttonsFrame = this.currentViewLabel.frame.rectangleForNextRow(padding)
+        
+        this.currentViewLabel.frame.rectangleForNextRow(padding, this.propertyEditors.length * 70)
+            .distributeViewsAlongHeight(this.propertyEditors, 1, padding, 50)
+        
+        const buttonsFrame = (this.propertyEditors.lastElement || this.currentViewLabel).frame.rectangleForNextRow(
+            padding)
             .distributeViewsEquallyAlongWidth(this.buttons.copy().reverse(), 1)
-    
+        
         const editorFrame = buttonsFrame.rectangleForNextRow(
             padding * 0 + 5,
-            bounds.height - this.currentViewLabel.frame.max.y - padding * 2
+            bounds.height - (this.propertyEditors.lastElement || this.currentViewLabel).frame.max.y - padding * 2
         )
         // this.editorContainer.style.position = ""
         // this.editorContainer.style.margin = ""

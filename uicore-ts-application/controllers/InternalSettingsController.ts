@@ -1,5 +1,11 @@
 import { ObjectID } from "bson"
-import { CBDropdownData, CBDropdownDataItem, CBLanguageItem, CBReferenceID, CBUserProfile } from "cbcore-ts"
+import {
+    CBDropdownData,
+    CBDropdownDataItem,
+    CBLanguageItem,
+    CBReferenceID,
+    CBUserProfile
+} from "../webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
 import { Application } from "express"
 
 import * as mongoose from "mongoose"

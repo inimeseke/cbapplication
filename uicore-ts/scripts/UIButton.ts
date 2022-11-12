@@ -63,7 +63,7 @@ export class UIButton extends UIBaseButton {
         
         // Instance variables
         
-        this._imageView = new UIImageView(elementID + "ImageView")
+        this._imageView = new UIImageView(this.elementID + "ImageView")
         this._imageView.hidden = YES
         this.addSubview(this.imageView)
         
@@ -99,25 +99,25 @@ export class UIButton extends UIBaseButton {
     }
     
     
-    public set hovered(hovered: boolean) {
+    public override set hovered(hovered: boolean) {
         this._hovered = hovered
         this.updateContentForCurrentState()
     }
     
-    public get hovered(): boolean {
+    public override get hovered(): boolean {
         return this._hovered ?? NO
     }
     
-    public set highlighted(highlighted: boolean) {
+    public override set highlighted(highlighted: boolean) {
         this._highlighted = highlighted
         this.updateContentForCurrentState()
     }
     
-    public get highlighted(): boolean {
+    public override get highlighted(): boolean {
         return this._highlighted
     }
     
-    public set focused(focused: boolean) {
+    public override set focused(focused: boolean) {
         this._focused = focused
         if (focused) {
             this.focus()
@@ -128,22 +128,22 @@ export class UIButton extends UIBaseButton {
         this.updateContentForCurrentState()
     }
     
-    public get focused(): boolean {
+    public override get focused(): boolean {
         return this._focused ?? NO
     }
     
-    public set selected(selected: boolean) {
+    public override set selected(selected: boolean) {
         this._selected = selected
         this.updateContentForCurrentState()
     }
     
-    public get selected(): boolean {
+    public override get selected(): boolean {
         return this._selected
     }
     
     
-    updateContentForCurrentState() {
-    
+    override updateContentForCurrentState() {
+        
         let updateFunction: Function = this.updateContentForNormalState
         if (this.selected && this.highlighted) {
             updateFunction = this.updateContentForSelectedAndHighlightedState
@@ -173,14 +173,14 @@ export class UIButton extends UIBaseButton {
         
     }
     
-    updateContentForNormalState() {
+    override updateContentForNormalState() {
         
         this.backgroundColor = this.colors.background.normal
         this.titleLabel.textColor = this.colors.titleLabel.normal
         
     }
     
-    updateContentForHoveredState() {
+    override updateContentForHoveredState() {
         
         this.updateContentForNormalState()
         
@@ -194,7 +194,7 @@ export class UIButton extends UIBaseButton {
         
     }
     
-    updateContentForFocusedState() {
+    override updateContentForFocusedState() {
         
         this.updateContentForHoveredState()
         
@@ -208,21 +208,21 @@ export class UIButton extends UIBaseButton {
         
     }
     
-    updateContentForHighlightedState() {
+    override updateContentForHighlightedState() {
         
         this.backgroundColor = this.colors.background.highlighted
         this.titleLabel.textColor = this.colors.titleLabel.highlighted
         
     }
     
-    updateContentForSelectedState() {
+    override updateContentForSelectedState() {
         
         this.backgroundColor = this.colors.background.selected
         this.titleLabel.textColor = this.colors.titleLabel.selected
         
     }
     
-    updateContentForSelectedAndHighlightedState() {
+    override updateContentForSelectedAndHighlightedState() {
         
         this.updateContentForSelectedState()
         
@@ -237,7 +237,7 @@ export class UIButton extends UIBaseButton {
     }
     
     
-    set enabled(enabled: boolean) {
+    override set enabled(enabled: boolean) {
         
         // @ts-ignore
         super.enabled = enabled
@@ -246,14 +246,14 @@ export class UIButton extends UIBaseButton {
         
     }
     
-    get enabled() {
+    override get enabled() {
         
         // @ts-ignore
         return super.enabled
         
     }
     
-    updateContentForCurrentEnabledState() {
+    override updateContentForCurrentEnabledState() {
         
         if (this.enabled) {
             this.alpha = 1
@@ -267,16 +267,16 @@ export class UIButton extends UIBaseButton {
     }
     
     
-    addStyleClass(styleClassName: string) {
+    override addStyleClass(styleClassName: string) {
         
         super.addStyleClass(styleClassName)
-    
+        
         if (this.styleClassName != styleClassName) {
-        
+            
             this.updateContentForCurrentState.call(this)
-        
+            
         }
-    
+        
     }
     
     
@@ -291,7 +291,7 @@ export class UIButton extends UIBaseButton {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         
@@ -392,7 +392,7 @@ export class UIButton extends UIBaseButton {
         
     }
     
-    initViewStyleSelectors() {
+    override initViewStyleSelectors() {
         
         this.initStyleSelector("." + this.styleClassName, "background-color: lightblue;")
         

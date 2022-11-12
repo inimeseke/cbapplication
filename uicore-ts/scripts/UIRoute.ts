@@ -100,7 +100,7 @@ export class UIRoute extends Array<UIRouteComponent> {
     
     
     
-    copy() {
+    override copy() {
         var result = new UIRoute()
         result = Object.assign(result, this)
         return result

@@ -20,11 +20,11 @@ export class UITextArea extends UITextField {
     }
     
     
-    get viewHTMLElement(): HTMLTextAreaElement & HTMLInputElement {
-        
+    override get viewHTMLElement(): HTMLTextAreaElement & HTMLInputElement {
+    
         // @ts-ignore
         return super.viewHTMLElement
-        
+    
     }
     
     

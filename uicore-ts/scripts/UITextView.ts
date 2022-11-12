@@ -225,13 +225,13 @@ export class UITextView extends UIView {
         
     }
     
-    set innerHTML(innerHTML: string) {
-        
+    override set innerHTML(innerHTML: string) {
+    
         this.text = innerHTML
-        
+    
     }
     
-    get innerHTML() {
+    override get innerHTML() {
         
         return this.viewHTMLElement.innerHTML
         
@@ -333,21 +333,21 @@ export class UITextView extends UIView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
     }
     
     
-    willMoveToSuperview(superview: UIView) {
+    override willMoveToSuperview(superview: UIView) {
         
         super.willMoveToSuperview(superview)
         
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         
@@ -371,7 +371,7 @@ export class UITextView extends UIView {
     }
     
     
-    intrinsicContentHeight(constrainingWidth = 0) {
+    override intrinsicContentHeight(constrainingWidth = 0) {
         
         const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this.computedStyle.font).replace(new RegExp(
                 "\\.",
@@ -406,7 +406,7 @@ export class UITextView extends UIView {
         
     }
     
-    intrinsicContentWidth(constrainingHeight = 0) {
+    override intrinsicContentWidth(constrainingHeight = 0) {
         
         const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this.computedStyle.font).replace(new RegExp(
                 "\\.",
@@ -442,7 +442,7 @@ export class UITextView extends UIView {
     }
     
     
-    intrinsicContentSize() {
+    override intrinsicContentSize() {
         
         // This works but is slow
         const result = this.intrinsicContentSizeWithConstraints(nil, nil)

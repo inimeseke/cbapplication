@@ -29,35 +29,35 @@ export class UILinkButton extends UILink {
     }
     
     
-    set colors(colors: UIButtonColorSpecifier) {
+    override set colors(colors: UIButtonColorSpecifier) {
         this.button.colors = colors
     }
     
-    get colors(): UIButtonColorSpecifier {
+    override get colors(): UIButtonColorSpecifier {
         return this.button.colors
     }
     
     
-    get viewHTMLElement() {
+    override get viewHTMLElement() {
         return super.viewHTMLElement as HTMLLinkElement
     }
     
     
-    set target(target: string) {
+    override set target(target: string) {
         this.viewHTMLElement.setAttribute("href", target)
     }
     
-    get target() {
+    override get target() {
         return this.viewHTMLElement.getAttribute("href") ?? ""
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
-    
+        
         const bounds = this.bounds
-    
+        
         this.button.frame = bounds
         this.button.layoutSubviews()
         

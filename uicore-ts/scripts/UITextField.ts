@@ -10,7 +10,7 @@ export class UITextField extends UITextView {
     _placeholderTextKey?: string
     _defaultPlaceholderText?: string
     
-    _viewHTMLElement!: HTMLInputElement
+    override _viewHTMLElement!: HTMLInputElement
     
     constructor(elementID?: string, viewHTMLElement = null, type = UITextView.type.textField) {
         
@@ -40,30 +40,30 @@ export class UITextField extends UITextView {
     }
     
     
-    static controlEvent = Object.assign({}, UITextView.controlEvent, {
+    static override controlEvent = Object.assign({}, UITextView.controlEvent, {
         
         "TextChange": "TextChange"
         
     })
     
     
-    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UITextField> {
+    override get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UITextField> {
         return (super.controlEventTargetAccumulator as any)
     }
     
-    public get viewHTMLElement() {
+    public override get viewHTMLElement() {
         return this._viewHTMLElement
     }
     
     
-    public set text(text: string) {
+    public override set text(text: string) {
         
         this.viewHTMLElement.value = text
         
     }
     
     
-    public get text(): string {
+    public override get text(): string {
         
         return this.viewHTMLElement.value
         
@@ -95,8 +95,7 @@ export class UITextField extends UITextView {
     }
     
     
-    
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
@@ -110,7 +109,7 @@ export class UITextField extends UITextView {
     }
     
     
-    willMoveToSuperview(superview: UIView) {
+    override willMoveToSuperview(superview: UIView) {
         
         super.willMoveToSuperview(superview)
         

@@ -18,14 +18,14 @@ export class UIDateTimeInput extends UIView {
     }
     
     
-    static controlEvent = Object.assign({}, UIView.controlEvent, {
-        
+    static override controlEvent = Object.assign({}, UIView.controlEvent, {
+    
         "ValueChange": "ValueChange"
-        
+    
     })
     
     
-    get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UIDateTimeInput> {
+    override get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UIDateTimeInput> {
         return super.controlEventTargetAccumulator as any
     }
     

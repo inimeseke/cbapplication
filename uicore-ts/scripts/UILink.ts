@@ -31,11 +31,11 @@ export class UILink extends UIBaseButton {
     }
     
     
-    get viewHTMLElement() {
-        
+    override get viewHTMLElement() {
+    
         // @ts-ignore
         return super.viewHTMLElement as HTMLLinkElement
-        
+    
     }
     
     set text(text: string) {
@@ -71,7 +71,7 @@ export class UILink extends UIBaseButton {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
@@ -84,7 +84,7 @@ export class UILink extends UIBaseButton {
     }
     
     
-    wasAddedToViewTree() {
+    override wasAddedToViewTree() {
         
         super.wasAddedToViewTree()
         
@@ -111,12 +111,12 @@ export class UILink extends UIBaseButton {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
-    
+        
         const bounds = this.bounds
-    
+        
     }
     
     

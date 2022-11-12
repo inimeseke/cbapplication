@@ -38,10 +38,10 @@ export class UIImageView extends UIView {
     }
     
     
-    get viewHTMLElement() {
-        
+    override get viewHTMLElement() {
+    
         return super.viewHTMLElement as HTMLImageElement
-        
+    
     }
     
     
@@ -185,7 +185,7 @@ export class UIImageView extends UIView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
@@ -199,7 +199,7 @@ export class UIImageView extends UIView {
     }
     
     
-    willMoveToSuperview(superview: UIView) {
+    override willMoveToSuperview(superview: UIView) {
         
         super.willMoveToSuperview(superview)
         
@@ -242,7 +242,7 @@ export class UIImageView extends UIView {
     }
     
     
-    didMoveToSuperview(superview: UIView) {
+    override didMoveToSuperview(superview: UIView) {
         
         super.didMoveToSuperview(superview)
         
@@ -250,7 +250,7 @@ export class UIImageView extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         
@@ -258,22 +258,22 @@ export class UIImageView extends UIView {
     }
     
     
-    intrinsicContentSize() {
-    
-    
+    override intrinsicContentSize() {
+        
+        
         return new UIRectangle(0, 0, this.viewHTMLElement.naturalHeight, this.viewHTMLElement.naturalWidth)
-    
-    
+        
+        
     }
     
-    intrinsicContentSizeWithConstraints(constrainingHeight = 0, constrainingWidth = 0) {
-    
+    override intrinsicContentSizeWithConstraints(constrainingHeight = 0, constrainingWidth = 0) {
+        
         const heightRatio = constrainingHeight / this.viewHTMLElement.naturalHeight
-    
+        
         const widthRatio = constrainingWidth / this.viewHTMLElement.naturalWidth
-    
+        
         const multiplier = Math.max(heightRatio, widthRatio)
-    
+        
         return new UIRectangle(0, 0, this.viewHTMLElement.naturalHeight *
             multiplier, this.viewHTMLElement.naturalWidth * multiplier)
     

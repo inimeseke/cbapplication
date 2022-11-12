@@ -25,7 +25,8 @@ export class SomeContentViewController extends UIViewController {
         this.view.addSubview(this.titleLabel)
     
         this.view.configureWithObject({
-            backgroundColor: new UIColor("#ffffff")
+            backgroundColor: new UIColor("#ffffff"),
+            hoverText: ""
         })
     
     }

@@ -153,7 +153,7 @@ export class CBEditorController extends RoutesController {
                 path: resultFile.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", ""),
                 referencedFiles: referencedFiles,
                 propertyLocation: Utils.IF(propertyObject)(() => {
-                
+    
                     return {
                         className: propertyObject.getParent().getName(),
                         start: {
@@ -167,7 +167,7 @@ export class CBEditorController extends RoutesController {
                                 .getStartLinePos() + 1
                         }
                     }
-                
+    
                 }).ELSE(() => undefined),
                 propertyReferenceLocations: propertyReferenceLocations,
                 editableProperties: editableProperties
@@ -283,19 +283,19 @@ export class CBEditorController extends RoutesController {
                     )
                 )
                 const targetObjectConstructorAssignmentReferences = targetObjectConstructorReferences.filter(reference => {
-                
+    
                     const binaryExpression = reference.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
                     const leftReferenceText = binaryExpression?.getLeft()?.getText()
-                
+    
                     const callExpression = reference.getFirstAncestorByKind(SyntaxKind.CallExpression)
                     const isConfiguration = callExpression?.getExpression()?.getText()?.endsWith("configureWithObject")
-                
+    
                     return (leftReferenceText == "this." + keyPathComponents.firstElement &&
                         binaryExpression?.getOperatorToken()?.getText() == "=" && this.isNodeContainedInNode(
                             reference,
                             binaryExpression?.getLeft()
                         )) || isConfiguration
-                
+    
                 })
             
             
@@ -323,8 +323,9 @@ export class CBEditorController extends RoutesController {
                         ).findReferencesAsNodes().find(
                             reference => this.isNodeContainedInNode(
                                 reference,
-                                targetObjectConstructorAssignmentReference.getFirstAncestor((node) => node.getText()
-                                    .contains("configureWithObject"))
+                                targetObjectConstructorAssignmentReference.getFirstAncestor(
+                                    (node) => node.getText().contains("configureWithObject")
+                                )
                             )
                         )?.getFirstAncestorByKind(SyntaxKind.CallExpression)
                 
@@ -422,13 +423,24 @@ export class CBEditorController extends RoutesController {
         targetObjectClassPropertyObject: SetAccessorDeclaration,
         valueString
     ) {
-        
+    
+        let result = valueString
+    
         if (targetObjectClassPropertyObject?.getType()?.compilerType?.symbol?.getName() == "UIColor") {
-            valueString = "new UIColor(\"" + valueString + "\")"
+        
+            result = "new UIColor(\"" + valueString + "\")"
+        
         }
+    
+        // @ts-ignore
+        if (targetObjectClassPropertyObject?.getType()?.compilerType?.intrinsicName == "string") {
         
-        return valueString
+            result = "\"" + valueString + "\""
         
+        }
+    
+        return result
+    
     }
     
     private reloadEditorProject() {

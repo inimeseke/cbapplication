@@ -92,15 +92,15 @@ export class UIRootViewController extends UIViewController {
     }
     
     
-    async handleRoute(route: UIRoute) {
-        
+    override async handleRoute(route: UIRoute) {
+    
         await super.handleRoute(route)
-        
+    
         UICore.languageService.updateCurrentLanguageKey()
-        
+    
         // Show content view
         await this.setContentViewControllerForRoute(route)
-        
+    
         await this.setDetailsViewControllerForRoute(route)
         
     }

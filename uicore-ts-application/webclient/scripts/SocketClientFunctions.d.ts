@@ -18,7 +18,49 @@ export interface CBEditorPropertyDescriptor {
 }
 
 
+export interface CBEditorPropertyValueDescriptor {
+    
+    className: string
+    propertyKeyPath: string
+    valueString: string
+    
+}
+
+
+interface CBEditorPropertyLocation {
+    className: string
+    start: { lineNumber: number, column: number }
+    end: { lineNumber: number, column: number }
+}
+
+
+export interface CBEditorPropertyReferenceLocation {
+    fileName: string
+    className: string
+    start: { lineNumber: number, column: number }
+    end: { lineNumber: number, column: number }
+}
+
+
+export interface CBEditorEditingDescriptor {
+    
+    codeFileContents: string
+    path: string
+    referencedFiles: { codeFileContents: string, path: string }[]
+    propertyLocation: CBEditorPropertyLocation
+    propertyReferenceLocations: CBEditorPropertyReferenceLocation[]
+    editableProperties: {
+        
+        typeName: string
+        path: string
+        
+    }[]
+    
+}
+
+
 declare module "cbcore-ts" {
+    
     
     export interface SocketClientInterface {
         
@@ -30,24 +72,13 @@ declare module "cbcore-ts" {
         
         AnnotatePropertyDescriptors: SocketClientFunction<CBEditorPropertyDescriptor[],
             CBEditorAnnotatedPropertyDescriptor[]>
-        
         EditProperty: SocketClientFunction<CBEditorPropertyDescriptor,
-            {
-                codeFileContents: string,
-                path: string,
-                referencedFiles: { codeFileContents: string, path: string }[],
-                propertyLocation: {
-                    className: string,
-                    start: { lineNumber: number, column: number },
-                    end: { lineNumber: number, column: number }
-                },
-                propertyReferenceLocations: {
-                    fileName: string,
-                    className: string,
-                    start: { lineNumber: number, column: number },
-                    end: { lineNumber: number, column: number }
-                }[]
-            }>
+            CBEditorEditingDescriptor>
+        
+        SetPropertyValue: SocketClientFunction<CBEditorPropertyValueDescriptor,
+            CBEditorEditingDescriptor>
+        
+        ReloadEditorFiles: SocketClientNoMessageFunction<void>
         
         
         // Internal settings controller

@@ -58,7 +58,7 @@ export class UITableView extends UINativeScrollView {
     _isDrawVisibleRowsScheduled = NO
     _shouldAnimateNextLayout?: boolean
     
-    animationDuration = 0.25
+    override animationDuration = 0.25
     
     
     constructor(elementID?: string) {
@@ -468,7 +468,7 @@ export class UITableView extends UINativeScrollView {
     
     
     // Functions that trigger redrawing of the content
-    didScrollToPosition(offsetPosition: UIPoint) {
+    override didScrollToPosition(offsetPosition: UIPoint) {
         
         super.didScrollToPosition(offsetPosition)
         
@@ -498,11 +498,11 @@ export class UITableView extends UINativeScrollView {
         
     }
     
-    wasAddedToViewTree() {
+    override wasAddedToViewTree() {
         this.loadData()
     }
     
-    setFrame(rectangle: UIRectangle, zIndex?: number, performUncheckedLayout?: boolean) {
+    override setFrame(rectangle: UIRectangle, zIndex?: number, performUncheckedLayout?: boolean) {
         
         const frame = this.frame
         super.setFrame(rectangle, zIndex, performUncheckedLayout)
@@ -515,7 +515,7 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
@@ -578,7 +578,7 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         const previousPositions: UITableViewReusableViewPositionObject[] = JSON.parse(JSON.stringify(this._rowPositions))
         
@@ -654,7 +654,7 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    intrinsicContentHeight(constrainingWidth = 0) {
+    override intrinsicContentHeight(constrainingWidth = 0) {
         
         
         var result = 0

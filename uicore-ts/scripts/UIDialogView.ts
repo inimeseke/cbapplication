@@ -77,14 +77,14 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     }
     
     
-    willAppear(animated: boolean = NO) {
-        
+    override willAppear(animated: boolean = NO) {
+    
         if (animated) {
-            
-            this.style.opacity = "0"
-            
-        }
         
+            this.style.opacity = "0"
+        
+        }
+    
         this.style.height = ""
     
         this._frame = nil
@@ -199,7 +199,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
@@ -212,7 +212,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         
         if (!IS(this.view)) {

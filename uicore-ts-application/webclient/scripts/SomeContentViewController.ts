@@ -6,35 +6,46 @@ export class SomeContentViewController extends UIViewController {
     readonly titleLabel: UITextView
     
     constructor(view: UIView) {
-        
+    
         super(view)
-        
+    
         // Code for further setup if necessary
-        
-        this.view.backgroundColor = UIColor.whiteColor
-        
+    
+        // this.view.backgroundColor = new UIColor("#ca0707")
+    
+        //this.view = this.view.configuredWithObject({ backgroundColor: new UIColor("#df5858") })
+    
+        //     .configuredWithObject({
+        //     //backgroundColor: new UIColor("#d94545")
+        //     backgroundColor: new UIColor("#ca0707")
+        // })
+    
         this.titleLabel = new UITextView(this.view.elementID + "TitleLabel", UITextView.type.header2)
         this.titleLabel.localizedTextObject = { en: "Some content", est: "Mingi sisu" }
         this.view.addSubview(this.titleLabel)
-        
-    }
     
-    
-    static readonly routeComponentName = "somecontent"
-    
-    static readonly ParameterIdentifierName = {}
-    
-    async viewDidAppear() {
+        this.view.configureWithObject({
+            backgroundColor: new UIColor("#ffffff")
+        })
     
     }
     
     
-    async viewWillDisappear() {
+    static override readonly routeComponentName = "somecontent"
+    
+    static override readonly ParameterIdentifierName = {}
+    
+    override async viewDidAppear() {
     
     }
     
     
-    async handleRoute(route: UIRoute) {
+    override async viewWillDisappear() {
+    
+    }
+    
+    
+    override async handleRoute(route: UIRoute) {
         
         super.handleRoute(route)
         const inquiryComponent = route.componentWithName(SomeContentViewController.routeComponentName)
@@ -42,28 +53,28 @@ export class SomeContentViewController extends UIViewController {
     }
     
     
-    updateViewConstraints() {
+    override updateViewConstraints() {
         
         super.updateViewConstraints()
         
     }
     
     
-    updateViewStyles() {
+    override updateViewStyles() {
         
         super.updateViewStyles()
         
     }
     
     
-    viewDidLayoutSubviews() {
+    override viewDidLayoutSubviews() {
         
         super.viewDidLayoutSubviews()
         
     }
     
     
-    layoutViewSubviews() {
+    override layoutViewSubviews() {
         
         super.layoutViewSubviews()
         

@@ -41,14 +41,14 @@ export class UIActionIndicator extends UIView {
     
     
     
-    set hidden(hidden: boolean) {
-        
+    override set hidden(hidden: boolean) {
+    
         super.hidden = hidden
-        
+    
         if (hidden) {
-            
+        
             this.indicatorView.removeFromSuperview()
-            
+        
         }
         else {
             
@@ -71,13 +71,12 @@ export class UIActionIndicator extends UIView {
     }
     
     
-    
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
-    
+        
         const bounds = this.bounds
-    
+        
         //this.indicatorView.centerInContainer();
         
         this.indicatorView.style.height = "" + this._size.integerValue + "px"

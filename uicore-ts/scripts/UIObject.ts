@@ -145,10 +145,13 @@ export function RETURNER<T>(value?: T) {
 
 export type UIIFBlockReceiver<T> = (functionToCall: () => any) => UIIFEvaluator<T>;
 export type UIIFEvaluatorBase<T> = () => T;
+
+
 export interface UIIFEvaluator<T> extends UIIFEvaluatorBase<T> {
     ELSE_IF: (otherValue: any) => UIIFBlockReceiver<T>;
     ELSE: (functionToCall: () => any) => T;
 }
+
 
 export function IF<T = any>(value: any): UIIFBlockReceiver<T> {
     
@@ -233,10 +236,12 @@ export class UIFunctionExtender<T extends (...args: any) => any> {
             const boundExtendingFunction = extendingFunction.bind(this)
             boundExtendingFunction(...objects)
         }
+    
         return extendedFunction
     }
     
 }
+
 
 export function EXTEND<T extends (...args: any) => any>(extendingFunction: T) {
     return new UIFunctionExtender(extendingFunction)
@@ -288,6 +293,7 @@ export class UILazyPropertyValue<T> {
     }
     
 }
+
 
 export function LAZY_VALUE<T>(initFunction: () => T) {
     return new UILazyPropertyValue(initFunction)
@@ -390,7 +396,7 @@ export class UIObject {
             }
             
             currentObject = currentObject[key]
-            if (IS_NOT(currentObject)) {
+            if (IS_LIKE_NULL(currentObject)) {
                 currentObject = nil
             }
             
@@ -442,8 +448,8 @@ export class UIObject {
     
     static configureWithObject<T extends object>(configurationTarget: T, object: UIInitializerObject<T>) {
     
-        const isAnObject = (item: any) => (item && typeof item === "object" && !Array.isArray(item) &&
-            !(item instanceof UICoreExtensionValueObject))
+        const isAnObject = (item: any) => (item && typeof item === "object" && !Array.isArray(item) && !(item instanceof UICoreExtensionValueObject))
+        const isAPureObject = (item: any) => isAnObject(item) && Object.getPrototypeOf(item) === Object.getPrototypeOf({})
     
         function isAClass(funcOrClass: object) {
             const isFunction = (functionToCheck: object) => (functionToCheck && {}.toString.call(functionToCheck) ===
@@ -470,7 +476,8 @@ export class UIObject {
                         })
                     }
                 
-                    if (isAnObject(sourceValue) || isAClass(sourceValue)) {
+                
+                    if (isAPureObject(sourceValue) || isAClass(sourceValue)) {
                         if (!(key in target) || target[key] instanceof Function) {
                             addValueAndKeyPath(sourceValue)
                         }

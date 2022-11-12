@@ -8,7 +8,7 @@ export class UIBaseButton extends UIView {
     _selected: boolean = NO
     _highlighted: boolean = NO
     
-    _isPointerInside: boolean
+    override _isPointerInside: boolean
     
     
     _isToggleable: boolean = NO
@@ -228,16 +228,16 @@ export class UIBaseButton extends UIView {
     }
     
     
-    set enabled(enabled: boolean) {
+    override set enabled(enabled: boolean) {
         super.enabled = enabled
         this.updateContentForCurrentEnabledState()
     }
     
-    get enabled() {
+    override get enabled() {
         return super.enabled
     }
     
-    updateContentForCurrentEnabledState() {
+    override updateContentForCurrentEnabledState() {
         
         if (this.enabled) {
             this.alpha = 1
@@ -251,7 +251,7 @@ export class UIBaseButton extends UIView {
     }
     
     
-    addStyleClass(styleClassName: string) {
+    override addStyleClass(styleClassName: string) {
         
         super.addStyleClass(styleClassName)
         
@@ -264,15 +264,15 @@ export class UIBaseButton extends UIView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
         if (event.name == UIView.broadcastEventName.PageDidScroll || event.name ==
             UIView.broadcastEventName.AddedToViewTree) {
-    
+            
             this.hovered = NO
-    
+            
             this.highlighted = NO
     
             this.updateContentForCurrentState()
@@ -304,25 +304,25 @@ export class UIBaseButton extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
-    
+        
         const bounds = this.bounds
-    
-    
+        
+        
     }
     
     
-    sendControlEventForKey(eventKey: string, nativeEvent: Event) {
+    override sendControlEventForKey(eventKey: string, nativeEvent: Event) {
         
         if (eventKey == UIView.controlEvent.PointerUpInside && !this.highlighted) {
             
             // Do not send the event in this case
             //super.sendControlEventForKey(eventKey, nativeEvent);
-    
+            
             const asd = 1
-    
+            
         }
         else {
             

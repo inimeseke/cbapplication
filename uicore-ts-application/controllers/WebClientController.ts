@@ -1,4 +1,4 @@
-import { CBCoreInitializer } from "cbcore-ts"
+import { CBCoreInitializer } from "../webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
 import { Application, Request, Response } from "express"
 import * as fs from "fs"
 import { Server } from "socket.io"

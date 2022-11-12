@@ -343,22 +343,22 @@ export class UISlideScrollerView extends UIView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
-        
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    
         super.didReceiveBroadcastEvent(event)
-        
+    
         if (event.name == UICore.broadcastEventName.WindowDidResize) {
-            
+        
             this.currentPageIndex = this.currentPageIndex
-            
-            
+        
+        
         }
         
         
     }
     
     
-    set frame(frame: UIRectangle) {
+    override set frame(frame: UIRectangle) {
         
         super.frame = frame
         
@@ -366,23 +366,23 @@ export class UISlideScrollerView extends UIView {
         
     }
     
-    get frame() {
+    override get frame() {
         
         return super.frame
         
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         
         if (this.bounds.isEqualTo(this._previousLayoutBounds)) {
             return
         }
-    
+        
         const bounds = this.bounds
-    
+        
         this._previousLayoutBounds = bounds
         
         this._scrollView.frame = bounds
@@ -420,7 +420,7 @@ export class UISlideScrollerView extends UIView {
     }
     
     
-    removeFromSuperview() {
+    override removeFromSuperview() {
         
         
         super.removeFromSuperview()

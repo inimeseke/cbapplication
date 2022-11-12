@@ -25,7 +25,7 @@ export class UIColor extends UIObject {
     
     
     
-    toString() {
+    override toString() {
         return this.stringValue
     }
     

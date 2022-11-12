@@ -379,16 +379,9 @@ export class EditorViewController extends UIViewController {
                         
                         let text: string = propertyDescriptor.object.valueForKeyPath(property.path)
                         let outerHTMLIfNeeded = ""
-                        
-                        // if (property.path.split(".").lastElement == "innerHTML") {
-                        //     outerHTMLIfNeeded = this._selectedView.viewHTMLElement.querySelectorAll(
-                        //         ".CBEditorPropertyBorderAndOverlayElement"
-                        //     )[0].outerHTML
-                        //     text = text.replace(outerHTMLIfNeeded, "")
-                        // }
-                        
+    
                         self.text = text
-                        
+    
                         // @ts-ignore
                         self.textField.controlEventTargetAccumulator.TextChange = () =>
                             propertyDescriptor.object.setValueForKeyPath(
@@ -396,9 +389,40 @@ export class EditorViewController extends UIViewController {
                                 self.text + IF(outerHTMLIfNeeded)(RETURNER(" " + outerHTMLIfNeeded))
                                     .ELSE(RETURNER(""))
                             )
-                        
+    
+                        self.textField.controlEventTargetAccumulator.Blur.EnterDown = async () => {
+        
+                            const newValue = self.text + IF(outerHTMLIfNeeded)(RETURNER(" " + outerHTMLIfNeeded))
+                                .ELSE(RETURNER(""))
+                            const isValueChanged = text != newValue
+        
+                            if (!isValueChanged) {
+                                return
+                            }
+        
+                            propertyDescriptor.object.setValueForKeyPath(
+                                property.path,
+                                newValue
+                            )
+        
+                            text = newValue
+        
+                            await SocketClient.SetPropertyValue({
+                                className: this._currentClassName!,
+                                propertyKeyPath: property.path,
+                                valueString: self.textField.text
+                            })
+        
+                            await this.shouldCallPointerUpInsideOnView(
+                                // @ts-ignore
+                                propertyDescriptor.object[propertyDescriptor.name],
+                                YES
+                            )
+        
+                        }
+    
                         this.highlightView(this._currentEditingView!)
-                        
+    
                     }
                 )
             )()

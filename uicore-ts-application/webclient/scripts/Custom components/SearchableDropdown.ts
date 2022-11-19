@@ -1,6 +1,7 @@
 import { CBSocketClient, SocketClient } from "cbcore-ts"
 import { CBDropdownDataItem } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import {
+    FIRST,
     IS,
     IS_NOT,
     IS_UNDEFINED,
@@ -61,7 +62,9 @@ export class SearchableDropdown<T> extends UIButton {
     keepFocusedRowVisible = YES
     _placeholderLocalizedTextObject?: UILocalizedTextObject
     
-    constructor(elementID: string) {
+    dialogContainerView: UIView = nil
+    
+    constructor(elementID?: string) {
         
         super(elementID)
         
@@ -72,7 +75,7 @@ export class SearchableDropdown<T> extends UIButton {
             this._titleLabel.textAlignment = UITextView.textAlignment.left
         }
         
-        this.overflowLabel = new UITextView(elementID + "OverflowLabel")
+        this.overflowLabel = new UITextView(this.elementID + "OverflowLabel")
         this.overflowLabel.textColor = CBColor.primaryContentColor
         this.overflowLabel.textAlignment = UITextView.textAlignment.right
         this.addSubview(this.overflowLabel)
@@ -84,11 +87,11 @@ export class SearchableDropdown<T> extends UIButton {
         
         this.setNeedsLayout()
         
-        this._containerView = new UIView(elementID + "ContainerView")
+        this._containerView = new UIView(this.elementID + "ContainerView")
         this._containerView.style.boxShadow = "0 9px 13px 0 rgba(0,0,0,0.26)"
         this._containerView.style.borderRadius = "2px"
         
-        this._searchTextField = new SearchTextField(elementID + "SearchTextField")
+        this._searchTextField = new SearchTextField(this.elementID + "SearchTextField")
         this._searchTextField.placeholderText = LanguageService.stringForKey(
             "searchableDropdownSearch",
             LanguageService.currentLanguageKey,
@@ -170,11 +173,11 @@ export class SearchableDropdown<T> extends UIButton {
         }
         
         
-        this._tableView = new UITableView(elementID + "TableView")
+        this._tableView = new UITableView(this.elementID + "TableView")
         this._containerView.addSubview(this._tableView)
         this._tableView.backgroundColor = UIColor.whiteColor
         
-        this._dialogView = new UIDialogView(elementID + "DialogView")
+        this._dialogView = new UIDialogView(this.elementID + "DialogView")
         this._dialogView.view = this._containerView
         this._dialogView.backgroundColor = UIColor.transparentColor
         
@@ -200,16 +203,21 @@ export class SearchableDropdown<T> extends UIButton {
         
         
         this._dialogView.layoutSubviews = () => {
-            
+    
             this._dialogView.frame = this.rootView.bounds
-            
+    
             const padding = this.core.paddingLength
-            
+    
             const searchTextFieldHeight = this.bounds.height
-            
-            this._containerView.frame = this.superview.rectangleInView(this.frame, this.rootView)
+    
+            this._dialogView.view.style.zIndex = "" + this._dialogView.zIndex
+    
+            this._containerView.frame = this.superview.rectangleInView(
+                this.frame,
+                FIRST(this.dialogContainerView, this.rootView)
+            )
                 .rectangleWithHeight(this.expandedContainerViewHeight)
-            
+    
             this._searchTextField.frame = this._containerView.bounds.rectangleWithHeight(searchTextFieldHeight)
                 .rectangleWithInsets(
                     0,
@@ -444,7 +452,7 @@ export class SearchableDropdown<T> extends UIButton {
     
     
     openDropdown() {
-        this._dialogView.showInView(this.rootView, YES)
+        this._dialogView.showInView(FIRST(this.dialogContainerView, this.rootView), YES)
         this._searchTextField.focus()
     }
     
@@ -452,7 +460,7 @@ export class SearchableDropdown<T> extends UIButton {
         this._dialogView.dismiss(YES)
     }
     
-    boundsDidChange() {
+    override boundsDidChange() {
         super.boundsDidChange()
         this.setNeedsLayout()
     }
@@ -626,7 +634,7 @@ export class SearchableDropdown<T> extends UIButton {
     }
     
     
-    updateContentForNormalState() {
+    override updateContentForNormalState() {
         
         this.style.borderBottom = "1px solid rgba(0,0,0,0.12)"
         this.style.borderBottomColor = CBColor.primaryContentColor.colorWithAlpha(0.12).stringValue
@@ -636,7 +644,7 @@ export class SearchableDropdown<T> extends UIButton {
         
     }
     
-    updateContentForHighlightedState() {
+    override updateContentForHighlightedState() {
         
         this.style.borderBottomWidth = "2px"
         this.style.borderBottomColor = this.tintColor.stringValue
@@ -644,7 +652,7 @@ export class SearchableDropdown<T> extends UIButton {
     }
     
     
-    static controlEvent = Object.assign({}, UIView.controlEvent, {
+    static override controlEvent = Object.assign({}, UIView.controlEvent, {
         
         "SelectionDidChange": "SelectionDidChange"
         
@@ -1023,7 +1031,7 @@ export class SearchableDropdown<T> extends UIButton {
     }
     
     
-    wasAddedToViewTree() {
+    override wasAddedToViewTree() {
         
         super.wasAddedToViewTree()
         
@@ -1033,7 +1041,7 @@ export class SearchableDropdown<T> extends UIButton {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         

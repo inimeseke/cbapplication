@@ -6,7 +6,8 @@ import {
     Node,
     ObjectLiteralExpression,
     Project,
-    PropertyDeclaration, SetAccessorDeclaration,
+    PropertyDeclaration,
+    SetAccessorDeclaration,
     SourceFile,
     SyntaxKind
 } from "ts-morph"
@@ -14,7 +15,8 @@ import "../Extensions"
 import Utils from "../Utils"
 import {
     CBEditorAnnotatedPropertyDescriptor,
-    CBEditorPropertyDescriptor
+    CBEditorPropertyDescriptor,
+    CBEditorPropertyLocation
 } from "../webclient/scripts/SocketClientFunctions"
 import { RoutesController } from "./RoutesController"
 import { SocketController } from "./SocketController"
@@ -176,6 +178,62 @@ export class CBEditorController extends RoutesController {
         }
     
     
+        targets.EditingValuesForProperty = async (message, socketSession, respondWithMessage) => {
+        
+        
+            const sourceFiles = this.webclientProject.getSourceFiles()
+            const resultFile = sourceFiles.find(
+                (file, index, array) => file.getClass(
+                    declaration => declaration.getName() == message.className
+                )
+            )
+        
+            sourceFiles.removeElement(resultFile)
+        
+            const referencedFiles = sourceFiles.map(
+                (file) => {
+                    return {
+                        codeFileContents: file.getFullText(),
+                        path: file.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", "")
+                    }
+                }
+            )
+        
+            const classObject = resultFile.getClass(message.className)
+        
+        
+            //if (propertyObject) {
+        
+            const propertyValueClass = classObject //this.propertyValueClass(sourceFiles, propertyObject)
+            const subclasses = propertyValueClass.getDerivedClasses()
+        
+            const classes = [propertyValueClass].concat(subclasses)
+        
+        
+            //let propertyObject = this.propertyObjectForClass(classObject, message.propertyKey.split(".").firstElement)
+        
+            const result: CBEditorPropertyDescriptor[] = classes.map(
+                classDeclaration => classDeclaration.getStaticProperties()
+                    .filter(value =>
+                        propertyValueClass &&
+                        value.getType()?.compilerType?.symbol?.getName() == propertyValueClass?.getName()
+                    )
+            ).flat().map(value => {
+            
+                return { propertyKey: value.getName(), className: propertyValueClass.getName() }
+            
+            })
+            var asd = 1
+        
+        
+            //}
+        
+        
+            await respondWithMessage(result)
+        
+        }
+    
+    
         targets.SetPropertyValue = async (message, socketSession, respondWithMessage) => {
         
         
@@ -204,18 +262,21 @@ export class CBEditorController extends RoutesController {
         
             sourceFiles.removeElement(targetFile)
         
-            const targetObjectClassObject = targetFile.getClass(classPropertyTypeName)
+            const targetObjectClassDeclaration = targetFile.getClass(classPropertyTypeName)
             const keyPathComponents = message.propertyKeyPath.split(".")
-            let targetObjectClassPropertyObject = targetObjectClassObject.getSetAccessor(
-                value => value.getName() == keyPathComponents.lastElement
+            let targetObjectClassPropertyObject = this.setAccessorForClassAndKey(
+                targetObjectClassDeclaration,
+                keyPathComponents.lastElement
             )
         
-            let propertyReferenceLocations: {
-                fileName: string;
-                start: { column: number; lineNumber: number };
-                className: string;
-                end: { column: number; lineNumber: number }
-            }[]
+            var locationOfEditedValue: CBEditorPropertyLocation
+        
+            // let propertyReferenceLocations: {
+            //     fileName: string;
+            //     start: { column: number; lineNumber: number };
+            //     className: string;
+            //     end: { column: number; lineNumber: number }
+            // }[]
         
             if (propertyObject) {
             
@@ -262,8 +323,9 @@ export class CBEditorController extends RoutesController {
                     )
                 )
             
-                assignmentObject?.right?.replaceWithText(valueString)
-            
+                locationOfEditedValue = this.locationOfNode(
+                    assignmentObject?.right?.replaceWithText(valueString)
+                )
             
                 // Find parent object initializer in constructor or declaration and assign value
             
@@ -299,10 +361,13 @@ export class CBEditorController extends RoutesController {
                 })
             
             
-                const targetObjectConstructorAssignmentReference = targetObjectConstructorAssignmentReferences.firstElement
+                const targetObjectConstructorAssignmentReference = targetObjectConstructorAssignmentReferences.firstElement ||
+                    propertyObject.getInitializer()?.getFirstChild(
+                        node => node.getText() == propertyObject.getNameNode().getText()
+                    )
             
             
-                if (targetObjectConstructorAssignmentReference && !assignmentObject) {
+                if ((targetObjectConstructorAssignmentReference || propertyObject.hasInitializer()) && !assignmentObject) {
                     const UIObjectClass = sourceFiles.find(
                         file => file.getClass(
                             declaration => declaration.getName() == "UIObject"
@@ -314,7 +379,7 @@ export class CBEditorController extends RoutesController {
                         ).findReferencesAsNodes().find(
                             reference => this.isNodeContainedInNode(
                                 reference,
-                                targetObjectConstructorAssignmentReference.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
+                                targetObjectConstructorAssignmentReference?.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
                                     ?.getRight()
                             )
                         )?.getFirstAncestorByKind(SyntaxKind.CallExpression) ||
@@ -323,9 +388,17 @@ export class CBEditorController extends RoutesController {
                         ).findReferencesAsNodes().find(
                             reference => this.isNodeContainedInNode(
                                 reference,
-                                targetObjectConstructorAssignmentReference.getFirstAncestor(
-                                    (node) => node.getText().contains("configureWithObject")
+                                targetObjectConstructorAssignmentReference?.getFirstAncestor(
+                                    node => node.getText().contains(keyPathComponents[0] + ".configureWithObject")
                                 )
+                            )
+                        )?.getFirstAncestorByKind(SyntaxKind.CallExpression) ||
+                        UIObjectClass.getMethod(
+                            method => method.getName() == "configuredWithObject"
+                        ).findReferencesAsNodes().find(
+                            reference => this.isNodeContainedInNode(
+                                reference,
+                                propertyObject.getInitializer()
                             )
                         )?.getFirstAncestorByKind(SyntaxKind.CallExpression)
                 
@@ -340,7 +413,10 @@ export class CBEditorController extends RoutesController {
                         
                             const propertyAssignmentValue = propertyAssignment.getChildren()[2]
                         
-                            propertyAssignmentValue.replaceWithText(valueString)
+                            locationOfEditedValue = this.locationOfNode(
+                                propertyAssignmentValue.replaceWithText(
+                                    valueString)
+                            )
                         
                         
                         }
@@ -352,6 +428,12 @@ export class CBEditorController extends RoutesController {
                                 initializer: valueString
                             })
                         
+                            locationOfEditedValue = this.locationOfNode(
+                                configurationObject.getProperty(
+                                    keyPathComponents.lastElement)
+                            )
+                        
+                        
                         }
                     
                     
@@ -359,13 +441,15 @@ export class CBEditorController extends RoutesController {
                     else {
                     
                         // Add configuration to targetObjectConstructorAssignmentReference
-                        const right = targetObjectConstructorAssignmentReference.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
-                            .getRight()
+                        const right = targetObjectConstructorAssignmentReference?.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
+                            ?.getRight()
                         const newNode = right.replaceWithText(
-                            right.getText() + ".configuredWithObject({\n" +
+                            (right || propertyObject.getInitializer()).getText() + ".configuredWithObject({\n" +
                             keyPathComponents.lastElement + ": " + valueString + "\n})"
                         )
                         newNode.formatText()
+                    
+                        locationOfEditedValue = this.locationOfNode(newNode)
                     
                     }
                 
@@ -385,11 +469,18 @@ export class CBEditorController extends RoutesController {
                     //     "this." + message.propertyKeyPath + " = " + "new UIColor(\"" + message.valueString + "\")"
                     // ).firstElement.formatText()
                 
-                    classConstructor.addStatements(
+                    const newStatement = classConstructor.addStatements(
                         "\n" + classConstructor.getChildIndentationText() +
                         "this." + keyPathComponents.firstElement + ".configureWithObject({\n" +
                         keyPathComponents.lastElement + ": " + valueString + "\n})"
-                    ).firstElement.formatText()
+                    ).firstElement
+                    newStatement.formatText()
+                
+                    classConstructor.getSourceFile().fixMissingImports()
+                
+                    locationOfEditedValue = this.locationOfNode(
+                        newStatement.getFirstChildByKind(SyntaxKind.BinaryExpression).getRight()
+                    )
                 
                 
                 }
@@ -405,7 +496,7 @@ export class CBEditorController extends RoutesController {
             await this.webclientProject.save()
             this.reloadEditorProject()
         
-            await respondWithMessage(null)
+            await respondWithMessage(locationOfEditedValue)
         
         }
     
@@ -419,28 +510,89 @@ export class CBEditorController extends RoutesController {
     }
     
     
+    private locationOfNode(newNode: Node) {
+        
+        if (!newNode) {
+            
+            return undefined
+            
+        }
+        
+        const classObject = newNode.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)
+        
+        return {
+            className: classObject.getName(),
+            start: {
+                lineNumber: newNode.getStartLineNumber(),
+                column: newNode.getStart() - newNode.getStartLinePos()
+            },
+            end: {
+                lineNumber: newNode.getEndLineNumber(),
+                column: newNode.getEnd() - newNode.getStartLinePos() + 1
+            }
+        }
+        
+    }
+    
+    private propertyValueClass(sourceFiles: SourceFile[], propertyObject: PropertyDeclaration) {
+        
+        let propertyValueClass: ClassDeclaration
+        sourceFiles.find(
+            (file, index, array) => file.getClass(
+                declaration => {
+                    const result = declaration.getName() == propertyObject.getStructure().type
+                    if (result) {
+                        propertyValueClass = declaration
+                    }
+                    return result
+                }
+            )
+        )
+        
+        return propertyValueClass
+        
+    }
+    
+    private setAccessorForClassAndKey(classObject: ClassDeclaration, key: string) {
+        
+        if (!classObject) {
+            return undefined
+        }
+        
+        return classObject?.getSetAccessor(
+            value => value.getName() == key
+        ) //|| this.setAccessorForClassAndKey(classObject.getBaseClass(), key)
+        
+    }
+    
     private valueStringForPropertyAndMessageValue(
         targetObjectClassPropertyObject: SetAccessorDeclaration,
-        valueString
+        valueString: string
     ) {
-    
+        
         let result = valueString
-    
+        
         if (targetObjectClassPropertyObject?.getType()?.compilerType?.symbol?.getName() == "UIColor") {
-        
+            
             result = "new UIColor(\"" + valueString + "\")"
-        
+            
+            if (valueString.startsWith("[") && valueString.endsWith("]")) {
+                
+                result = valueString.substring(1, valueString.length - 1)
+                
+            }
+            
         }
-    
+        
         // @ts-ignore
         if (targetObjectClassPropertyObject?.getType()?.compilerType?.intrinsicName == "string") {
-        
+    
             result = "\"" + valueString + "\""
-        
+    
         }
-    
+        
         return result
-    
+        
     }
     
     private reloadEditorProject() {

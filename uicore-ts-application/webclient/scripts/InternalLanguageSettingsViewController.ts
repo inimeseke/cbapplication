@@ -336,9 +336,9 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     }
     
     
-    static readonly routeComponentName = "internal_language_settings"
+    static override readonly routeComponentName = "internal_language_settings"
     
-    static readonly ParameterIdentifierName = {}
+    static override readonly ParameterIdentifierName = {}
     
     reloadTableData() {
         this.dropdown._tableView.reloadData()
@@ -481,7 +481,7 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     }
     
     
-    async handleRoute(route: UIRoute) {
+    override async handleRoute(route: UIRoute) {
         
         super.handleRoute(route)
         const inquiryComponent = route.componentWithName(InternalLanguageSettingsViewController.routeComponentName)
@@ -491,7 +491,7 @@ export class InternalLanguageSettingsViewController extends UIViewController {
     }
     
     
-    layoutViewSubviews() {
+    override layoutViewSubviews() {
         
         super.layoutViewSubviews()
         

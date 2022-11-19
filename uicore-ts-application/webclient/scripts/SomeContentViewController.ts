@@ -3,29 +3,32 @@ import { UIColor, UIRoute, UITextView, UIView, UIViewController } from "uicore-t
 
 export class SomeContentViewController extends UIViewController {
     
-    readonly titleLabel: UITextView
+    readonly titleLabel: UITextView = new UITextView(
+        this.view.elementID + "TitleLabel",
+        UITextView.type.header2
+    ).configuredWithObject({
+        text: "Some content asdasdasdasdasdasdasdasdasd",
+        hoverText: "",
+        localizedTextObject: { en: "Some content", est: "Mingi sisu" }
+    }).performingFunctionWithSelf(self => this.view.addSubview(self))
     
     constructor(view: UIView) {
-    
+        
         super(view)
-    
+        
         // Code for further setup if necessary
-    
-        // this.view.backgroundColor = new UIColor("#ca0707")
-    
+        
+        //this.view.backgroundColor = new UIColor("#ffffff")
+        
         //this.view = this.view.configuredWithObject({ backgroundColor: new UIColor("#df5858") })
     
         //     .configuredWithObject({
         //     //backgroundColor: new UIColor("#d94545")
         //     backgroundColor: new UIColor("#ca0707")
         // })
-    
-        this.titleLabel = new UITextView(this.view.elementID + "TitleLabel", UITextView.type.header2)
-        this.titleLabel.localizedTextObject = { en: "Some content", est: "Mingi sisu" }
-        this.view.addSubview(this.titleLabel)
-    
+        
         this.view.configureWithObject({
-            backgroundColor: new UIColor("#ffffff"),
+            backgroundColor: UIColor.whiteColor,
             hoverText: ""
         })
     

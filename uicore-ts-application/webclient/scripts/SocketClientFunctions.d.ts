@@ -63,26 +63,28 @@ declare module "cbcore-ts" {
     
     
     export interface SocketClientInterface {
-        
+    
         PerformAction: SocketClientNoMessageFunction<void>;
         PerformActionAndRetrieveData: SocketClientNoMessageFunction<boolean>;
         PerformActionAndRetrieveDataWithParameters: SocketClientFunction<string, boolean>;
-        
+    
         // CBEditor controller
-        
+    
         AnnotatePropertyDescriptors: SocketClientFunction<CBEditorPropertyDescriptor[],
             CBEditorAnnotatedPropertyDescriptor[]>
         EditProperty: SocketClientFunction<CBEditorPropertyDescriptor,
             CBEditorEditingDescriptor>
-        
+        EditingValuesForProperty: SocketClientFunction<CBEditorPropertyDescriptor,
+            CBEditorPropertyDescriptor[]>
+    
         SetPropertyValue: SocketClientFunction<CBEditorPropertyValueDescriptor,
-            CBEditorEditingDescriptor>
-        
+            CBEditorPropertyLocation>
+    
         ReloadEditorFiles: SocketClientNoMessageFunction<void>
-        
-        
+    
+    
         // Internal settings controller
-        
+    
         AreCBInternalSettingsAvailableForCurrentUser: SocketClientNoMessageFunction<boolean>
         
         RetrieveLanguageData: SocketClientNoMessageFunction<LanguagesData>;

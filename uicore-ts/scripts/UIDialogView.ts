@@ -225,24 +225,26 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         
         this.setPosition(0, 0, 0, 0, 0, "100%")
         this.setPosition(0, 0, 0, 0, UIView.pageHeight, "100%")
-        
+    
         const bounds = this.bounds
-        
+    
         const margin = 20
-        
+    
         //this.view.centerInContainer();
-        
+    
         this.view.style.position = "relative"
-        
+    
+        this.view.style.zIndex = "" + this.zIndex
+    
         // this.view.style.maxHeight = "" + (bounds.height - margin * 2).integerValue + "px";
         // this.view.style.maxWidth = "" + (bounds.width - margin * 2).integerValue + "px";
-        
-        
+    
+    
         // var viewIntrinsicRectangle = this.view.intrinsicContentSize();
         // this.view.frame = new UIRectangle((bounds.width - viewIntrinsicRectangle.width)*0.5,  )
-        
+    
         super.layoutSubviews()
-        
+    
     }
     
     

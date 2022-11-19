@@ -4,6 +4,7 @@ import {
     IS,
     IS_NOT,
     nil,
+    UIColor,
     UIPoint,
     UIRootViewController,
     UIRoute,
@@ -27,17 +28,17 @@ import { TopBarView } from "./TopBarView"
 
 export class RootViewController extends UIRootViewController {
     
-    readonly topBarView: TopBarView = new TopBarView("TopBarView", nil).configuredWithObject({
+    override readonly topBarView: TopBarView = new TopBarView("TopBarView", nil).configuredWithObject({
         titleLabel: { setText: CALL("topBarTitle", "UICore application") }
     }).performingFunctionWithSelf(self => this.view.addSubview(self))
     
-    readonly bottomBarView: BottomBarView = new BottomBarView("BottomBarView").configuredWithObject({
+    override readonly bottomBarView: BottomBarView = new BottomBarView("BottomBarView").configuredWithObject({
         style: { overflow: "hidden" }
     }).performingFunctionWithSelf(self => this.view.addSubview(self))
     
     readonly languagesDialogViewController = new UIViewController(new LanguagesDialogView("LanguagesDialogView"))
     
-    contentViewControllers = {
+    override contentViewControllers = {
         
         informationViewController: this.lazyViewControllerObjectWithClass(InformationViewController),
         internalDropdownSettingsViewController: this.lazyViewControllerObjectWithClass(
@@ -82,7 +83,7 @@ export class RootViewController extends UIRootViewController {
         
     }
     
-    async viewDidAppear() {
+    override async viewDidAppear() {
         
         await super.viewDidAppear()
         
@@ -91,7 +92,7 @@ export class RootViewController extends UIRootViewController {
     }
     
     
-    async handleRoute(route: UIRoute) {
+    override async handleRoute(route: UIRoute) {
         
         await super.handleRoute(route)
         
@@ -112,7 +113,7 @@ export class RootViewController extends UIRootViewController {
     }
     
     
-    viewDidReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override viewDidReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.viewDidReceiveBroadcastEvent(event)
         
@@ -157,18 +158,18 @@ export class RootViewController extends UIRootViewController {
         
     }
     
-    updateViewStyles() {
+    override updateViewStyles() {
     
     }
     
-    viewDidLayoutSubviews() {
+    override viewDidLayoutSubviews() {
         
         super.viewDidLayoutSubviews()
         
     }
     
     
-    layoutViewSubviews() {
+    override layoutViewSubviews() {
         
         super.layoutViewSubviews()
         

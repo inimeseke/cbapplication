@@ -1,10 +1,12 @@
-import { SocketClient } from "cbcore-ts"
+import { CBDropdownDataItem, SocketClient } from "cbcore-ts"
 import type * as monaco from "monaco-editor"
+import { IPosition } from "monaco-editor"
 import {
     IF,
     IS,
     nil,
-    NO, RETURNER,
+    NO,
+    RETURNER,
     UIColor,
     UIObject,
     UIRectangle,
@@ -19,7 +21,7 @@ import { CBColor } from "./Custom components/CBColor"
 import { CBColorSelector } from "./Custom components/CBColorSelector"
 import { CBFlatButton } from "./Custom components/CBFlatButton"
 import { CBTextField } from "./Custom components/CBTextField"
-import { CBEditorAnnotatedPropertyDescriptor, CBEditorEditingDescriptor } from "./SocketClientFunctions"
+import { CBEditorAnnotatedPropertyDescriptor, CBEditorPropertyDescriptor } from "./SocketClientFunctions"
 
 
 interface UnwrappedPropertyDescriptor {
@@ -52,7 +54,7 @@ export class EditorViewController extends UIViewController {
         }
     }).performingFunctionWithSelf(self => this.view.addSubview(self))
     currentViewLabel = new UITextView().performingFunctionWithSelf(self => this.view.addSubview(self))
-    propertyEditors: CBColorSelector[] = []
+    propertyEditors: CBColorSelector<CBEditorPropertyDescriptor>[] = []
     
     buttons: CBFlatButton[] = []
     
@@ -157,8 +159,8 @@ export class EditorViewController extends UIViewController {
     
     
     private async shouldCallPointerUpInsideOnView(view: UIView, forced = NO) {
-        
-        if ((!this.view.isMemberOfViewTree || view.allSuperviews.contains(this.view) || this._currentEditingView == view) && !forced) {
+    
+        if (!forced && (!this.view.isMemberOfViewTree || view.allSuperviews.contains(this.view) || this._currentEditingView == view)) {
             return
         }
         
@@ -324,46 +326,73 @@ export class EditorViewController extends UIViewController {
         this.propertyEditors = fileObject.editableProperties.map(property =>
             
             IF(propertyDescriptor.object.valueForKeyPath(property.path)?.isKindOfClass?.(UIColor))(() =>
-                
+    
                 new CBColorSelector().configuredWithObject(
                     {
                         titleLabel: {
                             text: property.path + " (" + propertyDescriptor.object.valueForKeyPath(property.path) + ")"
                         },
-                        colors: { background: { normal: CBColor.primaryTintColor } }
+                        colors: { background: { normal: CBColor.primaryTintColor } },
+                        dialogContainerView: this.view
                     }
-                ).performingFunctionWithSelf(self => {
-                        
-                        self.imageView.backgroundColor = propertyDescriptor.object.valueForKeyPath(property.path)
-                        
-                        self.controlEventTargetAccumulator.ValueInput = async () => {
-                            
-                            propertyDescriptor.object.setValueForKeyPath(property.path, self.imageView.backgroundColor)
-                            self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
-                                property.path
-                            ) + ")"
+                ).performingFunctionWithSelf(async self => {
+        
+                    const editingValues = (await SocketClient.EditingValuesForProperty({
+                        className: property.typeName,
+                        propertyKey: property.path
+                    })).result
+        
+                    self.data = editingValues.map(value => {
+            
+                        const result: CBDropdownDataItem<CBEditorPropertyDescriptor> = {
+                
+                            _id: value.className + "." + value.propertyKey,
+                            title: { en: value.className + "." + value.propertyKey },
+                            attachedObject: value,
+                            itemCode: "[" + value.className + "." + value.propertyKey + "]",
+                            isADropdownDataRow: YES,
+                            isADropdownDataSection: NO,
+                            dropdownCode: "asdasd"
+                
+                        }
+            
+                        return result
+            
+                    })
+        
+        
+                    self.imageView.backgroundColor = propertyDescriptor.object.valueForKeyPath(property.path)
+        
+                    self.controlEventTargetAccumulator.ValueInput = async () => {
+            
+                        propertyDescriptor.object.setValueForKeyPath(property.path, self.selectedColor)
+                        self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
+                            property.path
+                        ) + ")"
                             
                         }
                         
                         self.controlEventTargetAccumulator.ValueChange = async () => {
-                            
-                            propertyDescriptor.object.setValueForKeyPath(property.path, self.imageView.backgroundColor)
+    
+                            propertyDescriptor.object.setValueForKeyPath(property.path, self.selectedColor)
                             self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
                                 property.path
                             ) + ")"
-                            
-                            await SocketClient.SetPropertyValue({
+    
+                            const location = (await SocketClient.SetPropertyValue({
                                 className: this._currentClassName!,
                                 propertyKeyPath: property.path,
-                                valueString: self.imageView.backgroundColor.stringValue
-                            })
-                            
+                                valueString: self.selectedColorStringValueForEditor
+                            })).result
+    
                             await this.shouldCallPointerUpInsideOnView(
                                 // @ts-ignore
                                 propertyDescriptor.object[propertyDescriptor.name],
                                 YES
                             )
-                            
+    
+                            await this.showEditorPosition(location.end)
+    
                         }
                         
                     }
@@ -444,25 +473,29 @@ export class EditorViewController extends UIViewController {
                     object.codeFileContents,
                     object.path
                 )
-                
+    
             })
-            
+    
             this._editor.loadModelFromContents(fileObject.codeFileContents, fileObject.path)
-            
+    
             this._currentClassName = propertyDescriptor.className
-            
+    
         }
+        await this.showEditorPosition(IF(fileObject?.propertyLocation?.className == this._currentClassName)(
+            () => fileObject.propertyLocation.end
+        ).ELSE(
+            () => fileObject.propertyReferenceLocations?.firstElement?.end ?? { lineNumber: 0, column: 0 }
+        ))
+    
+    }
+    
+    private async showEditorPosition(positionToShow: IPosition) {
         this._editor.setPosition(
-            IF(fileObject?.propertyLocation?.className == this._currentClassName)(
-                () => fileObject.propertyLocation.end
-            ).ELSE(
-                () => fileObject.propertyReferenceLocations?.firstElement?.end ?? { lineNumber: 0, column: 0 }
-            )
+            positionToShow
         )
         this._editor.trigger("Highlight matches", "editor.action.wordHighlight.trigger", null)
         this._editor.revealLineInCenterIfOutsideViewport((await this._editor.getPosition())!.lineNumber)
         this._editor.focus()
-        
     }
     
     private highlightView(view: UIView) {

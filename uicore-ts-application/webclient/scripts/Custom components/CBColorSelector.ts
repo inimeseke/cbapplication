@@ -1,26 +1,25 @@
+import { CBDropdownDataItem } from "cbcore-ts"
 import {
     IS,
     IS_NOT,
     nil,
     NO,
-    UIButton,
     UIColor,
-    UIRectangle, UITextView,
-    UIView,
+    UIRectangle,
+    UITextView,
     UIViewAddControlEventTargetObject,
     YES
 } from "uicore-ts"
-import { CBButton } from "./CBButton"
-import { CBColor } from "./CBColor"
+import { SearchableDropdown } from "./SearchableDropdown"
 
 
-export class CBColorSelector extends CBButton {
+export class CBColorSelector<T> extends SearchableDropdown<T> {
     
     private readonly _inputHTMLElement: HTMLInputElement
     
     constructor(elementID?: string, elementType?: string) {
         
-        super(elementID, elementType)
+        super(elementID)
         
         this._inputHTMLElement = document.createElement("input")
         this._inputHTMLElement.setAttribute("type", "color")
@@ -33,11 +32,46 @@ export class CBColorSelector extends CBButton {
         
         //this.imageView.backgroundColor = this.backgroundColor
         
-        this.controlEventTargetAccumulator.PointerUpInside.EnterDown = () => this.inputHTMLElement.click()
+        this.isSingleSelection = YES
+        this.allowsCustomItem = YES
+        
+        this.controlEventTargetAccumulator.SelectionDidChange = () => {
+            
+            if (this.selectedData.firstElement?.itemCode == "customValue") {
+                
+                this.inputHTMLElement.click()
+                
+                //this.selectedData = []
+                
+                //this._tableView.viewForRowWithIndex(0)
+                
+            }
+            else {
+                
+                // @ts-ignore
+                const value = UIColor[this.selectedData.firstElement.attachedObject.propertyKey]
+                this.inputHTMLElement.value = "" + value
+                
+                this.sendControlEventForKey(CBColorSelector.controlEvent.ValueChange, nil)
+                
+                
+            }
+            
+            
+        }
+        
+        this.controlEventTargetAccumulator.PointerUpInside.EnterDown = () => {
+            
+            this.setNeedsLayout()
+            this._dialogView.setNeedsLayout()
+            this._dialogView.layoutIfNeeded()
+            //this.inputHTMLElement.click()
+            
+        }
         
         this._inputHTMLElement.onchange = (event) => {
             
-            this.imageView.backgroundColor = new UIColor(this.inputHTMLElement.value)
+            this.imageView.backgroundColor = this.selectedColor
             
             this.sendControlEventForKey(CBColorSelector.controlEvent.ValueChange, event)
             
@@ -45,7 +79,7 @@ export class CBColorSelector extends CBButton {
         
         this._inputHTMLElement.oninput = (event) => {
             
-            this.imageView.backgroundColor = new UIColor(this.inputHTMLElement.value)
+            this.imageView.backgroundColor = this.selectedColor
             
             this.sendControlEventForKey(CBColorSelector.controlEvent.ValueInput, event)
             
@@ -54,7 +88,7 @@ export class CBColorSelector extends CBButton {
     }
     
     
-    static override controlEvent = Object.assign({}, CBButton.controlEvent, {
+    static override controlEvent = Object.assign({}, SearchableDropdown.controlEvent, {
         
         "ValueChange": "ValueChange",
         "ValueInput": "ValueInput"
@@ -72,12 +106,77 @@ export class CBColorSelector extends CBButton {
     }
     
     
+    get selectedColor() {
+        
+        let result
+        
+        if (this.selectedData.firstElement?.itemCode == "customValue") {
+            
+            this.inputHTMLElement.click()
+            
+            result = new UIColor(this.inputHTMLElement.value)
+            
+            //this._tableView.viewForRowWithIndex(0)
+            
+        }
+        else {
+            
+            // @ts-ignore
+            result = UIColor[this.selectedData.firstElement.attachedObject.propertyKey]
+            
+        }
+        
+        return result
+        
+    }
+    
+    
+    get selectedColorStringValueForEditor() {
+        
+        let result
+        
+        if (this.selectedData.firstElement?.itemCode == "customValue") {
+            
+            result = "" + new UIColor(this.inputHTMLElement.value)
+            
+        }
+        else {
+            
+            result = this.selectedData.firstElement.itemCode
+            
+        }
+        
+        return result
+        
+    }
+    
+    override set data(data: CBDropdownDataItem<T>[]) {
+        
+        data.unshift({
+            _id: "customValue",
+            title: { en: "Select custom value" },
+            isADropdownDataSection: false,
+            isADropdownDataRow: true,
+            // @ts-ignore
+            attachedObject: undefined,
+            itemCode: "customValue",
+            dropdownCode: ""
+        })
+        
+        super.data = data
+        
+    }
+    
+    override get data(): CBDropdownDataItem<T>[] {
+        return super.data
+    }
+    
+    
     override layoutSubviews() {
         
         let bounds = this.bounds
         
         this.hoverText = this.titleLabel.text
-        
         
         // Image and text both present
         if (IS_NOT(this.imageView.hidden) && IS(this.titleLabel.text)) {

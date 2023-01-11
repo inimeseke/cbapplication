@@ -127,7 +127,7 @@ export class LanguagesDialogView extends UIView {
     }
     
     
-    wasAddedToViewTree() {
+    override wasAddedToViewTree() {
         
         super.wasAddedToViewTree()
         
@@ -136,7 +136,7 @@ export class LanguagesDialogView extends UIView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
     
@@ -155,7 +155,7 @@ export class LanguagesDialogView extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         

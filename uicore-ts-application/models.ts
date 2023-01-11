@@ -11,7 +11,7 @@ import {
     CBDropdownDataItem,
     CBFileAccessor, CBFileData,
     CBLanguageItem, CBLoginKey, CBUserPassword, CBUserProfile, CBUserProfilePublic
-} from "../cbcore-ts/scripts/CBDataInterfaces"
+} from "./webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
 
 
 const Schema = mongoose.Schema

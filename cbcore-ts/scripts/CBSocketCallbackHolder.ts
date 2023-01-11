@@ -75,7 +75,7 @@ export class CBSocketCallbackHolder extends UIObject {
     
     
     isValid = YES
-    _storeableResponseKeys: string[]
+    _storeableResponseKeys: string[] = []
     _storedResponseHashesDictionary: {
         
         [x: string]: {
@@ -85,7 +85,7 @@ export class CBSocketCallbackHolder extends UIObject {
             
         }
         
-    }
+    } = {}
     _verifiedResponseHashesDictionary: {
         
         [x: string]: boolean
@@ -249,7 +249,7 @@ export class CBSocketCallbackHolder extends UIObject {
         storedResponseHashesDictionary[localStorageKey] = {
             
             hash: responseDataHash,
-            validityDate: validityDate
+            validityDate: validityDate!
             
         }
         
@@ -346,7 +346,7 @@ export class CBSocketCallbackHolder extends UIObject {
             const storedResponse = IS(message.storedResponseHash)
             
             if (matchingDescriptor ||
-                (storedResponse && this._verifiedResponseHashesDictionary[message.storedResponseHash])) {
+                (storedResponse && this._verifiedResponseHashesDictionary[message.storedResponseHash!])) {
                 
                 result = NO
                 
@@ -501,7 +501,7 @@ export class CBSocketCallbackHolder extends UIObject {
             completionFunction: function (
                 this: CBSocketCallbackHolder,
                 responseMessage: CBSocketMultipleMessageObject[],
-                respondWithMessage
+                respondWithMessage: any
             ) {
                 
                 completionFunction(
@@ -562,8 +562,8 @@ export class CBSocketCallbackHolder extends UIObject {
             this.handlers[key].forEach(function (
                 this: CBSocketCallbackHolder,
                 handler: CBSocketMessageHandlerFunction,
-                index,
-                array
+                index: any,
+                array: any
             ) {
                 
                 handler(message.messageData, sendResponseFunction)
@@ -576,9 +576,7 @@ export class CBSocketCallbackHolder extends UIObject {
             
             this.onetimeHandlers[key].forEach(function (
                 this: CBSocketCallbackHolder,
-                handler: CBSocketMessageHandlerFunction,
-                index,
-                array
+                handler: CBSocketMessageHandlerFunction
             ) {
                 
                 handler(message.messageData, sendResponseFunction)
@@ -613,7 +611,7 @@ export class CBSocketCallbackHolder extends UIObject {
             
             
             // Function to call completion function
-            const callCompletionFunction = (descriptor, storedResponseCondition = NO) => {
+            const callCompletionFunction = (descriptor: CBSocketCallbackHolderMessageDescriptor, storedResponseCondition = NO) => {
                 
                 var messageData = message.messageData
                 
@@ -671,7 +669,7 @@ export class CBSocketCallbackHolder extends UIObject {
                     
                     if (!message.keepWaitingForResponses) {
                         
-                        this.storeResponse(descriptor.key, descriptor.messageDataHash, message, responseDataHash)
+                        this.storeResponse(descriptor.key, descriptor.messageDataHash, message, responseDataHash!)
                         
                         descriptorsForKey.removeElement(descriptor)
                         

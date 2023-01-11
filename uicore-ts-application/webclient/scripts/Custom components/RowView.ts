@@ -119,7 +119,7 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         const bounds = this.bounds
         
@@ -130,7 +130,13 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
         super.layoutSubviews()
         
         this._previousLayoutBounds = bounds
-    
+        
+        if (this.cellWidths.length < this.cells.length && this.cells.length) {
+        
+            this.cellWidths = [(bounds.width - this.padding * (this.cells.length - 1)) / this.cells.length].arrayByRepeating(this.cells.length)
+        
+        }
+        
         bounds.distributeViewsAlongWidth(this._cells, this._cellWeights, this.padding, this._cellWidths)
         this.cells.forEach(cell => cell.frame = cell.frame.rectangleWithHeight(this.rowHeight))
         

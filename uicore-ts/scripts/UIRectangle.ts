@@ -93,6 +93,15 @@ export class UIRectangle extends UIObject {
         
     }
     
+    scale(scale: number) {
+        if (IS_NOT_NIL(this.max.y)) {
+            this.height = this.height * scale
+        }
+        if (IS_NOT_NIL(this.max.x)) {
+            this.width = this.width * scale
+        }
+    }
+    
     get height() {
         if (this.max.y === nil) {
             return nil

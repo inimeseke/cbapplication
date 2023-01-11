@@ -7,12 +7,12 @@ export class CBTextField extends UIView {
     titleLabel: UITextView
     textField: UITextField
     
-    constructor(elementID?: string) {
+    constructor(elementID: string = ("UIView" + UIView.nextIndex)) {
     
         super(elementID)
     
         this.viewHTMLElement.classList.add("input")
-    
+        
         this.textField = new UITextField(elementID + "TextField")
         this.addSubview(this.textField)
     

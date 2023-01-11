@@ -18,11 +18,12 @@ import {
 import { LanguageService } from "../LanguageService"
 import { CBColor } from "./CBColor"
 import { CBDialogView } from "./CBDialogView"
+import { CBTextField } from "./CBTextField"
 
 
-export class CBDialogViewShower extends UIObject {
+export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDialogView> extends UIObject {
     
-    dialogView: UIDialogView<CBDialogView>
+    dialogView: UIDialogView<DialogViewViewType>
     static currentDialogViewShower: CBDialogViewShower | undefined | null
     static nextShowDialogFunctions: Function[] = []
     static currentActionIndicatorDialogViewShower: CBDialogViewShower = nil
@@ -31,7 +32,9 @@ export class CBDialogViewShower extends UIObject {
         
         super()
         
+        // @ts-ignore
         this.dialogView = new UIDialogView<CBDialogView>()
+        // @ts-ignore
         this.dialogView.view = new CBDialogView(elementID)
         this.dialogView.view.backgroundColor = UIColor.whiteColor
         
@@ -119,7 +122,11 @@ export class CBDialogViewShower extends UIObject {
     }
     
     
-    showQuestionDialogInRootView(titleTextObject?: CBLocalizedTextObject, questionTextObject?: CBLocalizedTextObject) {
+    showQuestionDialogInRootView(
+        titleTextObject?: CBLocalizedTextObject,
+        questionTextObject?: CBLocalizedTextObject,
+        rootView = UICore.main.rootViewController.view
+    ) {
         
         this.dialogView.view.initTitleLabelIfNeeded()
         this.dialogView.view.titleLabel.localizedTextObject = titleTextObject
@@ -129,6 +136,37 @@ export class CBDialogViewShower extends UIObject {
         if (IS(questionTextObject)) {
             this.dialogView.view.questionLabel.localizedTextObject = questionTextObject
         }
+        
+        this.dialogView.view.initYesNoButtonsIfNeeded()
+        
+        this.dialogView.view.noButton.addTargetForControlEvents([
+            UIButton.controlEvent.EnterDown, UIButton.controlEvent.PointerUpInside
+        ], () => this.noButtonWasPressed())
+        
+        this.dialogView.view.yesButton.addTargetForControlEvents([
+            UIButton.controlEvent.EnterDown, UIButton.controlEvent.PointerUpInside
+        ], () => this.yesButtonWasPressed())
+        
+        
+        this.dialogView.showInView(rootView, YES)
+        
+    }
+    
+    showQuestionDialogWithTextFieldInRootView(
+        titleTextObject?: CBLocalizedTextObject,
+        questionTextObject?: CBLocalizedTextObject
+    ) {
+        
+        this.dialogView.view.initTitleLabelIfNeeded()
+        this.dialogView.view.titleLabel.localizedTextObject = titleTextObject
+        
+        this.dialogView.view.initQuestionLabelIfNeeded()
+        
+        if (IS(questionTextObject)) {
+            this.dialogView.view.questionLabel.localizedTextObject = questionTextObject
+        }
+        
+        this.dialogView.view.view = new CBTextField()
         
         this.dialogView.view.initYesNoButtonsIfNeeded()
         
@@ -306,6 +344,25 @@ export class CBDialogViewShower extends UIObject {
         const textObject = LanguageService.localizedTextObjectForText(questionText)
         const showDialogFunction = dialogShower.showQuestionDialogInRootView.bind(dialogShower, textObject)
         CBDialogViewShower._showDialogWithFunction(showDialogFunction, dialogShower)
+        
+        return dialogShower
+        
+    }
+    
+    static showQuestionDialogWithTextField(
+        questionText: string,
+        dismissCallback: Function = nil,
+        rootView = UICore.main.rootViewController.view
+    ) {
+        
+        const dialogShower = CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback) as CBDialogViewShower<CBDialogView<CBTextField>>
+        const textObject = LanguageService.localizedTextObjectForText(questionText)
+        const showDialogFunction = () => dialogShower.showQuestionDialogInRootView(textObject, undefined, rootView)
+        dialogShower.dialogView.view.initQuestionLabelIfNeeded = nil
+        CBDialogViewShower._showDialogWithFunction(showDialogFunction, dialogShower)
+        dialogShower.dialogView.view.view = new CBTextField()
+        
+        dialogShower.dialogView.view.view.textField.focus()
         
         return dialogShower
         

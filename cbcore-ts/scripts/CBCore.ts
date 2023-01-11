@@ -19,11 +19,11 @@ import { CBSocketClient } from "./CBSocketClient"
 
 declare interface CBDialogViewShower {
     
-    alert(text: string, dismissCallback?: Function)
-    localizedAlert(textObject: CBLocalizedTextObject, dismissCallback?: Function)
+    alert(text: string, dismissCallback?: Function): void
+    localizedAlert(textObject: CBLocalizedTextObject, dismissCallback?: Function): void
     
-    showActionIndicatorDialog(message: string, dismissCallback?: Function)
-    hideActionIndicatorDialog()
+    showActionIndicatorDialog(message: string, dismissCallback?: Function): void
+    hideActionIndicatorDialog(): void
     
 }
 
@@ -218,11 +218,12 @@ export class CBCore extends UIObject {
     
     
     get userProfile() {
-        
-        var result = nil
-        
-        
+    
+        let result = nil
+    
+    
         try {
+            // @ts-ignore
             result = JSON.parse(localStorage.getItem("CBUserProfile"))
         } catch (error) {
             
@@ -305,6 +306,7 @@ export class CBCore extends UIObject {
     
     get externalServiceIdentifier(): { accessKey: string; serviceID: string; organizationID: string } {
         
+        // @ts-ignore
         const result = JSON.parse(localStorage.getItem("CBExternalServiceIdentifier"))
         
         return result

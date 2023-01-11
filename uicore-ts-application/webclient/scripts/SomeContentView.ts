@@ -13,14 +13,7 @@ export class SomeContentView extends UIView {
     }
     
     
-    initView(elementID: string, viewHTMLElement: HTMLElement, initViewData?: any) {
-        
-        super.initView(elementID, viewHTMLElement, initViewData)
-        
-    }
-    
-    
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         

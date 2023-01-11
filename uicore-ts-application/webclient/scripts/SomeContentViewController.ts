@@ -7,10 +7,44 @@ export class SomeContentViewController extends UIViewController {
         this.view.elementID + "TitleLabel",
         UITextView.type.header2
     ).configuredWithObject({
-        text: "Some content asdasdasdasdasdasdasdasdasd",
+        text: "Some content that can be changed using the editor.",
         hoverText: "",
-        localizedTextObject: { en: "Some content", est: "Mingi sisu" }
-    }).performingFunctionWithSelf(self => this.view.addSubview(self))
+        //localizedTextObject: { en: "Some content", est: "Mingi sisu" },
+        backgroundColor: UIColor.transparentColor
+    }).addedAsSubviewToView(this.view).performingFunctionWithSelf(function (self) {
+        
+        var textValue = self.text
+
+        self.controlEventTargetAccumulator.PointerHover = () => {
+            
+            textValue = self.text
+            self.text = "Click to edit this element."
+            
+            // @ts-ignore
+            if (self._CBEditorOverlayElement) {
+    
+                // @ts-ignore
+                self.viewHTMLElement.appendChild(self._CBEditorOverlayElement)
+    
+            }
+            
+        }
+        
+        self.controlEventTargetAccumulator.PointerLeave.PointerCancel = () => {
+            
+            self.text = textValue
+    
+            // @ts-ignore
+            if (self._CBEditorOverlayElement) {
+        
+                // @ts-ignore
+                self.viewHTMLElement.appendChild(self._CBEditorOverlayElement)
+        
+            }
+            
+        }
+        
+    })
     
     constructor(view: UIView) {
         
@@ -21,7 +55,7 @@ export class SomeContentViewController extends UIViewController {
         //this.view.backgroundColor = new UIColor("#ffffff")
         
         //this.view = this.view.configuredWithObject({ backgroundColor: new UIColor("#df5858") })
-    
+        
         //     .configuredWithObject({
         //     //backgroundColor: new UIColor("#d94545")
         //     backgroundColor: new UIColor("#ca0707")
@@ -31,8 +65,10 @@ export class SomeContentViewController extends UIViewController {
             backgroundColor: UIColor.whiteColor,
             hoverText: ""
         })
-    
+        
     }
+    
+    get titleLabel() {}
     
     
     static override readonly routeComponentName = "somecontent"

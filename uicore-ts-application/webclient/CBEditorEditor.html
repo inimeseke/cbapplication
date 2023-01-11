@@ -134,6 +134,16 @@
 
             try {
 
+                if (messageEvent.data.key == "setHeight") {
+
+                    var container = document.getElementById("container")
+
+                    container.style.height = messageEvent.data.parameters[0]
+
+                    return;
+
+                }
+
                 const result = editorObject[messageEvent.data.key](...messageEvent.data.parameters)
 
                 // respond on the received port

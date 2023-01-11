@@ -96,7 +96,7 @@ export class CBLanguageService implements UILanguageService {
     
         view = view as any || CBCore.sharedInstance.viewCores.everyElement.rootViewController.view.rootView as any
         
-        view.broadcastEventInSubtree({
+        view?.broadcastEventInSubtree({
             name: UIView.broadcastEventName.LanguageChanged,
             parameters: {}
         })
@@ -169,7 +169,7 @@ export class CBLanguageService implements UILanguageService {
         parameters?: { [x: string]: string | UILocalizedTextObject; }
     ) {
         
-        var result
+        var result: string
         
         if (IS(key) && CBLanguageService.languages[languageKey] &&
             IS_DEFINED(CBLanguageService.languages[languageKey][key])) {
@@ -239,8 +239,9 @@ export class CBLanguageService implements UILanguageService {
         
         const result = {}
         
-        CBLanguageService.languages.forEach(function (languageObject, languageKey) {
+        CBLanguageService.languages.forEach(function (languageObject: any, languageKey: string) {
             
+            // @ts-ignore
             result[languageKey] = CBLanguageService.stringForKey(key, languageKey, defaultString, parameters)
             
         })
@@ -305,16 +306,19 @@ export class CBLanguageService implements UILanguageService {
         
         localizedTextObject = FIRST_OR_NIL(localizedTextObject)
         
-        var result = localizedTextObject[CBLanguageService.currentLanguageKey]
-        
+        // @ts-ignore
+        let result: string = localizedTextObject[CBLanguageService.currentLanguageKey]
+    
         if (IS_NOT(result)) {
             
+            // @ts-ignore
             result = localizedTextObject[CBLanguageService.defaultLanguageKey]
             
         }
         
         if (IS_NOT(result)) {
             
+            // @ts-ignore
             result = localizedTextObject["en"]
             
         }

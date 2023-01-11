@@ -4,7 +4,7 @@ import {
     IS,
     IS_NOT,
     nil,
-    UIColor,
+    UIColor, UINativeScrollView,
     UIPoint,
     UIRootViewController,
     UIRoute,
@@ -30,11 +30,11 @@ export class RootViewController extends UIRootViewController {
     
     override readonly topBarView: TopBarView = new TopBarView("TopBarView", nil).configuredWithObject({
         titleLabel: { setText: CALL("topBarTitle", "UICore application") }
-    }).performingFunctionWithSelf(self => this.view.addSubview(self))
+    }).addedAsSubviewToView(this.view)
     
     override readonly bottomBarView: BottomBarView = new BottomBarView("BottomBarView").configuredWithObject({
         style: { overflow: "hidden" }
-    }).performingFunctionWithSelf(self => this.view.addSubview(self))
+    }).addedAsSubviewToView(this.view)
     
     readonly languagesDialogViewController = new UIViewController(new LanguagesDialogView("LanguagesDialogView"))
     
@@ -136,7 +136,7 @@ export class RootViewController extends UIRootViewController {
     showEditor() {
     
         if (IS_NOT(this.editor)) {
-            this.editor = new EditorViewController(new UIView("CBEditorView"))
+            this.editor = new EditorViewController(new UINativeScrollView("CBEditorView"))
         }
     
         this.editor.view.pointerDraggingPoint = new UIPoint(0, 0)

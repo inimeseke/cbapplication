@@ -5,7 +5,7 @@ import {
     CBSocketMessage, CBSocketMessageCompletionFunction,
     CBSocketMessageHandlerFunction, CBSocketMessageSendResponseFunction, CBSocketMultipleMessage,
     CBSocketMultipleMessageObject, CBUserProfile
-} from "../../cbcore-ts/scripts/CBDataInterfaces"
+} from "../webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
 import { SocketController, SocketServerClient } from "./SocketController"
 import objectHash = require("object-hash")
 
@@ -302,6 +302,7 @@ export default class SocketSession {
         ]
         
         let excludeMessage = false
+        let deferResponse = false
         
         const sendResponseFunction: CBSocketMessageSendResponseFunction = function (
             this: SocketSession,
@@ -452,6 +453,10 @@ export default class SocketSession {
             excludeMessage = true
         }
         
+        sendResponseFunction.deferResponse = () => {
+            deferResponse = true
+        }
+        
         sendResponseFunction.setResponseValidityDuration = duration => {
             responseValidityDuration = duration
         }
@@ -474,7 +479,7 @@ export default class SocketSession {
             await messageTarget(message.messageData, this, sendResponseFunction)
         }
         
-        if (!responseSent) {
+        if (!responseSent && !deferResponse) {
             excludeMessage = true
             await sendResponseFunction(null)
         }

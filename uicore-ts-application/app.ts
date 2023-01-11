@@ -59,7 +59,7 @@ export default class App {
         })
         this.config()
         this.mongoSetup()
-    
+        
         this.socketIO = new SocketIO.Server(this.HTTPServerInstance, { cookie: false, pingTimeout: 30000 })
         
         SocketController.Instance(this.socketIO)
@@ -68,7 +68,7 @@ export default class App {
         WebClientController.Instance(this.expressApp, this.socketIO).registerRoutes()
         
         FilesController.Instance(this.expressApp, this.socketIO).registerRoutes()
-    
+        
         InternalSettingsController.Instance(this.expressApp, this.socketIO).registerRoutes()
         CBEditorController.Instance(this.expressApp, this.socketIO).registerRoutes()
         
@@ -76,20 +76,20 @@ export default class App {
     }
     
     private config(): void {
-    
+        
         // This apparently has to be done before other configurations because of some kind on speed issue
         this.expressApp.use(express.static(path.join(__dirname, "webclient")))
-    
+        
         this.expressApp.use(passport.initialize())
-    
+        
         // support application/json type post data
         this.expressApp.use(bodyParser.json())
         // support application/x-www-form-urlencoded post data
         this.expressApp.use(bodyParser.urlencoded({ extended: false }))
-    
+        
         this.expressApp.set("view engine", "ejs")// tell Express we're using EJS
         this.expressApp.set("views", path.join(__dirname + "/webclient"))// set path to *.ejs files
-    
+        
         // this.expressApp.use(minifyHTML({
         //     override: true,
         //     exception_url: false,
@@ -110,7 +110,7 @@ export default class App {
     private async mongoSetup() {
         
         (mongoose as any).Promise = global.Promise// @see https://stackoverflow.com/a/38833920/4782491
-    
+        
         const mongodb = await MongoMemoryServer.create()
         
         const address = mongodb.getUri("ui_core_application") //"mongodb://localhost:27017/ui_core_application"

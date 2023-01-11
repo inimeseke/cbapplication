@@ -89,7 +89,7 @@ export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<s
     sender: UIView,
     event: Event
 ) => void) & Partial<UIViewAddControlEventTargetObject<T>>
-    
+
 }
 
 
@@ -162,6 +162,8 @@ export class UIView extends UIObject {
     _touchEventTime?: number
     
     static _pageScale = 1
+    _scale: number = 1
+    isInternalScaling: boolean = YES
     
     constructor(
         elementID: string = ("UIView" + UIView.nextIndex),
@@ -345,7 +347,7 @@ export class UIView extends UIObject {
         
         const languageName = UICore.languageService.currentLanguageKey
         const result = UICore.languageService.stringForKey(key, languageName, defaultString, parameters)
-    
+        
         this.innerHTML = result ?? ""
         
     }
@@ -703,11 +705,44 @@ export class UIView extends UIObject {
         viewHTMLElement.style.transformOrigin = "left top"
         viewHTMLElement.style.transform = "scale(" + zoom + ")"
         viewHTMLElement.style.width = width + "%"
-    
+        
     }
     
     static get pageScale() {
         return UIView._pageScale
+    }
+    
+    
+    set scale(scale: number) {
+        
+        this._scale = scale
+        
+        const zoom = scale
+        // const width = 100 / zoom
+        // const height = 100 / zoom
+        const viewHTMLElement = this.viewHTMLElement
+        viewHTMLElement.style.transformOrigin = "left top"
+        viewHTMLElement.style.transform = viewHTMLElement.style.transform.replace(
+            (viewHTMLElement.style.transform.match(
+                new RegExp("scale\\(.*\\)", "g")
+            )?.firstElement ?? ""),
+            ""
+        ) + "scale(" + zoom + ")"
+        // viewHTMLElement.style.width = width + "%"
+        // viewHTMLElement.style.height = height + "%"
+        
+        if (this.isInternalScaling) {
+            
+            this.setFrame(this.frame, this.frame.zIndex, YES)
+            
+        }
+        
+    }
+    
+    get scale() {
+        
+        return this._scale
+        
     }
     
     
@@ -751,6 +786,10 @@ export class UIView extends UIObject {
             return
         }
         
+        if (this.isInternalScaling) {
+            rectangle.scale(1 / this.scale)
+        }
+        
         UIView._setAbsoluteSizeAndPosition(
             this.viewHTMLElement,
             rectangle.topLeft.x,
@@ -791,8 +830,8 @@ export class UIView extends UIObject {
     
     
     boundsDidChange() {
-        
-        
+    
+    
     }
     
     
@@ -951,17 +990,17 @@ export class UIView extends UIObject {
     setStyleProperty(propertyName: string, value?: number | string) {
         
         try {
-    
+            
             if (IS_NIL(value)) {
                 return
             }
             if (IS_DEFINED(value) && (value as Number).isANumber) {
                 value = "" + (value as number).integerValue + "px"
             }
-    
+            
             // @ts-ignore
             this.style[propertyName] = value
-    
+            
         } catch (exception) {
             
             console.log(exception)
@@ -1023,34 +1062,34 @@ export class UIView extends UIObject {
         }
         
         if (IS_FIREFOX) {
-    
+            
             // Firefox does not fire the transition completion event properly
             new UIObject().performFunctionWithDelay(delay + duration, callTransitioncompletionFunction)
-    
+            
         }
-    
-    
+        
+        
         if (!(viewOrViews instanceof Array)) {
             viewOrViews = [viewOrViews] as any
         }
-    
+        
         const transitionStyles: any[] = []
         const transitionDurations: any[] = []
         const transitionDelays: any[] = []
         const transitionTimings: any[] = []
-    
+        
         function isUIView(view: any): view is UIView {
             return IS(view.viewHTMLElement)
         }
-    
+        
         for (var i = 0; i < (viewOrViews as any).length; i++) {
-        
+            
             let view = (viewOrViews as UIView[] | HTMLElement[])[i]
-        
+            
             if (isUIView(view)) {
                 view = view.viewHTMLElement
             }
-        
+            
             // @ts-ignore
             view.addEventListener("transitionend", transitionDidFinish, true)
             
@@ -1090,7 +1129,7 @@ export class UIView extends UIObject {
                 view.style.transitionTimingFunction = transitionTimings[i]
             }
         }
-    
+        
         function transitionDidFinish(this: HTMLElement, event: { srcElement: HTMLElement | UIView }) {
             let view = event.srcElement
             if (!view) {
@@ -1105,7 +1144,7 @@ export class UIView extends UIObject {
             view.style.transitionTimingFunction = transitionTimings[i]
             
             callTransitioncompletionFunction()
-        
+            
             // @ts-ignore
             view.removeEventListener("transitionend", transitionDidFinish, true)
             
@@ -1113,18 +1152,18 @@ export class UIView extends UIObject {
         
         function transitionDidFinishManually() {
             for (let i = 0; i < (viewOrViews as any).length; i++) {
-    
+                
                 let view = (viewOrViews as UIView[] | HTMLElement[])[i]
-    
+                
                 if (isUIView(view)) {
                     view = view.viewHTMLElement
                 }
-    
+                
                 view.style.transition = transitionStyles[i]
                 view.style.transitionDuration = transitionDurations[i]
                 view.style.transitionDelay = transitionDelays[i]
                 view.style.transitionTimingFunction = transitionTimings[i]
-    
+                
                 // @ts-ignore
                 view.removeEventListener("transitionend", transitionDidFinish, true)
                 
@@ -1177,10 +1216,12 @@ export class UIView extends UIObject {
             (top).integerValue + "px, 0px)"
         
         if (element.UIView) {
-            str = str + frameTransform + ";"
-        }
-        else {
-            element.UIView._frameTransform = frameTransform
+            
+            str = str + frameTransform +
+                (element.style.transform.match(
+                    new RegExp("scale\\(.*\\)", "g")
+                )?.firstElement ?? "") + ";"
+            
         }
         
         if (IS_NIL(height)) {
@@ -1243,7 +1284,7 @@ export class UIView extends UIObject {
                 //console.log("Error occurred " + error);
                 
             }
-    
+            
             if (!(element && !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) && element) {
                 element.className += element.className ? " abs" : "abs"
                 elements[key] = element
@@ -1371,7 +1412,7 @@ export class UIView extends UIObject {
     
     
     layoutSubviews() {
-    
+        
         this.willLayoutSubviews()
         
         this._shouldLayout = NO
@@ -1381,16 +1422,16 @@ export class UIView extends UIObject {
             this._updateLayoutFunction = UIView.performAutoLayout(this.viewHTMLElement, null, this.constraints)
         }
         this._updateLayoutFunction()
-    
+        
         this.viewController.layoutViewSubviews()
         
         this.applyClassesAndStyles()
-    
-        for (let i = 0; i < this.subviews.length; i++) {
         
+        for (let i = 0; i < this.subviews.length; i++) {
+            
             const subview = this.subviews[i]
             subview.calculateAndSetViewFrame()
-        
+            
         }
         
         this.didLayoutSubviews()
@@ -1549,7 +1590,7 @@ export class UIView extends UIObject {
         if (!IS(view)) {
             return NO
         }
-    
+        
         for (let i = 0; i < this.subviews.length; i++) {
             const subview = this.subviews[i]
             if (subview == view) {
@@ -1572,9 +1613,9 @@ export class UIView extends UIObject {
     addSubview(view: UIView, aboveView?: UIView) {
         
         if (!this.hasSubview(view) && IS(view)) {
-    
+            
             view.willMoveToSuperview(this)
-    
+            
             if (IS(aboveView)) {
                 this.viewHTMLElement.insertBefore(view.viewHTMLElement, aboveView.viewHTMLElement.nextSibling)
                 this.subviews.insertElementAtIndex(this.subviews.indexOf(aboveView), view)
@@ -1583,12 +1624,12 @@ export class UIView extends UIObject {
                 this.viewHTMLElement.appendChild(view.viewHTMLElement)
                 this.subviews.push(view)
             }
-    
+            
             view.core = this.core
             view.didMoveToSuperview(this)
-    
+            
             if (this.superview && this.isMemberOfViewTree) {
-        
+                
                 view.broadcastEventInSubtree({
                     name: UIView.broadcastEventName.AddedToViewTree,
                     parameters: nil
@@ -1604,6 +1645,12 @@ export class UIView extends UIObject {
     
     addSubviews(views: UIView[]) {
         views.forEach(view => this.addSubview(view))
+    }
+    
+    
+    addedAsSubviewToView(view: UIView, aboveView?: UIView) {
+        view.addSubview(this, aboveView)
+        return this
     }
     
     
@@ -1663,8 +1710,8 @@ export class UIView extends UIObject {
     
     
     willAppear() {
-        
-        
+    
+    
     }
     
     
@@ -1678,11 +1725,11 @@ export class UIView extends UIObject {
     }
     
     wasAddedToViewTree() {
-        
+    
     }
     
     wasRemovedFromViewTree() {
-        
+    
     }
     
     get isMemberOfViewTree() {
@@ -1797,12 +1844,12 @@ export class UIView extends UIObject {
                 
                 window.removeEventListener("mousemove", onMouseMove, true)
                 onmouseup(event)
-    
+                
             })
-    
+            
             window.addEventListener("touchmove", onTouchMove, true)
             window.addEventListener("mouseup", () => window.removeEventListener("touchmove", onTouchMove, true))
-    
+            
         }
         
         const onTouchStart = onMouseDown as any
@@ -2144,7 +2191,7 @@ export class UIView extends UIObject {
     
     
     public static controlEvent = {
-    
+        
         "PointerDown": "PointerDown",
         "PointerMove": "PointerMove",
         "PointerDrag": "PointerDrag",
@@ -2210,7 +2257,7 @@ export class UIView extends UIObject {
     
     
     addTargetForControlEvent(eventKey: string, targetFunction: (sender: UIView, event: Event) => void) {
-    
+        
         let targets = this._controlEventTargets[eventKey]
         
         if (!targets) {
@@ -2323,14 +2370,14 @@ export class UIView extends UIObject {
     
     
     intrinsicContentSizeWithConstraints(constrainingHeight: number = 0, constrainingWidth: number = 0) {
-    
+        
         // This works but is slow
-    
+        
         const result = new UIRectangle(0, 0, 0, 0)
         if (this.rootView.forceIntrinsicSizeZero) {
             return result
         }
-    
+        
         let temporarilyInViewTree = NO
         let nodeAboveThisView: Node | null = null
         if (!this.isMemberOfViewTree) {
@@ -2338,10 +2385,10 @@ export class UIView extends UIObject {
             temporarilyInViewTree = YES
             nodeAboveThisView = this.viewHTMLElement.nextSibling
         }
-    
+        
         const height = this.style.height
         const width = this.style.width
-    
+        
         this.style.height = "" + constrainingHeight
         this.style.width = "" + constrainingWidth
         
@@ -2398,13 +2445,13 @@ export class UIView extends UIObject {
     
     
     intrinsicContentWidth(constrainingHeight: number = 0): number {
-    
+        
         return this.intrinsicContentSizeWithConstraints(constrainingHeight).width
         
     }
     
     intrinsicContentHeight(constrainingWidth: number = 0): number {
-    
+        
         return this.intrinsicContentSizeWithConstraints(undefined, constrainingWidth).height
         
         
@@ -2413,7 +2460,7 @@ export class UIView extends UIObject {
     intrinsicContentSize(): UIRectangle {
         
         return nil
-    
+        
     }
     
     

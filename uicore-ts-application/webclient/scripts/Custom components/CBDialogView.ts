@@ -1,16 +1,17 @@
 import { FIRST_OR_NIL, IF, IS, IS_NOT, nil, NO, RETURNER, UIButton, UIColor, UITextView, UIView, YES } from "uicore-ts"
 import { LanguageService } from "../LanguageService"
 import { CBFlatButton } from "./CBFlatButton"
+import { CBTextField } from "./CBTextField"
 import { RowView } from "./RowView"
 
 
-export class CBDialogView extends UIView {
+export class CBDialogView<ViewType extends UIView = UIView> extends UIView {
     
     titleLabel: UITextView = nil
     titleRow: RowView = nil
     placeholderLabel: UITextView = nil
     
-    _view: UIView = nil
+    _view: ViewType = nil
     
     questionLabel: UITextView = nil
     yesButton: CBFlatButton = nil
@@ -30,7 +31,7 @@ export class CBDialogView extends UIView {
     }
     
     
-    set view(view: UIView) {
+    set view(view: ViewType) {
         this.view.removeFromSuperview()
         this._view = view
         this.addSubview(view)
@@ -161,7 +162,7 @@ export class CBDialogView extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
     
         super.layoutSubviews()
     
@@ -203,7 +204,7 @@ export class CBDialogView extends UIView {
     
     
         const buttons = [this.yesButton, this.noButton]
-    
+        
         const buttonsFrame = FIRST_OR_NIL(
             this.questionLabel,
             this.view,
@@ -248,7 +249,7 @@ export class CBDialogView extends UIView {
     }
     
     
-    intrinsicContentHeight(constrainingWidth: number = 0) {
+    override intrinsicContentHeight(constrainingWidth: number = 0) {
     
     
         const padding = this.core.paddingLength

@@ -17,7 +17,7 @@ export class CBServerClient extends UIObject {
     
     sendJSONObject(URL: string, objectToSend: any, completion: (response: any) => void) {
         
-        this.sendRequest("POST", URL, objectToSend, function (this: CBServerClient, status, response) {
+        this.sendRequest("POST", URL, objectToSend, function (this: CBServerClient, status: string | number, response: string) {
             if (status != 200) {
                 
                 console.log("GET " + URL + " " + status)
@@ -55,7 +55,7 @@ export class CBServerClient extends UIObject {
             }
             return
         }
-        this.sendRequest("GET", URL, null, function (this: CBServerClient, status, response) {
+        this.sendRequest("GET", URL, null, function (this: CBServerClient, status: string | number, response: string) {
             if (status != 200) {
                 
                 console.log("GET " + URL + " " + status)

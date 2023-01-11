@@ -271,13 +271,15 @@ export interface CBSocketMessageSendResponseFunction<ResponseMessageType = any> 
     
     excludeMessageFromAutomaticConnectionEvents: () => void;
     
-    setResponseValidityDuration(duration: number);
+    deferResponse: () => void;
     
-    useStoredResponseWithErrorResponse();
+    setResponseValidityDuration(duration: number): void;
     
-    sendErrorResponse(message?: any, completion?: CBSocketMessageCompletionFunction);
+    useStoredResponseWithErrorResponse(): void;
     
-    sendIntermediateResponse(updateMessage: any, completion?: CBSocketMessageCompletionFunction);
+    sendErrorResponse(message?: any, completion?: CBSocketMessageCompletionFunction): void;
+    
+    sendIntermediateResponse(updateMessage: any, completion?: CBSocketMessageCompletionFunction): void;
     
     // This tells the client to use the stored response if responseHash matches and also enables storing of responses
     // in the client in the first place. Returns true if the hash matched.

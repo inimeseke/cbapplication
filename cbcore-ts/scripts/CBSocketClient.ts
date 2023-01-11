@@ -116,10 +116,10 @@ export class CBSocketClient extends UIObject {
             
             const handshakeMessage: CBSocketHandshakeInitMessage = {
                 
-                accessToken: null,
+                accessToken: undefined,
                 userID: this._core.userProfile._id,
                 
-                inquiryAccessKey: null,
+                inquiryAccessKey: undefined,
                 
                 instanceIdentifier: instanceIdentifier
                 
@@ -294,7 +294,7 @@ export class CBSocketClient extends UIObject {
                     
                 }
                 
-                didSendFunctions.push(messageToBeSentObject.didSendFunction)
+                didSendFunctions.push(messageToBeSentObject.didSendFunction!)
                 
                 
             }
@@ -698,13 +698,13 @@ export const SocketClient: SocketClientInterface = new Proxy({ "name": "SocketCl
     get(target, key) {
         
         const result = (
-            messageData,
-            completionPolicy,
-            isUserBound
+            messageData: any,
+            completionPolicy: string | undefined,
+            isUserBound: boolean | undefined
         ) => CBCore.sharedInstance.socketClient.resultForMessageForKey(
             key as string,
             messageData,
-            completionPolicy,
+            completionPolicy as any,
             isUserBound
         )
         

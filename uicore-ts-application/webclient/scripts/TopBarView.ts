@@ -31,7 +31,7 @@ export class TopBarView extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         

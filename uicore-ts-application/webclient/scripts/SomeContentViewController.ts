@@ -68,8 +68,6 @@ export class SomeContentViewController extends UIViewController {
         
     }
     
-    get titleLabel() {}
-    
     
     static override readonly routeComponentName = "somecontent"
     

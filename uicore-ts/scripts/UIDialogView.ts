@@ -1,7 +1,9 @@
 import { IS_FIREFOX } from "./ClientCheckers"
 import { UIColor } from "./UIColor"
 import { UICore } from "./UICore"
-import { IS, nil, NO, YES } from "./UIObject"
+import { UINativeScrollView } from "./UINativeScrollView"
+import { FIRST, IF, IS, nil, NO, YES } from "./UIObject"
+import { UIScrollView } from "./UIScrollView"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
@@ -172,18 +174,18 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 0,
                 undefined,
                 (() => {
-        
+    
                     this.animateDisappearing()
-        
+    
                 }).bind(this),
                 () => {
-        
+    
                     if (this.isVisible == NO) {
-            
-                        this.removeFromSuperview()
-            
-                    }
         
+                        this.removeFromSuperview()
+        
+                    }
+    
                 }
             )
             
@@ -213,18 +215,30 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     
     override layoutSubviews() {
-        
-        
+    
+    
         if (!IS(this.view)) {
-            
+        
             return
-            
+        
         }
-        
+    
         //this.frame = this.superview.bounds;
-        
+    
         this.setPosition(0, 0, 0, 0, 0, "100%")
-        this.setPosition(0, 0, 0, 0, UIView.pageHeight, "100%")
+        this.setPosition(
+            0,
+            0,
+            0,
+            0,
+            FIRST(
+                IF(this.superview.isKindOfClass(UINativeScrollView))(() => this.superview.scrollSize.height)
+                    .ELSE_IF(this.superview.isKindOfClass(UIScrollView))(() => this.superview.scrollSize.height)
+                    .ELSE(() => this.superview.frame.height),
+                UIView.pageHeight
+            ),
+            "100%"
+        )
     
         const bounds = this.bounds
     

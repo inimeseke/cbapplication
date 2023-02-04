@@ -14,7 +14,7 @@ export class SomeContentViewController extends UIViewController {
     }).addedAsSubviewToView(this.view).performingFunctionWithSelf(function (self) {
         
         var textValue = self.text
-
+    
         self.controlEventTargetAccumulator.PointerHover = () => {
             
             textValue = self.text
@@ -36,16 +36,17 @@ export class SomeContentViewController extends UIViewController {
     
             // @ts-ignore
             if (self._CBEditorOverlayElement) {
-        
+    
                 // @ts-ignore
                 self.viewHTMLElement.appendChild(self._CBEditorOverlayElement)
-        
+    
             }
             
         }
         
     })
     
+
     constructor(view: UIView) {
         
         super(view)
@@ -123,10 +124,9 @@ export class SomeContentViewController extends UIViewController {
         const bounds = this.view.bounds.rectangleWithInset(padding)
         
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
-        
+    
+    
     }
-    
-    
 }
 
 

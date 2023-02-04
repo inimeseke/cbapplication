@@ -4,7 +4,7 @@ import {
     IS,
     IS_NOT,
     nil,
-    UIColor, UINativeScrollView,
+    UINativeScrollView,
     UIPoint,
     UIRootViewController,
     UIRoute,
@@ -145,8 +145,6 @@ export class RootViewController extends UIRootViewController {
         this.addChildViewController(this.editor)
         this.editor?.viewDidAppear()
     
-        UIView.shouldCallPointerUpInsideOnView(this.view).then(nil)
-    
     }
     
     hideEditor() {
@@ -188,7 +186,6 @@ export class RootViewController extends UIRootViewController {
         })
         
     }
-    
 }
 
 

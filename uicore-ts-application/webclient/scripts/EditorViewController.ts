@@ -4,16 +4,19 @@ import { IPosition } from "monaco-editor"
 import {
     IF,
     IS,
+    IS_NOT,
     nil,
     NO,
     RETURNER,
+    UIButton,
     UIColor,
     UIObject,
     UIRectangle,
-    UIRoute, UITextField,
+    UIRoute,
     UITextView,
     UIView,
-    UIViewController, wrapInNil,
+    UIViewController,
+    wrapInNil,
     YES
 } from "uicore-ts"
 import { CBButton } from "./Custom components/CBButton"
@@ -34,6 +37,14 @@ interface UnwrappedPropertyDescriptor {
     isReferencedInClassFile: boolean
     isInNodeModules: boolean
     isInDeclarationFile: boolean
+}
+
+
+interface PathKeyObject {
+    
+    containerObject?: UIView | UIViewController
+    key: string
+    
 }
 
 
@@ -99,35 +110,67 @@ export class EditorViewController extends UIViewController {
         }
     }).addedAsSubviewToView(this.view)
     
-    _editorViews: UIView[] = []
-    
     currentViewLabel = new UITextView().addedAsSubviewToView(this.view)
     
     addViewButton = new CBButton().configuredWithObject({
         titleLabel: { text: "Add view" },
         controlEventTargetAccumulator: {
             PointerUpInside: async () => {
-                
+    
+                this.dialogContainer.addedAsSubviewToView(this.view.superview)
+    
                 const dialogViewShower = CBDialogViewShower.showQuestionDialogWithTextField(
-                    "Insert name for the new property",
-                    () => this._editorViews.removeElement(dialogViewShower.dialogView),
-                    this.view
+                    "Insert a name for the new property",
+                    () => {
+            
+                        this._editorViews.removeElement(dialogViewShower.dialogView)
+                        this.dialogContainer.userInteractionEnabled = NO
+            
+                    },
+                    this.dialogContainer
                 )
-                
+                this.dialogContainer.userInteractionEnabled = YES
+    
+    
                 const dialogView = dialogViewShower.dialogView
-                
-                dialogViewShower.yesButtonWasPressed = () => {
-                    
+    
+                dialogViewShower.yesButtonWasPressed = async () => {
+        
                     const textField = dialogView.view.view
                     const propertyName = textField.textField.text
-                    
-                    alert(propertyName)
-                    
+        
+                    dialogView.dismiss()
+        
+                    //CBDialogViewShower.alert(propertyName, nil, this.dialogContainer)
+        
+        
+                    const result = (await SocketClient.AddSubview({
+            
+                        className: this._currentClassName!,
+                        propertyKey: propertyName,
+                        runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
+            
+                    })).result
+        
+                    // Reload the class with the new code
+        
+        
+                    location.reload()
+        
+                    //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
+        
                 }
-                
+    
+                dialogView.view.view.textField.controlEventTargetAccumulator.EnterDown = (
+                    sender,
+                    event
+                ) => dialogView.view.yesButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
+    
+                dialogView.view.view.textField.controlEventTargetAccumulator.EscDown = () => dialogView.dismiss()
+    
                 this._editorViews.push(dialogViewShower.dialogView)
-                
-                
+    
+    
             }
         }
     }).addedAsSubviewToView(this.view)
@@ -138,7 +181,7 @@ export class EditorViewController extends UIViewController {
         self => {
             
             self.style.borderStyle = "outset"
-            
+    
         }).addedAsSubviewToView(this.view)
     
     buttons: CBFlatButton[] = []
@@ -148,6 +191,14 @@ export class EditorViewController extends UIViewController {
     editorContainer = new UIView("EditorEditorContainer", nil, "iframe").configuredWithObject({
         viewHTMLElement: { src: "CBEditorEditor.html" }
     }).addedAsSubviewToView(this.view)
+    
+    dialogContainer = new UIView("CBEditorDialogContainer", nil).performingFunctionWithSelf(self => {
+        
+        self.userInteractionEnabled = NO
+        
+    })
+    
+    _editorViews: UIView[] = [this.dialogContainer]
     
     private _selectedView: UIView = nil
     
@@ -173,20 +224,22 @@ export class EditorViewController extends UIViewController {
         this.view.setBorder(2, 1)
         
         this.view.calculateAndSetViewFrame = () => {
-            
+    
             const width = 550
             const height = [850 + this.propertyEditors.length * 70, view.rootView.bounds.height - 20].min()
-            
-            this.view.setFrame(
-                new UIRectangle(
-                    view.rootView.bounds.width - 10 - width + this.view.pointerDraggingPoint.x,
-                    10 + this.view.pointerDraggingPoint.y,
-                    height,
-                    width
-                ),
-                500
+    
+            const viewFrame = new UIRectangle(
+                view.rootView.bounds.width - 10 - width + this.view.pointerDraggingPoint.x,
+                10 + this.view.pointerDraggingPoint.y,
+                height,
+                width
             )
-            
+    
+            this.view.setFrame(viewFrame, 500)
+            this.dialogContainer.setFrame(viewFrame, 501)
+            this.dialogContainer.subviews.everyElement.setNeedsLayout()
+    
+    
         }
         
         this.view.controlEventTargetAccumulator.PointerDrag = () => this.view.calculateAndSetViewFrame()
@@ -237,17 +290,28 @@ export class EditorViewController extends UIViewController {
                             return result
                         }
                     })
-                    
+    
                     resolveInitEditor(YES)
-                    
+    
                 }
-                
+    
             }
-            
+    
         })
-        
+    
     }
     
+    
+    async selectInitialView() {
+        
+        const currentViewKeyPath = (await SocketClient.CurrentViewKeyPath()).result
+        const view = this.view.rootView.viewController.valueForKeyPath(
+            currentViewKeyPath || "view"
+        )
+        
+        await this.shouldCallPointerUpInsideOnView(view)
+        
+    }
     
     private async shouldCallPointerUpInsideOnView(view: UIView, forced = NO) {
         
@@ -262,7 +326,6 @@ export class EditorViewController extends UIViewController {
         this._currentEditingView = view
         //this.currentViewLabel.text = view.elementID
         
-        this.highlightView(view)
         
         // Obtain data
         const propertyDescriptors = view.propertyDescriptors
@@ -270,7 +333,8 @@ export class EditorViewController extends UIViewController {
             propertyDescriptors.map(value => {
                 return {
                     className: value.object.constructor.name,
-                    propertyKey: value.name
+                    propertyKey: value.name,
+                    runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
                 }
             })
         )).result
@@ -285,6 +349,7 @@ export class EditorViewController extends UIViewController {
         // Update views
         this.updateButtons(unwrappedPropertyDescriptors, propertyDescriptorIndex)
         await this.showProperty(propertyDescriptor, forced)
+        this.highlightView(view)
         
         this.view.userInteractionEnabled = YES
         this.view.alpha = 1
@@ -411,7 +476,8 @@ export class EditorViewController extends UIViewController {
         
         const fileObject = (await SocketClient.EditProperty({
             className: propertyDescriptor.className,
-            propertyKey: propertyDescriptor.name
+            propertyKey: propertyDescriptor.name,
+            runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
         })).result
         
         this.propertyEditors.everyElement.removeFromSuperview()
@@ -432,7 +498,8 @@ export class EditorViewController extends UIViewController {
                         
                         const editingValues = (await SocketClient.EditingValuesForProperty({
                             className: property.typeName,
-                            propertyKey: property.path
+                            propertyKey: property.path,
+                            runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
                         })).result
                         
                         self.data = editingValues.map(value => {
@@ -646,20 +713,23 @@ export class EditorViewController extends UIViewController {
                     object.codeFileContents,
                     object.path
                 )
-                
+    
             })
-            
+    
             this._editor.loadModelFromContents(fileObject.codeFileContents, fileObject.path)
-            
+    
             this._currentClassName = propertyDescriptor.className
-            
+    
         }
+    
+        this.view.setNeedsLayout()
+    
         await this.showEditorPosition(IF(fileObject?.propertyLocation?.className == this._currentClassName)(
             () => fileObject.propertyLocation.end
         ).ELSE(
             () => fileObject.propertyReferenceLocations?.firstElement?.end ?? { lineNumber: 0, column: 0 }
         ))
-        
+    
     }
     
     private async showEditorPosition(positionToShow: IPosition) {
@@ -769,6 +839,7 @@ export class EditorViewController extends UIViewController {
         
     }
     
+    
     private async reloadEditor() {
         
         this.view.userInteractionEnabled = NO
@@ -779,10 +850,154 @@ export class EditorViewController extends UIViewController {
         
     }
     
+    private pathToViewFromRootViewController(view?: UIView) {
+        
+        let result: string
+        
+        if (view) {
+            
+            const pathKeyObject = this.pathKeyObjectToViewFromParentViewOrViewController(view)
+            const viewOrViewController = pathKeyObject.containerObject
+            result = this.expandKeyPath(pathKeyObject.key, viewOrViewController)
+            
+            if (result.startsWith(".")) {
+                result = result.slice(1)
+            }
+            
+            if (IS_NOT(result) || view != view.rootView.viewController.valueForKeyPath(result)) {
+                
+                result = "view" + view.allSuperviews.reverse()
+                    .map(view => view.superview?.subviews?.indexOf(view) ?? "")
+                    .join(".subviews.")
+                
+            }
+            
+        }
+        
+        // @ts-ignore
+        return result
+        
+    }
+    
+    private expandKeyPath(
+        keyPath: string,
+        viewOrViewController: UIView | UIViewController | undefined
+    ) {
+        
+        let newPathKeyObject: PathKeyObject | undefined
+        
+        if (viewOrViewController instanceof UIViewController) {
+            
+            newPathKeyObject = this.pathKeyObjectToViewControllerFromParentViewControllerOrView(
+                viewOrViewController
+            )
+            keyPath = newPathKeyObject.key + "." + keyPath
+            
+        }
+        
+        if (viewOrViewController instanceof UIView) {
+            
+            newPathKeyObject = this.pathKeyObjectToViewFromParentViewOrViewController(
+                viewOrViewController
+            )
+            keyPath = newPathKeyObject.key + "." + keyPath
+            
+        }
+        
+        if (newPathKeyObject) {
+            
+            keyPath = this.expandKeyPath(keyPath, newPathKeyObject.containerObject)
+            
+        }
+        
+        return keyPath
+        
+    }
+    
+    private pathKeyObjectToViewFromParentViewOrViewController(view: UIView) {
+        
+        var result: PathKeyObject = { containerObject: undefined, key: "" }
+        
+        if (IS(view.viewController)) {
+            
+            result = this.locationOfObjectInObject(view, view.viewController) as PathKeyObject
+            
+        }
+        else if (IS(view.superview)) {
+            
+            const locationInSuperview = this.locationOfObjectInObject(view, view.superview)
+            result = IF(locationInSuperview.key)(() => locationInSuperview)
+                .ELSE(() => this.locationOfObjectInObject(view, view.superview.viewController))
+            
+        }
+        
+        return result
+        
+    }
+    
+    
+    private pathKeyObjectToViewControllerFromParentViewControllerOrView(viewController: UIViewController) {
+        
+        var result: PathKeyObject = { containerObject: undefined, key: "" }
+        
+        if (IS(viewController.parentViewController)) {
+            
+            result = this.locationOfObjectInObject(viewController, viewController.parentViewController) as PathKeyObject
+            
+        }
+        else if (IS(viewController.view.superview)) {
+            
+            result = this.locationOfObjectInObject(
+                viewController,
+                viewController.view.viewController
+            ) as PathKeyObject || this.locationOfObjectInObject(
+                viewController,
+                viewController.view.superview
+            ) as PathKeyObject
+            
+        }
+        
+        return result
+        
+    }
+    
+    private locationOfObjectInObject(object: any, containerObject: object) {
+        
+        let result = { containerObject: containerObject, key: "" }
+        
+        containerObject?.forEach((value, key, stopLooping) => {
+            
+            if (object == value) {
+                
+                result = { containerObject: containerObject, key: key }
+                
+                if (key.startsWith("_")) {
+                    
+                    const propertyAccessorKey = key.slice(1)
+                    // @ts-ignore
+                    const propertyAccessorValue = containerObject[propertyAccessorKey]
+                    
+                    if (propertyAccessorValue == object) {
+                        result.key = propertyAccessorKey
+                    }
+                    
+                }
+                
+                stopLooping()
+                
+            }
+            
+        })
+        
+        return result
+        
+    }
+    
     
     static override readonly routeComponentName = "cb_editor"
     
     static override readonly ParameterIdentifierName = {}
+    
     
     override async viewDidAppear() {
         
@@ -793,6 +1008,7 @@ export class EditorViewController extends UIViewController {
         
         //this.view.setNeedsLayout()
         
+        await this.selectInitialView()
         
     }
     
@@ -800,6 +1016,14 @@ export class EditorViewController extends UIViewController {
     override async viewWillDisappear() {
         
         this.removeElementChanges()
+        
+    }
+    
+    override async viewDidDisappear() {
+        
+        await super.viewDidDisappear()
+        
+        await SocketClient.EditorWasClosed()
         
     }
     
@@ -831,7 +1055,6 @@ export class EditorViewController extends UIViewController {
         super.viewDidLayoutSubviews()
         
     }
-    
     
     override layoutViewSubviews() {
         
@@ -890,8 +1113,8 @@ export class EditorViewController extends UIViewController {
         
         
         if (focusedPropertyIndex < 0) {
-            
-            this.buttonsRow.frame = (this.propertyEditors.lastElement || this.currentViewLabel).frame.rectangleForNextRow(
+    
+            this.buttonsRow.frame = (this.propertyEditors.lastElement || this.addViewButton || this.currentViewLabel).frame.rectangleForNextRow(
                 padding
             )
             
@@ -928,8 +1151,6 @@ export class EditorViewController extends UIViewController {
         
         
     }
-    
-    
 }
 
 

@@ -13,8 +13,12 @@ export interface CBEditorAnnotatedPropertyDescriptor {
 
 
 export interface CBEditorPropertyDescriptor {
+    
     className: string
     propertyKey: string
+    
+    runtimeObjectKeyPath: string
+    
 }
 
 
@@ -80,16 +84,22 @@ declare module "cbcore-ts" {
     
         // CBEditor controller
     
+        CurrentViewKeyPath: SocketClientNoMessageFunction<string>
+        EditorWasClosed: SocketClientNoMessageFunction<void>
+    
         AnnotatePropertyDescriptors: SocketClientFunction<CBEditorPropertyDescriptor[],
             CBEditorAnnotatedPropertyDescriptor[]>
         EditProperty: SocketClientFunction<CBEditorPropertyDescriptor,
             CBEditorEditingDescriptor>
         EditingValuesForProperty: SocketClientFunction<CBEditorPropertyDescriptor,
             CBEditorPropertyDescriptor[]>
-        
+    
         SetPropertyValue: SocketClientFunction<CBEditorPropertyValueDescriptor,
             { location: CBEditorPropertyLocation, fileContent: string, newFileContent: string }>
-        
+    
+        AddSubview: SocketClientFunction<CBEditorPropertyDescriptor,
+            CBEditorEditingDescriptor>
+    
         SaveFile: SocketClientFunction<CBEditorClassFileDescriptor, string>
     
         ReloadEditorFiles: SocketClientNoMessageFunction<void>
@@ -98,7 +108,7 @@ declare module "cbcore-ts" {
         // Internal settings controller
     
         AreCBInternalSettingsAvailableForCurrentUser: SocketClientNoMessageFunction<boolean>
-        
+    
         RetrieveLanguageData: SocketClientNoMessageFunction<LanguagesData>;
         DeleteLanguageWithKey: SocketClientFunction<string, LanguagesData>;
         SaveLanguagesData: SocketClientFunction<LanguagesData, LanguagesData>;

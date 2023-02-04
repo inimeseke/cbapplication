@@ -151,14 +151,22 @@ export class CBTextField extends UIView {
     
     
     override focus() {
-        
+    
         this.textField.focus()
-        
+    
     }
     
     override blur() {
         
         this.textField.blur()
+        
+    }
+    
+    override intrinsicContentHeight(constrainingWidth?: number): number {
+        
+        const result = 50
+        
+        return result
         
     }
     

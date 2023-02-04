@@ -1,7 +1,6 @@
 import { FIRST_OR_NIL, IF, IS, IS_NOT, nil, NO, RETURNER, UIButton, UIColor, UITextView, UIView, YES } from "uicore-ts"
 import { LanguageService } from "../LanguageService"
 import { CBFlatButton } from "./CBFlatButton"
-import { CBTextField } from "./CBTextField"
 import { RowView } from "./RowView"
 
 
@@ -270,13 +269,32 @@ export class CBDialogView<ViewType extends UIView = UIView> extends UIView {
         result = result + addPaddingIfNeeded(this.titleRow.intrinsicContentHeight(constrainingWidth))
         
         result = result + addPaddingIfNeeded(this.view.intrinsicContentHeight(constrainingWidth) + padding)
-        
+    
         result = result + addPaddingIfNeeded(this.questionLabel.intrinsicContentHeight(constrainingWidth))
-        
+    
         result = result + IF<number>(FIRST_OR_NIL(this.yesButton, this.cancelButton))(RETURNER(labelHeight))()
-        
-        
+    
+    
         return result
+    
+    }
+    
+    override intrinsicContentWidth(constrainingHeight?: number): number {
+        
+        const padding = this.core.paddingLength
+        
+        const widths = [super.intrinsicContentWidth(constrainingHeight)]
+        
+        if (this.yesButton) {
+            
+            widths.push(
+                [this.yesButton.intrinsicContentWidth(constrainingHeight), 120].max() +
+                [this.noButton.intrinsicContentWidth(constrainingHeight), 120].max() + padding * 3
+            )
+            
+        }
+        
+        return widths.max()
         
     }
     

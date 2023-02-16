@@ -237,6 +237,7 @@ export class UIFunctionExtender<T extends (...args: any) => any> {
             boundExtendingFunction(...objects)
         }
     
+        extendedFunction.extendedFunction = functionToExtend
         return extendedFunction
     }
     
@@ -438,45 +439,58 @@ export class UIObject {
     
     
     configureWithObject(object: UIInitializerObject<this>) {
-        this.configuredWithObject(object)
+    
+        return UIObject.configureWithObject(this, object)
+    
     }
     
     configuredWithObject(object: UIInitializerObject<this>): this {
-        return UIObject.configureWithObject(this, object)
+        
+        this.configureWithObject(object)
+        return this
+        
     }
     
     
-    static configureWithObject<T extends object>(configurationTarget: T, object: UIInitializerObject<T>) {
-    
+    static configureWithObject<TargetObjectType extends object, ConfigurationObjectType extends UIInitializerObject<TargetObjectType>>(
+        configurationTarget: TargetObjectType,
+        object: ConfigurationObjectType
+    ): ConfigurationObjectType {
+        
         const isAnObject = (item: any) => (item && typeof item === "object" && !Array.isArray(item) && !(item instanceof UICoreExtensionValueObject))
         const isAPureObject = (item: any) => isAnObject(item) && Object.getPrototypeOf(item) === Object.getPrototypeOf({})
-    
+        
         function isAClass(funcOrClass: object) {
+            if (IS_NOT(funcOrClass)) {
+                return NO
+            }
             const isFunction = (functionToCheck: object) => (functionToCheck && {}.toString.call(functionToCheck) ===
                 "[object Function]")
             const propertyNames = Object.getOwnPropertyNames(funcOrClass)
             return (isFunction(funcOrClass) && !propertyNames.includes("arguments") &&
                 propertyNames.includes("prototype"))
         }
-    
-        let keyPathsAndValues: { value: any, keyPath: string }[] = []
-    
-        function prepareKeyPathsAndValues(target: Record<string, any>, source: object, keyPath = "") {
         
-            if ((isAnObject(target) || isAClass(target)) && isAnObject(source)) {
+        const result = {} as ConfigurationObjectType
+        
+        let keyPathsAndValues: { value: any, keyPath: string }[] = []
+        
+        function prepareKeyPathsAndValues(target: Record<string, any>, source: object, keyPath = "") {
             
+            if ((isAnObject(target) || isAClass(target)) && isAnObject(source)) {
+                
                 source.forEach((sourceValue, key) => {
-                
+                    
                     const valueKeyPath = keyPath + "." + key
-                
+                    
                     function addValueAndKeyPath(sourceValue: any) {
                         keyPathsAndValues.push({
                             value: sourceValue,
                             keyPath: valueKeyPath.replace(".", "")
                         })
                     }
-                
-                
+                    
+                    
                     if (isAPureObject(sourceValue) || isAClass(sourceValue)) {
                         if (!(key in target) || target[key] instanceof Function) {
                             addValueAndKeyPath(sourceValue)
@@ -499,7 +513,7 @@ export class UIObject {
         }
         
         prepareKeyPathsAndValues(configurationTarget, object)
-    
+        
         // Sort based on key path lengths
         keyPathsAndValues = keyPathsAndValues.sort((a, b) => {
             
@@ -543,18 +557,24 @@ export class UIObject {
                 value.callFunction(getTargetFunction(YES))
                 return
             }
-            
+    
             if (value instanceof UIFunctionExtender) {
                 value = value.extendedFunction(getTargetFunction())
             }
-            
+    
+            UIObject.setValueForKeyPath(keyPath, UIObject.valueForKeyPath(keyPath, configurationTarget), result, YES)
             UIObject.setValueForKeyPath(keyPath, value, configurationTarget, YES)
-            
+    
         })
         
         
-        return configurationTarget
+        return result
         
+    }
+    
+    static configuredWithObject<T extends object>(configurationTarget: T, object: UIInitializerObject<T>) {
+        this.configureWithObject(configurationTarget, object)
+        return configurationTarget
     }
     
     

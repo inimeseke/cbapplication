@@ -1,4 +1,4 @@
-import { UIColor, UIRoute, UITextView, UIView, UIViewController } from "uicore-ts"
+import { UIButton, UIColor, UIRoute, UITextView, UIView, UIViewController } from "uicore-ts"
 
 
 export class SomeContentViewController extends UIViewController {
@@ -16,9 +16,9 @@ export class SomeContentViewController extends UIViewController {
         var textValue = self.text
     
         self.controlEventTargetAccumulator.PointerHover = () => {
-            
+        
             textValue = self.text
-            self.text = "Click to edit this element."
+            self.text = "Open the editor and click to edit this element."
             
             // @ts-ignore
             if (self._CBEditorOverlayElement) {
@@ -36,17 +36,33 @@ export class SomeContentViewController extends UIViewController {
     
             // @ts-ignore
             if (self._CBEditorOverlayElement) {
-    
+        
                 // @ts-ignore
                 self.viewHTMLElement.appendChild(self._CBEditorOverlayElement)
-    
-            }
-            
-        }
         
+            }
+    
+        }
+    
+    })
+    asdasd: UITextView = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
+        text: "asdasdasdasdasdasdasd"
+    })
+    autopood = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
+        innerHTML: "autopood asdasd",
+        textColor: UIColor.redColor
+    })
+    autopoodasd = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
+        innerHTML: "Autopood asdasd",
+        text: "Autopood asd"
+    })
+    autopoodasdasd: UIButton = new UIButton().addedAsSubviewToView(this.view).configuredWithObject({
+        innerHTML: "Autopood asdasd"
+    })
+    testview: UITextView = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
+        text: "Test view"
     })
     
-
     constructor(view: UIView) {
         
         super(view)
@@ -114,16 +130,30 @@ export class SomeContentViewController extends UIViewController {
     
     
     override layoutViewSubviews() {
-        
+    
         super.layoutViewSubviews()
-        
+    
         const padding = this.core.paddingLength
         const labelHeight = padding
-        
+    
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)
-        
+    
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
+        this.asdasd.frame = this.titleLabel.frame.rectangleForNextRow(padding)
+        this.autopood.frame = this.asdasd.frame.rectangleForNextRow(padding)
+        this.autopoodasd.frame = this.autopood.frame.rectangleForNextRow(
+            padding,
+            [this.autopoodasd.intrinsicContentHeight(this.autopood.frame.width), padding].max()
+        )
+        this.autopoodasdasd.frame = this.autopoodasd.frame.rectangleForNextRow(
+            padding,
+            [this.autopoodasdasd.intrinsicContentHeight(this.autopoodasd.frame.width), padding].max()
+        )
+        this.testview.frame = this.autopoodasdasd.frame.rectangleForNextRow(
+            padding,
+            [this.testview.intrinsicContentHeight(this.autopoodasdasd.frame.width), padding].max()
+        )
     
     
     }

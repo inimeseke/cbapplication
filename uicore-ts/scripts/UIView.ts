@@ -143,6 +143,7 @@ export class UIView extends UIObject {
     _previousClientPoint: UIPoint = new UIPoint(0, 0)
     _isPointerInside?: boolean
     _isPointerValid?: boolean
+    _isPointerValidForMovement?: boolean
     _isPointerDown = NO
     _initialPointerPosition?: UIPoint
     _hasPointerDragged?: boolean
@@ -164,6 +165,7 @@ export class UIView extends UIObject {
     static _pageScale = 1
     _scale: number = 1
     isInternalScaling: boolean = YES
+    private _resizeObserver!: ResizeObserver
     
     constructor(
         elementID: string = ("UIView" + UIView.nextIndex),
@@ -261,17 +263,20 @@ export class UIView extends UIObject {
         else {
             
             this._viewHTMLElement = viewHTMLElement
-            
+    
         }
-        
+    
         if (IS(elementID)) {
             this.viewHTMLElement.id = elementID
         }
-        
+    
         this.viewHTMLElement.obeyAutolayout = YES
         this.viewHTMLElement.UIView = this
         this.addStyleClass(this.styleClassName)
-        
+    
+        this._resizeObserver = new ResizeObserver(() => this.setNeedsLayout())
+        this._resizeObserver.observe(this.viewHTMLElement)
+    
     }
     
     
@@ -447,7 +452,7 @@ export class UIView extends UIObject {
     
     get propertyDescriptors(): { object: UIObject; name: string }[] {
         let result: any[] = []
-        this.allSuperviews.forEach(view => {
+        this.withAllSuperviews.forEach(view => {
             FIRST_OR_NIL(view.viewController).forEach((value, key, stopLooping) => {
                 if (this == value) {
                     result.push({ object: view.viewController, name: key })
@@ -1744,7 +1749,7 @@ export class UIView extends UIObject {
     }
     
     
-    get allSuperviews() {
+    get withAllSuperviews() {
         const result = []
         let view: UIView = this
         for (let i = 0; IS(view); i = i) {
@@ -1756,7 +1761,7 @@ export class UIView extends UIObject {
     
     
     setNeedsLayoutOnAllSuperviews() {
-        this.allSuperviews.reverse().everyElement.setNeedsLayout()
+        this.withAllSuperviews.reverse().everyElement.setNeedsLayout()
     }
     
     
@@ -1780,6 +1785,41 @@ export class UIView extends UIObject {
         
         return YES
         
+    }
+    
+    static async shouldCallPointerHoverOnView(view: UIView) {
+        
+        return YES
+        
+    }
+    
+    static async shouldCallPointerLeaveOnView(view: UIView) {
+        
+        return YES
+        
+    }
+    
+    static async shouldCallPointerCancelOnView(view: UIView) {
+        
+        return YES
+        
+    }
+    
+    
+    shouldCallPointerUpInside() {
+        return UIView.shouldCallPointerUpInsideOnView(this)
+    }
+    
+    shouldCallPointerCancel() {
+        return UIView.shouldCallPointerCancelOnView(this)
+    }
+    
+    shouldCallPointerHover() {
+        return UIView.shouldCallPointerHoverOnView(this)
+    }
+    
+    shouldCallPointerLeave() {
+        return UIView.shouldCallPointerLeaveOnView(this)
     }
     
     
@@ -1822,6 +1862,7 @@ export class UIView extends UIObject {
             
             this._isPointerInside = YES
             this._isPointerValid = YES
+            this._isPointerValidForMovement = YES
             this._isPointerDown = YES
             this._initialPointerPosition = new UIPoint(event.clientX, event.clientY)
             if (isTouchEventClassDefined && event instanceof TouchEvent) {
@@ -1836,20 +1877,32 @@ export class UIView extends UIObject {
                 this._touchEventTime = nil
                 pauseEvent(event)
             }
-            
+    
             this._hasPointerDragged = NO
-            
-            window.addEventListener("mousemove", onMouseMove, true)
-            window.addEventListener("mouseup", (event) => {
-                
-                window.removeEventListener("mousemove", onMouseMove, true)
+    
+            const windowMouseMoveFunction = (event: MouseEvent) => {
+                onMouseMove(event)
+                //pauseEvent(event, YES)
+            }
+            const windowMouseUpOrLeaveFunction = (event: MouseEvent) => {
+        
+                window.removeEventListener("mousemove", windowMouseMoveFunction)
+                window.removeEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
+                document.body.removeEventListener("mouseleave", windowMouseUpOrLeaveFunction)
                 onmouseup(event)
-                
-            })
-            
+        
+            }
+            window.addEventListener("mousemove", windowMouseMoveFunction)
+            window.addEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
+            document.body.addEventListener("mouseleave", windowMouseUpOrLeaveFunction)
+    
+            const windowTouchFunction = () => {
+                window.removeEventListener("touchmove", onTouchMove, true)
+                window.removeEventListener("mouseup", windowTouchFunction, true)
+            }
             window.addEventListener("touchmove", onTouchMove, true)
-            window.addEventListener("mouseup", () => window.removeEventListener("touchmove", onTouchMove, true))
-            
+            window.addEventListener("mouseup", windowTouchFunction, true)
+    
         }
         
         const onTouchStart = onMouseDown as any
@@ -1866,8 +1919,8 @@ export class UIView extends UIObject {
                 (this.ignoresMouse && event instanceof MouseEvent)) {
                 return
             }
-            
-            if (this._isPointerInside && await UIView.shouldCallPointerUpInsideOnView(this)) {
+    
+            if (this._isPointerInside && await this.shouldCallPointerUpInside()) {
                 onPointerUpInside(event)
                 if (!this._hasPointerDragged) {
                     this.sendControlEventForKey(UIView.controlEvent.PointerTap, event)
@@ -1883,14 +1936,16 @@ export class UIView extends UIObject {
         
         const onTouchEnd = onmouseup
         
-        const onmouseout = (event: MouseEvent) => {
+        const onmouseout = async (event: MouseEvent) => {
             
             if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
                 (this.ignoresMouse && event instanceof MouseEvent)) {
                 return
             }
             
-            this.sendControlEventForKey(UIView.controlEvent.PointerLeave, event)
+            if (await this.shouldCallPointerLeave()) {
+                this.sendControlEventForKey(UIView.controlEvent.PointerLeave, event)
+            }
             
             this._isPointerInside = NO
             
@@ -1900,17 +1955,20 @@ export class UIView extends UIObject {
         
         const onTouchLeave = onmouseout
         
-        const onmouseover = (event: MouseEvent) => {
+        const onmouseover = async (event: MouseEvent) => {
             
             if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
                 (this.ignoresMouse && event instanceof MouseEvent)) {
                 return
             }
             
-            this.sendControlEventForKey(UIView.controlEvent.PointerHover, event)
+            if (await this.shouldCallPointerHover()) {
+                this.sendControlEventForKey(UIView.controlEvent.PointerHover, event)
+            }
             
             this._isPointerInside = YES
             this._isPointerValid = YES
+            this._isPointerValidForMovement = YES
             
             pauseEvent(event)
             
@@ -1923,8 +1981,8 @@ export class UIView extends UIObject {
             //     console.log("Mouse move")
             //
             // }
-            
-            if (!this._isPointerValid) {
+    
+            if (!this._isPointerValid && !this._isPointerValidForMovement) {
                 return
             }
             
@@ -1961,7 +2019,7 @@ export class UIView extends UIObject {
             
         }
         
-        const onTouchMove = (event: TouchEvent) => {
+        const onTouchMove = async (event: TouchEvent) => {
             
             if (!this._isPointerValid) {
                 return
@@ -1991,7 +2049,9 @@ export class UIView extends UIObject {
             if (this._isPointerInside && this.viewHTMLElement !=
                 document.elementFromPoint(touch.clientX, touch.clientY)) {
                 this._isPointerInside = NO
-                this.sendControlEventForKey(UIView.controlEvent.PointerLeave, event)
+                if (await this.shouldCallPointerLeave()) {
+                    this.sendControlEventForKey(UIView.controlEvent.PointerLeave, event)
+                }
             }
             
             this.sendControlEventForKey(UIView.controlEvent.PointerMove, event)
@@ -2020,7 +2080,7 @@ export class UIView extends UIObject {
             
         }
         
-        const onTouchCancel = (event: Event) => {
+        const onTouchCancel = async (event: Event) => {
             
             if (!this._isPointerValid) {
                 return
@@ -2032,9 +2092,12 @@ export class UIView extends UIObject {
             }
             
             this._isPointerValid = NO
+            this._isPointerValidForMovement = NO
             this._isPointerDown = NO
             
-            this.sendControlEventForKey(UIView.controlEvent.PointerCancel, event)
+            if (await this.shouldCallPointerCancel()) {
+                this.sendControlEventForKey(UIView.controlEvent.PointerCancel, event)
+            }
             
         }
         
@@ -2058,6 +2121,7 @@ export class UIView extends UIObject {
                 result = (event.key == "Escape" || event.key == "Esc")
             }
             else {
+                // @ts-ignore
                 result = (event.keyCode == 27)
             }
             return result
@@ -2188,7 +2252,6 @@ export class UIView extends UIObject {
         
         
     }
-    
     
     public static controlEvent = {
         

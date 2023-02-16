@@ -32,6 +32,7 @@ export interface CBEditorPropertyValueDescriptor {
     
 }
 
+
 export interface CBEditorClassFileDescriptor {
     
     className: string
@@ -93,6 +94,11 @@ declare module "cbcore-ts" {
             CBEditorEditingDescriptor>
         EditingValuesForProperty: SocketClientFunction<CBEditorPropertyDescriptor,
             CBEditorPropertyDescriptor[]>
+    
+        AllDerivedClassNames: SocketClientFunction<string, string[]>
+    
+        SetPropertyClassName: SocketClientFunction<CBEditorPropertyValueDescriptor,
+            { location: CBEditorPropertyLocation, fileContent: string, newFileContent: string }>
     
         SetPropertyValue: SocketClientFunction<CBEditorPropertyValueDescriptor,
             { location: CBEditorPropertyLocation, fileContent: string, newFileContent: string }>

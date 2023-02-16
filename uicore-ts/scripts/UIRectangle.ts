@@ -350,9 +350,34 @@ export class UIRectangle extends UIObject {
     }
     
     rectangleByAddingY(y: number) {
-    
+        
         const result = this.copy()
         result.y = this.y + y
+        
+        return result
+        
+    }
+    
+    
+    rectangleWithRelativeValues(
+        relativeXPosition: number,
+        widthMultiplier: number,
+        relativeYPosition: number,
+        heightMultiplier: number
+    ) {
+        
+        const result = this.copy()
+        
+        const width = result.width
+        const height = result.height
+        
+        result.width = widthMultiplier * width
+        result.height = heightMultiplier * height
+        
+        result.center = new UIPoint(
+            relativeXPosition * width,
+            relativeYPosition * height
+        )
         
         return result
         
@@ -364,7 +389,7 @@ export class UIRectangle extends UIObject {
         paddings: number | number[] = 0,
         absoluteWidths: number | number[] = nil
     ) {
-    
+        
         if (IS_NIL(paddings)) {
             paddings = 1
         }
@@ -375,7 +400,7 @@ export class UIRectangle extends UIObject {
         if (!(absoluteWidths instanceof Array) && IS_NOT_NIL(absoluteWidths)) {
             absoluteWidths = [absoluteWidths].arrayByRepeating(weights.length)
         }
-    
+        
         const result: UIRectangle[] = []
         const sumOfWeights = weights.reduce(
             (a, b, index) => {
@@ -390,9 +415,9 @@ export class UIRectangle extends UIObject {
         const sumOfAbsoluteWidths = (absoluteWidths as number[]).summedValue
         const totalRelativeWidth = this.width - sumOfPaddings - sumOfAbsoluteWidths
         let previousCellMaxX = this.x
-    
-        for (let i = 0; i < weights.length; i++) {
         
+        for (let i = 0; i < weights.length; i++) {
+            
             let resultWidth: number
             if (IS_NOT_NIL(absoluteWidths[i])) {
                 resultWidth = absoluteWidths[i] || 0
@@ -400,18 +425,18 @@ export class UIRectangle extends UIObject {
             else {
                 resultWidth = totalRelativeWidth * (weights[i] / sumOfWeights)
             }
-        
+            
             const rectangle = this.rectangleWithWidth(resultWidth)
-        
+            
             let padding = 0
             if (paddings.length > i && paddings[i]) {
                 padding = paddings[i]
             }
-        
+            
             rectangle.x = previousCellMaxX
             previousCellMaxX = rectangle.max.x + padding
             result.push(rectangle)
-        
+            
         }
         
         return result
@@ -453,7 +478,7 @@ export class UIRectangle extends UIObject {
         for (var i = 0; i < weights.length; i++) {
             var resultHeight: number
             if (IS_NOT_NIL(absoluteHeights[i])) {
-            
+    
                 resultHeight = absoluteHeights[i] || 0
                 
             }

@@ -6,7 +6,7 @@ import { UITextView } from "./UITextView"
 export class UITextArea extends UITextField {
     
     
-    constructor(elementID: string | undefined, viewHTMLElement = null) {
+    constructor(elementID?: string, viewHTMLElement = null) {
     
         super(elementID, viewHTMLElement, UITextView.type.textArea)
     

@@ -1,4 +1,5 @@
 import { Application } from "express"
+import * as fs from "fs"
 import * as path from "path"
 import { Server } from "socket.io"
 import {
@@ -11,6 +12,7 @@ import {
     SourceFile,
     SyntaxKind
 } from "ts-morph"
+import { IndentStyle } from "typescript"
 import "../Extensions"
 import Utils from "../Utils"
 import {
@@ -273,21 +275,165 @@ export class CBEditorController extends RoutesController {
                 
             })
             var asd = 1
-            
-            
+    
+    
             //}
-            
-            
+    
+    
             await respondWithMessage(result)
-            
+    
         }
+    
+    
+        targets.AllDerivedClassNames = async (message, socketSession, respondWithMessage) => {
         
+            const className = message
         
-        targets.SetPropertyValue = async (message, socketSession, respondWithMessage) => {
-            
-            
             const sourceFiles = this.webclientProject.getSourceFiles()
+            const resultFile = sourceFiles.find(
+                (file, index, array) => file.getClass(
+                    declaration => declaration.getName() == className
+                )
+            )
+        
+            const classObject = resultFile.getClass(className)
+        
+            const subclasses = classObject.getDerivedClasses()
+            //const classes = [classObject].concat(subclasses)
+        
+            const result = subclasses.map(subclass => subclass.getName())
+        
+            await respondWithMessage(result)
+        
+        }
+    
+    
+        targets.SetPropertyClassName = async (message, socketSession, respondWithMessage) => {
+        
+        
+            const sourceFiles = this.webclientProject.getSourceFiles()
+        
+            const resultFile = sourceFiles.find(
+                (file, index, array) => file.getClass(
+                    declaration => declaration.getName() == message.className
+                )
+            )
+        
+            sourceFiles.removeElement(resultFile)
+        
+            const fileText = resultFile.getText()
+        
+            const classObject = resultFile.getClass(message.className)
+            let propertyObject = this.propertyObjectForClass(
+                classObject,
+                message.propertyKeyPath.split(".").firstElement
+            )
+        
+            const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
+        
+            const targetFile = sourceFiles.find(
+                file => file.getClass(
+                    declaration => declaration.getName() == classPropertyTypeName
+                )
+            )
+        
+            sourceFiles.removeElement(targetFile)
+        
+            const targetObjectClassDeclaration = targetFile.getClass(classPropertyTypeName)
+            const keyPathComponents = message.propertyKeyPath.split(".")
+            let targetObjectClassPropertyObject = this.setAccessorForClassAndKey(
+                targetObjectClassDeclaration,
+                keyPathComponents.lastElement
+            )
+        
+            var locationOfEditedValue: CBEditorPropertyLocation
+        
+            // let propertyReferenceLocations: {
+            //     fileName: string;
+            //     start: { column: number; lineNumber: number };
+            //     className: string;
+            //     end: { column: number; lineNumber: number }
+            // }[]
+        
+            if (propertyObject) {
             
+                const initializerNewExpression = propertyObject.getInitializer()
+                    .getDescendantsOfKind(SyntaxKind.NewExpression).lastElement
+            
+                initializerNewExpression.setExpression(message.valueString)
+            
+                propertyObject.set({ type: message.valueString })
+            
+                classObject.getSourceFile().fixMissingImports()
+            
+                classObject.getSourceFile().organizeImports()
+            
+            }
+        
+        
+            // const result = await socketSession.socketClient.EditProperty({
+            //     propertyKey: message.propertyKeyPath,
+            //     className: message.className
+            // })
+        
+            const newFileContent = resultFile.getText()
+        
+            if (message.saveChanges) {
+            
+                fs.watch(
+                    "webclient/compiledScripts/webclient.js",
+                    (event, filename) => {
+                    
+                        // eventCount = eventCount + 1
+                        //
+                        // console.log(event + " " + filename)
+                        //
+                    
+                        // if (eventCount == 2) {
+                        //fs.unwatchFile("webclient/compiledScripts/webclient.js")
+                    
+                        respondWithMessage({
+                        
+                            location: locationOfEditedValue,
+                            fileContent: fileText,
+                            newFileContent: newFileContent
+                        
+                        })
+                    
+                        // }
+                    
+                    }
+                )
+            
+                await this.webclientProject.save()
+            
+                this.reloadEditorProject()
+            
+            }
+            else {
+            
+                resultFile.replaceText([0, resultFile.getEnd()], newFileContent)
+            
+                await respondWithMessage({
+                
+                    location: locationOfEditedValue,
+                    fileContent: fileText,
+                    newFileContent: newFileContent
+                
+                })
+            
+            }
+            //this.reloadEditorProject()
+        
+        
+        }
+    
+    
+        targets.SetPropertyValue = async (message, socketSession, respondWithMessage) => {
+        
+        
+            const sourceFiles = this.webclientProject.getSourceFiles()
+        
             const resultFile = sourceFiles.find(
                 (file, index, array) => file.getClass(
                     declaration => declaration.getName() == message.className
@@ -562,8 +708,8 @@ export class CBEditorController extends RoutesController {
     
             })
             //this.reloadEditorProject()
-    
-    
+        
+        
         }
         
         
@@ -636,27 +782,36 @@ export class CBEditorController extends RoutesController {
             
             const layoutMethod = classObject.getMethods()
                 .find(method => ["layoutViewSubviews", "layoutSubviews"].contains(method.getName()))
-            
+    
             const superCall = layoutMethod.getStatements().find(statement => statement.getText().startsWith("super"))
-            
+    
             const otherFrameStatement = layoutMethod.getDescendantsOfKind(SyntaxKind.BinaryExpression)
                 .filter(value => value.getOperatorToken().getText() == "=")
                 .reverse()
                 .find(
                     (statement, index, array) => statement.getLeft().getText().endsWith("frame"))
-            
+    
             // layoutMethod.getDescendantStatements().reverse().find(statement => statement.getText().contains("frame ="))
-            
-            layoutMethod.addStatements("this." + propertyObject.getName() + ".frame = " + otherFrameStatement.getLeft()
-                .getText() + ".rectangleForNextRow(padding)")
-            
+    
+            layoutMethod.addStatements(
+                "this." + propertyObject.getName() + ".frame = " + otherFrameStatement.getLeft().getText() +
+                ".rectangleForNextRow(" +
+                "\npadding, " +
+                "\n[this." + propertyObject.getName() + ".intrinsicContentHeight(" +
+                otherFrameStatement.getLeft().getText() + ".width" +
+                "), padding].max()" +
+                "\n)"
+            )
+    
+            layoutMethod.formatText({ indentStyle: IndentStyle.Block })
+    
             await resultFile.save()
-            
+    
             // return
-            
-            
+    
+    
             const viewClass = this.classDeclarationWithName(propertyObject?.getStructure()?.type as string)
-            
+    
             const editableAccessorDeclarations = this.editableAccessorDeclarations(viewClass)
             
             const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()

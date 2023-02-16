@@ -53,10 +53,10 @@ export class SearchTextField extends UIView {
     }
     
     
-    static controlEvent = Object.assign({}, UIView.controlEvent, {
-        
+    static override controlEvent = Object.assign({}, UIView.controlEvent, {
+    
         "TextChange": "TextChange"
-        
+    
     })
     
     // @ts-ignore
@@ -117,14 +117,13 @@ export class SearchTextField extends UIView {
     }
     
     
-    
-    focus() {
+    override focus() {
         
         this.textFieldElement.focus()
         
     }
     
-    blur() {
+    override blur() {
         
         this.textFieldElement.blur()
         
@@ -141,15 +140,9 @@ export class SearchTextField extends UIView {
     }
     
     
-    
-    
-    
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
-        
-        
-        
         
         
     }

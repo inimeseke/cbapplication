@@ -2,10 +2,8 @@ import { CBDropdownDataItem, SocketClient } from "cbcore-ts"
 import type * as monaco from "monaco-editor"
 import { IPosition } from "monaco-editor"
 import {
-    EXTEND,
     IF,
     IS,
-    IS_NIL,
     IS_NOT,
     nil,
     NO,
@@ -13,7 +11,6 @@ import {
     UIButton,
     UIColor,
     UIObject,
-    UIPoint,
     UIRectangle,
     UIRoute,
     UITextView,
@@ -249,8 +246,8 @@ export class EditorViewController extends UIViewController {
     
         //this.view.controlEventTargetAccumulator.PointerDrag = () => this.view.calculateAndSetViewFrame()
     
-        this.makeMovable(this.view, { shouldMoveWithDragEvent: (sender, event) => YES })
-        this.makeResizable(this.view, { borderColor: UIColor.transparentColor })
+        this.view.makeMovable({ shouldMoveWithMouseEvent: () => YES })
+        this.view.makeResizable({ borderColor: UIColor.transparentColor, borderWidth: 5 })
     
         SocketClient.ReloadEditorFiles().then(nil)
     
@@ -727,7 +724,7 @@ export class EditorViewController extends UIViewController {
                                 valueString: self.textField.text,
                                 saveChanges: YES
                             })
-                            
+    
                             await this.shouldCallPointerUpInsideOnView(
                                 // @ts-ignore
                                 propertyDescriptor.object[propertyDescriptor.name],
@@ -737,7 +734,7 @@ export class EditorViewController extends UIViewController {
                         }
     
     
-                        this.highlightView(this._currentEditingView!)
+                        //this.highlightView(this._currentEditingView!)
     
                     }
                 )
@@ -751,9 +748,9 @@ export class EditorViewController extends UIViewController {
                 index,
                 array
             ) => {
-            
+    
                 const result: CBDropdownDataItem<string> = {
-                
+        
                     _id: name,
                     attachedObject: name,
                     dropdownCode: name,
@@ -762,11 +759,11 @@ export class EditorViewController extends UIViewController {
                     itemCode: name,
                     rowsData: [],
                     title: LanguageService.localizedTextObjectForText(name)
-                
+        
                 }
-            
+    
                 return result
-            
+    
             })
     
         classNameDropdownData.insertElementAtIndex(0, {
@@ -896,8 +893,8 @@ export class EditorViewController extends UIViewController {
     
     
     private highlightSingleView(view: UIView) {
-        
-        var resizeAndMove = YES
+    
+        const resizeAndMove = YES
         const subviewPropertyDescriptor = view.propertyDescriptors.firstElement
         
         const overlayElement = view.viewHTMLElement.appendChild(UIObject.configuredWithObject(
@@ -905,7 +902,7 @@ export class EditorViewController extends UIViewController {
             {
                 className: "CBEditorPropertyBorderAndOverlayElement",
                 style: "position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; " +
-                    "pointer-events: none;"
+                    "pointer-events: none; border-style: solid"
             }
         ))
         
@@ -913,9 +910,8 @@ export class EditorViewController extends UIViewController {
         overlayElement.style.borderColor = this.transformColorForView(view).stringValue
         
         if (resizeAndMove) {
-            
-            this.makeResizable(
-                view,
+    
+            view.makeResizable(
                 {
                     overlayElement: overlayElement,
                     viewDidChangeToSize: (view, isMovementCompleted) => this.viewFrameDidChange(
@@ -924,23 +920,23 @@ export class EditorViewController extends UIViewController {
                     )
                 }
             )
-            this.makeMovable(
-                view, {
-                    overlayElement: overlayElement,
+    
+            view.makeMovable(
+                {
                     viewDidMoveToPosition: (view, isMovementCompleted) => this.viewFrameDidChange(
                         view,
                         isMovementCompleted
                     )
                 }
             )
-            
+    
         }
-        else {
-            
-            overlayElement.style.setProperty("border", "solid")
-            
-        }
-        
+        //else {
+    
+        overlayElement.style.setProperty("border", "solid")
+    
+        //}
+    
         const labelElement = overlayElement.appendChild(UIObject.configuredWithObject(
             document.createElement("span"),
             {
@@ -994,531 +990,6 @@ export class EditorViewController extends UIViewController {
         
     }
     
-    
-    private makeMovable(
-        view: UIView,
-        optionalParameters: {
-            overlayElement?: HTMLElement,
-            shouldMoveWithDragEvent?: (sender: UIView, event: DragEvent) => boolean,
-            viewDidMoveToPosition?: (view: UIView, isMovementCompleted: boolean) => void
-        } = {}
-    ) {
-        
-        const overlayElement = optionalParameters.overlayElement ?? view.viewHTMLElement
-        const shouldMoveWithDragEvent = optionalParameters.shouldMoveWithDragEvent ?? ((
-            sender,
-            event
-        ) => IS(event.altKey))
-        
-        let isMoving = NO
-        let viewValuesBeforeModifications: any[] = []
-        
-        let startPoint: UIPoint
-        let views: UIView[]
-        
-        const movementFunction = (sender: UIView, event: DragEvent) => {
-            
-            if (shouldMoveWithDragEvent(sender, event)) {
-                
-                if (!isMoving) {
-                    
-                    startPoint = view.frame.min
-                    
-                    sender.pointerDraggingPoint = new UIPoint(0, 0)
-                    const neighbouringViews = sender.superview.subviews
-                    views = sender.withAllSuperviews //.concat(neighbouringViews)
-                    // sender.moveToTopOfSuperview()
-                    
-                    sender.forEachViewInSubtree(view => {
-                        
-                        // Cancel pointer
-                        view.sendControlEventForKey(UIView.controlEvent.PointerCancel, nil)
-                        
-                    })
-                    
-                    viewValuesBeforeModifications = views.everyElement.configureWithObject({
-                        style: { cursor: "move" },
-                        nativeSelectionEnabled: NO,
-                        pausesPointerEvents: YES,
-                        shouldCallPointerUpInside: async () => NO
-                    }) as any[]
-                    
-                    isMoving = YES
-                    
-                }
-                
-                sender.frame = sender.frame
-                    .rectangleWithX(startPoint.x + sender.pointerDraggingPoint.x)
-                    .rectangleWithY(startPoint.y + sender.pointerDraggingPoint.y)
-                // .rectangleByAddingX(
-                //     sender.pointerDraggingPoint.x - startPoint.x
-                // ).rectangleByAddingY(
-                //     sender.pointerDraggingPoint.y - startPoint.y
-                // )
-                
-                optionalParameters.viewDidMoveToPosition?.(view, NO)
-                
-            }
-            else if (isMoving) {
-                
-                movementStopFunction(sender, event)
-                
-            }
-            
-        }
-        
-        const movementStopFunction = (sender: UIView, event: DragEvent) => {
-            
-            if (IS_NIL(event)) {
-                
-                return
-                
-            }
-            
-            views?.forEach(
-                (view, index) => {
-                    
-                    view.configureWithObject(viewValuesBeforeModifications[index])
-                    //view.shouldCallPointerUpInside = () => UIView.shouldCallPointerUpInsideOnView(view)
-                    
-                }
-            )
-            
-            optionalParameters.viewDidMoveToPosition?.(view, YES)
-            
-            isMoving = NO
-            
-        }
-        
-        const cleanupFunction = () => {
-            
-            view.removeTargetForControlEvent(UIView.controlEvent.PointerDrag, movementFunction)
-            view.removeTargetForControlEvents(
-                [UIView.controlEvent.PointerUp, UIView.controlEvent.PointerCancel],
-                movementStopFunction
-            )
-            
-        }
-        
-        view.controlEventTargetAccumulator.PointerDrag = movementFunction
-        view.controlEventTargetAccumulator.PointerUp.PointerCancel = movementStopFunction
-        
-        UIObject.configureWithObject(overlayElement, { remove: EXTEND(() => cleanupFunction()) })
-        
-    }
-    
-    
-    private makeResizable(
-        view: UIView,
-        optionalParameters: {
-            overlayElement?: HTMLElement,
-            borderWidth?: number,
-            borderColor?: UIColor,
-            viewDidChangeToSize?: (view: UIView, isMovementCompleted: boolean) => void
-        } = {}
-    ) {
-        
-        const overlayElement = optionalParameters.overlayElement ?? view.viewHTMLElement
-        
-        const borderWidth = IF(optionalParameters.borderWidth)(RETURNER(optionalParameters.borderWidth + "px"))
-                .ELSE(RETURNER(undefined)) ||
-            overlayElement.style.borderWidth ||
-            view.style.borderWidth || "2px"
-        
-        const borderColor = optionalParameters.borderColor?.stringValue ??
-            overlayElement.style.borderColor ??
-            view.style.borderColor ??
-            this.transformColorForView(view).stringValue
-        
-        const pointerUpFunction = (sender: UIView, event: Event) => {
-            optionalParameters.viewDidChangeToSize?.(view, YES)
-        }
-        
-        
-        const leftEdge = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "leftEdge",
-                style: {
-                    position: "absolute",
-                    height: "100%",
-                    width: borderWidth,
-                    top: "0px",
-                    left: "0px",
-                    cursor: "col-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        
-        overlayElement.appendChild(leftEdge.viewHTMLElement)
-        
-        leftEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(event.movementX / UIView.pageScale, 0, 0, 0)
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        
-        leftEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const rightEdge = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "rightEdge",
-                style: {
-                    position: "absolute",
-                    height: "100%",
-                    width: borderWidth,
-                    top: "0px",
-                    right: "0px",
-                    cursor: "col-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(rightEdge.viewHTMLElement)
-        
-        rightEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(0, -event.movementX / UIView.pageScale, 0, 0)
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        
-        rightEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        // noinspection JSSuspiciousNameCombination
-        const bottomEdge = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "bottomEdge",
-                style: {
-                    position: "absolute",
-                    height: borderWidth,
-                    width: "100%",
-                    bottom: "0px",
-                    left: "0px",
-                    cursor: "row-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(bottomEdge.viewHTMLElement)
-        
-        bottomEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(0, 0, -event.movementY / UIView.pageScale, 0)
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        
-        bottomEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        // noinspection JSSuspiciousNameCombination
-        const topEdge = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "topEdge",
-                style: {
-                    position: "absolute",
-                    height: borderWidth,
-                    width: "100%",
-                    top: "0px",
-                    right: "0px",
-                    cursor: "row-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(topEdge.viewHTMLElement)
-        
-        topEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(0, 0, 0, event.movementY / UIView.pageScale)
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        
-        topEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const topLeftCornerTop = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "topLeftCornerTop",
-                style: {
-                    position: "absolute",
-                    height: borderWidth,
-                    width: "5%",
-                    maxWidth: "5px",
-                    top: "0px",
-                    left: "0px",
-                    cursor: "nwse-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(topLeftCornerTop.viewHTMLElement)
-        
-        const pointerDragTLFunction = (sender: UIView, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(
-                event.movementX / UIView.pageScale,
-                0,
-                0,
-                event.movementY / UIView.pageScale
-            )
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        topLeftCornerTop.controlEventTargetAccumulator.PointerDrag = pointerDragTLFunction
-        
-        topLeftCornerTop.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const topLeftCornerLeft = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "topLeftCornerLeft",
-                style: {
-                    position: "absolute",
-                    height: "5%",
-                    maxHeight: "5px",
-                    width: borderWidth,
-                    top: "0px",
-                    left: "0px",
-                    cursor: "nwse-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(topLeftCornerLeft.viewHTMLElement)
-        
-        topLeftCornerLeft.controlEventTargetAccumulator.PointerDrag = pointerDragTLFunction
-        
-        topLeftCornerLeft.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const bottomLeftCornerLeft = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "bottomLeftCornerLeft",
-                style: {
-                    position: "absolute",
-                    height: "5%",
-                    maxHeight: "5px",
-                    width: borderWidth,
-                    bottom: "0px",
-                    left: "0px",
-                    cursor: "nesw-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(bottomLeftCornerLeft.viewHTMLElement)
-        
-        const pointerDragBLFunction = (sender: UIView, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(
-                event.movementX / UIView.pageScale,
-                0,
-                -event.movementY / UIView.pageScale,
-                0
-            )
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        bottomLeftCornerLeft.controlEventTargetAccumulator.PointerDrag = pointerDragBLFunction
-        
-        bottomLeftCornerLeft.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const bottomLeftCornerBottom = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "bottomLeftCornerBottom",
-                style: {
-                    position: "absolute",
-                    height: borderWidth,
-                    width: "5%",
-                    maxWidth: "5px",
-                    bottom: "0px",
-                    left: "0px",
-                    cursor: "nesw-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(bottomLeftCornerBottom.viewHTMLElement)
-        
-        bottomLeftCornerBottom.controlEventTargetAccumulator.PointerDrag = pointerDragBLFunction
-        
-        bottomLeftCornerBottom.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const bottomRightCornerBottom = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "bottomRightCornerBottom",
-                style: {
-                    position: "absolute",
-                    height: borderWidth,
-                    width: "5%",
-                    maxWidth: "5px",
-                    bottom: "0px",
-                    right: "0px",
-                    cursor: "nwse-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(bottomRightCornerBottom.viewHTMLElement)
-        
-        const pointerDragBRFunction = (sender: UIView, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(
-                0,
-                -event.movementX / UIView.pageScale,
-                -event.movementY / UIView.pageScale,
-                0
-            )
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        bottomRightCornerBottom.controlEventTargetAccumulator.PointerDrag = pointerDragBRFunction
-        
-        bottomRightCornerBottom.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const bottomRightCornerRight = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "bottomRightCornerRight",
-                style: {
-                    position: "absolute",
-                    height: "5%",
-                    maxHeight: "5px",
-                    width: borderWidth,
-                    bottom: "0px",
-                    right: "0px",
-                    cursor: "nwse-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(bottomRightCornerRight.viewHTMLElement)
-        
-        bottomRightCornerRight.controlEventTargetAccumulator.PointerDrag = pointerDragBRFunction
-        
-        bottomRightCornerRight.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const topRightCornerRight = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "topRightCornerRight",
-                style: {
-                    position: "absolute",
-                    height: "5%",
-                    maxHeight: "5px",
-                    width: borderWidth,
-                    top: "0px",
-                    right: "0px",
-                    cursor: "nesw-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(topRightCornerRight.viewHTMLElement)
-        
-        const pointerDragTRFunction = (sender: UIView, event: DragEvent) => {
-            
-            view.frame = view.frame.rectangleWithInsets(
-                0,
-                -event.movementX / UIView.pageScale,
-                0,
-                event.movementY / UIView.pageScale
-            )
-            
-            optionalParameters.viewDidChangeToSize?.(view, NO)
-            
-        }
-        topRightCornerRight.controlEventTargetAccumulator.PointerDrag = pointerDragTRFunction
-        
-        topRightCornerRight.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-        const topRightCornerTop = new UIView().configuredWithObject({
-            _viewHTMLElement: {
-                className: "topRightCornerTop",
-                style: {
-                    position: "absolute",
-                    height: borderWidth,
-                    width: "5%",
-                    maxWidth: "5px",
-                    top: "0px",
-                    right: "0px",
-                    cursor: "nesw-resize",
-                    backgroundColor: borderColor,
-                    pointerEvents: "auto"
-                }
-            },
-            shouldCallPointerUpInside: async () => YES,
-            shouldCallPointerHover: async () => YES,
-            pausesPointerEvents: YES
-        })
-        overlayElement.appendChild(topRightCornerTop.viewHTMLElement)
-        
-        topRightCornerTop.controlEventTargetAccumulator.PointerDrag = pointerDragTRFunction
-        
-        topRightCornerTop.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
-        
-    }
     
     private removeElementChanges() {
         

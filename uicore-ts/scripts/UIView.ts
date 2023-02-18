@@ -4,7 +4,7 @@ import { UICore } from "./UICore"
 import "./UICoreExtensions"
 import type { UIDialogView } from "./UIDialogView"
 import { UILocalizedTextObject } from "./UIInterfaces"
-import { FIRST, FIRST_OR_NIL, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST, FIRST_OR_NIL, IF, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, RETURNER, UIObject, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIViewController } from "./UIViewController"
@@ -107,6 +107,7 @@ interface Constraint {
 
 export class UIView extends UIObject {
     
+    
     _nativeSelectionEnabled: boolean = YES
     _shouldLayout?: boolean
     _UITableViewRowIndex?: number
@@ -167,6 +168,14 @@ export class UIView extends UIObject {
     isInternalScaling: boolean = YES
     private _resizeObserver!: ResizeObserver
     
+    private _isMovable = NO
+    makeNotMovable?: () => void
+    
+    private _isResizable = NO
+    makeNotResizable?: () => void
+    
+    private _isMoving: boolean = NO
+    
     constructor(
         elementID: string = ("UIView" + UIView.nextIndex),
         viewHTMLElement: HTMLElement & LooseObject | null = null,
@@ -201,7 +210,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     static get nextIndex() {
         return UIView._UIViewIndex + 1
     }
@@ -218,12 +226,12 @@ export class UIView extends UIObject {
         )
     }
     
+    
     static get pageWidth() {
         const body = document.body
         const html = document.documentElement
         return Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
     }
-    
     
     centerInContainer() {
         this.style.left = "50%"
@@ -235,6 +243,7 @@ export class UIView extends UIObject {
         this.style.left = "50%"
         this.style.transform = "translateX(-50%)"
     }
+    
     
     centerYInContainer() {
         this.style.top = "50%"
@@ -301,7 +310,6 @@ export class UIView extends UIObject {
         return this._nativeSelectionEnabled
     }
     
-    
     get styleClassName() {
         return "UICore_UIView_" + this.class.name
     }
@@ -319,13 +327,13 @@ export class UIView extends UIObject {
         
     }
     
+    
     initStyleSelector(selector: string, style: string) {
         const styleRules = UIView.getStyleRules(selector)
         if (!styleRules) {
             UIView.createStyleSelector(selector, style)
         }
     }
-    
     
     createElement(elementID: string, elementType: string) {
         let result = document.getElementById(elementID)
@@ -338,6 +346,7 @@ export class UIView extends UIObject {
     public get viewHTMLElement() {
         return this._viewHTMLElement
     }
+    
     
     public get elementID() {
         return this.viewHTMLElement.id
@@ -357,12 +366,12 @@ export class UIView extends UIObject {
         
     }
     
-    
     protected _setInnerHTMLFromKeyIfPossible() {
         if (this._innerHTMLKey && this._defaultInnerHTML) {
             this.setInnerHTML(this._innerHTMLKey, this._defaultInnerHTML, this._parameters)
         }
     }
+    
     
     protected _setInnerHTMLFromLocalizedTextObjectIfPossible() {
         if (IS(this._localizedTextObject)) {
@@ -370,10 +379,10 @@ export class UIView extends UIObject {
         }
     }
     
-    
     get localizedTextObject() {
         return this._localizedTextObject
     }
+    
     
     set localizedTextObject(localizedTextObject: UILocalizedTextObject | undefined) {
         this._localizedTextObject = localizedTextObject
@@ -392,10 +401,10 @@ export class UIView extends UIObject {
         }
     }
     
-    
     set hoverText(hoverText: string) {
         this.viewHTMLElement.setAttribute("title", hoverText)
     }
+    
     
     get hoverText() {
         return this.viewHTMLElement.getAttribute("title") ?? ""
@@ -425,7 +434,6 @@ export class UIView extends UIObject {
         return this
     }
     
-    
     public set enabled(enabled: boolean) {
         this._enabled = enabled
         this.updateContentForCurrentEnabledState()
@@ -435,15 +443,16 @@ export class UIView extends UIObject {
         return this._enabled
     }
     
+    
     updateContentForCurrentEnabledState() {
         this.hidden = !this.enabled
         this.userInteractionEnabled = this.enabled
     }
     
-    
     public get tabIndex(): number {
         return Number(this.viewHTMLElement.getAttribute("tabindex"))
     }
+    
     
     public set tabIndex(index: number) {
         this.viewHTMLElement.setAttribute("tabindex", "" + index)
@@ -466,7 +475,6 @@ export class UIView extends UIObject {
         })
         return result
     }
-    
     
     get styleClasses() {
         return this._styleClasses
@@ -502,6 +510,7 @@ export class UIView extends UIObject {
         }
         
     }
+    
     
     removeStyleClass(styleClass: string) {
         
@@ -672,7 +681,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     get style() {
         return this.viewHTMLElement.style
     }
@@ -681,10 +689,10 @@ export class UIView extends UIObject {
         return getComputedStyle(this.viewHTMLElement)
     }
     
+    
     public get hidden(): boolean {
         return this._isHidden
     }
-    
     
     public set hidden(v: boolean) {
         
@@ -713,10 +721,10 @@ export class UIView extends UIObject {
         
     }
     
+    
     static get pageScale() {
         return UIView._pageScale
     }
-    
     
     set scale(scale: number) {
         
@@ -744,12 +752,12 @@ export class UIView extends UIObject {
         
     }
     
+    
     get scale() {
         
         return this._scale
         
     }
-    
     
     // Use this method to calculate the frame for the view itself
     // This can be used when adding subviews to existing views like buttons
@@ -777,6 +785,7 @@ export class UIView extends UIObject {
             this.setFrame(rectangle, rectangle.zIndex)
         }
     }
+    
     
     setFrame(rectangle: UIRectangle & { zIndex?: number }, zIndex = 0, performUncheckedLayout = NO) {
         
@@ -811,7 +820,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     get bounds() {
         let result: UIRectangle
         if (IS_NOT(this._frame)) {
@@ -824,6 +832,7 @@ export class UIView extends UIObject {
         }
         return result
     }
+    
     
     set bounds(rectangle) {
         const frame = this.frame
@@ -838,7 +847,6 @@ export class UIView extends UIObject {
     
     
     }
-    
     
     setPosition(
         left: number | string = nil,
@@ -956,6 +964,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     setPaddings(left?: number | string, right?: number | string, bottom?: number | string, top?: number | string) {
         
         const previousBounds = this.bounds
@@ -1014,10 +1023,10 @@ export class UIView extends UIObject {
         
     }
     
-    
     get userInteractionEnabled() {
         return (this.style.pointerEvents != "none")
     }
+    
     
     set userInteractionEnabled(userInteractionEnabled) {
         if (userInteractionEnabled) {
@@ -1028,20 +1037,20 @@ export class UIView extends UIObject {
         }
     }
     
-    
     get backgroundColor() {
         return this._backgroundColor
     }
+    
     
     set backgroundColor(backgroundColor: UIColor) {
         this._backgroundColor = backgroundColor
         this.style.backgroundColor = backgroundColor.stringValue
     }
     
-    
     get alpha() {
         return 1 * (this.style.opacity as any)
     }
+    
     
     set alpha(alpha) {
         this.style.opacity = "" + alpha
@@ -1187,12 +1196,12 @@ export class UIView extends UIObject {
     
     }
     
-    
     static _transformAttribute = (("transform" in document.documentElement.style) ? "transform" : undefined) ||
         (("-webkit-transform" in document.documentElement.style) ? "-webkit-transform" : "undefined") ||
         (("-moz-transform" in document.documentElement.style) ? "-moz-transform" : "undefined") ||
         (("-ms-transform" in document.documentElement.style) ? "-ms-transform" : "undefined") ||
         (("-o-transform" in document.documentElement.style) ? "-o-transform" : "undefined")
+    
     
     static _setAbsoluteSizeAndPosition(
         element: HTMLElement & LooseObject,
@@ -1443,7 +1452,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     applyClassesAndStyles() {
         for (let i = 0; i < this.styleClasses.length; i++) {
             const styleClass = this.styleClasses[i]
@@ -1473,10 +1481,10 @@ export class UIView extends UIObject {
         this._constraints = constraints
     }
     
+    
     addConstraint(constraint: any) {
         this.constraints.push(constraint)
     }
-    
     
     addConstraintsWithVisualFormat(visualFormatArray: string[]) {
         this.constraints = this.constraints.concat(AutoLayout.VisualFormat.parse(
@@ -1550,6 +1558,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     static constraintRelation = {
         
         "equal": AutoLayout.Relation.EQU,
@@ -1587,7 +1596,6 @@ export class UIView extends UIObject {
         }
         return result
     }
-    
     
     hasSubview(view: UIView) {
         
@@ -1648,6 +1656,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     addSubviews(views: UIView[]) {
         views.forEach(view => this.addSubview(view))
     }
@@ -1657,7 +1666,6 @@ export class UIView extends UIObject {
         view.addSubview(this, aboveView)
         return this
     }
-    
     
     moveToBottomOfSuperview() {
         
@@ -1676,6 +1684,7 @@ export class UIView extends UIObject {
         }
         
     }
+    
     
     moveToTopOfSuperview() {
         
@@ -1719,7 +1728,6 @@ export class UIView extends UIObject {
     
     }
     
-    
     willMoveToSuperview(superview: UIView) {
         this._setInnerHTMLFromKeyIfPossible()
         this._setInnerHTMLFromLocalizedTextObjectIfPossible()
@@ -1736,6 +1744,7 @@ export class UIView extends UIObject {
     wasRemovedFromViewTree() {
     
     }
+    
     
     get isMemberOfViewTree() {
         let element: HTMLElement & LooseObject | null = this.viewHTMLElement
@@ -1778,6 +1787,635 @@ export class UIView extends UIObject {
     
     blur() {
         this.viewHTMLElement.blur()
+    }
+    
+    
+    get isMovable(): boolean {
+        return this._isMovable
+    }
+    
+    set isMovable(isMovable: boolean) {
+        if (isMovable) {
+            this.makeMovable()
+        }
+        else {
+            this.makeNotMovable?.()
+        }
+    }
+    
+    makeMovable(
+        optionalParameters: {
+            shouldMoveWithMouseEvent?: (
+                sender: UIView,
+                event: MouseEvent
+            ) => boolean; viewDidMoveToPosition?: (view: UIView, isMovementCompleted: boolean) => void
+        } = {}
+    ) {
+        
+        if (this.isMovable) {
+            return
+        }
+        
+        //const overlayElement = optionalParameters.overlayElement ?? this.viewHTMLElement
+        const shouldMoveWithMouseEvent = optionalParameters.shouldMoveWithMouseEvent ?? ((
+            sender,
+            event
+        ) => IS(event.altKey))
+        
+        let viewValuesBeforeModifications: any[] = []
+        let startPoint: UIPoint
+        let views: UIView[]
+        
+        const movementFunction = (sender: UIView, event: Event) => {
+            
+            if (event instanceof MouseEvent && shouldMoveWithMouseEvent(sender, event)) {
+                
+                if (!this._isMoving) {
+                    
+                    startPoint = this.frame.min
+                    
+                    sender.pointerDraggingPoint = new UIPoint(0, 0)
+                    //const neighbouringViews = sender.superview.subviews
+                    views = sender.withAllSuperviews //.concat(neighbouringViews)
+                    // sender.moveToTopOfSuperview()
+                    
+                    sender.forEachViewInSubtree(view => {
+                        
+                        // Cancel pointer
+                        view.sendControlEventForKey(UIView.controlEvent.PointerCancel, nil)
+                        
+                    })
+                    
+                    viewValuesBeforeModifications = views.everyElement.configureWithObject({
+                        style: { cursor: "move" },
+                        nativeSelectionEnabled: NO,
+                        pausesPointerEvents: YES,
+                        shouldCallPointerUpInside: async () => NO
+                    }) as any[]
+                    
+                    this._isMoving = YES
+                    
+                }
+                
+                sender.frame = sender.frame
+                    .rectangleWithX(startPoint.x + sender.pointerDraggingPoint.x)
+                    .rectangleWithY(startPoint.y + sender.pointerDraggingPoint.y)
+                
+                optionalParameters.viewDidMoveToPosition?.(this, NO)
+                
+            }
+            else if (this._isMoving) {
+                
+                movementStopFunction(sender, event)
+                
+            }
+            
+        }
+        
+        const movementStopFunction = (sender: UIView, event: Event) => {
+            
+            if (IS_NIL(event) || !this._isMoving) {
+                return
+            }
+            
+            views?.forEach(
+                (view, index) => {
+                    
+                    view.configureWithObject(viewValuesBeforeModifications[index])
+                    //view.shouldCallPointerUpInside = () => UIView.shouldCallPointerUpInsideOnView(view)
+                    
+                }
+            )
+            
+            optionalParameters.viewDidMoveToPosition?.(this, YES)
+            
+            this._isMoving = NO
+            
+        }
+        
+        const cleanupFunction = () => {
+            
+            if (!this.isMovable) {
+                return
+            }
+            
+            this.removeTargetForControlEvent(UIView.controlEvent.PointerDrag, movementFunction)
+            this.removeTargetForControlEvents(
+                [UIView.controlEvent.PointerUp, UIView.controlEvent.PointerCancel],
+                movementStopFunction
+            )
+            
+            this._isMovable = NO
+            
+            this.makeNotMovable = undefined
+            
+        }
+        
+        this.controlEventTargetAccumulator.PointerDrag = movementFunction
+        this.controlEventTargetAccumulator.PointerUp.PointerCancel = movementStopFunction
+        
+        //UIObject.configureWithObject(overlayElement, { remove: EXTEND(() => cleanupFunction()) })
+        
+        this._isMovable = YES
+        
+        this.makeNotMovable = cleanupFunction
+        
+    }
+    
+    
+    get isResizable(): boolean {
+        return this._isResizable
+    }
+    
+    set isResizable(isResizable: boolean) {
+        if (isResizable) {
+            this.makeResizable()
+        }
+        else {
+            this.makeNotResizable?.()
+        }
+    }
+    
+    
+    makeResizable(
+        optionalParameters: {
+            overlayElement?: HTMLElement; borderWidth?: number; borderColor?: UIColor; cornerSize?: string; maxCornerSize?: string; viewDidChangeToSize?: (
+                view: UIView,
+                isMovementCompleted: boolean
+            ) => void
+        } = {}
+    ) {
+        
+        if (this.isResizable) {
+            return
+        }
+        
+        const overlayElement = optionalParameters.overlayElement ?? this.viewHTMLElement
+        
+        const borderWidth = IF(optionalParameters.borderWidth)(RETURNER(optionalParameters.borderWidth + "px"))
+                .ELSE(RETURNER(undefined)) ||
+            overlayElement.style.borderWidth ||
+            this.style.borderWidth || "5px"
+        
+        const borderColor = optionalParameters.borderColor?.stringValue ??
+            // overlayElement.style.borderColor ??
+            // view.style.borderColor ??
+            UIColor.transparentColor.stringValue
+        //this.transformColorForView(view).stringValue
+        
+        const maxCornerSize = optionalParameters.maxCornerSize ?? "10px"
+        const cornerSize = optionalParameters.cornerSize ?? "5%"
+        
+        const pointerUpFunction = () => optionalParameters.viewDidChangeToSize?.(this, YES)
+        
+        const leftEdge = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "leftEdge",
+                style: {
+                    position: "absolute",
+                    height: "100%",
+                    width: borderWidth,
+                    top: "0px",
+                    left: "0px",
+                    cursor: "col-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        leftEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(event.movementX / UIView.pageScale, 0, 0, 0)
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        
+        
+        leftEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        const rightEdge = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "rightEdge",
+                style: {
+                    position: "absolute",
+                    height: "100%",
+                    width: borderWidth,
+                    top: "0px",
+                    right: "0px",
+                    cursor: "col-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        rightEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(0, -event.movementX / UIView.pageScale, 0, 0)
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        
+        
+        rightEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        // noinspection JSSuspiciousNameCombination
+        const bottomEdge = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "bottomEdge",
+                style: {
+                    position: "absolute",
+                    height: borderWidth,
+                    width: "100%",
+                    bottom: "0px",
+                    left: "0px",
+                    cursor: "row-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        bottomEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(0, 0, -event.movementY / UIView.pageScale, 0)
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        
+        
+        bottomEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        // noinspection JSSuspiciousNameCombination
+        const topEdge = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "topEdge",
+                style: {
+                    position: "absolute",
+                    height: borderWidth,
+                    width: "100%",
+                    top: "0px",
+                    right: "0px",
+                    cursor: "row-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        topEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(0, 0, 0, event.movementY / UIView.pageScale)
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        
+        
+        topEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        // noinspection JSSuspiciousNameCombination
+        const topLeftCornerTop = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "topLeftCornerTop",
+                style: {
+                    position: "absolute",
+                    height: borderWidth,
+                    width: cornerSize,
+                    maxWidth: maxCornerSize,
+                    top: "0px",
+                    left: "0px",
+                    cursor: "nwse-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        const pointerDragTLFunction = (sender: UIView, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(
+                    event.movementX / UIView.pageScale,
+                    0,
+                    0,
+                    event.movementY / UIView.pageScale
+                )
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        topLeftCornerTop.controlEventTargetAccumulator.PointerDrag = pointerDragTLFunction
+        
+        topLeftCornerTop.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        const topLeftCornerLeft = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "topLeftCornerLeft",
+                style: {
+                    position: "absolute",
+                    height: cornerSize,
+                    maxHeight: maxCornerSize,
+                    width: borderWidth,
+                    top: "0px",
+                    left: "0px",
+                    cursor: "nwse-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        topLeftCornerLeft.controlEventTargetAccumulator.PointerDrag = pointerDragTLFunction
+        
+        topLeftCornerLeft.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        const bottomLeftCornerLeft = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "bottomLeftCornerLeft",
+                style: {
+                    position: "absolute",
+                    height: cornerSize,
+                    maxHeight: maxCornerSize,
+                    width: borderWidth,
+                    bottom: "0px",
+                    left: "0px",
+                    cursor: "nesw-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        const pointerDragBLFunction = (sender: UIView, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(
+                    event.movementX / UIView.pageScale,
+                    0,
+                    -event.movementY / UIView.pageScale,
+                    0
+                )
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        bottomLeftCornerLeft.controlEventTargetAccumulator.PointerDrag = pointerDragBLFunction
+        
+        bottomLeftCornerLeft.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        // noinspection JSSuspiciousNameCombination
+        const bottomLeftCornerBottom = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "bottomLeftCornerBottom",
+                style: {
+                    position: "absolute",
+                    height: borderWidth,
+                    width: cornerSize,
+                    maxWidth: maxCornerSize,
+                    bottom: "0px",
+                    left: "0px",
+                    cursor: "nesw-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        bottomLeftCornerBottom.controlEventTargetAccumulator.PointerDrag = pointerDragBLFunction
+        
+        bottomLeftCornerBottom.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        // noinspection JSSuspiciousNameCombination
+        const bottomRightCornerBottom = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "bottomRightCornerBottom",
+                style: {
+                    position: "absolute",
+                    height: borderWidth,
+                    width: cornerSize,
+                    maxWidth: maxCornerSize,
+                    bottom: "0px",
+                    right: "0px",
+                    cursor: "nwse-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        const pointerDragBRFunction = (sender: UIView, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(
+                    0,
+                    -event.movementX / UIView.pageScale,
+                    -event.movementY / UIView.pageScale,
+                    0
+                )
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        bottomRightCornerBottom.controlEventTargetAccumulator.PointerDrag = pointerDragBRFunction
+        
+        bottomRightCornerBottom.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        const bottomRightCornerRight = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "bottomRightCornerRight",
+                style: {
+                    position: "absolute",
+                    height: cornerSize,
+                    maxHeight: maxCornerSize,
+                    width: borderWidth,
+                    bottom: "0px",
+                    right: "0px",
+                    cursor: "nwse-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        bottomRightCornerRight.controlEventTargetAccumulator.PointerDrag = pointerDragBRFunction
+        
+        bottomRightCornerRight.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        const topRightCornerRight = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "topRightCornerRight",
+                style: {
+                    position: "absolute",
+                    height: cornerSize,
+                    maxHeight: maxCornerSize,
+                    width: borderWidth,
+                    top: "0px",
+                    right: "0px",
+                    cursor: "nesw-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        const pointerDragTRFunction = (sender: UIView, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                this.frame = this.frame.rectangleWithInsets(
+                    0,
+                    -event.movementX / UIView.pageScale,
+                    0,
+                    event.movementY / UIView.pageScale
+                )
+                
+                optionalParameters.viewDidChangeToSize?.(this, NO)
+                
+            }
+            
+        }
+        topRightCornerRight.controlEventTargetAccumulator.PointerDrag = pointerDragTRFunction
+        
+        topRightCornerRight.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        // noinspection JSSuspiciousNameCombination
+        const topRightCornerTop = new UIView().configuredWithObject({
+            _viewHTMLElement: {
+                className: "topRightCornerTop",
+                style: {
+                    position: "absolute",
+                    height: borderWidth,
+                    width: cornerSize,
+                    maxWidth: maxCornerSize,
+                    top: "0px",
+                    right: "0px",
+                    cursor: "nesw-resize",
+                    backgroundColor: borderColor,
+                    pointerEvents: "auto"
+                }
+            },
+            shouldCallPointerUpInside: async () => YES,
+            shouldCallPointerHover: async () => YES,
+            pausesPointerEvents: YES
+        })
+        
+        
+        topRightCornerTop.controlEventTargetAccumulator.PointerDrag = pointerDragTRFunction
+        
+        topRightCornerTop.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
+        
+        const views = [
+            
+            leftEdge,
+            rightEdge,
+            bottomEdge,
+            topEdge,
+            
+            topRightCornerTop,
+            topLeftCornerTop,
+            topLeftCornerLeft,
+            bottomLeftCornerLeft,
+            bottomLeftCornerBottom,
+            bottomRightCornerBottom,
+            bottomRightCornerRight,
+            topRightCornerRight
+        
+        ]
+        
+        views.forEach(view => overlayElement.appendChild(view.viewHTMLElement))
+        
+        this._isResizable = YES
+        
+        this.makeNotResizable = () => {
+            
+            if (!this.isResizable) {
+                return
+            }
+            
+            views.everyElement.viewHTMLElement.remove()
+            this.makeNotResizable = undefined
+            this._isResizable = NO
+            
+        }
+        
     }
     
     
@@ -1885,12 +2523,12 @@ export class UIView extends UIObject {
                 //pauseEvent(event, YES)
             }
             const windowMouseUpOrLeaveFunction = (event: MouseEvent) => {
-        
+    
                 window.removeEventListener("mousemove", windowMouseMoveFunction)
                 window.removeEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
                 document.body.removeEventListener("mouseleave", windowMouseUpOrLeaveFunction)
                 onmouseup(event)
-        
+    
             }
             window.addEventListener("mousemove", windowMouseMoveFunction)
             window.addEventListener("mouseup", windowMouseUpOrLeaveFunction, true)

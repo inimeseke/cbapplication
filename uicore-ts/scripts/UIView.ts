@@ -1,4 +1,5 @@
 import { IS_FIREFOX, IS_SAFARI } from "./ClientCheckers"
+import toPx from "./SizeConverter"
 import { UIColor } from "./UIColor"
 import { UICore } from "./UICore"
 import "./UICoreExtensions"
@@ -89,7 +90,7 @@ export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<s
     sender: UIView,
     event: Event
 ) => void) & Partial<UIViewAddControlEventTargetObject<T>>
-
+    
 }
 
 
@@ -272,20 +273,20 @@ export class UIView extends UIObject {
         else {
             
             this._viewHTMLElement = viewHTMLElement
-    
+            
         }
-    
+        
         if (IS(elementID)) {
             this.viewHTMLElement.id = elementID
         }
-    
+        
         this.viewHTMLElement.obeyAutolayout = YES
         this.viewHTMLElement.UIView = this
         this.addStyleClass(this.styleClassName)
-    
+        
         this._resizeObserver = new ResizeObserver(() => this.setNeedsLayout())
         this._resizeObserver.observe(this.viewHTMLElement)
-    
+        
     }
     
     
@@ -762,7 +763,7 @@ export class UIView extends UIObject {
     // Use this method to calculate the frame for the view itself
     // This can be used when adding subviews to existing views like buttons
     calculateAndSetViewFrame() {
-    
+        
     }
     
     
@@ -790,6 +791,7 @@ export class UIView extends UIObject {
     setFrame(rectangle: UIRectangle & { zIndex?: number }, zIndex = 0, performUncheckedLayout = NO) {
         
         const frame: (UIRectangle & { zIndex?: number }) = this._frame || new UIRectangle(nil, nil, nil, nil) as any
+        
         
         if (zIndex != undefined) {
             rectangle.zIndex = zIndex
@@ -844,8 +846,8 @@ export class UIView extends UIObject {
     
     
     boundsDidChange() {
-    
-    
+        
+        
     }
     
     setPosition(
@@ -1192,8 +1194,8 @@ export class UIView extends UIObject {
     
     
     animationDidFinish() {
-    
-    
+        
+        
     }
     
     static _transformAttribute = (("transform" in document.documentElement.style) ? "transform" : undefined) ||
@@ -1724,8 +1726,8 @@ export class UIView extends UIObject {
     
     
     willAppear() {
-    
-    
+        
+        
     }
     
     willMoveToSuperview(superview: UIView) {
@@ -1738,11 +1740,11 @@ export class UIView extends UIObject {
     }
     
     wasAddedToViewTree() {
-    
+        
     }
     
     wasRemovedFromViewTree() {
-    
+        
     }
     
     
@@ -1966,7 +1968,139 @@ export class UIView extends UIObject {
         const maxCornerSize = optionalParameters.maxCornerSize ?? "10px"
         const cornerSize = optionalParameters.cornerSize ?? "5%"
         
-        const pointerUpFunction = () => optionalParameters.viewDidChangeToSize?.(this, YES)
+        let yOverflow = 0
+        let xOverflow = 0
+        
+        const pointerUpFunction = () => {
+            yOverflow = 0
+            xOverflow = 0
+            optionalParameters.viewDidChangeToSize?.(this, YES)
+        }
+        
+        const frameWasChanged = () => {
+            const frame = this.frame
+            if (this.style.minHeight) {
+                frame.height = [
+                    frame.height,
+                    toPx(this.viewHTMLElement, this.style.minHeight)
+                ].max()
+            }
+            if (this.style.maxHeight) {
+                frame.height = [
+                    frame,
+                    toPx(this.viewHTMLElement, this.style.maxHeight)
+                ].min()
+            }
+            yOverflow = yOverflow + this.frame.height - frame.height
+            this.frame = frame
+            optionalParameters.viewDidChangeToSize?.(this, NO)
+        }
+        
+        
+        const PointerXDragFunction = (centeredOnPosition: number, sender: UIView, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                const signMultiplier = 1 - 2 * centeredOnPosition
+                let movementX = event.movementX
+                
+                if (xOverflow * signMultiplier > 0 && 0 > movementX) {
+                    xOverflow = (xOverflow + movementX / UIView.pageScale).integerValue
+                    if (xOverflow >= 0) {
+                        return
+                    }
+                    movementX = xOverflow
+                    xOverflow = 0
+                }
+                
+                if (xOverflow > 0 && 0 < movementX && signMultiplier < 0) {
+                    xOverflow = (xOverflow + signMultiplier * movementX / UIView.pageScale).integerValue
+                    if (xOverflow >= 0) {
+                        return
+                    }
+                    movementX = xOverflow * signMultiplier
+                    xOverflow = 0
+                }
+                
+                const frame = this.frame
+                const widthChange = (signMultiplier * movementX) / UIView.pageScale
+                let frameWidth = frame.width + widthChange
+                
+                if (this.style.minWidth) {
+                    frameWidth = [
+                        frameWidth,
+                        toPx(this.viewHTMLElement, this.style.minWidth),
+                        0
+                    ].max()
+                }
+                
+                if (this.style.maxWidth) {
+                    frameWidth = [
+                        frameWidth,
+                        toPx(this.viewHTMLElement, this.style.maxWidth)
+                    ].min()
+                }
+                
+                xOverflow = (xOverflow + frame.width + widthChange - frameWidth).integerValue
+                this.frame = frame.rectangleWithWidth(frameWidth, centeredOnPosition)
+                frameWasChanged()
+                
+            }
+            
+        }
+        
+        const PointerYDragFunction = (centeredOnPosition: number, sender: UIView, event: Event) => {
+            
+            if (event instanceof MouseEvent) {
+                
+                const signMultiplier = 1 - 2 * centeredOnPosition
+                let movementY = event.movementY
+                
+                if (yOverflow * signMultiplier > 0 && 0 > movementY) {
+                    yOverflow = (yOverflow + movementY / UIView.pageScale).integerValue
+                    if (yOverflow >= 0) {
+                        return
+                    }
+                    movementY = yOverflow
+                    yOverflow = 0
+                }
+                
+                if (yOverflow > 0 && 0 < movementY && signMultiplier < 0) {
+                    yOverflow = (yOverflow + signMultiplier * movementY / UIView.pageScale).integerValue
+                    if (yOverflow >= 0) {
+                        return
+                    }
+                    movementY = yOverflow * signMultiplier
+                    yOverflow = 0
+                }
+                
+                const frame = this.frame
+                const heightChange = (signMultiplier * movementY) / UIView.pageScale
+                let frameHeight = frame.height + heightChange
+                
+                if (this.style.minHeight) {
+                    frameHeight = [
+                        frameHeight,
+                        toPx(this.viewHTMLElement, this.style.minHeight),
+                        0
+                    ].max()
+                }
+                
+                if (this.style.maxHeight) {
+                    frameHeight = [
+                        frameHeight,
+                        toPx(this.viewHTMLElement, this.style.maxHeight)
+                    ].min()
+                }
+                
+                yOverflow = (yOverflow + frame.height + heightChange - frameHeight).integerValue
+                this.frame = frame.rectangleWithHeight(frameHeight, centeredOnPosition)
+                frameWasChanged()
+                
+            }
+            
+        }
+        
         
         const leftEdge = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -1986,22 +2120,9 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
-        leftEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(event.movementX / UIView.pageScale, 0, 0, 0)
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
-        }
-        
-        
+        leftEdge.controlEventTargetAccumulator.PointerDrag = PointerXDragFunction.bind(this, 1)
         leftEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
         const rightEdge = new UIView().configuredWithObject({
             _viewHTMLElement: {
                 className: "rightEdge",
@@ -2020,22 +2141,9 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
-        rightEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(0, -event.movementX / UIView.pageScale, 0, 0)
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
-        }
-        
-        
+        rightEdge.controlEventTargetAccumulator.PointerDrag = PointerXDragFunction.bind(this, 0)
         rightEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
         // noinspection JSSuspiciousNameCombination
         const bottomEdge = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -2055,22 +2163,9 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
-        bottomEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(0, 0, -event.movementY / UIView.pageScale, 0)
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
-        }
-        
-        
+        bottomEdge.controlEventTargetAccumulator.PointerDrag = PointerYDragFunction.bind(this, 0)
         bottomEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
+        
         // noinspection JSSuspiciousNameCombination
         const topEdge = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -2090,22 +2185,15 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
+        topEdge.controlEventTargetAccumulator.PointerDrag = PointerYDragFunction.bind(this, 1)
+        topEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
         
         
-        topEdge.controlEventTargetAccumulator.PointerDrag = (sender, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(0, 0, 0, event.movementY / UIView.pageScale)
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
+        const pointerDragTLFunction = (sender: UIView, event: Event) => {
+            PointerXDragFunction(1, sender, event)
+            PointerYDragFunction(1, sender, event)
         }
         
-        
-        topEdge.controlEventTargetAccumulator.PointerUp = pointerUpFunction
         // noinspection JSSuspiciousNameCombination
         const topLeftCornerTop = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -2126,28 +2214,8 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
-        const pointerDragTLFunction = (sender: UIView, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(
-                    event.movementX / UIView.pageScale,
-                    0,
-                    0,
-                    event.movementY / UIView.pageScale
-                )
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
-        }
         topLeftCornerTop.controlEventTargetAccumulator.PointerDrag = pointerDragTLFunction
-        
         topLeftCornerTop.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
         
         const topLeftCornerLeft = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -2168,12 +2236,14 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
         topLeftCornerLeft.controlEventTargetAccumulator.PointerDrag = pointerDragTLFunction
-        
         topLeftCornerLeft.controlEventTargetAccumulator.PointerUp = pointerUpFunction
         
+        
+        const pointerDragBLFunction = (sender: UIView, event: Event) => {
+            PointerXDragFunction(1, sender, event)
+            PointerYDragFunction(0, sender, event)
+        }
         
         const bottomLeftCornerLeft = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -2194,28 +2264,8 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
-        const pointerDragBLFunction = (sender: UIView, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(
-                    event.movementX / UIView.pageScale,
-                    0,
-                    -event.movementY / UIView.pageScale,
-                    0
-                )
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
-        }
         bottomLeftCornerLeft.controlEventTargetAccumulator.PointerDrag = pointerDragBLFunction
-        
         bottomLeftCornerLeft.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
         
         // noinspection JSSuspiciousNameCombination
         const bottomLeftCornerBottom = new UIView().configuredWithObject({
@@ -2237,12 +2287,14 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
         bottomLeftCornerBottom.controlEventTargetAccumulator.PointerDrag = pointerDragBLFunction
-        
         bottomLeftCornerBottom.controlEventTargetAccumulator.PointerUp = pointerUpFunction
         
+        
+        const pointerDragBRFunction = (sender: UIView, event: Event) => {
+            PointerXDragFunction(0, sender, event)
+            PointerYDragFunction(0, sender, event)
+        }
         
         // noinspection JSSuspiciousNameCombination
         const bottomRightCornerBottom = new UIView().configuredWithObject({
@@ -2264,28 +2316,8 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
-        const pointerDragBRFunction = (sender: UIView, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(
-                    0,
-                    -event.movementX / UIView.pageScale,
-                    -event.movementY / UIView.pageScale,
-                    0
-                )
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
-        }
         bottomRightCornerBottom.controlEventTargetAccumulator.PointerDrag = pointerDragBRFunction
-        
         bottomRightCornerBottom.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
         
         const bottomRightCornerRight = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -2306,12 +2338,14 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
         bottomRightCornerRight.controlEventTargetAccumulator.PointerDrag = pointerDragBRFunction
-        
         bottomRightCornerRight.controlEventTargetAccumulator.PointerUp = pointerUpFunction
         
+        
+        const pointerDragTRFunction = (sender: UIView, event: Event) => {
+            PointerXDragFunction(0, sender, event)
+            PointerYDragFunction(1, sender, event)
+        }
         
         const topRightCornerRight = new UIView().configuredWithObject({
             _viewHTMLElement: {
@@ -2332,28 +2366,8 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
-        const pointerDragTRFunction = (sender: UIView, event: Event) => {
-            
-            if (event instanceof MouseEvent) {
-                
-                this.frame = this.frame.rectangleWithInsets(
-                    0,
-                    -event.movementX / UIView.pageScale,
-                    0,
-                    event.movementY / UIView.pageScale
-                )
-                
-                optionalParameters.viewDidChangeToSize?.(this, NO)
-                
-            }
-            
-        }
         topRightCornerRight.controlEventTargetAccumulator.PointerDrag = pointerDragTRFunction
-        
         topRightCornerRight.controlEventTargetAccumulator.PointerUp = pointerUpFunction
-        
         
         // noinspection JSSuspiciousNameCombination
         const topRightCornerTop = new UIView().configuredWithObject({
@@ -2375,10 +2389,7 @@ export class UIView extends UIObject {
             shouldCallPointerHover: async () => YES,
             pausesPointerEvents: YES
         })
-        
-        
         topRightCornerTop.controlEventTargetAccumulator.PointerDrag = pointerDragTRFunction
-        
         topRightCornerTop.controlEventTargetAccumulator.PointerUp = pointerUpFunction
         
         
@@ -2515,32 +2526,32 @@ export class UIView extends UIObject {
                 this._touchEventTime = nil
                 pauseEvent(event)
             }
-    
+            
             this._hasPointerDragged = NO
-    
+            
             const windowMouseMoveFunction = (event: MouseEvent) => {
                 onMouseMove(event)
                 //pauseEvent(event, YES)
             }
             const windowMouseUpOrLeaveFunction = (event: MouseEvent) => {
-    
+                
                 window.removeEventListener("mousemove", windowMouseMoveFunction)
                 window.removeEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
                 document.body.removeEventListener("mouseleave", windowMouseUpOrLeaveFunction)
                 onmouseup(event)
-    
+                
             }
             window.addEventListener("mousemove", windowMouseMoveFunction)
             window.addEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
             document.body.addEventListener("mouseleave", windowMouseUpOrLeaveFunction)
-    
+            
             const windowTouchFunction = () => {
                 window.removeEventListener("touchmove", onTouchMove, true)
                 window.removeEventListener("mouseup", windowTouchFunction, true)
             }
             window.addEventListener("touchmove", onTouchMove, true)
             window.addEventListener("mouseup", windowTouchFunction, true)
-    
+            
         }
         
         const onTouchStart = onMouseDown as any
@@ -2557,7 +2568,7 @@ export class UIView extends UIObject {
                 (this.ignoresMouse && event instanceof MouseEvent)) {
                 return
             }
-    
+            
             if (this._isPointerInside && await this.shouldCallPointerUpInside()) {
                 onPointerUpInside(event)
                 if (!this._hasPointerDragged) {
@@ -2619,7 +2630,7 @@ export class UIView extends UIObject {
             //     console.log("Mouse move")
             //
             // }
-    
+            
             if (!this._isPointerValid && !this._isPointerValidForMovement) {
                 return
             }

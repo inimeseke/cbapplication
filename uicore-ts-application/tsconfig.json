@@ -6,9 +6,9 @@
       "sourceMap": true,
       "strictBindCallApply": true,
       "noImplicitOverride": true,
-      "target": "es2018",
+      "target": "es2021",
       "lib": [
-        "es2019"
+        "es2021"
       ],
       "outDir": "./dist",
       "baseUrl": "./"

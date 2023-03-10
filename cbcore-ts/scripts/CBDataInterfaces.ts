@@ -171,7 +171,7 @@ export type CBUserProfilePublic = any;
 export type CBUserProfile = any;
 
 
-export interface SocketClientInterface {
+export interface CBSocketClientInterface {
     
     [x: string]: SocketClientFunction<any, any>;
     
@@ -218,6 +218,7 @@ export interface CBSocketMessage<MessageDataType = any> {
     identifier: string;
     inResponseToIdentifier?: string;
     keepWaitingForResponses?: boolean;
+    completionPolicy: string;
     
     messageData: MessageDataType;
     
@@ -284,6 +285,12 @@ export interface CBSocketMessageSendResponseFunction<ResponseMessageType = any> 
     // This tells the client to use the stored response if responseHash matches and also enables storing of responses
     // in the client in the first place. Returns true if the hash matched.
     confirmStoredResponseHash(responseHash: string, completion?: CBSocketMessageCompletionFunction): boolean;
+    
+    // This becomes false when the message is known to be ignored
+    isValid: boolean;
+    cancelHandling(): void;
+    message: CBSocketMessage;
+    key: string;
     
 }
 

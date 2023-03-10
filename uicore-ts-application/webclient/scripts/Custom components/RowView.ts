@@ -113,6 +113,16 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     }
     
     
+    override get frame(): UIRectangle & { zIndex?: number } {
+        return super.frame
+    }
+    
+    override set frame(frame: UIRectangle & { zIndex?: number }) {
+        super.frame = frame
+        this.cellWidths = []
+    }
+    
+    
     get rowHeight() {
         return IF(this._rowHeight)(() => this._rowHeight)
             .ELSE(() => this.cells.map(cell => cell.intrinsicContentHeight(this.bounds.width)).max())

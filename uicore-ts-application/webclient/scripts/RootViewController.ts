@@ -25,7 +25,6 @@ import { LanguageService } from "./LanguageService"
 import { SomeContentViewController } from "./SomeContentViewController"
 import { TopBarView } from "./TopBarView"
 
-
 export class RootViewController extends UIRootViewController {
     
     override readonly topBarView: TopBarView = new TopBarView("TopBarView", nil).configuredWithObject({
@@ -52,7 +51,6 @@ export class RootViewController extends UIRootViewController {
                 IS((await SocketClient.AreCBInternalSettingsAvailableForCurrentUser()).result) || YES
         ),
         mainViewController: this.lazyViewControllerObjectWithClass(SomeContentViewController)
-        
     }
     private editor?: EditorViewController
     

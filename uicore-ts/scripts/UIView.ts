@@ -176,6 +176,8 @@ export class UIView extends UIObject {
     makeNotResizable?: () => void
     
     private _isMoving: boolean = NO
+    _isCBEditorTemporaryResizable = NO
+    _isCBEditorTemporaryMovable = NO
     
     constructor(
         elementID: string = ("UIView" + UIView.nextIndex),

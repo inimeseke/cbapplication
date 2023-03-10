@@ -1,12 +1,12 @@
 import * as SocketIo from "socket.io"
 import Utils from "../Utils"
-import { CBDocument } from "TypeUtil"
+import {CBDocument} from "TypeUtil"
 import {
     CBSocketMessage, CBSocketMessageCompletionFunction,
     CBSocketMessageHandlerFunction, CBSocketMessageSendResponseFunction, CBSocketMultipleMessage,
     CBSocketMultipleMessageObject, CBUserProfile
 } from "../webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
-import { SocketController, SocketServerClient } from "./SocketController"
+import {SocketController, SocketServerClient} from "./SocketController"
 import objectHash = require("object-hash")
 
 
@@ -22,6 +22,8 @@ export default class SocketSession {
     private handlers: {
         [x: string]: CBSocketMessageHandlerFunction[];
     } = {}
+    
+    ongoingHandlerResponseFunctions: CBSocketMessageSendResponseFunction[] = []
     
     private responseGroups: {
         [x: string]: {
@@ -57,8 +59,10 @@ export default class SocketSession {
         messageTargets.forEachValue((value, key) =>
             this._socket.on(
                 key,
-                (message: CBSocketMessage<any>) => {
-                    this.didReceiveMessageForKey(key, message)
+                (message: CBSocketMessage) => {
+                    
+                    console.log("Received message for key " + key)
+                    this.didReceiveMessageForKey(key, message).then(Utils.nil)
                 }
             )
         )
@@ -66,7 +70,7 @@ export default class SocketSession {
         this._socket.on(
             this.responseMessageKey,
             (message: CBSocketMessage) => {
-                this.didReceiveMessageForKey(this.responseMessageKey, message)
+                this.didReceiveMessageForKey(this.responseMessageKey, message).then(Utils.nil)
             }
         )
         
@@ -86,11 +90,12 @@ export default class SocketSession {
                     if (message.shouldGroupResponses) {
                         this.responseGroups[messageObject.message.identifier] = responseGroup
                     }
-                    this.didReceiveMessageForKey(messageObject.key, messageObject.message)
+                    this.didReceiveMessageForKey(messageObject.key, messageObject.message).then(Utils.nil)
                 })
                 
                 if (this._multipleMessageResponses.length) {
                     this._sendMessageForKey(this.multipleMessageKey, this._multipleMessageResponses, message)
+                        .then(Utils.nil)
                     this._multipleMessageResponses = []
                 }
                 
@@ -100,7 +105,7 @@ export default class SocketSession {
         )
         
         const session = this
-        this.socketClient = new Proxy({ "name": "SocketClient" }, {
+        this.socketClient = new Proxy({"name": "SocketClient"}, {
             
             get(target, key) {
                 
@@ -167,7 +172,7 @@ export default class SocketSession {
     async _sendMessageForKey(
         key: string,
         message: any,
-        inResponseToMessage: CBSocketMessage<any> = {} as any,
+        inResponseToMessage: CBSocketMessage = {} as any,
         keepMessageConnectionOpen = false,
         shouldStoreResponse = false,
         shouldUseStoredResponse = false,
@@ -178,7 +183,8 @@ export default class SocketSession {
         if (message instanceof Promise) {
             try {
                 message = await message
-            } catch (exception) {
+            }
+            catch (exception) {
                 message = exception
             }
         }
@@ -193,15 +199,17 @@ export default class SocketSession {
             let messageDataHash
             try {
                 messageDataHash = objectHash(JSON.parse(JSON.stringify(message)))
-            } catch (exception) {
+            }
+            catch (exception) {
                 const asd = 1
             }
             
-            let messageObject: CBSocketMessage<any> = {
+            let messageObject: CBSocketMessage = {
                 messageData: message,
                 identifier: identifier,
                 inResponseToIdentifier: inResponseToMessage.identifier,
                 keepWaitingForResponses: keepMessageConnectionOpen,
+                completionPolicy: inResponseToMessage.completionPolicy || "directOnly",
                 
                 canBeStoredAsResponse: shouldStoreResponse,
                 useStoredResponse: shouldUseStoredResponse,
@@ -218,6 +226,7 @@ export default class SocketSession {
                     identifier: identifier,
                     inResponseToIdentifier: inResponseToMessage.identifier,
                     keepWaitingForResponses: keepMessageConnectionOpen,
+                    completionPolicy: inResponseToMessage.completionPolicy || "directOnly",
                     
                     canBeStoredAsResponse: shouldStoreResponse,
                     useStoredResponse: true,
@@ -268,13 +277,13 @@ export default class SocketSession {
     }
     
     
-    private removeMessageFromResponseGroups(inResponseToMessage: CBSocketMessage<any>) {
+    private removeMessageFromResponseGroups(inResponseToMessage: CBSocketMessage) {
         delete this.responseGroups[inResponseToMessage.identifier]
     }
     
     private async didReceiveMessageForKey(
         key: string,
-        message: CBSocketMessage<any>
+        message: CBSocketMessage
     ) {
         
         // Only handle messages if connected to client
@@ -295,14 +304,24 @@ export default class SocketSession {
         
         const userID = "" + this.userProfile.contactInformation.email
         
-        const excludedKeys = [
+        const excludedFromLogKeys = [
             "RetrieveDropdownDataForCode",
             "RetrieveNumberOfChatNotificationsForCBInquiryWithID",
             "RetrieveNumberOfOfferNotificationsForCBInquiryWithID"
         ]
         
-        let excludeMessage = false
+        let excludeMessageFromLog = false
         let deferResponse = false
+        
+        const functionsToInvalidate = this.ongoingHandlerResponseFunctions.filter(responseFunction =>
+            responseFunction.message.completionPolicy == "last" &&
+            responseFunction.key == key
+        )
+        
+        
+        functionsToInvalidate.forEach(
+            responseFunction => responseFunction.cancelHandling()
+        )
         
         const sendResponseFunction: CBSocketMessageSendResponseFunction = function (
             this: SocketSession,
@@ -314,7 +333,7 @@ export default class SocketSession {
                 return
             }
             
-            if (!excludedKeys.contains(key) && !excludeMessage) {
+            if (!excludedFromLogKeys.contains(key) && !excludeMessageFromLog) {
                 console.log(
                     "Sending response for message with key \"" + key + "\" after " + (Date.now() - startTime) +
                     "ms. User ID is " + userID + "."
@@ -323,7 +342,7 @@ export default class SocketSession {
             
             responseSent = true
             
-            return this._sendMessageForKey(
+            const result = this._sendMessageForKey(
                 this.responseMessageKey,
                 responseMessage,
                 message,
@@ -333,6 +352,10 @@ export default class SocketSession {
                 responseValidityDuration,
                 completion
             )
+            
+            this.ongoingHandlerResponseFunctions.removeElement(sendResponseFunction)
+            
+            return result
             
         }.bind(this) as any
         
@@ -345,7 +368,7 @@ export default class SocketSession {
                 return
             }
             
-            if (!excludedKeys.contains(key) && !excludeMessage) {
+            if (!excludedFromLogKeys.contains(key) && !excludeMessageFromLog) {
                 console.log(
                     "Sending intermediate response for message with key \"" + key + "\" after " +
                     (Date.now() - startTime) + "ms. User ID is " + userID + "."
@@ -384,7 +407,7 @@ export default class SocketSession {
                 }
             }
             
-            if (!excludedKeys.contains(key) && !excludeMessage) {
+            if (!excludedFromLogKeys.contains(key) && !excludeMessageFromLog) {
                 console.log(
                     "Sending error response for message with key \"" + key + "\" after " +
                     (Date.now() - startTime) + "ms. User ID is " + userID + "."
@@ -410,6 +433,8 @@ export default class SocketSession {
                 completion
             )
             
+            this.ongoingHandlerResponseFunctions.removeElement(sendResponseFunction)
+            
         }
         
         sendResponseFunction.confirmStoredResponseHash = (
@@ -421,7 +446,7 @@ export default class SocketSession {
             
             if (responseHash == message.storedResponseHash && message.storedResponseHash) {
                 
-                if (!excludedKeys.contains(key) && !excludeMessage) {
+                if (!excludedFromLogKeys.contains(key) && !excludeMessageFromLog) {
                     console.log(
                         "Sending stored hash response for message with key \"" + key + "\" after " +
                         (Date.now() - startTime) + "ms. User ID is " + userID + "."
@@ -441,6 +466,8 @@ export default class SocketSession {
                 )
                 clientStoredResponseTriggered = true
                 
+                this.ongoingHandlerResponseFunctions.removeElement(sendResponseFunction)
+                
                 return true
                 
             }
@@ -450,7 +477,7 @@ export default class SocketSession {
         }
         
         sendResponseFunction.excludeMessageFromAutomaticConnectionEvents = () => {
-            excludeMessage = true
+            excludeMessageFromLog = true
         }
         
         sendResponseFunction.deferResponse = () => {
@@ -465,12 +492,26 @@ export default class SocketSession {
             useStoredResponseWithErrorResponse = true
         }
         
+        sendResponseFunction.isValid = true
+        sendResponseFunction.cancelHandling = () => {
+            
+            console.log("Cancelling handling of " + key)
+            sendResponseFunction.isValid = false
+            this.ongoingHandlerResponseFunctions.removeElement(sendResponseFunction)
+            
+        }
+        sendResponseFunction.message = message
+        sendResponseFunction.key = key
+        
+        this.ongoingHandlerResponseFunctions.push(sendResponseFunction)
+        
         if (this.handlers[key]) {
             
             await Promise.all(this.handlers[key].map(handler => handler(
                 message.messageData,
                 sendResponseFunction
             )))
+            
             
         }
         
@@ -480,7 +521,7 @@ export default class SocketSession {
         }
         
         if (!responseSent && !deferResponse) {
-            excludeMessage = true
+            excludeMessageFromLog = true
             await sendResponseFunction(null)
         }
         
@@ -492,7 +533,8 @@ export default class SocketSession {
                 
                 try {
                     completionFunction(message.messageData, sendResponseFunction)
-                } catch (exception) {
+                }
+                catch (exception) {
                     sendResponseFunction.sendErrorResponse(exception)
                 }
                 
@@ -533,6 +575,8 @@ export default class SocketSession {
         sendResponseFunction.excludeMessageFromAutomaticConnectionEvents = Utils.nil
         sendResponseFunction.setResponseValidityDuration = Utils.nil
         sendResponseFunction.useStoredResponseWithErrorResponse = Utils.nil
+        sendResponseFunction.isValid = true
+        sendResponseFunction.message = message
         
         if (this.handlers[key]) {
             
@@ -572,14 +616,11 @@ export default class SocketSession {
         
         this.handlers[key].push(handlerFunction)
         
-        this._socket.on(key, (message: CBSocketMessage<any>) => {
+        this._socket.on(key, (message: CBSocketMessage) => {
             this.didReceiveMessageForKey(key, message)
         })
         
     }
-    
-    
-    
     
     
     socketDidDisconnect() {
@@ -587,9 +628,6 @@ export default class SocketSession {
         // Do something here if needed
         
     }
-    
-    
-    
     
     
 }

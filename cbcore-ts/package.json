@@ -34,7 +34,7 @@
     "@types/object-hash": "^2.1.1",
     "object-hash": "^2.1.1",
     "socket.io-client": "^4.5.2",
-    "uicore-ts": "^1.0.107"
+    "uicore-ts": "1.0.208"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.0",

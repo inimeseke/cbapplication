@@ -270,7 +270,8 @@ export class CBSocketClient extends UIObject {
                     messageData: message,
                     identifier: identifier,
                     keepWaitingForResponses: messageToBeSentObject.keepWaitingForResponses,
-                    inResponseToIdentifier: messageToBeSentObject.inResponseToMessage.identifier
+                    inResponseToIdentifier: messageToBeSentObject.inResponseToMessage.identifier,
+                    completionPolicy: messageToBeSentObject.completionPolicy
                     
                 }
                 
@@ -326,6 +327,7 @@ export class CBSocketClient extends UIObject {
             
             messageData: groupedMessages,
             identifier: MAKE_ID(),
+            completionPolicy: CBSocketClient.completionPolicy.all,
             
             shouldGroupResponses: receiveResponsesTogether
             
@@ -472,7 +474,8 @@ export class CBSocketClient extends UIObject {
                 messageData: message,
                 identifier: identifier,
                 keepWaitingForResponses: keepMessageConnectionOpen,
-                inResponseToIdentifier: inResponseToMessage.identifier
+                inResponseToIdentifier: inResponseToMessage.identifier,
+                completionPolicy: completionPolicy
                 
             }
             

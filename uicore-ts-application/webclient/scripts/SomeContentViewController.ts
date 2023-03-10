@@ -46,7 +46,8 @@ export class SomeContentViewController extends UIViewController {
     
     })
     asdasd: UITextView = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
-        text: "asdasdasdasdasdasdasd"
+        text: "asdasdasdasdasdasdasd",
+        backgroundColor: UIColor.transparentColor
     })
     autopood = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
         innerHTML: "autopood asdasd",
@@ -57,12 +58,18 @@ export class SomeContentViewController extends UIViewController {
         text: "Autopood asd"
     })
     autopoodasdasd: UIButton = new UIButton().addedAsSubviewToView(this.view).configuredWithObject({
-        innerHTML: "Autopood asdasd"
+        titleLabel: { text: "Autopood asdasd" },
+        colors: { 
+            titleLabel: { 
+                normal: UIColor.whiteColor 
+                } 
+            }
     })
     testview: UITextView = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
         text: "Test view"
     })
-    
+    bottomView = new UIView().addedAsSubviewToView(this.view);
+
     constructor(view: UIView) {
         
         super(view)
@@ -96,7 +103,7 @@ export class SomeContentViewController extends UIViewController {
     
     
     override async viewWillDisappear() {
-    
+        
     }
     
     
@@ -130,32 +137,33 @@ export class SomeContentViewController extends UIViewController {
     
     
     override layoutViewSubviews() {
-    
+
         super.layoutViewSubviews()
-    
+
         const padding = this.core.paddingLength
         const labelHeight = padding
-    
+
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)
-    
+
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
-        this.asdasd.frame = this.titleLabel.frame.rectangleForNextRow(padding)
+        this.asdasd.frame = this.titleLabel.frame.rectangleForNextRow(padding * 1.5)
         this.autopood.frame = this.asdasd.frame.rectangleForNextRow(padding)
         this.autopoodasd.frame = this.autopood.frame.rectangleForNextRow(
             padding,
             [this.autopoodasd.intrinsicContentHeight(this.autopood.frame.width), padding].max()
-        )
-        this.autopoodasdasd.frame = this.autopoodasd.frame.rectangleForNextRow(
+        ).rectangleWithWidth(bounds.width * 0.5 - padding * 0.5)
+        this.autopoodasdasd.frame = this.autopood.frame.rectangleForNextRow(
             padding,
             [this.autopoodasdasd.intrinsicContentHeight(this.autopoodasd.frame.width), padding].max()
-        )
-        this.testview.frame = this.autopoodasdasd.frame.rectangleForNextRow(
+        ).rectangleWithWidth(this.autopoodasd.frame.width, 1)
+        this.testview.frame = this.autopoodasd.frame.rectangleForNextRow(
             padding,
             [this.testview.intrinsicContentHeight(this.autopoodasdasd.frame.width), padding].max()
-        )
-    
-    
+        ).rectangleWithWidth(bounds.width)
+        this.bottomView.frame = this.testview.frame.rectangleForNextRow(0, padding)
+
+
     }
 }
 

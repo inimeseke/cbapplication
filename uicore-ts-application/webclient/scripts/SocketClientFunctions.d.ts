@@ -1,6 +1,5 @@
 import {
     CBDropdownData,
-    CBSocketClientInterface,
     LanguagesData,
     SocketClientFunction,
     SocketClientNoMessageFunction
@@ -79,11 +78,8 @@ export interface CBEditorEditingDescriptor {
     
 }
 
+export interface CBApplicationSocketClientInterface {
 
-//declare module "cbcore-ts" {
-
-
-export interface SocketClientInterface extends CBSocketClientInterface {
     
     PerformAction: SocketClientNoMessageFunction<void>;
     PerformActionAndRetrieveData: SocketClientNoMessageFunction<boolean>;
@@ -138,7 +134,16 @@ export interface SocketClientInterface extends CBSocketClientInterface {
 }
 
 
-//}
+declare module "cbcore-ts" {
+    
+    export interface SocketClientInterface extends CBApplicationSocketClientInterface {
+    
+        // Not putting anything here actually
+        // The extended interface has all the functions
+    
+    }
+    
+}
 
 // declare module "uicore-ts" {
 //

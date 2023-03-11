@@ -22,7 +22,7 @@ import {
     CBEditorPropertyLocation
 } from "../webclient/scripts/SocketClientFunctions"
 import { RoutesController } from "./RoutesController"
-import { ServerFunctionsFromClientFunctions, SocketController } from "./SocketController"
+import { SocketController } from "./SocketController"
 
 
 /// <reference path="../webclient/scripts/SocketClientFunctions.d.ts" />
@@ -969,7 +969,12 @@ export class CBEditorController extends RoutesController {
             
             await respondWithMessage({
                 
-                codeFileContents: newClassFile.getFullText()
+                codeFileContents: newClassFile.getFullText(),
+                path: componentName,
+                referencedFiles: [],
+                propertyLocation: null,
+                propertyReferenceLocations: [],
+                editableProperties: []
                 
             })
             

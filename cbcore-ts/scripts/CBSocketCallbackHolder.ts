@@ -426,6 +426,7 @@ export class CBSocketCallbackHolder extends UIObject {
                     
                     identifier: nil,
                     messageData: nil,
+                    completionPolicy: CBSocketClient.completionPolicy.directOnly,
                     
                     inResponseToIdentifier: message.identifier,
                     

@@ -25,7 +25,7 @@
     "@codemirror/lang-javascript": "^6.1.0",
     "browser-cjs": "^1.0.3",
     "browserify": "^17.0.0",
-    "cbcore-ts": "^1.0.5",
+    "cbcore-ts": "^1.0.7",
     "codemirror": "^6.0.1",
     "monaco-editor": "^0.34.0",
     "monaco-editor-auto-typings": "^0.4.3",

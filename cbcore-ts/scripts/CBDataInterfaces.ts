@@ -171,7 +171,7 @@ export type CBUserProfilePublic = any;
 export type CBUserProfile = any;
 
 
-export interface CBSocketClientInterface {
+export interface SocketClientInterface {
     
     [x: string]: SocketClientFunction<any, any>;
     

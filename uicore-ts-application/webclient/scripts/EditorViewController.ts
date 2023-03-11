@@ -1,8 +1,7 @@
 import { CBDropdownDataItem, CBSocketClient, SocketClient } from "cbcore-ts"
 import type * as monaco from "monaco-editor"
-import { editor, IPosition, languages } from "monaco-editor"
+import { editor, IPosition } from "monaco-editor"
 import {
-    EXTEND,
     IF,
     IS,
     IS_NOT,
@@ -31,7 +30,6 @@ import { SearchableDropdown } from "./Custom components/SearchableDropdown"
 import { LanguageService } from "./LanguageService"
 import { CBEditorAnnotatedPropertyDescriptor, CBEditorPropertyDescriptor } from "./SocketClientFunctions"
 import IModelContentChangedEvent = editor.IModelContentChangedEvent
-import Diagnostic = languages.typescript.Diagnostic
 
 
 interface UnwrappedPropertyDescriptor {
@@ -141,6 +139,78 @@ export class EditorViewController extends UIViewController {
     }).addedAsSubviewToView(this.view)
     
     
+    addViewControllerButton = new CBButton().configuredWithObject({
+        titleLabel: { text: "Add view controller" },
+        controlEventTargetAccumulator: {
+            PointerUpInside: async () => {
+                
+                this.dialogContainer.addedAsSubviewToView(this.view.superview)
+                
+                const dialogViewShower = CBDialogViewShower.showQuestionDialogWithTextField(
+                    "Insert a name for the new view controller class",
+                    () => {
+                        
+                        this._editorViews.removeElement(dialogViewShower.dialogView)
+                        this.dialogContainer.userInteractionEnabled = NO
+                        
+                    },
+                    this.dialogContainer
+                )
+                this.dialogContainer.userInteractionEnabled = YES
+                
+                
+                const dialogView = dialogViewShower.dialogView
+                
+                dialogViewShower.yesButtonWasPressed = async () => {
+                    
+                    const textField = dialogView.view.view
+                    const className = textField.textField.text
+                    
+                    dialogView.dismiss()
+                    
+                    //CBDialogViewShower.alert(propertyName, nil, this.dialogContainer)
+                    
+                    
+                    const result = (await SocketClient.AddNewViewController({
+                        
+                        className: className,
+                        propertyKey: className,
+                        runtimeObjectKeyPath: ""
+                        
+                    })).result
+                    
+                    // Reload the class with the new code
+                    
+                    //this.addScriptToPage(result.codeFileContents, YES)
+                    
+                    
+                    UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"])
+                        .routeWithComponent(
+                            result.path,
+                            {}
+                        ).apply()
+                    
+                    location.reload()
+                    
+                    //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
+                    
+                }
+                
+                dialogView.view.view.textField.controlEventTargetAccumulator.EnterDown = (
+                    sender,
+                    event
+                ) => dialogView.view.yesButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
+                
+                dialogView.view.view.textField.controlEventTargetAccumulator.EscDown = () => dialogView.dismiss()
+                
+                this._editorViews.push(dialogViewShower.dialogView)
+                
+                
+            }
+        }
+    }).addedAsSubviewToView(this.view)
+    
+    
     currentViewLabel = new UITextView().addedAsSubviewToView(this.view)
     
     addViewButton = new CBButton().configuredWithObject({
@@ -179,70 +249,6 @@ export class EditorViewController extends UIViewController {
                         
                         className: this._currentClassName!,
                         propertyKey: propertyName,
-                        runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
-                        
-                    })).result
-                    
-                    // Reload the class with the new code
-                    
-                    
-                    location.reload()
-                    
-                    //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
-                    
-                }
-                
-                dialogView.view.view.textField.controlEventTargetAccumulator.EnterDown = (
-                    sender,
-                    event
-                ) => dialogView.view.yesButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
-                
-                dialogView.view.view.textField.controlEventTargetAccumulator.EscDown = () => dialogView.dismiss()
-                
-                this._editorViews.push(dialogViewShower.dialogView)
-                
-                
-            }
-        }
-    }).addedAsSubviewToView(this.view)
-    
-    
-    addViewControllerButton = new CBButton().configuredWithObject({
-        titleLabel: { text: "Add view controller" },
-        controlEventTargetAccumulator: {
-            PointerUpInside: async () => {
-                
-                this.dialogContainer.addedAsSubviewToView(this.view.superview)
-                
-                const dialogViewShower = CBDialogViewShower.showQuestionDialogWithTextField(
-                    "Insert a name for the new view controller class",
-                    () => {
-                        
-                        this._editorViews.removeElement(dialogViewShower.dialogView)
-                        this.dialogContainer.userInteractionEnabled = NO
-                        
-                    },
-                    this.dialogContainer
-                )
-                this.dialogContainer.userInteractionEnabled = YES
-                
-                
-                const dialogView = dialogViewShower.dialogView
-                
-                dialogViewShower.yesButtonWasPressed = async () => {
-                    
-                    const textField = dialogView.view.view
-                    const className = textField.textField.text
-                    
-                    dialogView.dismiss()
-                    
-                    //CBDialogViewShower.alert(propertyName, nil, this.dialogContainer)
-                    
-                    
-                    const result = (await SocketClient.AddNewViewController({
-                        
-                        className: className,
-                        propertyKey: className,
                         runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
                         
                     })).result
@@ -590,6 +596,26 @@ export class EditorViewController extends UIViewController {
         this._selectedView?.setNeedsLayoutUpToRootView?.()
         
     }
+    
+    addScriptToPage(scriptText: string, module = NO) {
+        
+        const script = document.createElement("script")
+    
+        if (module) {
+            script.setAttribute("type", "module")
+        }
+        else {
+            script.setAttribute("type", "text/javascript")
+        }
+        
+        script.innerHTML = scriptText
+        document.body.appendChild(script)
+
+        return script
+        
+    }
+    
+    
     
     runScript(scriptText: string) {
         
@@ -1576,7 +1602,7 @@ export class EditorViewController extends UIViewController {
         
         this.saveButton.frame = this.reloadButton.frame.rectangleForPreviousColumn(padding * 0.5)
             .rectangleWithWidth(120, 1)
-    
+        
         this.addViewControllerButton.frame = this.titleLabel.frame.rectangleForNextRow(padding)
         
         this.currentViewLabel.frame = this.addViewControllerButton.frame.rectangleForNextRow(padding)

@@ -3,6 +3,7 @@ import {
     CBSocketHandshakeResponseMessage,
     CBSocketMessage,
     CBSocketMessageSendResponseFunction,
+    SocketClientInterface,
     CBUserProfile
 } from "../webclient/node_modules/cbcore-ts/compiledScripts/CBDataInterfaces"
 import * as mongoose from "mongoose"
@@ -10,9 +11,11 @@ import { Server, Socket } from "socket.io"
 import { CBDocument } from "TypeUtil"
 import { LoginKeyModel, UserModel, UserPasswordModel } from "../models"
 import Utils from "../Utils"
-import { SocketClientInterface } from "../webclient/scripts/SocketClientFunctions"
+import { CBApplicationSocketClientInterface } from "../webclient/scripts/SocketClientFunctions"
 import SocketSession from "./SocketSession"
 import { UserController } from "./UserController"
+
+/// <reference path="../webclient/scripts/SocketClientFunctions.d.ts" />
 
 
 enum CBAuthenticationSource {
@@ -35,7 +38,7 @@ type SocketServerFunctionFromClientFunction<ClientFunctionType extends (...args:
 type ServerFunctionsFromClientFunctions<T> = {
     [P in keyof T]: SocketServerFunctionFromClientFunction<T[P] extends (...args: any) => any ? T[P] : never>;
 }
-type SocketServer = ServerFunctionsFromClientFunctions<SocketClientInterface>;
+type SocketServer = ServerFunctionsFromClientFunctions<CBApplicationSocketClientInterface>;
 
 
 type SocketServerClientFunction<MessageType, ResultType> = (

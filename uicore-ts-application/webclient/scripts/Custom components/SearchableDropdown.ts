@@ -616,10 +616,21 @@ export class SearchableDropdown<T> extends UIButton {
     
     
     get expandedContainerViewHeight(): number {
+        
         if (IS(this._expandedContainerViewHeight)) {
             return this._expandedContainerViewHeight
         }
-        return this.superview.bounds.height - this.frame.max.y - this.core.paddingLength
+        
+        let result = this.superview.bounds.height - this.frame.max.y - this.core.paddingLength
+    
+        // if (IS(this.dialogContainerView)) {
+        //
+        //     result = 250
+        //
+        // }
+        
+        return result
+        
     }
     
     

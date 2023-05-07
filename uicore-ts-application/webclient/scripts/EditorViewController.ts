@@ -2,14 +2,16 @@ import { CBDropdownDataItem, CBSocketClient, SocketClient } from "cbcore-ts"
 import type * as monaco from "monaco-editor"
 import { editor, IPosition } from "monaco-editor"
 import {
+    FIRST_OR_NIL,
     IF,
     IS,
-    IS_NOT,
+    IS_NOT, MAKE_ID,
     nil,
     NO,
     RETURNER,
     UIButton,
     UIColor,
+    UICore,
     UIObject,
     UIRectangle,
     UIRoute,
@@ -22,9 +24,11 @@ import {
 import { CBButton } from "./Custom components/CBButton"
 import { CBColor } from "./Custom components/CBColor"
 import { CBColorSelector } from "./Custom components/CBColorSelector"
+import { CBDataView } from "./Custom components/CBDataView"
 import { CBDialogViewShower } from "./Custom components/CBDialogViewShower"
 import { CBFlatButton } from "./Custom components/CBFlatButton"
 import { CBTextField } from "./Custom components/CBTextField"
+import { CellView } from "./Custom components/CellView"
 import { RowView } from "./Custom components/RowView"
 import { SearchableDropdown } from "./Custom components/SearchableDropdown"
 import { LanguageService } from "./LanguageService"
@@ -71,6 +75,188 @@ console.log = function (obj, ...placeholders) {
     origlog.apply(this, placeholders)
     
 }
+
+
+interface CBEditorViewTreeDescriptor {
+    
+    className: string;
+    descriptor: { objectClassName: string; name: string }
+    subDescriptors: CBEditorViewTreeDescriptor[]
+    runtimeKeyPath: string
+    
+    _CB_DataView_IsExpandable?: boolean
+    _CB_DataView_IsExpanded?: boolean
+    
+}
+
+
+function props(obj: any) {
+    const p = [];
+    for (; obj != null; obj = Object.getPrototypeOf(obj)) {
+        const op = Object.getOwnPropertyNames(obj);
+        for (let i=0; i<op.length; i++)
+            if (p.indexOf(op[i]) == -1)
+                p.push(op[i]);
+    }
+    return p;
+}
+
+const _UIViewPropertyKeys = props(UIView.prototype).concat(new UIView().allKeys)
+const _UIViewControllerPropertyKeys = props(UIViewController.prototype).concat(new UIViewController(nil).allKeys)
+
+
+Object.defineProperty(UIView.prototype, "propertyDescriptors", {
+    get: function propertyDescriptors(this: UIView) {
+
+
+
+        //console.log(this.elementID + "_propertyDescriptors")
+
+        let result: any[] = []
+
+        function isPlainObject(value: any): value is object {
+            return value instanceof Object && Object.getPrototypeOf(value) === Object.prototype
+        }
+
+        function isAnArray(value: any): value is any[] {
+            return value instanceof Array && Object.getPrototypeOf(value) === Array.prototype
+        }
+
+        this.withAllSuperviews.forEach(view => {
+
+            const descriptorFromObject = function (
+                this: UIView,
+                object: object,
+                pathRootObject = object,
+                existingPathComponents: string[] = [],
+                lookInArrays = YES,
+                depthLeft = 5
+            ): {
+                subObjects: { object: object; key: string }[];
+                descriptor: { name: string; object: object } | undefined
+            } {
+
+                let resultDescriptor: { name: string; object: object } | undefined
+                const subObjects: { object: object, key: string }[] = []
+                const subArrays: { array: any[], key: string }[] = []
+
+                FIRST_OR_NIL(object).forEach((value, key, stopLooping) => {
+
+                    if (this == value) {
+
+                        existingPathComponents.push(key)
+
+                        resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
+                        stopLooping()
+                        return
+
+                    }
+
+
+                    if (isPlainObject(value) && !_UIViewPropertyKeys.contains(key) && !_UIViewControllerPropertyKeys.contains(key)) {
+                        subObjects.push({ object: value, key: key })
+                    }
+                    if (lookInArrays && isAnArray(value) && !_UIViewPropertyKeys.contains(key) && !_UIViewControllerPropertyKeys.contains(key)) {
+                        subArrays.push({ array: value, key: key })
+                    }
+
+                })
+
+                if (!resultDescriptor && lookInArrays) {
+
+                    subArrays.copy().forEach(value => {
+
+                        if (value.key.startsWith("_")) {
+
+                            subArrays.removeElement(value)
+                            subArrays.push(value)
+
+                        }
+
+                    })
+
+                    subArrays.find(arrayObject =>
+                        arrayObject.array.find((value, index) => {
+                            if (this == value) {
+                                existingPathComponents.push(arrayObject.key + "." + index)
+                                resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
+                                return YES
+                            }
+                            return NO
+                        })
+                    )
+
+                }
+
+                // if (!resultDescriptor && depthLeft) {
+                //
+                //     // @ts-ignore
+                //     resultDescriptor = subObjects.find(object => descriptorFromObject(
+                //         object,
+                //         pathRootObject,
+                //         existingPathComponents,
+                //         NO,
+                //         depthLeft - 1
+                //     ))
+                //
+                // }
+
+                if (resultDescriptor?.object?.constructor?.name == "Object") {
+
+                    var asd = 1
+
+                }
+
+                const result = {
+                    descriptor: resultDescriptor,
+                    subObjects: subObjects
+                }
+
+                return result
+
+            }.bind(this)
+
+            const viewControllerResult = descriptorFromObject(view.viewController)
+
+            if (viewControllerResult?.descriptor) {
+
+                result.push(viewControllerResult.descriptor)
+
+            }
+
+            const viewResult = descriptorFromObject(view)
+
+            if (viewResult?.descriptor) {
+
+                result.push(viewResult.descriptor)
+
+            }
+            else if (this.superview && this.superview == view) {
+
+                result.push({ object: view, key: "subviews." + view.subviews.indexOf(this) })
+
+            }
+
+
+            // view.forEach((value, key, stopLooping) => {
+            //
+            //     if (this == value) {
+            //
+            //         result.push({ object: view, name: key })
+            //
+            //         stopLooping()
+            //
+            //     }
+            //
+            // })
+
+
+        })
+
+        return result
+
+    }
+})
 
 
 export class EditorViewController extends UIViewController {
@@ -139,6 +325,143 @@ export class EditorViewController extends UIViewController {
     }).addedAsSubviewToView(this.view)
     
     
+    private configureCellForTreeViewRow = (cellView: CellView, dataItem: CBEditorViewTreeDescriptor) => {
+        if ((this.view.rootView.viewController.valueForKeyPath(
+            dataItem.runtimeKeyPath
+        ) instanceof UIViewController)) {
+            
+            cellView.titleLabel.alpha = 0.5
+            
+        }
+        else {
+            
+            cellView.titleLabel.alpha = 1
+            
+        }
+    }
+    
+    
+    treeView = new CBDataView<CBEditorViewTreeDescriptor>().configuredWithObject({
+        descriptors: [
+            {
+                keyPath: "className",
+                title: "Class name",
+                defaultTitle: "", //"No class name".italics(),
+                allowSorting: YES,
+                initialOrderingState: "ascending",
+                updateCell: this.configureCellForTreeViewRow
+            },
+            // {
+            //     keyPath: "_id",
+            //     title: "_id",
+            //     defaultTitle: "", //"No class name".italics(),
+            //     allowSorting: YES,
+            //     initialOrderingState: "ascending",
+            //     updateCell: this.configureCellForTreeViewRow
+            // },
+            {
+                keyPath: "descriptor.name",
+                title: "Property name",
+                defaultTitle: "", //"No property name".italics(),
+                allowSorting: YES,
+                updateCell: this.configureCellForTreeViewRow
+            },
+            {
+                keyPath: "descriptor.objectClassName",
+                title: "Container class name",
+                defaultTitle: "", //"No class name".italics(),
+                allowSorting: YES,
+                updateCell: this.configureCellForTreeViewRow
+            },
+            {
+                
+                defaultTitle: "Edit",
+                initCell: cellView => cellView.colors.titleLabel.selected = UIColor.redColor,
+                updateCell: (
+                    cellView,
+                    dataItem
+                ) => {
+                    
+                    cellView.hidden = (this.view.rootView.viewController.valueForKeyPath(
+                        dataItem.runtimeKeyPath
+                    ) instanceof UIViewController)
+                    
+                    cellView.selected = (this.view.rootView.viewController.valueForKeyPath(
+                        dataItem.runtimeKeyPath
+                    ) == this._currentEditingView)
+                    
+                    cellView.userInteractionEnabled = IS_NOT(cellView.selected)
+                    cellView.enabled = !dataItem?.descriptor?.name?.contains(".")
+                    
+                    
+                    cellView.titleLabel.style.fontWeight = IF(cellView.selected)(() => "bold").ELSE(() => "normal")
+                    
+                },
+                buttonWasPressed: async (cellView, dataItem) => {
+                    
+                    await (this.view.rootView.viewController.valueForKeyPath(dataItem.runtimeKeyPath) as UIView).shouldCallPointerUpInside()
+                    
+                }
+                
+            }
+        ],
+        rowExpandedValueDidChange: (row, event) => {
+            
+            if (event.altKey && event.metaKey) {
+                
+                const rowDataPoint: CBEditorViewTreeDescriptor = row.data
+                
+                const subDescriptors: CBEditorViewTreeDescriptor[] = rowDataPoint.subDescriptors
+                
+                const firstSubDescriptor = subDescriptors.find(value => value._CB_DataView_IsExpandable)
+                
+                if (!firstSubDescriptor) {
+                    
+                    return
+                    
+                }
+                
+                const isExpanded = !firstSubDescriptor._CB_DataView_IsExpanded
+                
+                subDescriptors.forEach((subDescriptor, index, array) => {
+                    
+                    //console.log(subDescriptor)
+                    
+                    // Find other rows with the same class and property names
+                    
+                    this.treeView.data.forEach((value, index, array) => {
+                        
+                        if (subDescriptor.className == value.className && subDescriptor.descriptor.name == value.descriptor.name) {
+                            value._CB_DataView_IsExpanded = isExpanded
+                        }
+                        
+                    })
+                    
+                    
+                })
+                
+                rowDataPoint._CB_DataView_IsExpanded = !rowDataPoint._CB_DataView_IsExpanded
+                
+                
+            }
+            else if (event.metaKey) {
+                
+                // Find other rows with the same class and property names
+                
+                this.treeView.data.forEach((value, index, array) => {
+                    
+                    if (row.data.className == value.className && row.data.descriptor.name == value.descriptor.name) {
+                        value._CB_DataView_IsExpanded = row.data._CB_DataView_IsExpanded
+                    }
+                    
+                })
+                
+            }
+            
+            
+        }
+    }).addedAsSubviewToView(this.view)
+    
     addViewControllerButton = new CBButton().configuredWithObject({
         titleLabel: { text: "Add view controller" },
         controlEventTargetAccumulator: {
@@ -164,7 +487,13 @@ export class EditorViewController extends UIViewController {
                 dialogViewShower.yesButtonWasPressed = async () => {
                     
                     const textField = dialogView.view.view
-                    const className = textField.textField.text
+                    let className = textField.textField.text
+                    if (IS_NOT(className)) {
+                        return
+                    }
+                    if (className && !className.endsWith("ViewController")) {
+                        className = className + "ViewController"
+                    }
                     
                     dialogView.dismiss()
                     
@@ -173,9 +502,7 @@ export class EditorViewController extends UIViewController {
                     
                     const result = (await SocketClient.AddNewViewController({
                         
-                        className: className,
-                        propertyKey: className,
-                        runtimeObjectKeyPath: ""
+                        className: className
                         
                     })).result
                     
@@ -186,11 +513,91 @@ export class EditorViewController extends UIViewController {
                     
                     UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"])
                         .routeWithComponent(
-                            result.path,
+                            result.componentName,
                             {}
                         ).apply()
                     
-                    location.reload()
+                    
+                    this.performFunctionWithDelay(0.5, () => location.reload())
+                    
+                    
+                    //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
+                    
+                }
+                
+                dialogView.view.view.textField.controlEventTargetAccumulator.EnterDown = (
+                    sender,
+                    event
+                ) => dialogView.view.yesButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
+                
+                dialogView.view.view.textField.controlEventTargetAccumulator.EscDown = () => dialogView.dismiss()
+                
+                this._editorViews.push(dialogViewShower.dialogView)
+                
+                
+            }
+        }
+    }).addedAsSubviewToView(this.view)
+    
+    deleteViewControllerButton = new CBButton().configuredWithObject({
+        titleLabel: { text: "Delete view controller" },
+        colors: { background: { normal: UIColor.redColor } },
+        controlEventTargetAccumulator: {
+            PointerUpInside: async () => {
+                
+                this.dialogContainer.addedAsSubviewToView(this.view.superview)
+                
+                const dialogViewShower = CBDialogViewShower.showQuestionDialogWithTextField(
+                    "Are you sure that you want to delete " + this._currentClassName + "?\nWrite the class name to confirm.",
+                    () => {
+                        
+                        this._editorViews.removeElement(dialogViewShower.dialogView)
+                        this.dialogContainer.userInteractionEnabled = NO
+                        
+                    },
+                    this.dialogContainer
+                )
+                this.dialogContainer.userInteractionEnabled = YES
+                
+                
+                const dialogView = dialogViewShower.dialogView
+                
+                dialogViewShower.yesButtonWasPressed = async () => {
+                    
+                    const textField = dialogView.view.view
+                    const className = textField.textField.text
+                    
+                    dialogView.dismiss()
+                    
+                    //CBDialogViewShower.alert(propertyName, nil, this.dialogContainer)
+                    
+                    if (this._currentClassName != className) {
+                        
+                        CBDialogViewShower.alert("Not deleting view controller.")
+                        
+                        return
+                        
+                    }
+                    
+                    const result = (await SocketClient.DeleteViewController({
+                        
+                        className: className,
+                        deleteFile: YES
+                        
+                    })).result
+                    
+                    // Reload the class with the new code
+                    
+                    //this.addScriptToPage(result.codeFileContents, YES)
+                    
+                    
+                    UIRoute.currentRoute.routeByRemovingComponentNamed(
+                        (this._currentEditingView?.viewController.class as typeof UIViewController).routeComponentName
+                    ).apply()
+                    
+                    
+                    this.performFunctionWithDelay(0.5, () => location.reload())
+                    
                     
                     //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
                     
@@ -275,6 +682,62 @@ export class EditorViewController extends UIViewController {
             }
         }
     }).addedAsSubviewToView(this.view)
+    
+    // removeViewButton = new CBButton().configuredWithObject({
+    //     titleLabel: { text: "Remove view" },
+    //     colors: { background: { normal: UIColor.colorWithRGBA(250, 170, 100) } },
+    //     controlEventTargetAccumulator: {
+    //         PointerUpInside: async () => {
+    //
+    //             this.dialogContainer.addedAsSubviewToView(this.view.superview)
+    //
+    //             const dialogViewShower = CBDialogViewShower.showQuestionDialog(
+    //                 "Are you sure that you want to remove " + this._currentEditingView?.propertyDescriptors.firstElement.name + "?",
+    //                 () => {
+    //
+    //                     this._editorViews.removeElement(dialogViewShower.dialogView)
+    //                     this.dialogContainer.userInteractionEnabled = NO
+    //
+    //                 }
+    //             )
+    //             this.dialogContainer.userInteractionEnabled = YES
+    //
+    //
+    //             const dialogView = dialogViewShower.dialogView
+    //
+    //             dialogViewShower.yesButtonWasPressed = async () => {
+    //
+    //
+    //
+    //                 dialogView.dismiss()
+    //
+    //                 //CBDialogViewShower.alert(propertyName, nil, this.dialogContainer)
+    //
+    //
+    //                 const result = (await SocketClient.RemoveSubview({
+    //
+    //                     className: this._currentClassName!,
+    //                     propertyKey: this._currentEditingView?.propertyDescriptors.firstElement.name!,
+    //                     runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
+    //
+    //                 })).result
+    //
+    //                 // Reload the class with the new code
+    //
+    //
+    //                 location.reload()
+    //
+    //                 //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
+    //
+    //             }
+    //
+    //
+    //             this._editorViews.push(dialogViewShower.dialogView)
+    //
+    //
+    //         }
+    //     }
+    // }).addedAsSubviewToView(this.view)
     
     propertyEditors: UIView[] = []
     
@@ -578,6 +1041,7 @@ export class EditorViewController extends UIViewController {
         
     }
     
+    
     private replaceLayoutFunction(scriptText: string) {
         
         const replacementFunction = this.runScript(scriptText)
@@ -600,7 +1064,7 @@ export class EditorViewController extends UIViewController {
     addScriptToPage(scriptText: string, module = NO) {
         
         const script = document.createElement("script")
-    
+        
         if (module) {
             script.setAttribute("type", "module")
         }
@@ -610,11 +1074,10 @@ export class EditorViewController extends UIViewController {
         
         script.innerHTML = scriptText
         document.body.appendChild(script)
-
+        
         return script
         
     }
-    
     
     
     runScript(scriptText: string) {
@@ -638,7 +1101,7 @@ export class EditorViewController extends UIViewController {
     
     private viewFrameDidChange(view: UIView, isMovementCompleted: boolean) {
         
-        if (isMovementCompleted) {
+        if (isMovementCompleted || YES) {
             
             
             const bounds = view.superview.bounds
@@ -716,10 +1179,94 @@ export class EditorViewController extends UIViewController {
         await this.showProperty(propertyDescriptor, forced)
         this.highlightView(view)
         
+        this.updateViewTreeTable().then(nil)
+        
         this.view.userInteractionEnabled = YES
         this.view.alpha = 1
         
         return NO
+        
+    }
+    
+    
+    private async updateViewTreeTable() {
+        
+        // this.treeView.data = []
+        // this.treeView.tableView.reloadData()
+        
+        const treeDescriptors = this.viewTreeDescriptors()
+        this.treeView.setTreeData(treeDescriptors, "subDescriptors", NO)
+        
+        const currentViewDescriptor = this.treeView.data.find(descriptor =>
+            (this.view.rootView.viewController.valueForKeyPath(
+                descriptor.runtimeKeyPath
+            ) == this._currentEditingView)
+        )
+        
+        const parentDescriptors = (
+            descriptor: CBEditorViewTreeDescriptor,
+            result: CBEditorViewTreeDescriptor[] = []
+        ) => {
+            
+            // @ts-ignore
+            const parentDescriptor: CBEditorViewTreeDescriptor = this.treeView.data.find(
+                // @ts-ignore
+                value => value["_id"] == descriptor["_parent"]
+            )
+            
+            result.push(parentDescriptor)
+            
+            // @ts-ignore
+            if (parentDescriptor && parentDescriptor["_parent"]) {
+                
+                parentDescriptors(parentDescriptor, result)
+                
+            }
+            
+            return result
+            
+        }
+        
+        if (currentViewDescriptor) {
+            
+            parentDescriptors(currentViewDescriptor).everyElement._CB_DataView_IsExpanded = YES
+            
+        }
+        
+        await this.treeView.updateTableDataByFiltering()
+        
+        const highlightedDataItemIndex = this.treeView.filteredData.findIndex(dataItem =>
+                
+                (this.view.rootView.viewController.valueForKeyPath(
+                    dataItem.runtimeKeyPath
+                ) == this._currentEditingView)
+            
+            // dataItem.descriptor.name == currentViewDescriptor?.name &&
+            // dataItem.descriptor.objectClassName == currentViewDescriptor?.object.class.name
+        )
+        
+        this.treeView.highlightedDataItem = this.treeView.filteredData[highlightedDataItemIndex]
+        
+        // Show the highlighted row
+        const tableView = this.treeView.tableView
+        tableView._calculatePositionsUntilIndex(highlightedDataItemIndex)
+        const focusedRowPosition = tableView._rowPositions[highlightedDataItemIndex]
+        
+        // Scroll the view if needed
+        let contentOffset = tableView.contentOffset
+        if ((focusedRowPosition?.topY ?? 0) < contentOffset.y) {
+            contentOffset.y = focusedRowPosition.topY
+        }
+        const tableCurrentHeight = tableView.bounds.height
+        if ((focusedRowPosition?.bottomY ?? tableCurrentHeight) > (contentOffset.y + tableCurrentHeight)) {
+            contentOffset = contentOffset.pointByAddingY(-(contentOffset.y + tableCurrentHeight -
+                focusedRowPosition.bottomY))
+        }
+        const animationDuration = tableView.animationDuration
+        tableView.animationDuration = 0
+        tableView.contentOffset = contentOffset
+        tableView.animationDuration = animationDuration
+        
         
     }
     
@@ -792,7 +1339,7 @@ export class EditorViewController extends UIViewController {
             
         })
         
-        this.buttons[selectedButtonIndex].selected = YES
+        FIRST_OR_NIL(this.buttons[selectedButtonIndex]).selected = YES
         this.buttonsRow.cells = this.buttons.copy().reverse()
         
     }
@@ -848,7 +1395,6 @@ export class EditorViewController extends UIViewController {
         })).result
         
         this.propertyEditors.everyElement.removeFromSuperview()
-        // @ts-ignore
         this.propertyEditors = fileObject.editableProperties.map(property =>
             
             IF(propertyDescriptor.object.valueForKeyPath(property.path)?.isKindOfClass?.(UIColor))(() =>
@@ -859,7 +1405,8 @@ export class EditorViewController extends UIViewController {
                             text: property.path + " (" + propertyDescriptor.object.valueForKeyPath(property.path) + ")"
                         },
                         colors: { background: { normal: CBColor.primaryTintColor } },
-                        dialogContainerView: this.view
+                        dialogContainerView: this.view,
+                        expandedContainerViewHeight: 500
                     }
                 ).performingFunctionWithSelf(async self => {
                         
@@ -1138,6 +1685,7 @@ export class EditorViewController extends UIViewController {
         
         classNameDropdown.isSingleSelection = YES
         
+        classNameDropdown.expandedContainerViewHeight = 500
         
         this.propertyEditors.insertElementAtIndex(0, classNameDropdown)
         
@@ -1337,11 +1885,7 @@ export class EditorViewController extends UIViewController {
     private removeElementChanges() {
         
         this._selectedView.viewHTMLElement.querySelectorAll(".CBEditorPropertyLabelElement")
-            .forEach(element => {
-                
-                element.remove()
-                
-            })
+            .forEach(element => element.remove())
         this._selectedView.viewHTMLElement.querySelectorAll(".CBEditorPropertyBorderAndOverlayElement")
             .forEach(element => {
                 
@@ -1368,6 +1912,144 @@ export class EditorViewController extends UIViewController {
     
     
     // section Data processing
+    
+    viewTreeDescriptors() {
+        
+        const result: CBEditorViewTreeDescriptor[] = []
+        
+        const forEachViewInSubtree = (view: UIView, targetArray: any[], pathArray: string[]) => {
+            
+            if (view == this.view) {
+                return
+            }
+            
+            if (IS(view.viewController)) {
+                
+                const viewController = view.viewController
+                
+                //const descriptor = view.propertyDescriptors.firstElement
+                
+                let className: string | undefined = viewController?.class?.name
+                if (className?.startsWith("_")) {
+                    className = className.substring(1)
+                }
+                
+                const pathKeyObject = this.pathKeyObjectToViewControllerFromParentViewControllerOrView(viewController)
+                const runtimeKeyPath = this.pathToViewControllerFromRootViewController(viewController)
+                const viewControllerResult = {
+                    
+                    _id: "",
+                    className: className,
+                    descriptor: {
+                        objectClassName: pathKeyObject.containerObject?.class?.name,
+                        name: pathKeyObject.key
+                    },
+                    subDescriptors: [],
+                    runtimeKeyPath: runtimeKeyPath
+                    
+                }
+                
+                targetArray.push(viewControllerResult)
+                
+                if (viewControllerResult.descriptor.name || pathArray.length) {
+                    
+                    pathArray = pathArray.copy()
+                    
+                    pathArray.push(
+                        viewControllerResult.descriptor.name ??
+                        ("subviews." + viewController.view.superview.subviews.indexOf(view) + ".viewController")
+                    )
+                    
+                }
+                
+                viewControllerResult._id = pathArray.join(".") || MAKE_ID()
+                
+                targetArray = viewControllerResult.subDescriptors
+                
+            }
+            
+            const descriptor = view.propertyDescriptors.firstElement
+            
+            let className: string | undefined = view?.class?.name
+            if (className?.startsWith("_")) {
+                className = className.substring(1)
+            }
+            
+            const result = {
+                
+                _id: "",
+                className: className,
+                descriptor: { objectClassName: descriptor?.object?.class?.name, name: descriptor?.name },
+                subDescriptors: [],
+                runtimeKeyPath: this.pathToViewFromRootViewController(view)
+                
+            }
+            
+            targetArray.push(result)
+            
+            if (result.descriptor.name || pathArray.length) {
+                
+                pathArray = pathArray.copy()
+                
+                pathArray.push(result.descriptor.name ?? ("subviews." + view.superview.subviews.indexOf(view)))
+                
+            }
+            
+            result._id = pathArray.join(".") || MAKE_ID()
+            
+            if (view.subviews.length) {
+                
+                result.subDescriptors = []
+                view.subviews.forEach(value => forEachViewInSubtree(value, result.subDescriptors, pathArray))
+                
+            }
+            
+            var asdasd = result.descriptor.objectClassName == "TreeViewViewController" && result.runtimeKeyPath == "contentViewController.view"
+            
+            if (asdasd) {
+                
+                var asd = 1
+                
+            }
+            
+        }
+        
+        
+        forEachViewInSubtree(UICore.main.rootViewController.view, result, [])
+        
+        return result
+        
+    }
+    
+    private pathToViewControllerFromRootViewController(viewController?: UIViewController) {
+        
+        let result: string
+        
+        if (viewController) {
+            
+            const pathKeyObject = this.pathKeyObjectToViewControllerFromParentViewControllerOrView(viewController)
+            const viewOrViewController = pathKeyObject.containerObject
+            result = this.expandKeyPath(pathKeyObject.key, viewOrViewController)
+            
+            if (result.startsWith(".")) {
+                result = result.slice(1)
+            }
+            
+            // if (IS_NOT(result) || viewController != viewController.view.rootView.viewController.valueForKeyPath(result)) {
+            //
+            //     result = "view" + viewController.withAllSuperviews.reverse()
+            //         .map(view => view.superview?.subviews?.indexOf(view) ?? "")
+            //         .join(".subviews.")
+            //
+            // }
+            
+        }
+        
+        // @ts-ignore
+        return result
+        
+    }
+    
     private pathToViewFromRootViewController(view?: UIView) {
         
         let result: string
@@ -1435,7 +2117,7 @@ export class EditorViewController extends UIViewController {
     
     private pathKeyObjectToViewFromParentViewOrViewController(view: UIView) {
         
-        var result: PathKeyObject = { containerObject: undefined, key: "" }
+        let result: PathKeyObject = { containerObject: undefined, key: "" }
         
         if (IS(view.viewController)) {
             
@@ -1603,11 +2285,22 @@ export class EditorViewController extends UIViewController {
         this.saveButton.frame = this.reloadButton.frame.rectangleForPreviousColumn(padding * 0.5)
             .rectangleWithWidth(120, 1)
         
-        this.addViewControllerButton.frame = this.titleLabel.frame.rectangleForNextRow(padding)
+        this.treeView.frame = this.titleLabel.frame.rectangleForNextRow(padding, 500)
         
-        this.currentViewLabel.frame = this.addViewControllerButton.frame.rectangleForNextRow(padding)
+        this.addViewControllerButton.frame = this.treeView.frame.rectangleForNextRow(padding, labelHeight * 2)
+            .rectangleWithWidth(bounds.width * 0.5 - padding * 0.5)
+        this.deleteViewControllerButton.frame = this.addViewControllerButton.frame.rectangleForNextColumn(padding)
         
-        this.addViewButton.frame = this.currentViewLabel.frame.rectangleForNextRow(padding)
+        this.currentViewLabel.frame = this.addViewControllerButton.frame
+            .rectangleWithWidth(bounds.width)
+            .rectangleForNextRow(
+                padding,
+                this.currentViewLabel.methods.intrinsicContentHeight
+            )
+        
+        this.addViewButton.frame = this.currentViewLabel.frame.rectangleForNextRow(padding, labelHeight * 2)
+        //.rectangleWithWidth(bounds.width * 0.5 - padding * 0.5)
+        //this.removeViewButton.frame = this.addViewButton.frame.rectangleForNextColumn(padding)
         
         const tableRows: UIView[] = this.propertyEditors.copy()
         
@@ -1633,7 +2326,8 @@ export class EditorViewController extends UIViewController {
             absoluteHeights.push(1)
             
         }
-        this.addViewButton.frame.rectangleForNextRow(padding, tableRows.length * 70)
+        this.addViewButton.frame.rectangleWithWidth(bounds.width)
+            .rectangleForNextRow(padding, tableRows.length * 70)
             .distributeViewsAlongHeight(
                 tableRows,
                 1,
@@ -1646,9 +2340,10 @@ export class EditorViewController extends UIViewController {
             
             this.buttonsRow.frame = (this.propertyEditors.lastElement ||
                 this.addViewButton ||
-                this.currentViewLabel).frame.rectangleForNextRow(
-                padding
-            )
+                this.currentViewLabel).frame.rectangleWithWidth(bounds.width)
+                .rectangleForNextRow(
+                    padding
+                )
             
             this.editorContainer.frame = this.buttonsRow.frame.rectangleForNextRow(
                 padding * 0 + 5,

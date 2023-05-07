@@ -178,6 +178,10 @@ export class UIView extends UIObject {
     private _isMoving: boolean = NO
     _isCBEditorTemporaryResizable = NO
     _isCBEditorTemporaryMovable = NO
+    static _onWindowTouchMove: (event: TouchEvent) => void = nil
+    static _onWindowMouseMove: (event: MouseEvent) => void = nil
+    static _onWindowMouseup: (event: MouseEvent) => void = nil
+    
     
     constructor(
         elementID: string = ("UIView" + UIView.nextIndex),
@@ -217,6 +221,7 @@ export class UIView extends UIObject {
         return UIView._UIViewIndex + 1
     }
     
+    
     static get pageHeight() {
         const body = document.body
         const html = document.documentElement
@@ -229,7 +234,6 @@ export class UIView extends UIObject {
         )
     }
     
-    
     static get pageWidth() {
         const body = document.body
         const html = document.documentElement
@@ -241,6 +245,7 @@ export class UIView extends UIObject {
         this.style.top = "50%"
         this.style.transform = "translateX(-50%) translateY(-50%)"
     }
+    
     
     centerXInContainer() {
         this.style.left = "50%"
@@ -308,7 +313,6 @@ export class UIView extends UIObject {
         }
     }
     
-    
     get nativeSelectionEnabled() {
         return this._nativeSelectionEnabled
     }
@@ -324,12 +328,12 @@ export class UIView extends UIObject {
         }
     }
     
+    
     initViewStyleSelectors() {
         
         // Override this in a subclass
         
     }
-    
     
     initStyleSelector(selector: string, style: string) {
         const styleRules = UIView.getStyleRules(selector)
@@ -346,6 +350,7 @@ export class UIView extends UIObject {
         return result
     }
     
+    
     public get viewHTMLElement() {
         return this._viewHTMLElement
     }
@@ -354,7 +359,6 @@ export class UIView extends UIObject {
     public get elementID() {
         return this.viewHTMLElement.id
     }
-    
     
     setInnerHTML(key: string, defaultString: string, parameters?: { [x: string]: string | UILocalizedTextObject }) {
         
@@ -369,18 +373,19 @@ export class UIView extends UIObject {
         
     }
     
+    
     protected _setInnerHTMLFromKeyIfPossible() {
         if (this._innerHTMLKey && this._defaultInnerHTML) {
             this.setInnerHTML(this._innerHTMLKey, this._defaultInnerHTML, this._parameters)
         }
     }
     
-    
     protected _setInnerHTMLFromLocalizedTextObjectIfPossible() {
         if (IS(this._localizedTextObject)) {
             this.innerHTML = UICore.languageService.stringForCurrentLanguage(this._localizedTextObject)
         }
     }
+    
     
     get localizedTextObject() {
         return this._localizedTextObject
@@ -397,12 +402,12 @@ export class UIView extends UIObject {
         return this.viewHTMLElement.innerHTML
     }
     
-    
     set innerHTML(innerHTML) {
         if (this.innerHTML != innerHTML) {
             this.viewHTMLElement.innerHTML = FIRST(innerHTML, "")
         }
     }
+    
     
     set hoverText(hoverText: string) {
         this.viewHTMLElement.setAttribute("title", hoverText)
@@ -429,7 +434,6 @@ export class UIView extends UIObject {
         return this as any as UIDialogView
     }
     
-    
     get rootView(): UIView {
         if (IS(this.superview)) {
             return this.superview.rootView
@@ -442,15 +446,16 @@ export class UIView extends UIObject {
         this.updateContentForCurrentEnabledState()
     }
     
+    
     public get enabled(): boolean {
         return this._enabled
     }
-    
     
     updateContentForCurrentEnabledState() {
         this.hidden = !this.enabled
         this.userInteractionEnabled = this.enabled
     }
+    
     
     public get tabIndex(): number {
         return Number(this.viewHTMLElement.getAttribute("tabindex"))
@@ -460,7 +465,6 @@ export class UIView extends UIObject {
     public set tabIndex(index: number) {
         this.viewHTMLElement.setAttribute("tabindex", "" + index)
     }
-    
     
     get propertyDescriptors(): { object: UIObject; name: string }[] {
         let result: any[] = []
@@ -501,6 +505,7 @@ export class UIView extends UIObject {
         return NO
         
     }
+    
     
     addStyleClass(styleClass: string) {
         
@@ -629,7 +634,6 @@ export class UIView extends UIObject {
         // }
     }
     
-    
     static getStyleRules(selector: string) {
         
         // https://stackoverflow.com/questions/324486/how-do-you-read-css-rule-values-with-javascript
@@ -688,10 +692,10 @@ export class UIView extends UIObject {
         return this.viewHTMLElement.style
     }
     
+    
     get computedStyle() {
         return getComputedStyle(this.viewHTMLElement)
     }
-    
     
     public get hidden(): boolean {
         return this._isHidden
@@ -711,6 +715,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     static set pageScale(scale: number) {
         
         UIView._pageScale = scale
@@ -724,10 +729,10 @@ export class UIView extends UIObject {
         
     }
     
-    
     static get pageScale() {
         return UIView._pageScale
     }
+    
     
     set scale(scale: number) {
         
@@ -755,7 +760,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     get scale() {
         
         return this._scale
@@ -765,7 +769,7 @@ export class UIView extends UIObject {
     // Use this method to calculate the frame for the view itself
     // This can be used when adding subviews to existing views like buttons
     calculateAndSetViewFrame() {
-        
+    
     }
     
     
@@ -846,10 +850,9 @@ export class UIView extends UIObject {
         this.frame = newFrame
     }
     
-    
     boundsDidChange() {
-        
-        
+    
+    
     }
     
     setPosition(
@@ -954,6 +957,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     setPadding(padding?: number | string) {
         
         const previousBounds = this.bounds
@@ -1004,7 +1008,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     setStyleProperty(propertyName: string, value?: number | string) {
         
         try {
@@ -1027,10 +1030,10 @@ export class UIView extends UIObject {
         
     }
     
+    
     get userInteractionEnabled() {
         return (this.style.pointerEvents != "none")
     }
-    
     
     set userInteractionEnabled(userInteractionEnabled) {
         if (userInteractionEnabled) {
@@ -1041,15 +1044,16 @@ export class UIView extends UIObject {
         }
     }
     
+    
     get backgroundColor() {
         return this._backgroundColor
     }
-    
     
     set backgroundColor(backgroundColor: UIColor) {
         this._backgroundColor = backgroundColor
         this.style.backgroundColor = backgroundColor.stringValue
     }
+    
     
     get alpha() {
         return 1 * (this.style.opacity as any)
@@ -1194,11 +1198,11 @@ export class UIView extends UIObject {
         
     }
     
-    
     animationDidFinish() {
-        
-        
+    
+    
     }
+    
     
     static _transformAttribute = (("transform" in document.documentElement.style) ? "transform" : undefined) ||
         (("-webkit-transform" in document.documentElement.style) ? "-webkit-transform" : "undefined") ||
@@ -1428,7 +1432,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     layoutSubviews() {
         
         this.willLayoutSubviews()
@@ -1481,10 +1484,10 @@ export class UIView extends UIObject {
         return this._constraints
     }
     
+    
     set constraints(constraints) {
         this._constraints = constraints
     }
-    
     
     addConstraint(constraint: any) {
         this.constraints.push(constraint)
@@ -1545,6 +1548,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     static constraintAttribute = {
         
         "left": AutoLayout.Attribute.LEFT,
@@ -1587,7 +1591,6 @@ export class UIView extends UIObject {
         return nil
     }
     
-    
     rectangleContainingSubviews() {
         const center = this.bounds.center
         let result = new UIRectangle(center.x, center.y, 0, 0)
@@ -1627,6 +1630,7 @@ export class UIView extends UIObject {
         return result
     }
     
+    
     addSubview(view: UIView, aboveView?: UIView) {
         
         if (!this.hasSubview(view) && IS(view)) {
@@ -1665,11 +1669,11 @@ export class UIView extends UIObject {
         views.forEach(view => this.addSubview(view))
     }
     
-    
     addedAsSubviewToView(view: UIView, aboveView?: UIView) {
         view.addSubview(this, aboveView)
         return this
     }
+    
     
     moveToBottomOfSuperview() {
         
@@ -1726,10 +1730,9 @@ export class UIView extends UIObject {
         }
     }
     
-    
     willAppear() {
-        
-        
+    
+    
     }
     
     willMoveToSuperview(superview: UIView) {
@@ -1742,11 +1745,12 @@ export class UIView extends UIObject {
     }
     
     wasAddedToViewTree() {
-        
+    
     }
     
+    
     wasRemovedFromViewTree() {
-        
+    
     }
     
     
@@ -1793,7 +1797,6 @@ export class UIView extends UIObject {
         this.viewHTMLElement.blur()
     }
     
-    
     get isMovable(): boolean {
         return this._isMovable
     }
@@ -1806,6 +1809,7 @@ export class UIView extends UIObject {
             this.makeNotMovable?.()
         }
     }
+    
     
     makeMovable(
         optionalParameters: {
@@ -1926,10 +1930,10 @@ export class UIView extends UIObject {
         
     }
     
-    
     get isResizable(): boolean {
         return this._isResizable
     }
+    
     
     set isResizable(isResizable: boolean) {
         if (isResizable) {
@@ -2003,8 +2007,9 @@ export class UIView extends UIObject {
             
             if (event instanceof MouseEvent) {
                 
+                const scaleX = this.viewHTMLElement.getBoundingClientRect().width / this.viewHTMLElement.offsetWidth
                 const signMultiplier = 1 - 2 * centeredOnPosition
-                let movementX = event.movementX
+                let movementX = event.movementX / scaleX
                 
                 if (xOverflow * signMultiplier > 0 && 0 > movementX) {
                     xOverflow = (xOverflow + movementX / UIView.pageScale).integerValue
@@ -2055,8 +2060,9 @@ export class UIView extends UIObject {
             
             if (event instanceof MouseEvent) {
                 
+                const scaleX = this.viewHTMLElement.getBoundingClientRect().width / this.viewHTMLElement.offsetWidth
                 const signMultiplier = 1 - 2 * centeredOnPosition
-                let movementY = event.movementY
+                let movementY = event.movementY / scaleX
                 
                 if (yOverflow * signMultiplier > 0 && 0 > movementY) {
                     yOverflow = (yOverflow + movementY / UIView.pageScale).integerValue
@@ -2431,7 +2437,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     static async shouldCallPointerUpInsideOnView(view: UIView) {
         
         return YES
@@ -2450,12 +2455,12 @@ export class UIView extends UIObject {
         
     }
     
+    
     static async shouldCallPointerCancelOnView(view: UIView) {
         
         return YES
         
     }
-    
     
     shouldCallPointerUpInside() {
         return UIView.shouldCallPointerUpInsideOnView(this)
@@ -2469,10 +2474,10 @@ export class UIView extends UIObject {
         return UIView.shouldCallPointerHoverOnView(this)
     }
     
+    
     shouldCallPointerLeave() {
         return UIView.shouldCallPointerLeaveOnView(this)
     }
-    
     
     protected _loadUIEvents() {
         
@@ -2531,28 +2536,9 @@ export class UIView extends UIObject {
             
             this._hasPointerDragged = NO
             
-            const windowMouseMoveFunction = (event: MouseEvent) => {
-                onMouseMove(event)
-                //pauseEvent(event, YES)
-            }
-            const windowMouseUpOrLeaveFunction = (event: MouseEvent) => {
-                
-                window.removeEventListener("mousemove", windowMouseMoveFunction)
-                window.removeEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
-                document.body.removeEventListener("mouseleave", windowMouseUpOrLeaveFunction)
-                onmouseup(event)
-                
-            }
-            window.addEventListener("mousemove", windowMouseMoveFunction)
-            window.addEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
-            document.body.addEventListener("mouseleave", windowMouseUpOrLeaveFunction)
-            
-            const windowTouchFunction = () => {
-                window.removeEventListener("touchmove", onTouchMove, true)
-                window.removeEventListener("mouseup", windowTouchFunction, true)
-            }
-            window.addEventListener("touchmove", onTouchMove, true)
-            window.addEventListener("mouseup", windowTouchFunction, true)
+            UIView._onWindowTouchMove = onTouchMove
+            UIView._onWindowMouseup = onmouseup
+            UIView._onWindowMouseMove = onMouseMove
             
         }
         
@@ -2658,8 +2644,9 @@ export class UIView extends UIObject {
             this.sendControlEventForKey(UIView.controlEvent.PointerMove, event)
             
             if (this._hasPointerDragged && this._isPointerDown) {
+                const scaleX = this.viewHTMLElement.getBoundingClientRect().width / this.viewHTMLElement.offsetWidth
                 const movementPoint = this._previousClientPoint.to(clientPoint)
-                this.pointerDraggingPoint = new UIPoint(movementPoint.x, movementPoint.y).scale(1 / UIView.pageScale)
+                this.pointerDraggingPoint = new UIPoint(movementPoint.x, movementPoint.y).scale(1 / scaleX)
                     .add(this.pointerDraggingPoint)
                 this.sendControlEventForKey(UIView.controlEvent.PointerDrag, event)
             }
@@ -2709,8 +2696,9 @@ export class UIView extends UIObject {
             
             
             if (this._hasPointerDragged) {
+                const scaleX = this.viewHTMLElement.getBoundingClientRect().width / this.viewHTMLElement.offsetWidth
                 const movementPoint = this._previousClientPoint.to(clientPoint)
-                this.pointerDraggingPoint = new UIPoint(movementPoint.x, movementPoint.y).scale(1 / UIView.pageScale)
+                this.pointerDraggingPoint = new UIPoint(movementPoint.x, movementPoint.y).scale(1 / scaleX)
                     .add(this.pointerDraggingPoint)
                 this.sendControlEventForKey(UIView.controlEvent.PointerDrag, event)
             }
@@ -2930,6 +2918,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     controlEvent = UIView.controlEvent
     
     
@@ -2969,7 +2958,6 @@ export class UIView extends UIObject {
         eventKeys.forEach(key => this.addTargetForControlEvent(key, targetFunction))
     }
     
-    
     addTargetForControlEvent(eventKey: string, targetFunction: (sender: UIView, event: Event) => void) {
         
         let targets = this._controlEventTargets[eventKey]
@@ -3001,6 +2989,7 @@ export class UIView extends UIObject {
         eventKeys.forEach(key => this.removeTargetForControlEvent(key, targetFunction))
     }
     
+    
     sendControlEventForKey(eventKey: string, nativeEvent: Event) {
         let targets = this._controlEventTargets[eventKey]
         if (!targets) {
@@ -3023,7 +3012,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     broadcastEventInSubtree(event: UIViewBroadcastEvent) {
         this.forEachViewInSubtree(view => {
             view.didReceiveBroadcastEvent(event)
@@ -3032,6 +3020,7 @@ export class UIView extends UIObject {
             }
         })
     }
+    
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
@@ -3061,7 +3050,6 @@ export class UIView extends UIObject {
         this.subviews.everyElement.forEachViewInSubtree(functionToCall)
     }
     
-    
     rectangleInView(rectangle: UIRectangle, view: UIView) {
         if (!view.isMemberOfViewTree || !this.isMemberOfViewTree) {
             return nil
@@ -3077,6 +3065,7 @@ export class UIView extends UIObject {
         
         return rectangle.copy().offsetByPoint(offsetPoint)
     }
+    
     
     rectangleFromView(rectangle: UIRectangle, view: UIView) {
         return view.rectangleInView(rectangle, this)
@@ -3157,7 +3146,6 @@ export class UIView extends UIObject {
         
     }
     
-    
     intrinsicContentWidth(constrainingHeight: number = 0): number {
         
         return this.intrinsicContentSizeWithConstraints(constrainingHeight).width
@@ -3171,14 +3159,50 @@ export class UIView extends UIObject {
         
     }
     
+    
     intrinsicContentSize(): UIRectangle {
         
         return nil
         
     }
     
+}
+
+
+const windowMouseMoveFunction = (event: MouseEvent) => {
+    
+    UIView._onWindowMouseMove(event)
+    //pauseEvent(event, YES)
     
 }
+const windowMouseUpOrLeaveFunction = (event: MouseEvent) => {
+    
+    const onWindowMouseUp = UIView._onWindowMouseup
+    
+    UIView._onWindowMouseMove = nil
+    UIView._onWindowMouseup = nil
+    
+    // window.removeEventListener("mousemove", windowMouseMoveFunction)
+    // window.removeEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
+    // document.body.removeEventListener("mouseleave", windowMouseUpOrLeaveFunction)
+    onWindowMouseUp(event)
+    
+}
+window.addEventListener("mousemove", windowMouseMoveFunction)
+window.addEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
+document.body.addEventListener("mouseleave", windowMouseUpOrLeaveFunction)
+
+const windowTouchFunction = () => {
+    
+    UIView._onWindowTouchMove = nil
+    UIView._onWindowMouseup = nil
+    // window.removeEventListener("touchmove", UIView._onWindowTouchMove, true)
+    // window.removeEventListener("mouseup", windowTouchFunction, true)
+    
+}
+window.addEventListener("touchmove", UIView._onWindowTouchMove, true)
+window.addEventListener("mouseup", windowTouchFunction, true)
+
 
 
 

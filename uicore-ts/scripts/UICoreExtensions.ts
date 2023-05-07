@@ -606,7 +606,8 @@ if ("allValues" in Object.prototype == NO) {
                 values.push(value)
             })
             return values
-        }
+        },
+        enumerable:  NO
     })
 }
 
@@ -622,7 +623,8 @@ if ("allKeys" in Object.prototype == NO) {
     Object.defineProperty(Object.prototype, "allKeys", {
         get: function (this: Object) {
             return Object.keys(this)
-        }
+        },
+        enumerable: NO
     })
 }
 
@@ -788,7 +790,8 @@ if ("capitalizedString" in String.prototype == NO) {
     Object.defineProperty(Object.prototype, "capitalizedString", {
         get: function (this: String) {
             return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase()
-        }
+        },
+        enumerable: NO
     })
 }
 

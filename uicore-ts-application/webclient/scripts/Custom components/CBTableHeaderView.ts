@@ -1,6 +1,6 @@
 import { IF, nil, UIButton, UIKeyValueStringSorter, UIKeyValueStringSorterSortingInstruction } from "uicore-ts"
 import { CBColor } from "./CBColor"
-import { CBTableViewCellDescriptor } from "./CBDataView"
+import { CBDataViewCellDescriptor } from "./CBDataView"
 import { CellView } from "./CellView"
 import { RowView } from "./RowView"
 
@@ -10,13 +10,13 @@ const kDescendingColumnImageAddress = "images/baseline-expand_less-24px.svg"
 const kAscendingColumnImageAddress = "images/baseline-expand_more-24px.svg"
 
 
-export class CBTableHeaderView extends RowView<CellView> {
+export class CBTableHeaderView<DataType = Record<string, any>> extends RowView<CellView> {
     
     orderingStates: string[] = []
     
-    private _descriptors: CBTableViewCellDescriptor[] = []
+    private _descriptors: CBDataViewCellDescriptor<DataType>[] = []
     
-    constructor(elementID: string, descriptors: CBTableViewCellDescriptor[] = []) {
+    constructor(elementID: string, descriptors: CBDataViewCellDescriptor<DataType>[] = []) {
         
         super(elementID)
         

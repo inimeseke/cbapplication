@@ -5,6 +5,7 @@ import * as path from "path"
 import { Server } from "socket.io"
 import {
     ClassDeclaration,
+    ExpressionStatement,
     Node,
     ObjectLiteralExpression,
     Project,
@@ -111,117 +112,127 @@ export class CBEditorController extends RoutesController {
         
         targets.EditProperty = async (message, socketSession, respondWithMessage) => {
             
-            this.currentEditingTarget = message
-            
-            const sourceFiles = this.webclientProject.getSourceFiles()
-            const resultFile = sourceFiles.find(
-                (file, index, array) => file.getClass(
-                    declaration => declaration.getName() == message.className
-                )
-            )
-            
-            sourceFiles.removeElement(resultFile)
-            
-            const referencedFiles = sourceFiles.map(
-                (file) => {
-                    return {
-                        codeFileContents: file.getFullText(),
-                        path: file.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", "")
-                    }
-                }
-            )
-            
-            const classObject = resultFile.getClass(message.className)
-            let propertyObject = this.propertyObjectForClass(classObject, message.propertyKey)
-            let propertyReferenceLocations: {
-                fileName: string;
-                start: { column: number; lineNumber: number };
-                className: string;
-                end: { column: number; lineNumber: number }
-            }[]
-            
-            if (propertyObject) {
+            try {
                 
-                const propertyReferences = propertyObject.findReferencesAsNodes().filter(
-                    reference => reference.getSourceFile() == classObject.getSourceFile()
+                this.currentEditingTarget = message
+                
+                const sourceFiles = this.webclientProject.getSourceFiles()
+                const resultFile = sourceFiles.find(
+                    (file, index, array) => file.getClass(
+                        declaration => declaration.getName() == message.className
+                    )
                 )
                 
-                propertyReferenceLocations = propertyReferences.map(reference => {
-                    
-                    return {
-                        fileName: reference.getSourceFile().getBaseName(),
-                        className: reference.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)?.getName?.() ?? "",
-                        start: {
-                            lineNumber: reference.getStartLineNumber(),
-                            column: reference.getStart() - reference.getStartLinePos()
-                        },
-                        end: {
-                            lineNumber: reference.getEndLineNumber(),
-                            column: reference.getEnd() - reference.getStartLinePos() + 1
+                sourceFiles.removeElement(resultFile)
+                
+                const referencedFiles = sourceFiles.map(
+                    (file) => {
+                        return {
+                            codeFileContents: file.getFullText(),
+                            path: file.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", "")
                         }
                     }
+                )
+                
+                const classObject = resultFile.getClass(message.className)
+                let propertyObject = this.propertyObjectForClass(classObject, message.propertyKey)
+                let propertyReferenceLocations: {
+                    fileName: string;
+                    start: { column: number; lineNumber: number };
+                    className: string;
+                    end: { column: number; lineNumber: number }
+                }[]
+                
+                if (propertyObject) {
                     
+                    const propertyReferences = propertyObject.findReferencesAsNodes().filter(
+                        reference => reference.getSourceFile() == classObject.getSourceFile()
+                    )
+                    
+                    propertyReferenceLocations = propertyReferences.map(reference => {
+                        
+                        return {
+                            fileName: reference.getSourceFile().getBaseName(),
+                            className: reference.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)?.getName?.() ?? "",
+                            start: {
+                                lineNumber: reference.getStartLineNumber(),
+                                column: reference.getStart() - reference.getStartLinePos()
+                            },
+                            end: {
+                                lineNumber: reference.getEndLineNumber(),
+                                column: reference.getEnd() - reference.getStartLinePos() + 1
+                            }
+                        }
+                        
+                    })
+                    
+                }
+                
+                const viewClass = this.classDeclarationWithName(
+                    propertyObject?.getStructure()?.type as string ||
+                    propertyObject.getType().getApparentType().getSymbol().getName()
+                )
+                
+                const editableAccessorDeclarations = this.editableAccessorDeclarations(viewClass)
+                
+                const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
+                const targetFile = sourceFiles.find(
+                    file => file.getClass(
+                        declaration => declaration.getName() == classPropertyTypeName
+                    )
+                )
+                
+                const editableProperties = editableAccessorDeclarations.map(setter => {
+                    
+                    const propertyKeyPath = message.propertyKey + "." + setter.getStructure().name
+                    
+                    const result = {
+                        typeName: setter.getStructure().parameters.firstElement.type as string,
+                        path: propertyKeyPath,
+                        editingLocation: this.locationOfEditing(
+                            resultFile,
+                            targetFile,
+                            { className: message.className, propertyKeyPath: propertyKeyPath }
+                        )
+                    }
+                    
+                    return result
+                    
+                }).uniqueElementsOnlyWithFunction(property => property.path)
+                
+                
+                await respondWithMessage({
+                    codeFileContents: resultFile.getFullText(),
+                    path: resultFile.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", ""),
+                    referencedFiles: referencedFiles,
+                    propertyLocation: Utils.IF(propertyObject)(() => {
+                        
+                        return {
+                            className: propertyObject.getParent().getName(),
+                            start: {
+                                lineNumber: propertyObject.getNameNode().getStartLineNumber(),
+                                column: propertyObject.getNameNode().getStart() - propertyObject.getNameNode()
+                                    .getStartLinePos() + 1
+                            },
+                            end: {
+                                lineNumber: propertyObject.getNameNode().getEndLineNumber(),
+                                column: propertyObject.getNameNode().getEnd() - propertyObject.getNameNode()
+                                    .getStartLinePos() + 1
+                            }
+                        }
+                        
+                    }).ELSE(() => undefined),
+                    propertyReferenceLocations: propertyReferenceLocations,
+                    editableProperties: editableProperties
                 })
                 
+            } catch (exception) {
+                
+                respondWithMessage.sendErrorResponse(exception)
+                
+                this.currentEditingTarget = undefined
+                
             }
-            
-            const viewClass = this.classDeclarationWithName(
-                propertyObject?.getStructure()?.type as string ||
-                propertyObject.getType().getApparentType().getSymbol().getName()
-            )
-            
-            const editableAccessorDeclarations = this.editableAccessorDeclarations(viewClass)
-            
-            const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
-            const targetFile = sourceFiles.find(
-                file => file.getClass(
-                    declaration => declaration.getName() == classPropertyTypeName
-                )
-            )
-            
-            const editableProperties = editableAccessorDeclarations.map(setter => {
-                
-                const propertyKeyPath = message.propertyKey + "." + setter.getStructure().name
-                
-                const result = {
-                    typeName: setter.getStructure().parameters.firstElement.type as string,
-                    path: propertyKeyPath,
-                    editingLocation: this.locationOfEditing(
-                        resultFile,
-                        targetFile,
-                        { className: message.className, propertyKeyPath: propertyKeyPath }
-                    )
-                }
-                
-                return result
-                
-            }).uniqueElementsOnlyWithFunction(property => property.path)
-            
-            
-            await respondWithMessage({
-                codeFileContents: resultFile.getFullText(),
-                path: resultFile.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", ""),
-                referencedFiles: referencedFiles,
-                propertyLocation: Utils.IF(propertyObject)(() => {
-                    
-                    return {
-                        className: propertyObject.getParent().getName(),
-                        start: {
-                            lineNumber: propertyObject.getNameNode().getStartLineNumber(),
-                            column: propertyObject.getNameNode().getStart() - propertyObject.getNameNode()
-                                .getStartLinePos() + 1
-                        },
-                        end: {
-                            lineNumber: propertyObject.getNameNode().getEndLineNumber(),
-                            column: propertyObject.getNameNode().getEnd() - propertyObject.getNameNode()
-                                .getStartLinePos() + 1
-                        }
-                    }
-                    
-                }).ELSE(() => undefined),
-                propertyReferenceLocations: propertyReferenceLocations,
-                editableProperties: editableProperties
-            })
             
         }
         
@@ -904,6 +915,41 @@ export class CBEditorController extends RoutesController {
         }
         
         
+        targets.RemoveSubview = async (message, socketSession, respondWithMessage) => {
+            
+            
+            const viewController = this.classDeclarationWithName(message.className)
+            const property = viewController.getProperty(message.propertyKey)
+            const referenceNodes = property.findReferencesAsNodes()
+            
+            const referenceExpressions: ExpressionStatement[] = referenceNodes.map(
+                value => value.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)
+            ).filter(value => value).uniqueElementsOnlyWithFunction(value => value.getText())
+            
+            const referenceBinaryExpressions = referenceExpressions.map(
+                value => value.getFirstDescendantByKind(SyntaxKind.BinaryExpression)
+            ).filter(value => value?.getLeft()?.getText()?.contains(message.propertyKey + ".frame"))
+            
+            referenceBinaryExpressions.forEach(value => {
+                
+                value.getFirstAncestorByKind(SyntaxKind.ExpressionStatement)?.remove()
+                
+            })
+            
+            property.remove()
+            
+            await viewController.getSourceFile().save()
+            
+            this.currentEditingTarget.propertyKey = "view"
+            
+            var asd = 1
+            
+            respondWithMessage(true)
+            
+            
+        }
+        
+        
         targets.AddNewViewController = async (message, socketSession, respondWithMessage) => {
             
             
@@ -941,12 +987,10 @@ export class CBEditorController extends RoutesController {
             
             // Register the class in the RootViewController
             
-            const rootViewControllerClass = rootViewControllerFile.getClasses()[0]
-            const contentViewControllersProperty = rootViewControllerClass.getProperty("contentViewControllers")
-            
             const classNameLowercased = newClassName.slice(0, 1).toLowerCase() + newClassName.slice(1)
             
-            
+            const rootViewControllerClass = rootViewControllerFile.getClasses()[0]
+            const contentViewControllersProperty = rootViewControllerClass.getProperty("contentViewControllers")
             contentViewControllersProperty.getInitializer()
                 .asKind(SyntaxKind.ObjectLiteralExpression)
                 .addPropertyAssignment({
@@ -963,173 +1007,115 @@ export class CBEditorController extends RoutesController {
             
             //rootViewControllerFile.fixMissingImports()
             
-            var asd = 1
+            // Change the title
+            
+            const UIObjectClass = sourceFiles.find(
+                file => file.getClass(
+                    declaration => declaration.getName() == "UIObject"
+                )
+            ).getClass(declaration => declaration.getName() == "UIObject")
+            
+            const titleLabelPropertyName = "titleLabel"
+            const titleLabelPropertyDeclaration = newClass.getProperty(titleLabelPropertyName)
+            const configurationMethodCallReference = UIObjectClass.getMethod(
+                method => method.getName() == "configuredWithObject"
+            ).findReferencesAsNodes().find(
+                reference => this.isNodeContainedInNode(
+                    reference,
+                    titleLabelPropertyDeclaration.getInitializer()
+                )
+            )?.getFirstAncestorByKind(SyntaxKind.CallExpression)
+            const configurationObject = configurationMethodCallReference?.getArguments()?.[0] as ObjectLiteralExpression
+            
+            if (configurationObject) {
+                const propertyAssignment = configurationObject.getChildrenOfKind(SyntaxKind.PropertyAssignment)
+                    .find(assignment => assignment.getChildren()[0].getText() == "text")
+                if (propertyAssignment) {
+                    const propertyAssignmentValue = propertyAssignment.getChildren()[2]
+                    propertyAssignmentValue.replaceWithText("\"" + newClassName + "\"")
+                }
+                else {
+                    configurationObject.addPropertyAssignment({
+                        name: "text",
+                        initializer: newClassName
+                    })
+                }
+            }
+            
+            
             await newClassFile.save()
             await rootViewControllerFile.save()
+            
+            let compiledCodeFileContents: string
+            
+            try {
+                
+                compiledCodeFileContents = transformSync(newClassFile.getFullText()).code
+                
+            } catch (exception) {
+                
+                console.log(exception)
+                console.log(newClassFile.getFullText())
+                
+            }
+            
+            this.currentEditingTarget = {
+                className: newClassName,
+                propertyKey: "view",
+                runtimeObjectKeyPath: "contentViewController.view"
+            }
             
             await respondWithMessage({
                 
                 codeFileContents: newClassFile.getFullText(),
-                path: componentName,
-                referencedFiles: [],
-                propertyLocation: null,
-                propertyReferenceLocations: [],
-                editableProperties: []
+                compiledCodeFileContents: compiledCodeFileContents,
+                componentName: componentName
                 
             })
             
-            return
             
-            const referencedFiles = sourceFiles.map(
-                (file) => {
-                    return {
-                        codeFileContents: file.getFullText(),
-                        path: file.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", "")
-                    }
-                }
-            )
+        }
+        
+        
+        targets.DeleteViewController = async (message, socketSession, respondWithMessage) => {
             
-            const classObject = rootViewControllerFile.getClass(message.className)
-            let propertyObject = this.propertyObjectForClass(classObject, message.propertyKey)
-            const propertyReferences = propertyObject?.findReferencesAsNodes()?.filter(
-                reference => reference.getSourceFile() == classObject.getSourceFile()
-            ) ?? []
+            const UIRootViewController = this.classDeclarationWithName("UIRootViewController")
             
-            const propertyReferenceLocations = propertyReferences.map(reference => {
-                
-                return {
-                    fileName: reference.getSourceFile().getBaseName(),
-                    className: reference.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)?.getName?.() ?? "",
-                    start: {
-                        lineNumber: reference.getStartLineNumber(),
-                        column: reference.getStart() - reference.getStartLinePos()
-                    },
-                    end: {
-                        lineNumber: reference.getEndLineNumber(),
-                        column: reference.getEnd() - reference.getStartLinePos() + 1
-                    }
-                }
-                
-            })
+            const viewController = this.classDeclarationWithName(message.className)
             
-            if (propertyObject) {
-                
-                respondWithMessage.sendErrorResponse(
-                    "Property withe name " + message.propertyKey + " is already present in class " + message.className
-                )
-                
-                return
-                
-            }
+            // viewController.findReferences().forEach((value, index, array) => {
+            //
+            //
+            //
+            //     value.getDefinition()
+            //
+            // })
             
-            respondWithMessage.sendIntermediateResponse("Adding property " +
-                message.className +
-                "_" +
-                message.propertyKey)
-            
-            propertyObject = classObject.addProperty({
-                name: message.propertyKey,
-                initializer: "new UIView().addedAsSubviewToView(this.view)"
-            })
-            // .configuredWithObject({ backgroundColor: UIColor.redColor })
-            
-            
-            propertyObject.setOrder(classObject.getConstructors()[0].getChildIndex())
-            
-            // Set frame for the view in the layout method
-            
-            const layoutMethod = classObject.getMethods()
-                .find(method => ["layoutViewSubviews", "layoutSubviews"].contains(method.getName()))
-            
-            const superCall = layoutMethod.getStatements().find(statement => statement.getText().startsWith("super"))
-            
-            const otherFrameStatement = layoutMethod.getDescendantsOfKind(SyntaxKind.BinaryExpression)
-                .filter(value => value.getOperatorToken().getText() == "=")
-                .reverse()
-                .find(
-                    (statement, index, array) => statement.getLeft().getText().endsWith("frame"))
-            
-            // layoutMethod.getDescendantStatements().reverse().find(statement => statement.getText().contains("frame ="))
-            
-            layoutMethod.addStatements(
-                "this." + propertyObject.getName() + ".frame = " + otherFrameStatement.getLeft().getText() +
-                ".rectangleForNextRow(" +
-                "\npadding, " +
-                "\n[this." + propertyObject.getName() + ".intrinsicContentHeight(" +
-                otherFrameStatement.getLeft().getText() + ".width" +
-                "), padding].max()" +
-                "\n)"
-            )
-            
-            layoutMethod.formatText({ indentStyle: IndentStyle.Block })
-            
-            await rootViewControllerFile.save()
-            
-            // return
-            
-            
-            const viewClass = this.classDeclarationWithName(propertyObject?.getStructure()?.type as string)
-            
-            const editableAccessorDeclarations = this.editableAccessorDeclarations(viewClass)
-            
-            const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
-            const targetFile = sourceFiles.find(
-                file => file.getClass(
-                    declaration => declaration.getName() == classPropertyTypeName
+            const sourceFiles = this.webclientProject.getSourceFiles()
+            const rootViewControllerFile = sourceFiles.find(
+                (file, index, array) => file.getClass(declaration =>
+                    declaration.getName() != UIRootViewController.getName() &&
+                    this.isClassKindOfReferenceClass(declaration, UIRootViewController)
                 )
             )
             
-            const editableProperties = editableAccessorDeclarations.map(setter => {
-                
-                const propertyKeyPath = message.propertyKey + "." + setter.getStructure().name
-                
-                const result = {
-                    typeName: setter.getStructure().parameters.firstElement.type as string,
-                    path: propertyKeyPath,
-                    editingLocation: this.locationOfEditing(
-                        rootViewControllerFile,
-                        targetFile,
-                        { className: message.className, propertyKeyPath: propertyKeyPath }
-                    )
-                }
-                
-                return result
-                
-            }).uniqueElementsOnlyWithFunction(property => property.path)
+            // Unregister the class in the RootViewController
             
-            const runtimeObjectKeyPathComponents = this.currentEditingTarget.runtimeObjectKeyPath.split(".")
-            runtimeObjectKeyPathComponents.lastElement = message.propertyKey
-            this.currentEditingTarget = {
-                propertyKey: message.propertyKey,
-                className: message.className,
-                runtimeObjectKeyPath: runtimeObjectKeyPathComponents.join(".")
-            }
+            const classNameLowercased = message.className.slice(0, 1).toLowerCase() + message.className.slice(1)
             
+            const rootViewControllerClass = rootViewControllerFile.getClasses()[0]
+            const contentViewControllersProperty = rootViewControllerClass.getProperty("contentViewControllers")
+            contentViewControllersProperty.getInitializer()
+                .asKind(SyntaxKind.ObjectLiteralExpression)
+                .getProperty(classNameLowercased).remove()
             
-            await respondWithMessage({
-                codeFileContents: rootViewControllerFile.getFullText(),
-                path: rootViewControllerFile.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", ""),
-                referencedFiles: referencedFiles,
-                propertyLocation: Utils.IF(propertyObject)(() => {
-                    
-                    return {
-                        className: propertyObject.getParent().getName(),
-                        start: {
-                            lineNumber: propertyObject.getNameNode().getStartLineNumber(),
-                            column: propertyObject.getNameNode().getStart() - propertyObject.getNameNode()
-                                .getStartLinePos() + 1
-                        },
-                        end: {
-                            lineNumber: propertyObject.getNameNode().getEndLineNumber(),
-                            column: propertyObject.getNameNode().getEnd() - propertyObject.getNameNode()
-                                .getStartLinePos() + 1
-                        }
-                    }
-                    
-                }).ELSE(() => undefined),
-                propertyReferenceLocations: propertyReferenceLocations,
-                editableProperties: editableProperties
-            })
+            rootViewControllerFile.organizeImports()
+            await this.webclientProject.save()
+            fs.unlinkSync(viewController.getSourceFile().getFilePath())
+            
+            this.reloadEditorProject()
+            
+            await respondWithMessage(true)
             
         }
         
@@ -1547,6 +1533,7 @@ export class CBEditorController extends RoutesController {
             
             var asd = 1
             
+            return
             
         }
         

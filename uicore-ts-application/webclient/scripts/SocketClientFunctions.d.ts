@@ -109,9 +109,12 @@ export interface CBApplicationSocketClientInterface {
     
     AddSubview: SocketClientFunction<CBEditorPropertyDescriptor,
         CBEditorEditingDescriptor>
+    RemoveSubview: SocketClientFunction<CBEditorPropertyDescriptor,
+        boolean>
     
-    AddNewViewController: SocketClientFunction<CBEditorPropertyDescriptor,
-        CBEditorEditingDescriptor>
+    AddNewViewController: SocketClientFunction<{ className: string },
+        { codeFileContents: string, compiledCodeFileContents: string, componentName: string }>
+    DeleteViewController: SocketClientFunction<{ className: string, deleteFile: boolean }, boolean>
     
     SaveFile: SocketClientFunction<CBEditorClassFileDescriptor, string>
     

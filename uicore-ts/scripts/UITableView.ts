@@ -1,6 +1,6 @@
 import { UIButton } from "./UIButton"
 import { UINativeScrollView } from "./UINativeScrollView"
-import { IS, nil, NO, YES } from "./UIObject"
+import { IS, IS_DEFINED, nil, NO, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
@@ -8,7 +8,7 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 interface UITableViewRowView extends UIView {
     
-    _UITableViewRowIndex: number;
+    _UITableViewRowIndex?: number;
     
 }
 
@@ -119,7 +119,7 @@ export class UITableView extends UINativeScrollView {
         newIndexes.forEach(index => {
         
             if (this.isRowWithIndexVisible(index)) {
-                this.highlightRowAsNew(this.viewForRowWithIndex(index) as UIView)
+                this.highlightRowAsNew(this.visibleRowWithIndex(index) as UIView)
             }
         
         })
@@ -319,15 +319,15 @@ export class UITableView extends UINativeScrollView {
         }
     
         const visibleIndexes = this.indexesForVisibleRows()
-    
+        
         const minIndex = visibleIndexes[0]
         const maxIndex = visibleIndexes[visibleIndexes.length - 1]
     
         const removedViews: UITableViewRowView[] = []
-    
+        
         const visibleRows: UITableViewRowView[] = []
         this._visibleRows.forEach((row) => {
-            if (row._UITableViewRowIndex < minIndex || row._UITableViewRowIndex > maxIndex) {
+            if (IS_DEFINED(row._UITableViewRowIndex) && (row._UITableViewRowIndex < minIndex || row._UITableViewRowIndex > maxIndex)) {
             
                 //row.removeFromSuperview();
             
@@ -460,7 +460,7 @@ export class UITableView extends UINativeScrollView {
     
     viewForRowWithIndex(rowIndex: number): UITableViewRowView {
         const row = this.reusableViewForIdentifier("Row", rowIndex);
-        (row as UIButton).titleLabel.text = "Row " + rowIndex
+        (row as unknown as UIButton).titleLabel.text = "Row " + rowIndex
         return row
     }
     
@@ -537,7 +537,7 @@ export class UITableView extends UINativeScrollView {
         
             const frame = bounds.copy()
         
-            const positionObject = positions[row._UITableViewRowIndex]
+            const positionObject = positions[row._UITableViewRowIndex!]
             frame.min.y = positionObject.topY
             frame.max.y = positionObject.bottomY
             row.frame = frame

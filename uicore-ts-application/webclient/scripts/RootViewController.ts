@@ -24,6 +24,8 @@ import { LanguagesDialogView } from "./LanguagesDialogView"
 import { LanguageService } from "./LanguageService"
 import { SomeContentViewController } from "./SomeContentViewController"
 import { TopBarView } from "./TopBarView"
+import { TreeViewViewController } from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/TreeViewViewController";
+import { ChartViewController } from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/ChartViewController";
 
 export class RootViewController extends UIRootViewController {
     
@@ -50,7 +52,9 @@ export class RootViewController extends UIRootViewController {
             async () =>
                 IS((await SocketClient.AreCBInternalSettingsAvailableForCurrentUser()).result) || YES
         ),
-        mainViewController: this.lazyViewControllerObjectWithClass(SomeContentViewController)
+        mainViewController: this.lazyViewControllerObjectWithClass(SomeContentViewController),
+        treeViewViewController: this.lazyViewControllerObjectWithClass(TreeViewViewController),
+        chartViewController: this.lazyViewControllerObjectWithClass(ChartViewController)
     }
     private editor?: EditorViewController
     

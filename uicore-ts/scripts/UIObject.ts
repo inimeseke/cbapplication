@@ -229,14 +229,14 @@ export class UIFunctionExtender<T extends (...args: any) => any> {
     
     extendedFunction(functionToExtend: T) {
         const extendingFunction = this.extendingFunction
-    
+        
         function extendedFunction(this: any, ...objects: any[]) {
             const boundFunctionToExtend = functionToExtend.bind(this)
             boundFunctionToExtend(...objects)
             const boundExtendingFunction = extendingFunction.bind(this)
             boundExtendingFunction(...objects)
         }
-    
+        
         extendedFunction.extendedFunction = functionToExtend
         return extendedFunction
     }
@@ -270,7 +270,7 @@ export class UILazyPropertyValue<T> {
             isValueInitialized = YES
             this.initFunction = nil
         }
-    
+        
         // @ts-ignore
         if (delete target[key]) {
             
@@ -315,7 +315,7 @@ export type UIInitializerObject<T> = {
 export class UIObject {
     
     constructor() {
-    
+        
         // Do something here if needed
         
     }
@@ -376,7 +376,7 @@ export class UIObject {
         
         const keys = keyPath.split(".")
         let currentObject = object
-    
+        
         for (let i = 0; i < keys.length; i++) {
             
             const key = keys[i]
@@ -439,9 +439,9 @@ export class UIObject {
     
     
     configureWithObject(object: UIInitializerObject<this>) {
-    
+        
         return UIObject.configureWithObject(this, object)
-    
+        
     }
     
     configuredWithObject(object: UIInitializerObject<this>): this {
@@ -557,14 +557,14 @@ export class UIObject {
                 value.callFunction(getTargetFunction(YES))
                 return
             }
-    
+            
             if (value instanceof UIFunctionExtender) {
                 value = value.extendedFunction(getTargetFunction())
             }
-    
+            
             UIObject.setValueForKeyPath(keyPath, UIObject.valueForKeyPath(keyPath, configurationTarget), result, YES)
             UIObject.setValueForKeyPath(keyPath, value, configurationTarget, YES)
-    
+            
         })
         
         
@@ -575,6 +575,18 @@ export class UIObject {
     static configuredWithObject<T extends object>(configurationTarget: T, object: UIInitializerObject<T>) {
         this.configureWithObject(configurationTarget, object)
         return configurationTarget
+    }
+    
+    
+    get methods(): MethodsOnly<Omit<this, "methods">> {
+        const thisObject = this as object
+        const result = {} as any
+        thisObject.forEach((value, key) => {
+            if (value instanceof Function && key != "methods") {
+                result[key] = value.bind(thisObject)
+            }
+        })
+        return result
     }
     
     
@@ -595,6 +607,9 @@ export class UIObject {
     
     
 }
+
+type MethodsOnly<T> =
+    Pick<T, { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]>;
 
 
 

@@ -383,6 +383,7 @@ export class UITextView extends UIView {
         
         if (this.changesOften) {
             
+            // @ts-ignore
             cacheObject = this._intrinsicHeightCache
             
             
@@ -418,6 +419,7 @@ export class UITextView extends UIView {
         
         if (this.changesOften) {
             
+            // @ts-ignore
             cacheObject = this._intrinsicWidthCache
             
             

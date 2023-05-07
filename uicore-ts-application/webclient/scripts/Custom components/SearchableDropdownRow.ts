@@ -34,22 +34,22 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    set selected(selected: boolean) {
+    override set selected(selected: boolean) {
         super.selected = selected
         this._checkbox.selected = selected
     }
     
-    get selected() {
+    override get selected() {
         return super.selected
     }
     
     
-    set focused(focused: boolean) {
+    override set focused(focused: boolean) {
         this._focused = focused
         this.updateContentForCurrentState()
     }
     
-    get focused() {
+    override get focused() {
         return this._focused ?? NO
     }
     
@@ -64,7 +64,7 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    updateContentForNormalState() {
+    override updateContentForNormalState() {
         
         
         if (this.type == SearchableDropdownRow.type.sectionTitle) {
@@ -181,7 +181,7 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    updateContentForHoveredState() {
+    override updateContentForHoveredState() {
         
         
         this.backgroundColor = CBColor.primaryContentColor.colorWithAlpha(0.05)
@@ -190,7 +190,7 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    updateContentForHighlightedState() {
+    override updateContentForHighlightedState() {
         
         
         this.backgroundColor = CBColor.primaryContentColor.colorWithAlpha(0.08)
@@ -198,7 +198,7 @@ export class SearchableDropdownRow extends UIButton {
         
     }
     
-    updateContentForFocusedState() {
+    override updateContentForFocusedState() {
         
         
         this.backgroundColor = CBColor.primaryContentColor.colorWithAlpha(0.08)
@@ -207,7 +207,7 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    updateContentForSelectedState() {
+    override updateContentForSelectedState() {
         
         
         this.updateContentForNormalState()
@@ -232,7 +232,7 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    wasRemovedFromViewTree() {
+    override wasRemovedFromViewTree() {
         
         super.wasRemovedFromViewTree()
         
@@ -243,7 +243,7 @@ export class SearchableDropdownRow extends UIButton {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         

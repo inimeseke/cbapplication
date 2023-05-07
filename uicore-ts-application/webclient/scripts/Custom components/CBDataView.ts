@@ -1,9 +1,16 @@
 import { CBLocalizedTextObject } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import {
+    FIRST,
     IF,
+    IS,
+    IS_NIL,
     IS_NOT,
-    NO,
+    IS_UNDEFINED,
+    MAKE_ID,
+    nil,
+    NO, UIColor,
     UIKeyValueStringSorter,
+    UIObject,
     UIStringFilter,
     UITableView,
     UITextField,
@@ -19,12 +26,18 @@ import { CBTableRowView } from "./CBTableRowView"
 import { CellView } from "./CellView"
 
 
-export interface CBTableViewCellDescriptor {
+type StringOnly<T> = T extends string ? T : never;
+
+
+export interface CBDataViewCellDescriptor<DataType = Record<string, any>> {
     
     
-    keyPath: string;
+    keyPath: StringOnly<keyof DataType> | string;
     title: string | CBLocalizedTextObject;
     allowSorting: boolean;
+    
+    identifierKeyPath?: StringOnly<keyof DataType> | string;
+    parentIdentifierKeyPath?: StringOnly<keyof DataType> | string;
     
     // @ts-ignore
     initialOrderingState?: ValueOf<{
@@ -38,25 +51,28 @@ export interface CBTableViewCellDescriptor {
     defaultTitle?: string;
     
     initCell?: (cellView: CellView) => void;
-    updateCell?: (cellView: CellView, dataItem: any) => void;
+    updateCell?: (cellView: CellView, dataItem: DataType) => void;
     
-    buttonWasPressed?: (cellView: CellView, dataItem: any) => void;
+    buttonWasPressed?: (cellView: CellView, dataItem: DataType) => void;
     
 }
 
 
-export class CBDataView extends UIView {
+export class CBDataView<DataType = Record<string, any>> extends UIView {
     
     
-    private _descriptors: CBTableViewCellDescriptor[] = []
+    private _descriptors: CBDataViewCellDescriptor<DataType>[] = []
     
     private _filteringArray: string[] = []
-    private _data: any[] = []
+    private _data: DataType[] = []
+    
+    highlightedDataItem?: DataType
+    
     
     private _filteredData: any[] = []
     
     searchTextField: UITextField
-    tableHeaderView: CBTableHeaderView
+    tableHeaderView: CBTableHeaderView<DataType>
     tableView: UITableView
     
     titleLabel: UITextView
@@ -66,6 +82,8 @@ export class CBDataView extends UIView {
     isSearchAvailable = YES
     
     _highlightNextFilterChange = NO
+    isTreeView = NO
+    _rowToKeepStaticAfterUpdate?: CBTableRowView<DataType>
     
     
     constructor(elementID?: string) {
@@ -93,19 +111,51 @@ export class CBDataView extends UIView {
         this.tableView = new UITableView(this.elementID + "TableView")
         this.addSubview(this.tableView)
         
+        this.tableHeaderView.moveToTopOfSuperview()
+        this.tableHeaderView.style.boxShadow = "#0000005e 0px 2px 2px -2px"
         
-        this.tableView.heightForRowWithIndex =
-            index => this.tableView.viewForRowWithIndex(index).intrinsicContentHeight(this.tableView.bounds.width)
+        // function ONLY_IF(object: any) {
+        //     if (IS(object)) {
+        //         return object;
+        //     }
+        //     return null
+        // }
+        
+        this.tableView.allRowsHaveEqualHeight = YES
+        
+        // this.tableView.heightForRowWithIndex =
+        //     index =>  this.tableView.viewForRowWithIndex(index).intrinsicContentHeight(this.tableView.bounds.width)
+        
         
         this.tableView.numberOfRows = () => this.filteredData.length
         
-        this.tableView.newReusableViewForIdentifier = (identifier, rowIDIndex) => new CBTableRowView(
-            elementID + "TableRow" + rowIDIndex
-        )
+        
+        this.tableView.newReusableViewForIdentifier = (identifier, rowIDIndex) => {
+            
+            const rowView = new CBTableRowView(
+                this.elementID + "TableRow" + rowIDIndex
+            )
+            
+            
+            rowView.expandedValueDidChange = (row: UIView, event: MouseEvent) => {
+                
+                // @ts-ignore
+                this.rowExpandedValueDidChange(rowView, event)
+                
+                // @ts-ignore
+                this.keepRowStaticDuringNextUpdate(rowView)
+                
+                this.updateTableDataByFiltering()
+                
+            }
+            
+            return rowView
+            
+        }
         
         this.tableView.viewForRowWithIndex = (index) => {
             
-            const row = this.tableView.reusableViewForIdentifier("TableRow", index) as CBTableRowView
+            const row = this.tableView.reusableViewForIdentifier("TableRow", index) as CBTableRowView<DataType>
             
             if (!row.descriptors.isEqualToArray(this._descriptors)) {
                 
@@ -129,6 +179,8 @@ export class CBDataView extends UIView {
                 
             }
             
+            row.highlighted = IS(this.highlightedDataItem) && row.data == this.highlightedDataItem
+            
             return row
             
         }
@@ -151,7 +203,7 @@ export class CBDataView extends UIView {
     }
     
     
-    wasAddedToViewTree() {
+    override wasAddedToViewTree() {
         
         super.wasAddedToViewTree()
         
@@ -160,7 +212,7 @@ export class CBDataView extends UIView {
     }
     
     
-    didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+    override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)
         
@@ -174,28 +226,32 @@ export class CBDataView extends UIView {
     }
     
     
-    get descriptors(): CBTableViewCellDescriptor[] {
+    rowExpandedValueDidChange(row: CBTableRowView<DataType>, event: MouseEvent) {
+        
+        // Override somewhere
+        
+    }
+    
+    
+    get descriptors() {
         return this._descriptors
     }
     
-    set descriptors(descriptors: CBTableViewCellDescriptor[]) {
+    set descriptors(descriptors) {
         
         this._descriptors = descriptors
         
         this.tableHeaderView.descriptors = descriptors
-        
         this.tableView._reusableViews = {}
         
         this.updateFilteringArray()
-        
-        // noinspection JSIgnoredPromiseFromCall
-        this.updateTableDataByFiltering()
+        this.updateTableDataByFiltering().then(nil)
         
         
     }
     
     
-    set data(data: any[]) {
+    set data(data) {
         
         this._data = data
         
@@ -203,10 +259,7 @@ export class CBDataView extends UIView {
         
         // Form array of strings for filtering
         this.updateFilteringArray()
-        
-        // noinspection JSIgnoredPromiseFromCall
-        this.updateTableDataByFiltering()
-        
+        this.updateTableDataByFiltering().then(nil)
         this.setNeedsLayoutUpToRootView()
         
     }
@@ -216,13 +269,108 @@ export class CBDataView extends UIView {
     }
     
     
+    setTreeData(data: DataType[], subElementsKey: string, expanded = YES) {
+        
+        // Flatten the tree
+        
+        const descriptor = this.descriptors.firstElement
+        const identifierKeyPath = descriptor.identifierKeyPath as string ?? "_id"
+        const parentIdentifierKeyPath = descriptor.parentIdentifierKeyPath as string ?? "_parent"
+        
+        
+        const flatData: DataType[] = []
+        
+        
+        function flattenData(data: DataType[], parentElementID?: string) {
+            
+            data.forEach(value => {
+                
+                flatData.push(value)
+                
+                let identifier = UIObject.valueForKeyPath(identifierKeyPath, value)
+                if (IS_UNDEFINED(identifier) || IS_NIL(identifier)) {
+                    identifier = MAKE_ID()
+                    UIObject.setValueForKeyPath(identifierKeyPath, identifier, value, YES)
+                }
+                
+                if (parentElementID?.length) {
+                    UIObject.setValueForKeyPath(parentIdentifierKeyPath, parentElementID, value, YES)
+                }
+                
+                const subElements: DataType[] = UIObject.valueForKeyPath(subElementsKey, value)
+                if (subElements?.length) {
+                    
+                    // @ts-ignore
+                    if (!value._CB_DataView_IsExpandable) {
+                        
+                        // @ts-ignore
+                        value._CB_DataView_IsExpandable = YES
+                        // @ts-ignore
+                        value._CB_DataView_IsExpanded = expanded
+                        
+                    }
+                    
+                    flattenData(subElements, identifier)
+                    
+                }
+                
+            })
+            
+        }
+        
+        flattenData(data)
+        
+        this.isTreeView = YES
+        
+        const groupedData = (this.data || []).groupedBy(item =>
+            UIObject.valueForKeyPath(identifierKeyPath, item)
+        )
+        flatData.forEach(value => {
+                
+                const isExpanded = groupedData[UIObject.valueForKeyPath(
+                    identifierKeyPath,
+                    value
+                    // @ts-ignore
+                )]?.firstElement?._CB_DataView_IsExpanded
+                
+                if (isExpanded) {
+                    // @ts-ignore
+                    value._CB_DataView_IsExpanded = isExpanded
+                }
+                
+            }
+        )
+        
+        // Set data
+        this.data = flatData
+        
+        
+    }
+    
+    
     private updateFilteringArray() {
         
-        this._filteringArray = this.data.map(
-            dataItem => this.descriptors.map(
-                descriptor => dataItem[descriptor.keyPath]
-            ).join(" ")
-        )
+        if (!this.descriptors.length) {
+            return
+        }
+        
+        let data = this.data
+        
+        // // Only filtering root level rows
+        // if (this.descriptors?.firstElement?.parentIdentifierKeyPath) {
+        //     data = data.filter(
+        //         value => IS_NOT(
+        //             UIObject.valueForKeyPath(this.descriptors.firstElement.parentIdentifierKeyPath as string, value)
+        //         )
+        //     )
+        // }
+        
+        this._filteringArray = data
+            .map(
+                (dataItem: any) => this.descriptors.map(
+                    descriptor => dataItem[descriptor.keyPath]
+                ).join(" ")
+            )
         
     }
     
@@ -236,12 +384,15 @@ export class CBDataView extends UIView {
         this._filteredData = value
         
         this.tableView.reloadData()
-        
         this.setNeedsLayoutUpToRootView()
-        
         this.tableView.invalidateSizeOfRowWithIndex(0)
-        
         this.tableView.setNeedsLayoutUpToRootView()
+        
+    }
+    
+    keepRowStaticDuringNextUpdate(rowView: CBTableRowView<DataType>) {
+        
+        this._rowToKeepStaticAfterUpdate = rowView
         
     }
     
@@ -259,37 +410,164 @@ export class CBDataView extends UIView {
             filteringResult.push(this.data[index])
         })
         
+        const descriptor = this.descriptors.firstElement
+        const parentIdentifierKeyPath = descriptor?.parentIdentifierKeyPath ?? "_parent"
+        const identifierKeyPath = descriptor?.identifierKeyPath ?? "_id"
         
-        // Sort the data
-        const { sortedData } = await this._stringSorter.sortedData(
-            filteringResult,
-            this.tableHeaderView.sortingInstructions
-        )
-        
-        const previousData = this.data
-        
-        this.filteredData = sortedData
-        
-        if (this._highlightNextFilterChange) {
+        if (this.isTreeView) {
             
-            this.tableView.setNeedsLayout()
+            // Include parents of all the remaining sub data objects
+            const subDataParentKeys: string[] = []
+            const getParentKeys = (value: any) => {
+                if (IS_NOT(value)) {
+                    return
+                }
+                const parentKey = UIObject.valueForKeyPath(
+                    parentIdentifierKeyPath,
+                    value
+                )
+                const hasParentKey = IS(parentKey) && ((parentKey + "") == parentKey)
+                
+                if (hasParentKey) {
+                    const parentObject = this.data.find(
+                        objectValue => UIObject.valueForKeyPath(
+                            identifierKeyPath,
+                            objectValue
+                        ) == parentKey
+                    )
+                    
+                    if (!subDataParentKeys.contains(parentKey)) {
+                        subDataParentKeys.push(parentKey)
+                    }
+                    getParentKeys(parentObject)
+                }
+                
+            }
             
-            this.tableView.highlightChanges(previousData, this.data)
+            filteringResult.forEach(value => getParentKeys(value))
             
-            this._highlightNextFilterChange = NO
+            const dataPointsToIncludeAsParentData = this.data.filter(
+                value => !filteringResult.contains(value) &&
+                    subDataParentKeys.contains(
+                        UIObject.valueForKeyPath(identifierKeyPath as string, value)
+                    )
+            )
+            dataPointsToIncludeAsParentData.forEach(value => filteringResult.push(value))
             
         }
         
         
+        // Sort the data
+        const { sortedIndexes } = await this._stringSorter.sortedData(
+            filteringResult,
+            this.tableHeaderView.sortingInstructions
+        )
+        const sortedData: DataType[] = []
+        sortedIndexes.forEach(index => sortedData.push(filteringResult[index]))
+        
+        let result: DataType[] = []
+        
+        if (this.isTreeView) {
+            
+            result = []
+            
+            // Move sub elements under parent elements
+            const parentDataObjects = sortedData.filter(value =>
+                IS_NOT(UIObject.valueForKeyPath(parentIdentifierKeyPath as string, value))
+            )
+            const groupedSubRows = sortedData.groupedBy(value =>
+                UIObject.valueForKeyPath(parentIdentifierKeyPath as string, value)
+            )
+            
+            delete groupedSubRows.undefined
+            delete groupedSubRows[""]
+            
+            function addToResult(
+                result: any[],
+                parentDataObjects: any[],
+                identifierKey: string | undefined,
+                groupedSubRows: any,
+                nestingDepth = 0
+            ) {
+                
+                parentDataObjects.forEach(value => {
+                    
+                    result.push(value)
+                    
+                    value._CB_DataView_NestingDepth = nestingDepth
+                    
+                    if (identifierKey) {
+                        const identifier = UIObject.valueForKeyPath(identifierKey, value)
+                        const subRows = groupedSubRows[identifier]
+                        if (subRows) {
+                            
+                            // This is needed to avoid showing sub rows of non-expanded rows
+                            if (value._CB_DataView_IsExpandable && !value._CB_DataView_IsExpanded) {
+                                return
+                            }
+                            
+                            addToResult(result, subRows, identifierKey, groupedSubRows, nestingDepth + 1)
+                            
+                            if (!value._CB_DataView_IsExpandable) {
+                                
+                                value._CB_DataView_IsExpandable = YES
+                                value._CB_DataView_IsExpanded = YES
+                                
+                            }
+                            
+                        }
+                    }
+                    
+                })
+                
+            }
+            
+            addToResult(result, parentDataObjects, identifierKeyPath, groupedSubRows)
+            
+        }
+        
+        
+        const rowToKeepStaticAfterUpdateYPositionInView = (this._rowToKeepStaticAfterUpdate?.frame.y ?? 0) - this.tableView.contentOffset.y
+        const rowToKeepStaticAfterUpdateDataPoint = this._rowToKeepStaticAfterUpdate?.data
+        
+        const previousData = this.filteredData
+        this.filteredData = result
+        
+        if (this._rowToKeepStaticAfterUpdate) {
+            
+            this.tableView.layoutIfNeeded()
+            
+            const newRowIndex = result.indexOf(rowToKeepStaticAfterUpdateDataPoint)
+            const newRowPosition = this.tableView._rowPositions[newRowIndex]
+            
+            const newRowPositionInView = newRowPosition.topY - this.tableView.contentOffset.y
+            
+            const animationDuration = this.tableView.animationDuration
+            this.tableView.animationDuration = 0
+            this.tableView.contentOffset = this.tableView.contentOffset.pointByAddingY(
+                newRowPositionInView - rowToKeepStaticAfterUpdateYPositionInView
+            )
+            this.tableView.animationDuration = animationDuration
+            
+            this._rowToKeepStaticAfterUpdate = undefined
+            
+        }
+        
+        
+        if (this._highlightNextFilterChange) {
+            this.tableView.setNeedsLayout()
+            this.tableView.highlightChanges(previousData, this.filteredData)
+            this._highlightNextFilterChange = NO
+        }
+        
     }
     
     
-    boundsDidChange() {
+    override boundsDidChange() {
         
         super.boundsDidChange()
         
         this.tableView.invalidateSizeOfRowWithIndex(0)
-        
         this.tableView.setNeedsLayoutUpToRootView()
         
     }
@@ -297,16 +575,18 @@ export class CBDataView extends UIView {
     
     async sortTableData() {
         
-        this.filteredData = (await this._stringSorter.sortedData(
-            this.data,
-            this.tableHeaderView.sortingInstructions,
-            "asdasdasdasd"
-        )).sortedData
+        await this.updateTableDataByFiltering()
+        
+        // this.filteredData = (await this._stringSorter.sortedData(
+        //     this.data,
+        //     this.tableHeaderView.sortingInstructions,
+        //     MAKE_ID()
+        // )).sortedData
         
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         
@@ -352,7 +632,7 @@ export class CBDataView extends UIView {
     }
     
     
-    intrinsicContentHeight(constrainingWidth: number = 0): number {
+    override intrinsicContentHeight(constrainingWidth: number = 0): number {
         
         const padding = this.core.paddingLength
         const labelHeight = padding

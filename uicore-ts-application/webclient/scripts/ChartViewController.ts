@@ -1,17 +1,19 @@
-import { UIButton, UIColor, UIRoute, UITextView, UIView, UIViewController } from "uicore-ts"
+import { UIColor, UIRoute, UITextArea, UITextView, UIView, UIViewController } from "uicore-ts";
 
 
-export class SomeContentViewController extends UIViewController {
+export class ChartViewController extends UIViewController {
     
     readonly titleLabel: UITextView = new UITextView(
         this.view.elementID + "TitleLabel",
         UITextView.type.header2
     ).configuredWithObject({
-        text: "Some content that can be changed using the editor.",
+        text: "ChartViewController",
         hoverText: "",
         backgroundColor: UIColor.transparentColor
     }).addedAsSubviewToView(this.view)
-    
+    dataInputTextArea: UITextArea = new UITextArea().addedAsSubviewToView(this.view).configuredWithObject({
+        placeholderText: "Input your data here in JSON format"
+    });
 
     constructor(view: UIView) {
         
@@ -36,7 +38,7 @@ export class SomeContentViewController extends UIViewController {
     }
     
     
-    static override readonly routeComponentName = "somecontent"
+    static override readonly routeComponentName = "chart"
     
     static override readonly ParameterIdentifierName = {}
     
@@ -53,7 +55,7 @@ export class SomeContentViewController extends UIViewController {
     override async handleRoute(route: UIRoute) {
         
         super.handleRoute(route)
-        const inquiryComponent = route.componentWithName(SomeContentViewController.routeComponentName)
+        const inquiryComponent = route.componentWithName(ChartViewController.routeComponentName)
         
     }
     
@@ -90,6 +92,12 @@ export class SomeContentViewController extends UIViewController {
         const bounds = this.view.bounds.rectangleWithInset(padding)
 
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
+
+        this.view.setPaddings(0, 0, padding, 0)
+        this.dataInputTextArea.frame = this.titleLabel.frame.rectangleForNextRow(
+            padding,
+            [this.dataInputTextArea.intrinsicContentHeight(this.titleLabel.frame.width), 50].max
+        )
 
 
     }

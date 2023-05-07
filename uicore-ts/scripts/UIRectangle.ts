@@ -12,12 +12,12 @@ export class UIRectangle extends UIObject {
     
     
     constructor(x: number = 0, y: number = 0, height: number = 0, width: number = 0) {
-    
+        
         super()
-    
+        
         this.min = new UIPoint(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY)
         this.max = new UIPoint(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY)
-    
+        
         this.min.didChange = (point) => {
             this.rectanglePointDidChange(point)
             this._rectanglePointDidChange()
@@ -26,12 +26,12 @@ export class UIRectangle extends UIObject {
             this.rectanglePointDidChange(point)
             this._rectanglePointDidChange()
         }
-    
+        
         this._isBeingUpdated = NO
-    
+        
         this.min = new UIPoint(x, y)
         this.max = new UIPoint(x + width, y + height)
-    
+        
         if (IS_NIL(height)) {
             this.max.y = height
         }
@@ -39,7 +39,7 @@ export class UIRectangle extends UIObject {
         if (IS_NIL(width)) {
             this.max.x = width
         }
-    
+        
     }
     
     
@@ -67,7 +67,7 @@ export class UIRectangle extends UIObject {
         }
         
         this.beginUpdates()
-    
+        
         const min = this.min.copy()
         if (min.x === nil) {
             min.x = this.max.x
@@ -75,7 +75,7 @@ export class UIRectangle extends UIObject {
         if (min.y === nil) {
             min.y = this.max.y
         }
-    
+        
         const max = this.max.copy()
         if (max.x === nil) {
             max.x = this.min.x
@@ -133,7 +133,7 @@ export class UIRectangle extends UIObject {
     set x(x: number) {
         
         this.beginUpdates()
-    
+        
         const width = this.width
         this.min.x = x
         this.max.x = this.min.x + width
@@ -151,7 +151,7 @@ export class UIRectangle extends UIObject {
     set y(y: number) {
         
         this.beginUpdates()
-    
+        
         const height = this.height
         this.min.y = y
         this.max.y = this.min.y + height
@@ -203,11 +203,11 @@ export class UIRectangle extends UIObject {
     
     
     intersectionRectangleWithRectangle(rectangle: UIRectangle): UIRectangle {
-    
+        
         const result = this.copy()
-    
+        
         result.beginUpdates()
-    
+        
         const min = result.min
         if (min.x === nil) {
             min.x = rectangle.max.x - Math.min(result.width, rectangle.width)
@@ -215,7 +215,7 @@ export class UIRectangle extends UIObject {
         if (min.y === nil) {
             min.y = rectangle.max.y - Math.min(result.height, rectangle.height)
         }
-    
+        
         const max = result.max
         if (max.x === nil) {
             max.x = rectangle.min.x + Math.min(result.width, rectangle.width)
@@ -231,7 +231,7 @@ export class UIRectangle extends UIObject {
         
         
         if (result.height < 0) {
-    
+            
             const averageY = (this.center.y + rectangle.center.y) * 0.5
             result.min.y = averageY
             result.max.y = averageY
@@ -239,7 +239,7 @@ export class UIRectangle extends UIObject {
         }
         
         if (result.width < 0) {
-    
+            
             const averageX = (this.center.x + rectangle.center.x) * 0.5
             result.min.x = averageX
             result.max.x = averageX
@@ -282,7 +282,7 @@ export class UIRectangle extends UIObject {
         if (isNaN(centeredOnPosition)) {
             centeredOnPosition = nil
         }
-    
+        
         const result = this.copy()
         result.height = height
         
@@ -300,7 +300,7 @@ export class UIRectangle extends UIObject {
         if (isNaN(centeredOnPosition)) {
             centeredOnPosition = nil
         }
-    
+        
         const result = this.copy()
         result.width = width
         
@@ -322,7 +322,7 @@ export class UIRectangle extends UIObject {
     }
     
     rectangleWithX(x: number, centeredOnPosition: number = 0) {
-    
+        
         const result = this.copy()
         result.x = x - result.width * centeredOnPosition
         
@@ -331,7 +331,7 @@ export class UIRectangle extends UIObject {
     }
     
     rectangleWithY(y: number, centeredOnPosition: number = 0) {
-    
+        
         const result = this.copy()
         result.y = y - result.height * centeredOnPosition
         
@@ -341,7 +341,7 @@ export class UIRectangle extends UIObject {
     
     
     rectangleByAddingX(x: number) {
-    
+        
         const result = this.copy()
         result.x = this.x + x
         
@@ -448,7 +448,7 @@ export class UIRectangle extends UIObject {
         paddings: number | number[] = 0,
         absoluteHeights: number | number[] = nil
     ) {
-    
+        
         if (IS_NIL(paddings)) {
             paddings = 1
         }
@@ -459,7 +459,7 @@ export class UIRectangle extends UIObject {
         if (!(absoluteHeights instanceof Array) && IS_NOT_NIL(absoluteHeights)) {
             absoluteHeights = [absoluteHeights].arrayByRepeating(weights.length)
         }
-    
+        
         const result: UIRectangle[] = []
         const sumOfWeights = weights.reduce(
             (a, b, index) => {
@@ -474,11 +474,11 @@ export class UIRectangle extends UIObject {
         const sumOfAbsoluteHeights = (absoluteHeights as number[]).summedValue
         const totalRelativeHeight = this.height - sumOfPaddings - sumOfAbsoluteHeights
         var previousCellMaxY = this.y
-    
+        
         for (var i = 0; i < weights.length; i++) {
             var resultHeight: number
             if (IS_NOT_NIL(absoluteHeights[i])) {
-    
+                
                 resultHeight = absoluteHeights[i] || 0
                 
             }
@@ -487,9 +487,9 @@ export class UIRectangle extends UIObject {
                 resultHeight = totalRelativeHeight * (weights[i] / sumOfWeights)
                 
             }
-        
+            
             const rectangle = this.rectangleWithHeight(resultHeight)
-        
+            
             var padding = 0
             if (paddings.length > i && paddings[i]) {
                 padding = paddings[i]
@@ -571,7 +571,10 @@ export class UIRectangle extends UIObject {
     }
     
     
-    rectangleForNextRow(padding: number = 0, height = this.height) {
+    rectangleForNextRow(padding: number = 0, height: number | ((constrainingWidth: number) => number) = this.height) {
+        if (height instanceof Function) {
+            height = height(this.width)
+        }
         const result = this.rectangleWithY(this.max.y + padding)
         if (height != this.height) {
             result.height = height
@@ -579,7 +582,10 @@ export class UIRectangle extends UIObject {
         return result
     }
     
-    rectangleForNextColumn(padding: number = 0, width = this.width) {
+    rectangleForNextColumn(padding: number = 0, width: number | ((constrainingHeight: number) => number) = this.width) {
+        if (width instanceof Function) {
+            width = width(this.height)
+        }
         const result = this.rectangleWithX(this.max.x + padding)
         if (width != this.width) {
             result.width = width

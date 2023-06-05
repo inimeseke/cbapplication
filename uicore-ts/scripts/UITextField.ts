@@ -1,6 +1,6 @@
 import { UIColor } from "./UIColor"
 import { UICore } from "./UICore"
-import { nil, NO, YES } from "./UIObject"
+import { nil, NO, ValueOf, YES } from "./UIObject"
 import { UITextView } from "./UITextView"
 import { UIView, UIViewAddControlEventTargetObject, UIViewBroadcastEvent } from "./UIView"
 
@@ -12,7 +12,7 @@ export class UITextField extends UITextView {
     
     override _viewHTMLElement!: HTMLInputElement
     
-    constructor(elementID?: string, viewHTMLElement = null, type = UITextView.type.textField) {
+    constructor(elementID?: string, viewHTMLElement = null, type: string | ValueOf<typeof UITextView.type> = UITextView.type.textField) {
         
         super(elementID, type, viewHTMLElement)
         

@@ -25,14 +25,14 @@
     "@codemirror/lang-javascript": "^6.1.0",
     "browser-cjs": "^1.0.3",
     "browserify": "^17.0.0",
-    "cbcore-ts": "^1.0.11",
+    "cbcore-ts": "^1.0.21",
     "codemirror": "^6.0.1",
     "monaco-editor": "^0.37.1",
     "monaco-editor-auto-typings": "^0.4.3",
     "object-hash": "^3.0.0",
     "socket.io": "^4.5.1",
     "tsify": "^5.0.4",
-    "uicore-ts": "^1.0.235",
+    "uicore-ts": "^1.0.501",
     "vscode-web": "^1.72.0"
   },
   "devDependencies": {

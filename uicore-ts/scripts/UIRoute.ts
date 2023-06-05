@@ -2,7 +2,6 @@ import { IS_NIL, IS_NOT, nil, NO } from "./UIObject"
 import { UIViewController } from "./UIViewController"
 
 
-export type ValueOf<T> = T[keyof T];
 export type PropType<TObj, TProp extends keyof TObj> = TObj[TProp];
 
 export type UIRouteParameters<T = any> = {

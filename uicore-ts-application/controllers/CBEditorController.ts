@@ -6,6 +6,7 @@ import { Server } from "socket.io"
 import {
     ClassDeclaration,
     ExpressionStatement,
+    GetAccessorDeclaration,
     Node,
     ObjectLiteralExpression,
     Project,
@@ -18,7 +19,7 @@ import { IndentStyle } from "typescript"
 import "../Extensions"
 import Utils from "../Utils"
 import {
-    CBEditorAnnotatedPropertyDescriptor,
+    CBEditorAnnotatedPropertyDescriptor, CBEditorEditablePropertyDescriptor,
     CBEditorPropertyDescriptor,
     CBEditorPropertyLocation
 } from "../webclient/scripts/SocketClientFunctions"
@@ -27,6 +28,12 @@ import { SocketController } from "./SocketController"
 
 
 /// <reference path="../webclient/scripts/SocketClientFunctions.d.ts" />
+
+
+interface EditableDeclarationObject {
+    declaration: (SetAccessorDeclaration | PropertyDeclaration)
+    keyPathComponents: string[]
+}
 
 
 export class CBEditorController extends RoutesController {
@@ -135,7 +142,7 @@ export class CBEditorController extends RoutesController {
                 )
                 
                 const classObject = resultFile.getClass(message.className)
-                let propertyObject = this.propertyObjectForClass(classObject, message.propertyKey)
+                let propertyObject = this.propertyDeclarationForClassAndKey(classObject, message.propertyKeyPath)
                 let propertyReferenceLocations: {
                     fileName: string;
                     start: { column: number; lineNumber: number };
@@ -173,7 +180,7 @@ export class CBEditorController extends RoutesController {
                     propertyObject.getType().getApparentType().getSymbol().getName()
                 )
                 
-                const editableAccessorDeclarations = this.editableAccessorDeclarations(viewClass)
+                const editableDeclarationObjects = this.editableDeclarations(viewClass)
                 
                 const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
                 const targetFile = sourceFiles.find(
@@ -182,18 +189,47 @@ export class CBEditorController extends RoutesController {
                     )
                 )
                 
-                const editableProperties = editableAccessorDeclarations.map(setter => {
+                const editableProperties = editableDeclarationObjects.map(declarationObject => {
                     
-                    const propertyKeyPath = message.propertyKey + "." + setter.getStructure().name
+                    const declaration = declarationObject.declaration
+                    const propertyKeyPath = message.propertyKeyPath + "." + declarationObject.keyPathComponents.join(".")
+                    let typeName: string
+                    let declarationType: "field" | "property"
                     
-                    const result = {
-                        typeName: setter.getStructure().parameters.firstElement.type as string,
+                    if (declaration instanceof SetAccessorDeclaration) {
+                        
+                        typeName = declaration.getStructure().parameters.firstElement.type as string
+                        declarationType = "property"
+                        
+                    }
+                    
+                    if (declaration instanceof PropertyDeclaration) {
+                        
+                        typeName = declaration.getStructure().type as string
+                        declarationType = "field"
+                        
+                    }
+                    
+                    // Add editing values straight to the descriptor
+                    const unionTypeStrings = declaration.getType().getUnionTypes()
+                        .filter(value => value.isStringLiteral())
+                    
+                    // if (unionTypes.length) {
+                    //
+                    //     var asdasd = 1
+                    //
+                    // }
+                    
+                    const result: CBEditorEditablePropertyDescriptor = {
+                        typeName: typeName,
                         path: propertyKeyPath,
                         editingLocation: this.locationOfEditing(
                             resultFile,
                             targetFile,
                             { className: message.className, propertyKeyPath: propertyKeyPath }
-                        )
+                        ),
+                        declarationType: declarationType,
+                        valueOptions: unionTypeStrings.map(value => value.getText())
                     }
                     
                     return result
@@ -247,6 +283,13 @@ export class CBEditorController extends RoutesController {
                 )
             )
             
+            if (!resultFile) {
+                
+                respondWithMessage([])
+                return
+                
+            }
+            
             sourceFiles.removeElement(resultFile)
             
             const referencedFiles = sourceFiles.map(
@@ -281,7 +324,7 @@ export class CBEditorController extends RoutesController {
                 
                 const result: CBEditorPropertyDescriptor = {
                     
-                    propertyKey: value.getName(),
+                    propertyKeyPath: value.getName(),
                     className: propertyValueClass.getName(),
                     runtimeObjectKeyPath: null
                     
@@ -359,7 +402,7 @@ export class CBEditorController extends RoutesController {
             const fileText = resultFile.getText()
             
             const classObject = resultFile.getClass(message.className)
-            let propertyObject = this.propertyObjectForClass(
+            let propertyObject = this.propertyDeclarationForClassAndKey(
                 classObject,
                 message.propertyKeyPath.split(".").firstElement
             )
@@ -466,50 +509,31 @@ export class CBEditorController extends RoutesController {
         
         targets.SetPropertyValue = async (message, socketSession, respondWithMessage) => {
             
-            
-            const sourceFiles = this.webclientProject.getSourceFiles()
-            
-            const resultFile = sourceFiles.find(
-                (file, index, array) => file.getClass(
-                    declaration => declaration.getName() == message.className
-                )
-            )
-            
-            sourceFiles.removeElement(resultFile)
-            
+            const classObject = this.classDeclarationWithName(message.className)
+            const resultFile = classObject.getSourceFile()
             const fileText = resultFile.getText()
             
-            const classObject = resultFile.getClass(message.className)
-            let propertyObject = this.propertyObjectForClass(
+            let propertyObject = this.propertyDeclarationForClassAndKey(
                 classObject,
                 message.propertyKeyPath.split(".").firstElement
             )
             
+            const valuePropertyOrAccessorObject = this.setAccessorOrPropertyDeclarationForClassAndKeyPath(
+                classObject,
+                message.propertyKeyPath
+            )
+            
+            
             const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
             
-            const targetFile = sourceFiles.find(
-                file => file.getClass(
-                    declaration => declaration.getName() == classPropertyTypeName
-                )
-            )
-            
-            sourceFiles.removeElement(targetFile)
-            
-            const targetObjectClassDeclaration = targetFile.getClass(classPropertyTypeName)
+            const targetObjectClassDeclaration = this.classDeclarationWithName(classPropertyTypeName)
             const keyPathComponents = message.propertyKeyPath.split(".")
-            let targetObjectClassPropertyObject = this.setAccessorForClassAndKey(
+            let targetObjectClassPropertyObject = this.setAccessorOrPropertyDeclarationForClassAndKeyPath(
                 targetObjectClassDeclaration,
-                keyPathComponents.lastElement
+                message.propertyKeyPath
             )
             
-            var locationOfEditedValue: CBEditorPropertyLocation
-            
-            // let propertyReferenceLocations: {
-            //     fileName: string;
-            //     start: { column: number; lineNumber: number };
-            //     className: string;
-            //     end: { column: number; lineNumber: number }
-            // }[]
+            let locationOfEditedValue: CBEditorPropertyLocation
             
             if (propertyObject) {
                 
@@ -518,7 +542,7 @@ export class CBEditorController extends RoutesController {
                 ) ?? []
                 
                 let valueString = this.valueStringForPropertyAndMessageValue(
-                    targetObjectClassPropertyObject,
+                    valuePropertyOrAccessorObject,
                     message.valueString
                 )
                 
@@ -600,108 +624,15 @@ export class CBEditorController extends RoutesController {
                     )
                 
                 
-                if ((targetObjectConstructorAssignmentReference || propertyObject.hasInitializer()) &&
-                    !assignmentObject) {
-                    const UIObjectClass = sourceFiles.find(
-                        file => file.getClass(
-                            declaration => declaration.getName() == "UIObject"
-                        )
-                    ).getClass(declaration => declaration.getName() == "UIObject")
-                    
-                    const configurationMethodCallReference = UIObjectClass.getMethod(
-                            method => method.getName() == "configuredWithObject"
-                        ).findReferencesAsNodes().find(
-                            reference => this.isNodeContainedInNode(
-                                reference,
-                                targetObjectConstructorAssignmentReference?.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
-                                    ?.getRight()
-                            )
-                        )?.getFirstAncestorByKind(SyntaxKind.CallExpression) ||
-                        UIObjectClass.getMethod(
-                            method => method.getName() == "configureWithObject"
-                        ).findReferencesAsNodes().find(
-                            reference => this.isNodeContainedInNode(
-                                reference,
-                                targetObjectConstructorAssignmentReference?.getFirstAncestor(
-                                    node => node.getText().contains(keyPathComponents[0] + ".configureWithObject")
-                                )
-                            )
-                        )?.getFirstAncestorByKind(SyntaxKind.CallExpression) ||
-                        UIObjectClass.getMethod(
-                            method => method.getName() == "configuredWithObject"
-                        ).findReferencesAsNodes().find(
-                            reference => this.isNodeContainedInNode(
-                                reference,
-                                propertyObject.getInitializer()
-                            )
-                        )?.getFirstAncestorByKind(SyntaxKind.CallExpression)
-                    
-                    const configurationObject = configurationMethodCallReference?.getArguments()?.[0] as ObjectLiteralExpression
-                    
-                    if (configurationObject) {
-                        
-                        const propertyAssignment = configurationObject.getChildrenOfKind(SyntaxKind.PropertyAssignment)
-                            .find(assignment => assignment.getChildren()[0].getText() == keyPathComponents.lastElement)
-                        
-                        if (propertyAssignment) {
-                            
-                            const propertyAssignmentValue = propertyAssignment.getChildren()[2]
-                            
-                            locationOfEditedValue = this.locationOfNode(
-                                propertyAssignmentValue.replaceWithText(valueString)
-                            )
-                            
-                            
-                        }
-                        else {
-                            
-                            
-                            configurationObject.addPropertyAssignment({
-                                name: keyPathComponents.lastElement,
-                                initializer: valueString
-                            })
-                            
-                            locationOfEditedValue = this.locationOfNode(
-                                configurationObject.getProperty(keyPathComponents.lastElement)
-                            )
-                            
-                            
-                        }
-                        
-                        
-                    }
-                    else {
-                        
-                        // Add configuration to targetObjectConstructorAssignmentReference
-                        const right = targetObjectConstructorAssignmentReference?.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
-                            ?.getRight() ?? propertyObject.getInitializer()
-                        const newNode = right.replaceWithText(
-                            right.getText() + ".configuredWithObject({\n" +
-                            keyPathComponents.lastElement + ": " + valueString + "\n})"
-                        )
-                        newNode.formatText()
-                        
-                        locationOfEditedValue = this.locationOfNode(newNode)
-                        
-                    }
-                    
-                    
-                }
-                else if (!assignmentObject) {
-                    
-                    var asdasd = 1
+                if (!assignmentObject && !(targetObjectConstructorAssignmentReference || propertyObject.hasInitializer())) {
                     
                     // Add value assignment in constructor
                     
-                    // classConstructor.addStatements(
-                    //     "\n" + classConstructor.getChildIndentationText() +
-                    //     "this." + message.propertyKeyPath + " = " + "new UIColor(\"" + message.valueString + "\")"
-                    // ).firstElement.formatText()
-                    
                     const newStatement = classConstructor.addStatements(
                         "\n" + classConstructor.getChildIndentationText() +
-                        "this." + keyPathComponents.firstElement + ".configureWithObject({\n" +
-                        keyPathComponents.lastElement + ": " + valueString + "\n})"
+                        "this." + keyPathComponents.firstElement + ".configureWithObject({" +
+                        //"\n" + keyPathComponents.lastElement + ": " + valueString + "\n" +
+                        "})"
                     ).firstElement
                     newStatement.formatText()
                     
@@ -711,8 +642,56 @@ export class CBEditorController extends RoutesController {
                         newStatement.getFirstChildByKind(SyntaxKind.BinaryExpression).getRight()
                     )
                     
-                    
                 }
+                
+                
+                const UIObjectClass = this.classDeclarationWithName("UIObject")
+                
+                const configurationMethodCallReference = UIObjectClass.getMethod(
+                        method => method.getName() == "configuredWithObject"
+                    ).findReferencesAsNodes().find(
+                        reference => this.isNodeContainedInNode(
+                            reference,
+                            targetObjectConstructorAssignmentReference?.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
+                                ?.getRight()
+                        )
+                    )?.getFirstAncestorByKind(SyntaxKind.CallExpression) ||
+                    UIObjectClass.getMethod(
+                        method => method.getName() == "configureWithObject"
+                    ).findReferencesAsNodes().find(
+                        reference => this.isNodeContainedInNode(
+                            reference,
+                            targetObjectConstructorAssignmentReference?.getFirstAncestor(
+                                node => node.getText().contains(keyPathComponents[0] + ".configureWithObject")
+                            )
+                        )
+                    )?.getFirstAncestorByKind(SyntaxKind.CallExpression) ||
+                    UIObjectClass.getMethod(
+                        method => method.getName() == "configuredWithObject"
+                    ).findReferencesAsNodes().find(
+                        reference => this.isNodeContainedInNode(
+                            reference,
+                            propertyObject.getInitializer()
+                        )
+                    )?.getFirstAncestorByKind(SyntaxKind.CallExpression)
+                
+                let configurationObject = configurationMethodCallReference?.getArguments()?.[0] as ObjectLiteralExpression
+                if (!configurationObject) {
+                    // Add configuration to targetObjectConstructorAssignmentReference
+                    const right = targetObjectConstructorAssignmentReference?.getFirstAncestorByKind(SyntaxKind.BinaryExpression)
+                        ?.getRight() ?? propertyObject.getInitializer()
+                    const newNode = right.replaceWithText(
+                        right.getText() + ".configuredWithObject({})"
+                    )
+                    newNode.formatText()
+                    configurationObject = newNode.getFirstDescendantByKind(SyntaxKind.ObjectLiteralExpression)
+                }
+                
+                locationOfEditedValue = this.setValueForKeyPathInObjectCreatingPath(
+                    keyPathComponents.slice(1),
+                    configurationObject,
+                    valueString
+                )
                 
                 
             }
@@ -771,7 +750,7 @@ export class CBEditorController extends RoutesController {
             )
             
             const classObject = resultFile.getClass(message.className)
-            let propertyObject = this.propertyObjectForClass(classObject, message.propertyKey)
+            let propertyObject = this.propertyDeclarationForClassAndKey(classObject, message.propertyKeyPath)
             const propertyReferences = propertyObject?.findReferencesAsNodes()?.filter(
                 reference => reference.getSourceFile() == classObject.getSourceFile()
             ) ?? []
@@ -796,7 +775,7 @@ export class CBEditorController extends RoutesController {
             if (propertyObject) {
                 
                 respondWithMessage.sendErrorResponse(
-                    "Property withe name " + message.propertyKey + " is already present in class " + message.className
+                    "Property withe name " + message.propertyKeyPath + " is already present in class " + message.className
                 )
                 
                 return
@@ -806,10 +785,10 @@ export class CBEditorController extends RoutesController {
             respondWithMessage.sendIntermediateResponse("Adding property " +
                 message.className +
                 "_" +
-                message.propertyKey)
+                message.propertyKeyPath)
             
             propertyObject = classObject.addProperty({
-                name: message.propertyKey,
+                name: message.propertyKeyPath,
                 initializer: "new UIView().addedAsSubviewToView(this.view)"
             })
             // .configuredWithObject({ backgroundColor: UIColor.redColor })
@@ -851,7 +830,7 @@ export class CBEditorController extends RoutesController {
             
             const viewClass = this.classDeclarationWithName(propertyObject?.getStructure()?.type as string)
             
-            const editableAccessorDeclarations = this.editableAccessorDeclarations(viewClass)
+            const editableDeclarationObjects = this.editableDeclarations(viewClass)
             
             const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
             const targetFile = sourceFiles.find(
@@ -860,18 +839,40 @@ export class CBEditorController extends RoutesController {
                 )
             )
             
-            const editableProperties = editableAccessorDeclarations.map(setter => {
+            const editableProperties = editableDeclarationObjects.map(declarationObject => {
                 
-                const propertyKeyPath = message.propertyKey + "." + setter.getStructure().name
+                const declaration = declarationObject.declaration
+                const propertyKeyPath = message.propertyKeyPath + "." + declarationObject.keyPathComponents.join(".")
+                let typeName: string
+                let declarationType: "field" | "property"
                 
-                const result = {
-                    typeName: setter.getStructure().parameters.firstElement.type as string,
+                if (declaration instanceof SetAccessorDeclaration) {
+                    
+                    typeName = declaration.getStructure().parameters.firstElement.type as string
+                    declarationType = "property"
+                    
+                }
+                
+                if (declaration instanceof PropertyDeclaration) {
+                    
+                    typeName = declaration.getStructure().type as string
+                    declarationType = "field"
+                    
+                }
+                
+                // Add editing values straight to the descriptor
+                const unionTypes = declaration.getType().getUnionTypes()
+                
+                const result: CBEditorEditablePropertyDescriptor = {
+                    typeName: typeName,
                     path: propertyKeyPath,
                     editingLocation: this.locationOfEditing(
                         resultFile,
                         targetFile,
                         { className: message.className, propertyKeyPath: propertyKeyPath }
-                    )
+                    ),
+                    declarationType: declarationType,
+                    valueOptions: unionTypes.map(value => value.getText())
                 }
                 
                 return result
@@ -879,9 +880,9 @@ export class CBEditorController extends RoutesController {
             }).uniqueElementsOnlyWithFunction(property => property.path)
             
             const runtimeObjectKeyPathComponents = this.currentEditingTarget.runtimeObjectKeyPath.split(".")
-            runtimeObjectKeyPathComponents.lastElement = message.propertyKey
+            runtimeObjectKeyPathComponents.lastElement = message.propertyKeyPath
             this.currentEditingTarget = {
-                propertyKey: message.propertyKey,
+                propertyKeyPath: message.propertyKeyPath,
                 className: message.className,
                 runtimeObjectKeyPath: runtimeObjectKeyPathComponents.join(".")
             }
@@ -919,7 +920,7 @@ export class CBEditorController extends RoutesController {
             
             
             const viewController = this.classDeclarationWithName(message.className)
-            const property = viewController.getProperty(message.propertyKey)
+            const property = viewController.getProperty(message.propertyKeyPath)
             const referenceNodes = property.findReferencesAsNodes()
             
             const referenceExpressions: ExpressionStatement[] = referenceNodes.map(
@@ -928,7 +929,7 @@ export class CBEditorController extends RoutesController {
             
             const referenceBinaryExpressions = referenceExpressions.map(
                 value => value.getFirstDescendantByKind(SyntaxKind.BinaryExpression)
-            ).filter(value => value?.getLeft()?.getText()?.contains(message.propertyKey + ".frame"))
+            ).filter(value => value?.getLeft()?.getText()?.contains(message.propertyKeyPath + ".frame"))
             
             referenceBinaryExpressions.forEach(value => {
                 
@@ -940,7 +941,7 @@ export class CBEditorController extends RoutesController {
             
             await viewController.getSourceFile().save()
             
-            this.currentEditingTarget.propertyKey = "view"
+            this.currentEditingTarget.propertyKeyPath = "view"
             
             var asd = 1
             
@@ -1061,7 +1062,7 @@ export class CBEditorController extends RoutesController {
             
             this.currentEditingTarget = {
                 className: newClassName,
-                propertyKey: "view",
+                propertyKeyPath: "view",
                 runtimeObjectKeyPath: "contentViewController.view"
             }
             
@@ -1150,6 +1151,73 @@ export class CBEditorController extends RoutesController {
     }
     
     
+    private setValueForKeyPathInObjectCreatingPath<T>(
+        keyPathComponents: string[],
+        configurationObject: ObjectLiteralExpression,
+        valueString: string
+    ) {
+        
+        // Set value for the keypath with createPath enabled
+        
+        keyPathComponents.slice(0, -1).forEach((value, index, array) => {
+            
+            const propertyAssignment = configurationObject.getChildrenOfKind(SyntaxKind.PropertyAssignment)
+                .find(assignment => assignment.getChildren()[0].getText() == value)
+            
+            if (propertyAssignment) {
+                
+                const propertyAssignmentValue = propertyAssignment.getChildren()[2]
+                if (propertyAssignmentValue instanceof ObjectLiteralExpression) {
+                    configurationObject = propertyAssignmentValue
+                }
+                
+            }
+            else {
+                
+                const assignment = configurationObject.addPropertyAssignment({
+                    name: value,
+                    initializer: "{}"
+                })
+                
+                const initializer = assignment.getInitializer()
+                if (initializer instanceof ObjectLiteralExpression) {
+                    configurationObject = initializer
+                }
+                
+            }
+            
+        })
+        
+        
+        const propertyAssignment = configurationObject.getChildrenOfKind(SyntaxKind.PropertyAssignment)
+            .find(assignment => assignment.getChildren()[0].getText() == keyPathComponents.lastElement)
+        
+        if (propertyAssignment) {
+            
+            const propertyAssignmentValue = propertyAssignment.getChildren()[2]
+            
+            return this.locationOfNode(
+                propertyAssignmentValue.replaceWithText(valueString)
+            )
+            
+            
+        }
+        else {
+            
+            const assignment = configurationObject.addPropertyAssignment({
+                name: keyPathComponents.lastElement,
+                initializer: valueString
+            })
+            
+            const initializer = assignment.getInitializer()
+            return this.locationOfNode(
+                //configurationObject.getProperty(keyPathComponents.lastElement)
+                initializer
+            )
+            
+        }
+    }
+    
     private locationOfEditing(
         resultFile: SourceFile,
         targetFile: SourceFile,
@@ -1160,12 +1228,18 @@ export class CBEditorController extends RoutesController {
         const fileText = resultFile.getText()
         
         const classObject = resultFile.getClass(message.className)
-        let propertyObject = this.propertyObjectForClass(
+        let propertyObject = this.propertyDeclarationForClassAndKey(
             classObject,
-            message.propertyKeyPath.split(".").firstElement
+            message.propertyKeyPath
         )
+        if (!propertyObject) {
+            return
+        }
         
-        const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
+        const classPropertyTypeName = propertyObject?.getType()?.compilerType?.symbol?.getName()
+        if (!classPropertyTypeName) {
+            return
+        }
         
         const targetObjectClassDeclaration = targetFile.getClass(classPropertyTypeName)
         const keyPathComponents = message.propertyKeyPath.split(".")
@@ -1267,7 +1341,7 @@ export class CBEditorController extends RoutesController {
                 )
             
             
-            if ((targetObjectConstructorAssignmentReference || propertyObject.hasInitializer()) && !assignmentObject) {
+            if ((targetObjectConstructorAssignmentReference || propertyObject.hasInitializer?.()) && !assignmentObject) {
                 
                 const sourceFiles = this.webclientProject.getSourceFiles()
                 const UIObjectClass = sourceFiles.find(
@@ -1298,10 +1372,16 @@ export class CBEditorController extends RoutesController {
                     UIObjectClass.getMethod(
                         method => method.getName() == "configuredWithObject"
                     ).findReferencesAsNodes().find(
-                        reference => this.isNodeContainedInNode(
-                            reference,
-                            propertyObject.getInitializer()
-                        )
+                        reference => {
+                            let nodeContainedInNode = false
+                            if (propertyObject instanceof PropertyDeclaration) {
+                                nodeContainedInNode = this.isNodeContainedInNode(
+                                    reference,
+                                    propertyObject.getInitializer()
+                                )
+                            }
+                            return nodeContainedInNode
+                        }
                     )?.getFirstAncestorByKind(SyntaxKind.CallExpression)
                 
                 const configurationObject = configurationMethodCallReference?.getArguments()?.[0] as ObjectLiteralExpression
@@ -1356,7 +1436,7 @@ export class CBEditorController extends RoutesController {
         
         const classObject = newNode.getFirstAncestorByKind(SyntaxKind.ClassDeclaration)
         
-        return {
+        const result = {
             className: classObject.getName(),
             start: {
                 lineNumber: newNode.getStartLineNumber(),
@@ -1367,6 +1447,11 @@ export class CBEditorController extends RoutesController {
                 column: newNode.getEnd() - newNode.getStartLinePos() + 1
             }
         }
+        
+        result.start.column = result.start.column +
+            newNode.getFullText().length - newNode.getText().length
+        
+        return result
         
     }
     
@@ -1389,7 +1474,7 @@ export class CBEditorController extends RoutesController {
         
     }
     
-    private setAccessorForClassAndKey(classObject: ClassDeclaration, key: string) {
+    private setAccessorForClassAndKey(classObject: ClassDeclaration, key: string): SetAccessorDeclaration | undefined {
         
         if (!classObject) {
             return undefined
@@ -1401,14 +1486,96 @@ export class CBEditorController extends RoutesController {
         
     }
     
+    private propertyDeclarationForClassAndKey(
+        classObject: ClassDeclaration,
+        key: string
+    ): PropertyDeclaration | undefined {
+        
+        if (!classObject) {
+            return undefined
+        }
+        
+        return classObject?.getProperty(
+            property => property.getName() == key
+        ) || this.propertyDeclarationForClassAndKey(classObject?.getBaseClass(), key)
+        
+    }
+    
+    private setAccessorOrPropertyDeclarationForClassAndKeyPath(
+        classObject: ClassDeclaration,
+        keyPath: string,
+        original = { classObject, keyPath, className: classObject?.getName() }
+    ) {
+        
+        if (!classObject) {
+            return undefined
+        }
+        
+        
+        const keyPathComponents = keyPath.split(".")
+        
+        let propertyDeclaration: PropertyDeclaration | SetAccessorDeclaration | undefined
+        
+        for (let i = 0; i < keyPathComponents.length; i++) {
+            
+            const key = keyPathComponents[i]
+            
+            propertyDeclaration = classObject?.getSetAccessor(
+                    accessor => accessor.getName() == key
+                ) || Utils.IF(i < keyPathComponents.length - 1)(() =>
+                    classObject?.getGetAccessor(
+                        accessor => accessor.getName() == key
+                    )
+                ).ELSE(() => undefined) ||
+                classObject?.getProperty(
+                    property => property.getName() == key
+                ) || this.setAccessorOrPropertyDeclarationForClassAndKeyPath(
+                    classObject?.getBaseClass(),
+                    key,
+                    original
+                )
+            
+            if (!propertyDeclaration) {
+                
+                var asd = 1
+                
+                break
+                
+            }
+            
+            
+            const classDeclarationWithName = this.classDeclarationWithName(propertyDeclaration?.getType()
+                ?.compilerType
+                ?.symbol
+                ?.getName())
+            
+            if (!classDeclarationWithName) {
+                
+                var asdasdasdasdasd = 1
+                
+                break
+                
+            }
+            
+            classObject = classDeclarationWithName
+            
+        }
+        
+        return propertyDeclaration
+        
+    }
+    
     private valueStringForPropertyAndMessageValue(
-        targetObjectClassPropertyObject: SetAccessorDeclaration,
+        targetObjectClassPropertyObject: SetAccessorDeclaration | PropertyDeclaration,
         valueString: string
     ) {
         
         let result = valueString
         
-        if (targetObjectClassPropertyObject?.getType()?.compilerType?.symbol?.getName() == "UIColor") {
+        const valueTypeName = targetObjectClassPropertyObject.getType().compilerType.symbol?.getName() ??
+            targetObjectClassPropertyObject.getType().compilerType["intrinsicName"]
+        
+        if (valueTypeName == "UIColor") {
             
             result = "new UIColor(\"" + valueString + "\")"
             
@@ -1420,8 +1587,8 @@ export class CBEditorController extends RoutesController {
             
         }
         
-        // @ts-ignore
-        if (targetObjectClassPropertyObject?.getType()?.compilerType?.intrinsicName == "string") {
+        
+        if (valueTypeName == "string") {
             
             result = "\"" + valueString + "\""
             
@@ -1469,7 +1636,10 @@ export class CBEditorController extends RoutesController {
         return (parent && parent == parentNode) || (parent && this.isNodeContainedInNode(parent, parentNode))
     }
     
-    private editableAccessorDeclarations(viewClass: ClassDeclaration) {
+    private editableDeclarations(
+        viewClass: ClassDeclaration,
+        keyPathComponentsToPrepend: string[] = []
+    ): EditableDeclarationObject[] {
         
         if (!viewClass) {
             return []
@@ -1477,20 +1647,181 @@ export class CBEditorController extends RoutesController {
         
         const colorReferenceClass = this.classDeclarationWithName("UIColor")
         
-        let result = viewClass.getSetAccessors().filter(
+        
+        let accessorDeclarations = viewClass.getSetAccessors().filter(
             propertyAccessor => ["string", "number"].contains(
                 propertyAccessor.getStructure().parameters.firstElement.type as string
             ) || this.isClassKindOfReferenceClass(
                 this.classDeclarationWithName(propertyAccessor.getStructure().parameters.firstElement.type as string),
                 colorReferenceClass
+            ) || propertyAccessor.getType().getUnionTypes().anyMatch(
+                value => value.isString() || value.isStringLiteral()
             )
         )
         
+        const propertyDeclarations = viewClass.getProperties().filter(
+            (propertyDeclaration: PropertyDeclaration) => {
+                
+                const declarationStructure = propertyDeclaration.getStructure()
+                
+                if (declarationStructure.isStatic) {
+                    return false
+                }
+                
+                let result = (["string", "number"].contains(
+                    declarationStructure.type as string
+                ) || this.isClassKindOfReferenceClass(
+                    this.classDeclarationWithName(declarationStructure.type as string),
+                    colorReferenceClass
+                ))
+                
+                const name = declarationStructure.name
+                const isAlreadyInAccessorsArray = accessorDeclarations.anyMatch(
+                    value => value.getName() == name.replace(
+                        "_",
+                        ""
+                    )
+                )
+                if (result && name.startsWith("_") && isAlreadyInAccessorsArray) {
+                    result = false
+                }
+                
+                
+                return result
+                
+            }
+        )
+        
+        let result: EditableDeclarationObject[] = accessorDeclarations.map(declaration => {
+            
+            const result = {
+                declaration: declaration,
+                keyPathComponents: keyPathComponentsToPrepend.concat([declaration.getName()])
+            }
+            
+            return result
+            
+        })
+        if (propertyDeclarations) {
+            result = result.concat(propertyDeclarations.map(declaration => {
+                
+                const result = {
+                    declaration: declaration,
+                    keyPathComponents: keyPathComponentsToPrepend.concat([declaration.getName()])
+                }
+                
+                return result
+                
+            }))
+        }
         
         const baseClass = viewClass.getBaseClass()
         if (baseClass) {
-            result = result.concat(this.editableAccessorDeclarations(baseClass))
+            result = result.concat(this.editableDeclarations(baseClass))
         }
+        
+        function withSuperclasses(classDeclaration: ClassDeclaration, result: ClassDeclaration[] = []) {
+            result.push(classDeclaration)
+            const baseClassDeclaration = classDeclaration.getBaseClass()
+            if (baseClassDeclaration) {
+                withSuperclasses(baseClassDeclaration, result)
+            }
+            return result
+        }
+        
+        function getAccessorForSetAccessor(
+            setAccessorDeclaration: SetAccessorDeclaration,
+            viewClassDeclaration: ClassDeclaration
+        ) {
+            const viewClassDeclarations = withSuperclasses(viewClassDeclaration)
+            const result = viewClassDeclarations.map(value =>
+                value.getGetAccessor(getAccessor =>
+                    getAccessor.getName() == setAccessorDeclaration.getName()
+                )
+            ).find(value => value?.getName() == setAccessorDeclaration?.getName())
+            return result
+        }
+        
+        function setAccessorForGetAccessor(
+            getAccessorDeclaration: GetAccessorDeclaration,
+            viewClassDeclaration: ClassDeclaration
+        ) {
+            const viewClassDeclarations = withSuperclasses(viewClassDeclaration)
+            const result = viewClassDeclarations.map(value =>
+                value.getSetAccessor(setAccessor =>
+                    setAccessor?.getName() == getAccessorDeclaration.getName()
+                )
+            ).find(value => value?.getName() == getAccessorDeclaration.getName())
+            return result
+        }
+        
+        const viewClassDeclarations = withSuperclasses(viewClass)
+        
+        const setAccessorDeclarations = viewClassDeclarations.flatMap(
+            value => value.getSetAccessors()
+        ).uniqueElementsOnlyWithFunction(
+            item => item.getName()
+        )
+        
+        const getAccessorDeclarations = viewClassDeclarations.flatMap(
+            value => value.getGetAccessors()
+        ).uniqueElementsOnlyWithFunction(
+            item => item.getName()
+        )
+        
+        const accessorsWithNestedAttributes = getAccessorDeclarations.filter(accessor =>
+            accessor.getDecorator(declaration =>
+                declaration.getName() == "CBEditorNestedAttributes"
+            ) ||
+            setAccessorForGetAccessor(accessor, viewClass)?.getDecorator(declaration =>
+                declaration.getName() == "CBEditorNestedAttributes"
+            )
+        )
+        
+        accessorsWithNestedAttributes.forEach(value => {
+                const items = this.editableDeclarations(
+                    this.classDeclarationWithName(value.getReturnType().compilerType.getSymbol().getName()),
+                    keyPathComponentsToPrepend.concat([value.getName()])
+                )
+                return result = result.concat(
+                    items
+                )
+            }
+        )
+        
+        const propertyDeclarationsWithNestedAttributes = viewClass.getProperties().filter(
+            propertyDeclaration => {
+                
+                const declarationStructure = propertyDeclaration.getStructure()
+                
+                let result = propertyDeclaration.getDecorator(
+                    declaration => declaration.getName() == "CBEditorNestedAttributes"
+                ) && true
+                
+                const name = declarationStructure.name
+                const isAlreadyInAccessorsArray = accessorDeclarations.anyMatch(
+                    value => value.getName() == name.replace(
+                        "_",
+                        ""
+                    )
+                )
+                if (result && name.startsWith("_") && isAlreadyInAccessorsArray) {
+                    result = false
+                }
+                
+                return result
+                
+            }
+        )
+        
+        propertyDeclarationsWithNestedAttributes.forEach(value =>
+            result = result.concat(
+                this.editableDeclarations(
+                    this.classDeclarationWithName(value.getStructure()?.type as string),
+                    keyPathComponentsToPrepend.concat([value.getName()])
+                )
+            )
+        )
         
         return result
         
@@ -1538,7 +1869,10 @@ export class CBEditorController extends RoutesController {
         }
         
         const classObject = resultFile.getClass(propertyDescriptor.className)
-        const propertyObject = this.propertyObjectForClass(classObject, propertyDescriptor.propertyKey)
+        const propertyObject = this.propertyDeclarationForClassAndKey(
+            classObject,
+            propertyDescriptor.propertyKeyPath
+        )
         
         const propertyReferences = propertyObject?.findReferencesAsNodes()?.filter(
             reference => reference.getSourceFile() == classObject.getSourceFile()
@@ -1547,7 +1881,7 @@ export class CBEditorController extends RoutesController {
         const result: CBEditorAnnotatedPropertyDescriptor = {
             
             className: propertyDescriptor.className,
-            propertyKey: propertyDescriptor.propertyKey,
+            propertyKey: propertyDescriptor.propertyKeyPath,
             isDeclaredInClassFile: propertyObject?.getFirstAncestorByKind(SyntaxKind.ClassDeclaration) == classObject,
             isReferencedInClassFile: propertyReferences.length > 0,
             isInNodeModules: classObject.getSourceFile().isInNodeModules(),
@@ -1556,7 +1890,7 @@ export class CBEditorController extends RoutesController {
                 sourceFiles,
                 {
                     className: classObject.getBaseClass().getName(),
-                    propertyKey: propertyDescriptor.propertyKey,
+                    propertyKeyPath: propertyDescriptor.propertyKeyPath,
                     runtimeObjectKeyPath: propertyDescriptor.runtimeObjectKeyPath
                 }
             )).ELSE(() => undefined)
@@ -1565,19 +1899,6 @@ export class CBEditorController extends RoutesController {
         }
         
         return result
-        
-    }
-    
-    propertyObjectForClass(classObject: ClassDeclaration, propertyName: string): PropertyDeclaration {
-        
-        if (!classObject) {
-            return null
-        }
-        
-        return classObject.getProperty(propertyName) || this.propertyObjectForClass(
-            classObject.getBaseClass(),
-            propertyName
-        )
         
     }
     

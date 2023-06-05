@@ -364,11 +364,11 @@ export class UIObject {
         return this[key]
     }
     
-    valueForKeyPath(keyPath: string): any {
-        return UIObject.valueForKeyPath(keyPath, this)
+    valueForKeyPath<T = any>(keyPath: string, defaultValue?: T): T | undefined {
+        return UIObject.valueForKeyPath(keyPath, this, defaultValue)
     }
     
-    static valueForKeyPath(keyPath: string, object: any): any {
+    static valueForKeyPath<T = any>(keyPath: string, object: any, defaultValue?: T): T | undefined {
         
         if (IS_NOT(keyPath)) {
             return object
@@ -396,9 +396,9 @@ export class UIObject {
                 
             }
             
-            currentObject = currentObject[key]
+            currentObject = currentObject?.[key]
             if (IS_LIKE_NULL(currentObject)) {
-                currentObject = nil
+                currentObject = defaultValue
             }
             
         }
@@ -608,10 +608,10 @@ export class UIObject {
     
 }
 
-type MethodsOnly<T> =
+export type MethodsOnly<T> =
     Pick<T, { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]>;
 
-
+export type ValueOf<T> = T[keyof T];
 
 
 

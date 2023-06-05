@@ -1,5 +1,6 @@
 import { CBLocalizedTextObject } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import {
+    EXTEND,
     FIRST,
     IF,
     IS,
@@ -53,7 +54,7 @@ export interface CBDataViewCellDescriptor<DataType = Record<string, any>> {
     initCell?: (cellView: CellView) => void;
     updateCell?: (cellView: CellView, dataItem: DataType) => void;
     
-    buttonWasPressed?: (cellView: CellView, dataItem: DataType) => void;
+    buttonWasPressed?: (cellView: CellView, dataItem: DataType, event: MouseEvent | TouchEvent | KeyboardEvent) => void;
     
 }
 
@@ -111,8 +112,10 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         this.tableView = new UITableView(this.elementID + "TableView")
         this.addSubview(this.tableView)
         
-        this.tableHeaderView.moveToTopOfSuperview()
-        this.tableHeaderView.style.boxShadow = "#0000005e 0px 2px 2px -2px"
+        this.updateHeaderShadow()
+        this.tableView.configureWithObject({
+            didScrollToPosition: EXTEND(() => this.updateHeaderShadow())
+        })
         
         // function ONLY_IF(object: any) {
         //     if (IS(object)) {
@@ -203,6 +206,24 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
     }
     
     
+    private updateHeaderShadow() {
+        
+        const boxShadowString = "#0000005e 0px 2px 2px -2px"
+        
+        if (this.tableView.contentOffset.y > 0 && this.tableHeaderView.style.boxShadow != boxShadowString) {
+            
+            this.tableHeaderView.moveToTopOfSuperview()
+            this.tableHeaderView.style.boxShadow = boxShadowString
+            
+        }
+        else {
+            
+            this.tableHeaderView.style.boxShadow = ""
+            
+        }
+        
+    }
+    
     override wasAddedToViewTree() {
         
         super.wasAddedToViewTree()
@@ -269,7 +290,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
     }
     
     
-    setTreeData(data: DataType[], subElementsKey: string, expanded = YES) {
+    setTreeData(data: DataType[], subElementsKey: keyof DataType & string, expanded = YES) {
         
         // Flatten the tree
         

@@ -111,7 +111,7 @@ export class CBCore extends UIObject {
         "userDidLogIn": "UserDidLogIn",
         "userDidLogOut": "UserDidLogOut"
         
-    }
+    } as const
     
     broadcastMessageInRootViewTree(message: UIViewBroadcastEvent) {
     

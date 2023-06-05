@@ -118,7 +118,7 @@ export class CBTableRowView<DataType = Record<string, any>> extends RowView {
                 (sender, event) => {
                     
                     const buttonWasPressed = FIRST_OR_NIL(descriptor.buttonWasPressed)
-                    buttonWasPressed(view, this.data)
+                    buttonWasPressed(view, this.data, event as any)
                     
                 }
             )

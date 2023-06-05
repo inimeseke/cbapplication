@@ -2,6 +2,7 @@ import { UIColor } from "./UIColor"
 import { UILocalizedTextObject } from "./UIInterfaces"
 import { FIRST, IS_LIKE_NULL, nil, NO, UIObject, YES } from "./UIObject"
 import { UIRectangle } from "./UIRectangle"
+import type { ValueOf } from "./UIObject"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
@@ -9,7 +10,7 @@ export class UITextView extends UIView {
     
     
     _textColor: UIColor = UITextView.defaultTextColor
-    _textAlignment?: string
+    _textAlignment?: ValueOf<typeof UITextView.textAlignment>
     
     _isSingleLine = YES
     
@@ -40,7 +41,7 @@ export class UITextView extends UIView {
     _text?: string
     
     
-    constructor(elementID?: string, textViewType = UITextView.type.paragraph, viewHTMLElement = null) {
+    constructor(elementID?: string, textViewType: string | ValueOf<typeof UITextView.type> = UITextView.type.paragraph, viewHTMLElement = null) {
         
         super(elementID, viewHTMLElement, textViewType)
         
@@ -101,7 +102,7 @@ export class UITextView extends UIView {
         "span": "span",
         "label": "label"
         
-    }
+    } as const
     
     
     static textAlignment = {
@@ -111,22 +112,21 @@ export class UITextView extends UIView {
         "right": "right",
         "justify": "justify"
         
-    }
+    } as const
     
     get textAlignment() {
-        const result = this.style.textAlign
-        return result
+        // @ts-ignore
+        return this.style.textAlign
     }
     
-    set textAlignment(textAlignment: string) {
+    set textAlignment(textAlignment: ValueOf<typeof UITextView.textAlignment>) {
         this._textAlignment = textAlignment
         this.style.textAlign = textAlignment
     }
     
     
     get textColor() {
-        const result = this._textColor
-        return result
+        return this._textColor
     }
     
     set textColor(color: UIColor) {

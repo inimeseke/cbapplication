@@ -1,4 +1,5 @@
-import { CALL, UIButton, UIColor, UIRoute, UITextView, UIView, UIViewController, YES } from "uicore-ts"
+import { CALL, UIColor, UIRoute, UITextView, UIView, UIViewController, YES } from "uicore-ts"
+import { CBButton } from "./Custom components/CBButton"
 import { CBDataView } from "./Custom components/CBDataView"
 
 
@@ -9,7 +10,6 @@ export class TreeViewViewController extends UIViewController {
         UITextView.type.header2
     ).configuredWithObject({
         text: "TreeViewViewController",
-        hoverText: "",
         //localizedTextObject: { en: "Some content", est: "Mingi sisu" },
         backgroundColor: UIColor.transparentColor
     }).addedAsSubviewToView(this.view)
@@ -49,8 +49,16 @@ export class TreeViewViewController extends UIViewController {
         ], "subData")
     }).addedAsSubviewToView(this.view)
     
-    bottomView = new UIView().addedAsSubviewToView(this.view)
+    exampleButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
+        titleLabel: {
+            text: "Asdasdasdasdasdasdasd",
+            textAlignment: "center"
+        }
+    })
     
+    bottomView = new UIView().addedAsSubviewToView(this.view)
+    asdasd = new UIView().addedAsSubviewToView(this.view)
+
     constructor(view: UIView) {
         
         super(view)
@@ -118,28 +126,42 @@ export class TreeViewViewController extends UIViewController {
     
     
     override layoutViewSubviews() {
-        
+
         super.layoutViewSubviews()
-        
+
         const padding = this.core.paddingLength
         const labelHeight = padding
-        
+
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)
-        
+
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
         this.treeView.frame = this.titleLabel.frame.rectangleForNextRow(
             padding,
             [this.treeView.intrinsicContentHeight(this.titleLabel.frame.width), padding, 500].max()
         )
-        this.bottomView.frame = this.treeView.frame.rectangleForNextRow(
+        this.exampleButton.frame = this.treeView.frame.rectangleForNextRow(
+            padding,
+            150
+        )
+        this.bottomView.frame = this.exampleButton.frame.rectangleForNextRow(
             padding,
             1
         )
-        
-        
+        this.asdasd.frame = this.bottomView.frame.rectangleForNextRow(
+            padding,
+            [this.asdasd.intrinsicContentHeight(this.bottomView.frame.width), padding].max()
+        )
+
+
     }
 }
+
+
+
+
+
+
 
 
 

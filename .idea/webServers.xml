@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="8f20db9d-e668-4270-be32-b260c46279ca" name="MBP" url="http://localhost">
+        <fileTransfer host="192.168.1.196" port="15151" />
+      </webServer>
+    </option>
+  </component>
+</project>

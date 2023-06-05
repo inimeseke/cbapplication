@@ -1,7 +1,7 @@
 import { UIBaseButton } from "./UIBaseButton"
 import { UIColor } from "./UIColor"
 import { UIImageView } from "./UIImageView"
-import { IS, IS_NOT, IS_NOT_NIL, nil, NO, YES } from "./UIObject"
+import { IS, IS_NOT, IS_NOT_NIL, nil, NO, ValueOf, YES } from "./UIObject"
 import { UIRectangle } from "./UIRectangle"
 import { UITextView } from "./UITextView"
 
@@ -57,7 +57,7 @@ export class UIButton extends UIBaseButton {
     }
     
     
-    constructor(elementID?: string, elementType?: string, titleType = UITextView.type.span) {
+    constructor(elementID?: string, elementType?: string, titleType: string | ValueOf<typeof UITextView.type> = UITextView.type.span) {
         
         super(elementID, elementType)
         

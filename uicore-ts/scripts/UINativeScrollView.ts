@@ -16,6 +16,16 @@ export class UINativeScrollView extends UIView {
         
         this.viewHTMLElement.addEventListener("scroll", () => {
             
+            this.resizingHandles.forEach(
+                handle => handle.style.transform = ("" + handle.style.transform).replace(
+                    new RegExp("translateX\\(([^)]+)\\)"),
+                    ""
+                ).replace(
+                    new RegExp("translateY\\(([^)]+)\\)"),
+                    ""
+                ) + "translateX(" + this.viewHTMLElement.scrollLeft + "px)" + " translateY(" + this.viewHTMLElement.scrollTop + "px)"
+            )
+            
             this.didScrollToPosition(new UIPoint(this.viewHTMLElement.scrollLeft, this.viewHTMLElement.scrollTop))
             
             this.broadcastEventInSubtree({

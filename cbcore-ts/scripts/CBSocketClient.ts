@@ -361,7 +361,7 @@ export class CBSocketClient extends UIObject {
         "firstOnly": "firstOnly",
         "storedOrFirst": "storedOrFirst"
     
-    }
+    } as const
     
     
     sendUserBoundMessageForKeyWithPolicy(
@@ -453,7 +453,7 @@ export class CBSocketClient extends UIObject {
         message: any,
         inResponseToMessage: CBSocketMessage<any> = {} as any,
         keepMessageConnectionOpen = NO,
-        completionPolicy = CBSocketClient.completionPolicy.directOnly,
+        completionPolicy: keyof typeof CBSocketClient.completionPolicy = CBSocketClient.completionPolicy.directOnly,
         isUserBound = NO,
         didSendFunction: () => void = nil,
         completion: CBSocketMessageCompletionFunction = nil

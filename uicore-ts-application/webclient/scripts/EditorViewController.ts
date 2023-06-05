@@ -2,10 +2,12 @@ import { CBDropdownDataItem, CBSocketClient, SocketClient } from "cbcore-ts"
 import type * as monaco from "monaco-editor"
 import { editor, IPosition } from "monaco-editor"
 import {
+    FIRST,
     FIRST_OR_NIL,
     IF,
     IS,
-    IS_NOT, MAKE_ID,
+    IS_NOT,
+    MAKE_ID,
     nil,
     NO,
     RETURNER,
@@ -17,7 +19,7 @@ import {
     UIRoute,
     UITextView,
     UIView,
-    UIViewController,
+    UIViewController, ValueOf,
     wrapInNil,
     YES
 } from "uicore-ts"
@@ -32,7 +34,11 @@ import { CellView } from "./Custom components/CellView"
 import { RowView } from "./Custom components/RowView"
 import { SearchableDropdown } from "./Custom components/SearchableDropdown"
 import { LanguageService } from "./LanguageService"
-import { CBEditorAnnotatedPropertyDescriptor, CBEditorPropertyDescriptor } from "./SocketClientFunctions"
+import {
+    CBEditorAnnotatedPropertyDescriptor,
+    CBEditorPropertyDescriptor,
+    CBEditorPropertyLocation
+} from "./SocketClientFunctions"
 import IModelContentChangedEvent = editor.IModelContentChangedEvent
 
 
@@ -76,6 +82,15 @@ console.log = function (obj, ...placeholders) {
     
 }
 
+export function CBEditorNestedAttributes(
+    _object: any,
+    _context: ClassFieldDecoratorContext | ClassSetterDecoratorContext | ClassGetterDecoratorContext
+) {
+    
+    // var asd = 1
+    
+}
+
 
 interface CBEditorViewTreeDescriptor {
     
@@ -90,173 +105,13 @@ interface CBEditorViewTreeDescriptor {
 }
 
 
-function props(obj: any) {
-    const p = [];
-    for (; obj != null; obj = Object.getPrototypeOf(obj)) {
-        const op = Object.getOwnPropertyNames(obj);
-        for (let i=0; i<op.length; i++)
-            if (p.indexOf(op[i]) == -1)
-                p.push(op[i]);
-    }
-    return p;
-}
 
-const _UIViewPropertyKeys = props(UIView.prototype).concat(new UIView().allKeys)
-const _UIViewControllerPropertyKeys = props(UIViewController.prototype).concat(new UIViewController(nil).allKeys)
-
-
-Object.defineProperty(UIView.prototype, "propertyDescriptors", {
-    get: function propertyDescriptors(this: UIView) {
-
-
-
-        //console.log(this.elementID + "_propertyDescriptors")
-
-        let result: any[] = []
-
-        function isPlainObject(value: any): value is object {
-            return value instanceof Object && Object.getPrototypeOf(value) === Object.prototype
-        }
-
-        function isAnArray(value: any): value is any[] {
-            return value instanceof Array && Object.getPrototypeOf(value) === Array.prototype
-        }
-
-        this.withAllSuperviews.forEach(view => {
-
-            const descriptorFromObject = function (
-                this: UIView,
-                object: object,
-                pathRootObject = object,
-                existingPathComponents: string[] = [],
-                lookInArrays = YES,
-                depthLeft = 5
-            ): {
-                subObjects: { object: object; key: string }[];
-                descriptor: { name: string; object: object } | undefined
-            } {
-
-                let resultDescriptor: { name: string; object: object } | undefined
-                const subObjects: { object: object, key: string }[] = []
-                const subArrays: { array: any[], key: string }[] = []
-
-                FIRST_OR_NIL(object).forEach((value, key, stopLooping) => {
-
-                    if (this == value) {
-
-                        existingPathComponents.push(key)
-
-                        resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
-                        stopLooping()
-                        return
-
-                    }
-
-
-                    if (isPlainObject(value) && !_UIViewPropertyKeys.contains(key) && !_UIViewControllerPropertyKeys.contains(key)) {
-                        subObjects.push({ object: value, key: key })
-                    }
-                    if (lookInArrays && isAnArray(value) && !_UIViewPropertyKeys.contains(key) && !_UIViewControllerPropertyKeys.contains(key)) {
-                        subArrays.push({ array: value, key: key })
-                    }
-
-                })
-
-                if (!resultDescriptor && lookInArrays) {
-
-                    subArrays.copy().forEach(value => {
-
-                        if (value.key.startsWith("_")) {
-
-                            subArrays.removeElement(value)
-                            subArrays.push(value)
-
-                        }
-
-                    })
-
-                    subArrays.find(arrayObject =>
-                        arrayObject.array.find((value, index) => {
-                            if (this == value) {
-                                existingPathComponents.push(arrayObject.key + "." + index)
-                                resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
-                                return YES
-                            }
-                            return NO
-                        })
-                    )
-
-                }
-
-                // if (!resultDescriptor && depthLeft) {
-                //
-                //     // @ts-ignore
-                //     resultDescriptor = subObjects.find(object => descriptorFromObject(
-                //         object,
-                //         pathRootObject,
-                //         existingPathComponents,
-                //         NO,
-                //         depthLeft - 1
-                //     ))
-                //
-                // }
-
-                if (resultDescriptor?.object?.constructor?.name == "Object") {
-
-                    var asd = 1
-
-                }
-
-                const result = {
-                    descriptor: resultDescriptor,
-                    subObjects: subObjects
-                }
-
-                return result
-
-            }.bind(this)
-
-            const viewControllerResult = descriptorFromObject(view.viewController)
-
-            if (viewControllerResult?.descriptor) {
-
-                result.push(viewControllerResult.descriptor)
-
-            }
-
-            const viewResult = descriptorFromObject(view)
-
-            if (viewResult?.descriptor) {
-
-                result.push(viewResult.descriptor)
-
-            }
-            else if (this.superview && this.superview == view) {
-
-                result.push({ object: view, key: "subviews." + view.subviews.indexOf(this) })
-
-            }
-
-
-            // view.forEach((value, key, stopLooping) => {
-            //
-            //     if (this == value) {
-            //
-            //         result.push({ object: view, name: key })
-            //
-            //         stopLooping()
-            //
-            //     }
-            //
-            // })
-
-
-        })
-
-        return result
-
-    }
-})
+// function asdasd(target: typeof UIObject, context: ClassDecoratorContext) {
+//
+//     context.name
+//     console.log(asdasd.name)
+//
+// }
 
 
 export class EditorViewController extends UIViewController {
@@ -267,7 +122,8 @@ export class EditorViewController extends UIViewController {
         UITextView.type.header2
     ).configuredWithObject({
         text: "Editor",
-        userInteractionEnabled: NO
+        userInteractionEnabled: NO,
+        nativeSelectionEnabled: NO
     }).addedAsSubviewToView(this.view)
     
     closeButton = new CBButton().configuredWithObject({
@@ -282,7 +138,7 @@ export class EditorViewController extends UIViewController {
     reloadButton = new CBButton().configuredWithObject({
         titleLabel: { text: "Reload files" },
         controlEventTargetAccumulator: {
-            PointerUpInside: async () => {
+            PointerUpInside: async (sender, event) => {
                 
                 this.view.alpha = 0.5
                 
@@ -290,7 +146,7 @@ export class EditorViewController extends UIViewController {
                 
                 await SocketClient.ReloadEditorFiles()
                 if (this._currentEditingView) {
-                    await this.shouldCallPointerUpInsideOnView(this._currentEditingView, YES)
+                    await this.shouldCallPointerUpInsideOnView(this._currentEditingView, event as any, YES)
                 }
                 
             }
@@ -317,7 +173,7 @@ export class EditorViewController extends UIViewController {
                 })
                 
                 if (this._currentEditingView) {
-                    await this.shouldCallPointerUpInsideOnView(this._currentEditingView, YES)
+                    await this.shouldCallPointerUpInsideOnView(this._currentEditingView, nil, YES)
                 }
                 
             }
@@ -393,13 +249,18 @@ export class EditorViewController extends UIViewController {
                     cellView.userInteractionEnabled = IS_NOT(cellView.selected)
                     cellView.enabled = !dataItem?.descriptor?.name?.contains(".")
                     
-                    
-                    cellView.titleLabel.style.fontWeight = IF(cellView.selected)(() => "bold").ELSE(() => "normal")
+                    cellView.titleLabel.style.fontWeight = IF(cellView.selected)(() => "bold")
+                        .ELSE(() => "normal")
                     
                 },
-                buttonWasPressed: async (cellView, dataItem) => {
+                buttonWasPressed: async (
+                    cellView,
+                    dataItem,
+                    event
+                ) => {
                     
-                    await (this.view.rootView.viewController.valueForKeyPath(dataItem.runtimeKeyPath) as UIView).shouldCallPointerUpInside()
+                    await (this.view.rootView.viewController.valueForKeyPath(dataItem.runtimeKeyPath) as UIView)
+                        .shouldCallPointerUpInside(nil)
                     
                 }
                 
@@ -410,34 +271,26 @@ export class EditorViewController extends UIViewController {
             if (event.altKey && event.metaKey) {
                 
                 const rowDataPoint: CBEditorViewTreeDescriptor = row.data
-                
                 const subDescriptors: CBEditorViewTreeDescriptor[] = rowDataPoint.subDescriptors
-                
-                const firstSubDescriptor = subDescriptors.find(value => value._CB_DataView_IsExpandable)
-                
+                const firstSubDescriptor = subDescriptors.find(
+                    value => value._CB_DataView_IsExpandable
+                )
                 if (!firstSubDescriptor) {
-                    
                     return
-                    
                 }
                 
                 const isExpanded = !firstSubDescriptor._CB_DataView_IsExpanded
                 
-                subDescriptors.forEach((subDescriptor, index, array) => {
-                    
-                    //console.log(subDescriptor)
-                    
+                subDescriptors.forEach(subDescriptor => {
                     // Find other rows with the same class and property names
-                    
-                    this.treeView.data.forEach((value, index, array) => {
-                        
-                        if (subDescriptor.className == value.className && subDescriptor.descriptor.name == value.descriptor.name) {
+                    this.treeView.data.forEach(value => {
+                        if (
+                            subDescriptor.className == value.className &&
+                            subDescriptor.descriptor.name == value.descriptor.name
+                        ) {
                             value._CB_DataView_IsExpanded = isExpanded
                         }
-                        
                     })
-                    
-                    
                 })
                 
                 rowDataPoint._CB_DataView_IsExpanded = !rowDataPoint._CB_DataView_IsExpanded
@@ -448,7 +301,7 @@ export class EditorViewController extends UIViewController {
                 
                 // Find other rows with the same class and property names
                 
-                this.treeView.data.forEach((value, index, array) => {
+                this.treeView.data.forEach(value => {
                     
                     if (row.data.className == value.className && row.data.descriptor.name == value.descriptor.name) {
                         value._CB_DataView_IsExpanded = row.data._CB_DataView_IsExpanded
@@ -483,7 +336,6 @@ export class EditorViewController extends UIViewController {
                 
                 
                 const dialogView = dialogViewShower.dialogView
-                
                 dialogViewShower.yesButtonWasPressed = async () => {
                     
                     const textField = dialogView.view.view
@@ -497,31 +349,17 @@ export class EditorViewController extends UIViewController {
                     
                     dialogView.dismiss()
                     
-                    //CBDialogViewShower.alert(propertyName, nil, this.dialogContainer)
-                    
-                    
                     const result = (await SocketClient.AddNewViewController({
-                        
                         className: className
-                        
                     })).result
                     
                     // Reload the class with the new code
-                    
-                    //this.addScriptToPage(result.codeFileContents, YES)
-                    
-                    
                     UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"])
                         .routeWithComponent(
                             result.componentName,
                             {}
                         ).apply()
-                    
-                    
                     this.performFunctionWithDelay(0.5, () => location.reload())
-                    
-                    
-                    //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
                     
                 }
                 
@@ -548,7 +386,8 @@ export class EditorViewController extends UIViewController {
                 this.dialogContainer.addedAsSubviewToView(this.view.superview)
                 
                 const dialogViewShower = CBDialogViewShower.showQuestionDialogWithTextField(
-                    "Are you sure that you want to delete " + this._currentClassName + "?\nWrite the class name to confirm.",
+                    "Are you sure that you want to delete " + this._currentClassName +
+                    "?\nWrite the class name to confirm.",
                     () => {
                         
                         this._editorViews.removeElement(dialogViewShower.dialogView)
@@ -641,7 +480,6 @@ export class EditorViewController extends UIViewController {
                 
                 
                 const dialogView = dialogViewShower.dialogView
-                
                 dialogViewShower.yesButtonWasPressed = async () => {
                     
                     const textField = dialogView.view.view
@@ -649,23 +487,14 @@ export class EditorViewController extends UIViewController {
                     
                     dialogView.dismiss()
                     
-                    //CBDialogViewShower.alert(propertyName, nil, this.dialogContainer)
-                    
-                    
-                    const result = (await SocketClient.AddSubview({
-                        
+                    await SocketClient.AddSubview({
                         className: this._currentClassName!,
-                        propertyKey: propertyName,
+                        propertyKeyPath: propertyName,
                         runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
-                        
-                    })).result
+                    })
                     
                     // Reload the class with the new code
-                    
-                    
                     location.reload()
-                    
-                    //this.showProperty({ className: this._currentClassName!, name: propertyName, object: nil })
                     
                 }
                 
@@ -692,7 +521,8 @@ export class EditorViewController extends UIViewController {
     //             this.dialogContainer.addedAsSubviewToView(this.view.superview)
     //
     //             const dialogViewShower = CBDialogViewShower.showQuestionDialog(
-    //                 "Are you sure that you want to remove " + this._currentEditingView?.propertyDescriptors.firstElement.name + "?",
+    //                 "Are you sure that you want to remove " +
+    //                 this._currentEditingView?.propertyDescriptors.firstElement.name + "?",
     //                 () => {
     //
     //                     this._editorViews.removeElement(dialogViewShower.dialogView)
@@ -752,15 +582,17 @@ export class EditorViewController extends UIViewController {
     
     buttonsRow = new RowView().addedAsSubviewToView(this.view)
     
-    editorContainer = new UIView("EditorEditorContainer", nil, "iframe").configuredWithObject({
-        viewHTMLElement: { src: "CBEditorEditor.html" }
-    }).addedAsSubviewToView(this.view)
+    editorContainer = new UIView("EditorEditorContainer", nil, "iframe")
+        .configuredWithObject({
+            viewHTMLElement: { src: "CBEditorEditor.html" }
+        }).addedAsSubviewToView(this.view)
     
-    dialogContainer = new UIView("CBEditorDialogContainer", nil).performingFunctionWithSelf(self => {
-        
-        self.userInteractionEnabled = NO
-        
-    })
+    dialogContainer = new UIView("CBEditorDialogContainer", nil)
+        .performingFunctionWithSelf(self => {
+            
+            self.userInteractionEnabled = NO
+            
+        })
     
     _editorViews: UIView[] = [this.dialogContainer]
     
@@ -828,13 +660,13 @@ export class EditorViewController extends UIViewController {
         SocketClient.ReloadEditorFiles().then(nil)
         
         this.initEditor().then(nil)
-        UIView.shouldCallPointerUpInsideOnView = async eventView =>
-            await this.shouldCallPointerUpInsideOnView(eventView) ?? YES
+        UIView.shouldCallPointerUpInsideOnView = async (eventView: UIView, event) =>
+            await this.shouldCallPointerUpInsideOnView(eventView, event) ?? YES
         
         UIView.shouldCallPointerHoverOnView = async view => {
             
             // @ts-ignore
-            const editorOverlayElement = view._CBEditorOverlayElement
+            //const editorOverlayElement = view._CBEditorOverlayElement
             
             if (view != this._currentEditingView && !view.withAllSuperviews.contains(this.view)) {
                 
@@ -927,7 +759,7 @@ export class EditorViewController extends UIViewController {
             currentViewKeyPath || "view"
         )
         
-        await this.shouldCallPointerUpInsideOnView(view)
+        await this.shouldCallPointerUpInsideOnView(view, nil)
         
     }
     
@@ -1000,8 +832,12 @@ export class EditorViewController extends UIViewController {
     
     private layoutFunctionText(editorText: string) {
         
-        const matchedText = editorText.match(new RegExp("layoutViewSubviews\\(\\) \\{"))?.firstElement ||
-            editorText.match(new RegExp("layoutSubviews\\(\\) \\{"))?.firstElement
+        const matchedText = editorText.match(
+                new RegExp("layoutViewSubviews\\(\\) \\{")
+            )?.firstElement ||
+            editorText.match(
+                new RegExp("layoutSubviews\\(\\) \\{")
+            )?.firstElement
         
         let methodBlockString = ""
         
@@ -1047,14 +883,10 @@ export class EditorViewController extends UIViewController {
         const replacementFunction = this.runScript(scriptText)
         
         if (this._selectedView?.viewController) {
-            
             this._selectedView.viewController.layoutViewSubviews = replacementFunction
-            
         }
         else {
-            
             this._selectedView.layoutSubviews = replacementFunction
-            
         }
         
         this._selectedView?.setNeedsLayoutUpToRootView?.()
@@ -1103,7 +935,6 @@ export class EditorViewController extends UIViewController {
         
         if (isMovementCompleted || YES) {
             
-            
             const bounds = view.superview.bounds
             const relativeXPosition = view.frame.center.x / bounds.width
             const widthMultiplier = view.frame.width / bounds.width
@@ -1112,39 +943,53 @@ export class EditorViewController extends UIViewController {
             const heightMultiplier = view.frame.height / bounds.height
             
             view.calculateAndSetViewFrame = () => {
-                
-                
-                const rectangleWithWidthAndHeight = view.superview.bounds.rectangleWithRelativeValues(
+                view.frame = view.superview.bounds.rectangleWithRelativeValues(
                     relativeXPosition,
                     widthMultiplier,
                     relativeYPosition,
                     heightMultiplier
                 )
-                
-                
-                view.frame = rectangleWithWidthAndHeight
-                
             }
             
-            
         }
-        
         
     }
     
     
     // section Current view selection
-    private async shouldCallPointerUpInsideOnView(view: UIView, forced = NO) {
+    private async shouldCallPointerUpInsideOnView(view: UIView, event: MouseEvent | TouchEvent, forced = NO) {
         
-        const isAnEditorView = this._editorViews.anyMatch(editorView => view.withAllSuperviews.contains(editorView))
-        if (!forced &&
-            (!this.view.isMemberOfViewTree ||
+        const isAnEditorView = this._editorViews.anyMatch(
+            editorView => view.withAllSuperviews.contains(editorView)
+        )
+        if (
+            !forced &&
+            (
+                !this.view.isMemberOfViewTree ||
                 this.view.viewHTMLElement.contains(view.viewHTMLElement) ||
-                this._currentEditingView ==
-                view ||
-                isAnEditorView)) {
+                this._currentEditingView == view ||
+                isAnEditorView ||
+                !event.altKey
+            )
+        ) {
             
             return YES
+            
+        }
+        
+        event.stopPropagation()
+        
+        if (!event.metaKey && this._currentEditingView) {
+            
+            const viewWithAllSuperviews = view.withAllSuperviews
+            
+            const currentEditingViewIndex = viewWithAllSuperviews.indexOf(this._currentEditingView)
+            
+            if (currentEditingViewIndex > 0) {
+                
+                view = viewWithAllSuperviews[currentEditingViewIndex - 1]
+                
+            }
             
         }
         
@@ -1161,7 +1006,7 @@ export class EditorViewController extends UIViewController {
             propertyDescriptors.map(value => {
                 return {
                     className: value.object.constructor.name,
-                    propertyKey: value.name,
+                    propertyKeyPath: value.name,
                     runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
                 }
             })
@@ -1271,14 +1116,14 @@ export class EditorViewController extends UIViewController {
     }
     
     private indexForPropertyDescriptor(unwrappedPropertyDescriptors: UnwrappedPropertyDescriptor[]) {
-        let propertyDescriptorIndex = unwrappedPropertyDescriptors.findIndex(
-            object => object.isDeclaredInClassFile && !object.isInNodeModules && !object.isInDeclarationFile
+        let propertyDescriptorIndex = unwrappedPropertyDescriptors.findIndex(object =>
+            object.isDeclaredInClassFile && !object.isInNodeModules && !object.isInDeclarationFile
         )
         
         if (0 >= propertyDescriptorIndex) {
             
-            propertyDescriptorIndex = unwrappedPropertyDescriptors.findIndex(
-                object => object.isReferencedInClassFile && !object.isInNodeModules && !object.isInDeclarationFile
+            propertyDescriptorIndex = unwrappedPropertyDescriptors.findIndex(object =>
+                object.isReferencedInClassFile && !object.isInNodeModules && !object.isInDeclarationFile
             )
             
         }
@@ -1307,7 +1152,10 @@ export class EditorViewController extends UIViewController {
         return propertyDescriptorIndex
     }
     
-    private updateButtons(unwrappedPropertyDescriptors: UnwrappedPropertyDescriptor[], selectedButtonIndex: number) {
+    private updateButtons(
+        unwrappedPropertyDescriptors: UnwrappedPropertyDescriptor[],
+        selectedButtonIndex: number
+    ) {
         
         this.buttonsRow.cells = []
         this.buttonsRow.cellWidths = []
@@ -1374,7 +1222,10 @@ export class EditorViewController extends UIViewController {
     
     
     // section Content updating
-    private async showProperty(propertyDescriptor: { object: UIObject, className: string, name: string }, forced = NO) {
+    private async showProperty(
+        propertyDescriptor: { object: UIObject, className: string, name: string },
+        forced = NO
+    ) {
         
         if (!propertyDescriptor && !forced) {
             return
@@ -1390,234 +1241,417 @@ export class EditorViewController extends UIViewController {
         
         const fileObject = (await SocketClient.EditProperty({
             className: propertyDescriptor.className,
-            propertyKey: propertyDescriptor.name,
+            propertyKeyPath: propertyDescriptor.name,
             runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
         })).result
         
         this.propertyEditors.everyElement.removeFromSuperview()
-        this.propertyEditors = fileObject.editableProperties.map(property =>
+        let propertyEditors: UIView[] = []
+        for (let i = 0; i < fileObject.editableProperties.length; i++) {
             
-            IF(propertyDescriptor.object.valueForKeyPath(property.path)?.isKindOfClass?.(UIColor))(() =>
+            const property = fileObject.editableProperties[i]
+            
+            const isColor = propertyDescriptor.object.valueForKeyPath(property.path)?.isKindOfClass?.(UIColor)
+            if (IS(isColor)) {
                 
-                new CBColorSelector().configuredWithObject(
-                    {
-                        titleLabel: {
-                            text: property.path + " (" + propertyDescriptor.object.valueForKeyPath(property.path) + ")"
-                        },
-                        colors: { background: { normal: CBColor.primaryTintColor } },
-                        dialogContainerView: this.view,
-                        expandedContainerViewHeight: 500
-                    }
-                ).performingFunctionWithSelf(async self => {
-                        
-                        const editingValues = (await SocketClient.EditingValuesForProperty({
-                            className: property.typeName,
-                            propertyKey: property.path,
-                            runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
-                        })).result
-                        
-                        self.data = editingValues.map(value => {
-                            
-                            const result: CBDropdownDataItem<CBEditorPropertyDescriptor> = {
-                                
-                                _id: value.className + "." + value.propertyKey,
-                                title: { en: value.className + "." + value.propertyKey },
-                                attachedObject: value,
-                                itemCode: "[" + value.className + "." + value.propertyKey + "]",
-                                isADropdownDataRow: YES,
-                                isADropdownDataSection: NO,
-                                dropdownCode: "asdasd"
-                                
-                            }
-                            
-                            return result
-                            
-                        })
-                        
-                        
-                        self.imageView.backgroundColor = propertyDescriptor.object.valueForKeyPath(property.path)
-                        
-                        self.controlEventTargetAccumulator.ValueInput = async () => {
-                            
-                            propertyDescriptor.object.setValueForKeyPath(property.path, self.selectedColor)
-                            self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
-                                property.path
-                            ) + ")"
-                            
+                propertyEditors.push(
+                    new CBColorSelector().configuredWithObject(
+                        {
+                            titleLabel: {
+                                text: property.path + " (" + propertyDescriptor.object.valueForKeyPath(property.path) + ")" +
+                                    IF(property.declarationType == "field")(
+                                        () => " (field)"
+                                    ).ELSE(RETURNER(""))
+                            },
+                            colors: { background: { normal: CBColor.primaryTintColor } },
+                            dialogContainerView: this.view,
+                            expandedContainerViewHeight: 500
                         }
-                        
-                        self.controlEventTargetAccumulator.ValueChange = async () => {
+                    ).performingFunctionWithSelf(async self => {
                             
-                            propertyDescriptor.object.setValueForKeyPath(property.path, self.selectedColor)
-                            self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
-                                property.path
-                            ) + ")"
-                            
-                            const location = (await SocketClient.SetPropertyValue({
-                                
-                                className: this._currentClassName!,
+                            const editingValues = (await SocketClient.EditingValuesForProperty({
+                                className: property.typeName,
                                 propertyKeyPath: property.path,
-                                valueString: self.selectedColorStringValueForEditor,
-                                saveChanges: YES
+                                runtimeObjectKeyPath: this.pathToViewFromRootViewController(this._currentEditingView!)
+                            })).result
+                            
+                            self.data = editingValues.map(value => {
                                 
-                            })).result.location
+                                const result: CBDropdownDataItem<CBEditorPropertyDescriptor> = {
+                                    
+                                    _id: value.className + "." + value.propertyKeyPath,
+                                    title: { en: value.className + "." + value.propertyKeyPath },
+                                    attachedObject: value,
+                                    itemCode: "[" + value.className + "." + value.propertyKeyPath + "]",
+                                    isADropdownDataRow: YES,
+                                    isADropdownDataSection: NO,
+                                    dropdownCode: "asdasd"
+                                    
+                                }
+                                
+                                return result
+                                
+                            })
                             
-                            await this.shouldCallPointerUpInsideOnView(
-                                // @ts-ignore
-                                propertyDescriptor.object[propertyDescriptor.name],
-                                YES
-                            )
                             
-                            await this.showEditorPosition(location.end)
+                            self.imageView.backgroundColor = propertyDescriptor.object.valueForKeyPath(property.path) ?? nil
+                            
+                            self.controlEventTargetAccumulator.ValueInput = async () => {
+                                
+                                propertyDescriptor.object.setValueForKeyPath(property.path, self.selectedColor)
+                                self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
+                                    property.path
+                                ) + ")"
+                                
+                            }
+                            
+                            self.controlEventTargetAccumulator.ValueChange = async () => {
+                                
+                                propertyDescriptor.object.setValueForKeyPath(property.path, self.selectedColor)
+                                self.titleLabel.text = property.path + " (" + propertyDescriptor.object.valueForKeyPath(
+                                    property.path
+                                ) + ")"
+                                
+                                const location = (await SocketClient.SetPropertyValue({
+                                    
+                                    className: this._currentClassName!,
+                                    propertyKeyPath: property.path,
+                                    valueString: self.selectedColorStringValueForEditor,
+                                    saveChanges: YES
+                                    
+                                })).result.location
+                                
+                                await this.shouldCallPointerUpInsideOnView(
+                                    // @ts-ignore
+                                    propertyDescriptor.object[propertyDescriptor.name],
+                                    nil,
+                                    YES
+                                )
+                                
+                                await this.showEditorPosition(location.end)
+                                
+                            }
                             
                         }
-                        
-                    }
+                    )
                 )
-            ).ELSE_IF(propertyDescriptor.object.valueForKeyPath(property.path).isAString)(() =>
                 
-                new CBTextField().configuredWithObject(
-                    {
-                        titleLabel: { text: property.path }
-                    }
-                ).performingFunctionWithSelf(
-                    self => {
-                        
-                        let text: string = propertyDescriptor.object.valueForKeyPath(property.path)
-                        let outerHTMLIfNeeded = ""
-                        
-                        self.text = text.replace(
-                            propertyDescriptor.object.valueForKeyPath(
-                                property.path.split(".").slice(0, -1).join(".") + "._CBEditorOverlayElement"
-                            )?.outerHTML ?? "",
-                            ""
-                        )
-                        
-                        self.textField.backgroundColor = UIColor.transparentColor
-                        
-                        const editingLocation = property.editingLocation
-                        
-                        self.textField.controlEventTargetAccumulator.Focus = async () => {
+            }
+            else if (property.valueOptions.length) {
+                
+                
+                propertyEditors.push(
+                    new SearchableDropdown<string>().configuredWithObject(
+                        {
+                            titleLabel: {
+                                text: property.path + IF(property.declarationType == "field")(
+                                    () => " (field)"
+                                ).ELSE(RETURNER(""))
+                            },
+                            colors: { background: { normal: CBColor.primaryTintColor } },
+                            dialogContainerView: this.view,
+                            expandedContainerViewHeight: 500,
+                            isSingleSelection: YES,
+                            backgroundColor: UIColor.transparentColor
+                        }
+                    ).performingFunctionWithSelf(
+                        async self => {
                             
-                            if (editingLocation) {
+                            
+                            let text: string = propertyDescriptor.object.valueForKeyPath(property.path) ?? ""
+                            
+                            self.data = property.valueOptions.map((value, index, array) => {
                                 
-                                this.view.layoutSubviews()
+                                const result: CBDropdownDataItem<string> = {
+                                    
+                                    _id: value,
+                                    attachedObject: value,
+                                    dropdownCode: nil,
+                                    isADropdownDataRow: false,
+                                    isADropdownDataSection: false,
+                                    itemCode: value,
+                                    rowsData: [],
+                                    title: LanguageService.localizedTextObjectForText(value)
+                                    
+                                }
                                 
-                                // Set position to the correct editing location
-                                this._editor.setPosition(editingLocation.end)
+                                return result
                                 
-                                // Highlight the value that is being edited
-                                this._editor.setSelection({
-                                    startColumn: editingLocation.start.column,
-                                    startLineNumber: editingLocation.start.lineNumber,
-                                    endColumn: editingLocation.end.column,
-                                    endLineNumber: editingLocation.end.lineNumber
+                            })
+                            
+                            self.selectedItemCodes = ["\"" + text + "\""]
+                            
+                            let outerHTMLIfNeeded = ""
+                            
+                            let initialFileText = await this._editor.getValue()
+                            let initialEditingLocation: CBEditorPropertyLocation
+                            let editingLocation = property.editingLocation
+                            let currentFileText = initialFileText
+                            
+                            self.controlEventTargetAccumulator.SelectionDidChange = async () => {
+                                
+                                const newValue = self.selectedData.firstElement.attachedObject.slice(1, -1)
+                                const isValueChanged = text != newValue
+                                this.view.setNeedsLayout()
+                                
+                                if (!isValueChanged) {
+                                    
+                                    // Revert the file to the beginning of editing
+                                    currentFileText = initialFileText
+                                    this._editor.setValue(currentFileText)
+                                    
+                                    editingLocation = initialEditingLocation
+                                    
+                                    if (initialEditingLocation) {
+                                        initialEditingLocation = JSON.parse(JSON.stringify(initialEditingLocation))
+                                    }
+                                    
+                                    return
+                                    
+                                }
+                                
+                                
+                                propertyDescriptor.object.setValueForKeyPath(
+                                    property.path,
+                                    newValue
+                                )
+                                
+                                text = newValue
+                                
+                                await SocketClient.SetPropertyValue({
+                                    className: this._currentClassName!,
+                                    propertyKeyPath: property.path,
+                                    valueString: self.selectedData.firstElement.attachedObject,
+                                    saveChanges: YES
                                 })
                                 
-                                this._editor.revealLineInCenterIfOutsideViewport(editingLocation.end.lineNumber)
+                                await this.shouldCallPointerUpInsideOnView(
+                                    // @ts-ignore
+                                    propertyDescriptor.object[propertyDescriptor.name],
+                                    nil,
+                                    YES
+                                )
                                 
                             }
+                            
+                            
+                            //this.highlightView(this._currentEditingView!)
                             
                         }
-                        
-                        // @ts-ignore
-                        self.textField.controlEventTargetAccumulator.TextChange = async () => {
+                    )
+                )
+                
+            }
+            else if (propertyDescriptor.object.valueForKeyPath(property.path)?.isAString) {
+                
+                propertyEditors.push(
+                    new CBTextField().configuredWithObject(
+                        {
+                            titleLabel: {
+                                text: property.path + IF(property.declarationType == "field")(
+                                    () => " (field)"
+                                ).ELSE(RETURNER(""))
+                            }
+                        }
+                    ).performingFunctionWithSelf(
+                        async self => {
                             
-                            const newValue = self.text + IF(outerHTMLIfNeeded)(RETURNER(" " + outerHTMLIfNeeded))
-                                .ELSE(RETURNER(""))
-                            const isValueChanged = text != newValue
                             
-                            propertyDescriptor.object.setValueForKeyPath(
-                                property.path,
-                                newValue
+                            let text: string = propertyDescriptor.object.valueForKeyPath(property.path) ?? ""
+                            
+                            self.text = text.replace(
+                                propertyDescriptor.object.valueForKeyPath(
+                                    property.path.split(".").slice(0, -1).join(".") + "._CBEditorOverlayElement"
+                                )?.outerHTML ?? "",
+                                ""
                             )
                             
-                            // if (!isValueChanged) {
-                            //     return
-                            // }
+                            self.textField.backgroundColor = UIColor.transparentColor
                             
-                            if (editingLocation && NO) {
+                            let outerHTMLIfNeeded = ""
+                            
+                            let initialFileText = await this._editor.getValue()
+                            let initialEditingLocation: CBEditorPropertyLocation
+                            let editingLocation = property.editingLocation
+                            let currentFileText = initialFileText
+                            
+                            self.textField.controlEventTargetAccumulator.Focus = async () => {
                                 
-                                // Set position to the correct editing location
-                                this._editor.getValue()
+                                currentFileText = await this._editor.getValue()
+                                initialFileText = currentFileText
                                 
-                                // Highlight the value that is being edited
-                                this._editor.setSelection({
-                                    startColumn: editingLocation.start.column,
-                                    startLineNumber: editingLocation.start.lineNumber,
-                                    endColumn: editingLocation.end.column,
-                                    endLineNumber: editingLocation.end.lineNumber
-                                })
+                                // Make it possible to reload the editing location
+                                
+                                if (editingLocation) {
+                                    
+                                    this.view.layoutSubviews()
+                                    
+                                    initialEditingLocation = JSON.parse(JSON.stringify(editingLocation))
+                                    
+                                    // Set position to the correct editing location
+                                    this._editor.setPosition(editingLocation.end)
+                                    
+                                    // Highlight the value that is being edited
+                                    this._editor.setSelection({
+                                        startColumn: editingLocation.start.column,
+                                        startLineNumber: editingLocation.start.lineNumber,
+                                        endColumn: editingLocation.end.column,
+                                        endLineNumber: editingLocation.end.lineNumber
+                                    })
+                                    
+                                    this._editor.revealLineInCenterIfOutsideViewport(editingLocation.end.lineNumber)
+                                    
+                                }
                                 
                             }
-                            else {
+                            
+                            // @ts-ignore
+                            self.textField.controlEventTargetAccumulator.TextChange = async () => {
                                 
-                                const result = (await SocketClient.SetPropertyValue({
+                                const newValue = self.text + IF(outerHTMLIfNeeded)(RETURNER(
+                                    " " + outerHTMLIfNeeded
+                                )).ELSE(RETURNER(""))
+                                const isValueChanged = text != newValue
+                                
+                                propertyDescriptor.object.setValueForKeyPath(
+                                    property.path,
+                                    newValue
+                                )
+                                
+                                // if (!isValueChanged) {
+                                //     return
+                                // }
+                                
+                                if (editingLocation) {
+                                    
+                                    // Replace the string value in the current source code
+                                    const lines = currentFileText.split("\n")
+                                    
+                                    const beginningLines = lines.slice(0, editingLocation.start.lineNumber)
+                                    beginningLines.lastElement = beginningLines.lastElement.slice(
+                                        0,
+                                        editingLocation.start.column
+                                    )
+                                    
+                                    const endingLines = lines.slice(editingLocation.end.lineNumber - 1)
+                                    endingLines.firstElement = endingLines.firstElement.slice(
+                                        editingLocation.end.column - 2
+                                    )
+                                    
+                                    currentFileText = beginningLines.join("\n") + self.text + endingLines.join("\n")
+                                    this._editor.setValue(currentFileText)
+                                    
+                                    editingLocation.end = {
+                                        column: editingLocation.start.column + self.text.length + 2,
+                                        lineNumber: editingLocation.start.lineNumber
+                                    }
+                                    
+                                    // Highlight the value that is being edited
+                                    this._editor.setSelection({
+                                        startColumn: editingLocation.start.column,
+                                        startLineNumber: editingLocation.start.lineNumber,
+                                        endColumn: editingLocation.end.column,
+                                        endLineNumber: editingLocation.end.lineNumber
+                                    })
+                                    
+                                }
+                                else {
+                                    
+                                    const result = (await SocketClient.SetPropertyValue({
+                                        className: this._currentClassName!,
+                                        propertyKeyPath: property.path,
+                                        valueString: self.textField.text,
+                                        saveChanges: NO
+                                    }, CBSocketClient.completionPolicy.last)).result
+                                    
+                                    currentFileText = result.newFileContent
+                                    this._editor.setValue(result.newFileContent)
+                                    
+                                    editingLocation = result.location
+                                    // if (!initialEditingLocation) {
+                                    //     initialEditingLocation = JSON.parse(JSON.stringify(editingLocation))
+                                    // }
+                                    this._editor.setPosition(result.location.end)
+                                    
+                                    this._editor.setSelection({
+                                        startColumn: result.location.start.column,
+                                        startLineNumber: result.location.start.lineNumber,
+                                        endColumn: result.location.end.column,
+                                        endLineNumber: result.location.end.lineNumber
+                                    })
+                                    
+                                }
+                                
+                                
+                            }
+                            
+                            self.textField.controlEventTargetAccumulator.Blur.EnterDown = async () => {
+                                
+                                const newValue = self.text + IF(outerHTMLIfNeeded)(RETURNER(
+                                    " " + outerHTMLIfNeeded
+                                )).ELSE(RETURNER(""))
+                                const isValueChanged = text != newValue
+                                this.view.setNeedsLayout()
+                                
+                                if (!isValueChanged) {
+                                    
+                                    // Revert the file to the beginning of editing
+                                    currentFileText = initialFileText
+                                    this._editor.setValue(currentFileText)
+                                    
+                                    editingLocation = initialEditingLocation
+                                    
+                                    if (initialEditingLocation) {
+                                        initialEditingLocation = JSON.parse(JSON.stringify(initialEditingLocation))
+                                    }
+                                    
+                                    return
+                                    
+                                }
+                                
+                                
+                                propertyDescriptor.object.setValueForKeyPath(
+                                    property.path,
+                                    newValue
+                                )
+                                
+                                text = newValue
+                                
+                                await SocketClient.SetPropertyValue({
                                     className: this._currentClassName!,
                                     propertyKeyPath: property.path,
                                     valueString: self.textField.text,
-                                    saveChanges: NO
-                                })).result
-                                
-                                this._editor.setValue(result.newFileContent)
-                                
-                                this._editor.setPosition(result.location.end)
-                                
-                                this._editor.setSelection({
-                                    startColumn: result.location.start.column,
-                                    startLineNumber: result.location.start.lineNumber,
-                                    endColumn: result.location.end.column,
-                                    endLineNumber: result.location.end.lineNumber
+                                    saveChanges: YES
                                 })
                                 
+                                await this.shouldCallPointerUpInsideOnView(
+                                    // @ts-ignore
+                                    propertyDescriptor.object[propertyDescriptor.name],
+                                    nil,
+                                    YES
+                                )
+                                
                             }
                             
                             
-                        }
-                        
-                        self.textField.controlEventTargetAccumulator.Blur.EnterDown = async () => {
-                            
-                            const newValue = self.text + IF(outerHTMLIfNeeded)(RETURNER(" " + outerHTMLIfNeeded))
-                                .ELSE(RETURNER(""))
-                            const isValueChanged = text != newValue
-                            this.view.setNeedsLayout()
-                            
-                            if (!isValueChanged) {
-                                return
-                            }
-                            
-                            propertyDescriptor.object.setValueForKeyPath(
-                                property.path,
-                                newValue
-                            )
-                            
-                            text = newValue
-                            
-                            await SocketClient.SetPropertyValue({
-                                className: this._currentClassName!,
-                                propertyKeyPath: property.path,
-                                valueString: self.textField.text,
-                                saveChanges: YES
-                            })
-                            
-                            await this.shouldCallPointerUpInsideOnView(
-                                // @ts-ignore
-                                propertyDescriptor.object[propertyDescriptor.name],
-                                YES
-                            )
+                            //this.highlightView(this._currentEditingView!)
                             
                         }
-                        
-                        
-                        //this.highlightView(this._currentEditingView!)
-                        
-                    }
+                    )
                 )
-            )()
-        ).filter(editor => IS(editor))
+                
+            }
+            
+            
+            
+        }
+        
+        this.propertyEditors = propertyEditors
         
         const classNameDropdown = new SearchableDropdown()
-        const classNameDropdownData: CBDropdownDataItem<string>[] = (await SocketClient.AllDerivedClassNames("UIView")).result.map(
+        const classNameDropdownData: CBDropdownDataItem<string>[] = (await SocketClient.AllDerivedClassNames(
+            "UIView"
+        )).result.map(
             (
                 name,
                 index,
@@ -1759,21 +1793,15 @@ export class EditorViewController extends UIViewController {
     // section View highlighting
     private highlightView(view: UIView) {
         
-        const propertyDescriptor = view.propertyDescriptors.firstElement
-        
         this.removeElementChanges()
         this._selectedView = view
         
         this.highlightSingleView(view)
         
         view.subviews.forEach(subview => {
-            
             if (subview != view && !subview.withAllSuperviews.contains(this.view)) {
-                
                 this.highlightSingleView(subview, YES)
-                
             }
-            
         })
         
     }
@@ -1801,7 +1829,8 @@ export class EditorViewController extends UIViewController {
             overlayView.backgroundColor = UIColor.colorWithRGBA(228, 228, 187, 0.75)
             
             // // @ts-ignore
-            // const configurationValues: object[] = view.subviews.everyElement.configureWithObject({ userInteractionEnabled: NO }).UI_elementValues
+            // const configurationValues: object[] = view.subviews.everyElement
+            //     .configureWithObject({ userInteractionEnabled: NO }).UI_elementValues
             //
             // UIObject.configuredWithObject(
             //     overlayView.viewHTMLElement,
@@ -1934,7 +1963,9 @@ export class EditorViewController extends UIViewController {
                     className = className.substring(1)
                 }
                 
-                const pathKeyObject = this.pathKeyObjectToViewControllerFromParentViewControllerOrView(viewController)
+                const pathKeyObject = this.pathKeyObjectToViewControllerFromParentViewControllerOrView(
+                    viewController
+                )
                 const runtimeKeyPath = this.pathToViewControllerFromRootViewController(viewController)
                 const viewControllerResult = {
                     
@@ -2004,16 +2035,7 @@ export class EditorViewController extends UIViewController {
                 
             }
             
-            var asdasd = result.descriptor.objectClassName == "TreeViewViewController" && result.runtimeKeyPath == "contentViewController.view"
-            
-            if (asdasd) {
-                
-                var asd = 1
-                
-            }
-            
         }
-        
         
         forEachViewInSubtree(UICore.main.rootViewController.view, result, [])
         
@@ -2027,7 +2049,9 @@ export class EditorViewController extends UIViewController {
         
         if (viewController) {
             
-            const pathKeyObject = this.pathKeyObjectToViewControllerFromParentViewControllerOrView(viewController)
+            const pathKeyObject = this.pathKeyObjectToViewControllerFromParentViewControllerOrView(
+                viewController
+            )
             const viewOrViewController = pathKeyObject.containerObject
             result = this.expandKeyPath(pathKeyObject.key, viewOrViewController)
             
@@ -2035,7 +2059,10 @@ export class EditorViewController extends UIViewController {
                 result = result.slice(1)
             }
             
-            // if (IS_NOT(result) || viewController != viewController.view.rootView.viewController.valueForKeyPath(result)) {
+            // if (
+            //     IS_NOT(result) ||
+            //     viewController != viewController.view.rootView.viewController.valueForKeyPath(result)
+            // ) {
             //
             //     result = "view" + viewController.withAllSuperviews.reverse()
             //         .map(view => view.superview?.subviews?.indexOf(view) ?? "")
@@ -2138,7 +2165,7 @@ export class EditorViewController extends UIViewController {
     
     private pathKeyObjectToViewControllerFromParentViewControllerOrView(viewController: UIViewController) {
         
-        var result: PathKeyObject = { containerObject: undefined, key: "" }
+        let result: PathKeyObject = { containerObject: undefined, key: "" }
         
         if (IS(viewController.parentViewController)) {
             
@@ -2204,13 +2231,6 @@ export class EditorViewController extends UIViewController {
     
     override async viewDidAppear() {
         
-        // this.editor = monaco.editor.create(document.getElementById("testContainer")!, {
-        //     value: ["function x(asdasd: string) {", "\tconsole.log(\"Asdasd \" + asdasd)", "}"].join("\n"),
-        //     language: "typescript"
-        // })
-        
-        //this.view.setNeedsLayout()
-        
         await this.selectInitialView()
         
     }
@@ -2220,9 +2240,7 @@ export class EditorViewController extends UIViewController {
         this.removeElementChanges()
         
         UIView.shouldCallPointerUpInsideOnView = async () => YES
-        
         UIView.shouldCallPointerHoverOnView = async () => YES
-        
         UIView.shouldCallPointerLeaveOnView = async () => YES
         
     }
@@ -2240,7 +2258,7 @@ export class EditorViewController extends UIViewController {
     override async handleRoute(route: UIRoute) {
         
         super.handleRoute(route)
-        const inquiryComponent = route.componentWithName(EditorViewController.routeComponentName)
+        // const inquiryComponent = route.componentWithName(EditorViewController.routeComponentName)
         
     }
     
@@ -2383,7 +2401,3 @@ export class EditorViewController extends UIViewController {
     }
     
 }
-
-
-
-

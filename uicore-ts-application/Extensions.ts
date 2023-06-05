@@ -286,6 +286,7 @@ Array.prototype.uniqueElementsOnlyWithFunction = function uniqueElements(
 ) {
     
     function uniqueArrayElementsOnlyWithFunction<T>(a: T[], valueFunction: (element: T) => any): T[] {
+        a = a.copy().reverse()
         // @ts-ignore
         return [
             ...new Map(

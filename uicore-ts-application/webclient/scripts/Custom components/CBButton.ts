@@ -1,9 +1,14 @@
 import { IS_NOT, UIButton, UIColor } from "uicore-ts"
+import { CBEditorNestedAttributes } from "../EditorViewController"
 import { CBColor } from "./CBColor"
 
 
 export class CBButton extends UIButton {
     
+    @CBEditorNestedAttributes
+    override get titleLabel() {
+        return super.titleLabel
+    }
     
     constructor(elementID?: string, elementType?: string) {
         
@@ -32,7 +37,7 @@ export class CBButton extends UIButton {
     }
     
     
-    updateContentForNormalState() {
+    override updateContentForNormalState() {
         
         super.updateContentForNormalState()
         
@@ -41,7 +46,7 @@ export class CBButton extends UIButton {
     }
     
     
-    updateContentForHoveredState() {
+    override updateContentForHoveredState() {
         
         super.updateContentForHoveredState()
         
@@ -49,7 +54,7 @@ export class CBButton extends UIButton {
         
     }
     
-    updateContentForFocusedState() {
+    override updateContentForFocusedState() {
         
         super.updateContentForFocusedState()
         
@@ -58,7 +63,7 @@ export class CBButton extends UIButton {
     }
     
     
-    updateContentForHighlightedState() {
+    override updateContentForHighlightedState() {
         
         super.updateContentForHighlightedState()
         
@@ -67,7 +72,7 @@ export class CBButton extends UIButton {
     }
     
     
-    updateContentForCurrentEnabledState() {
+    override updateContentForCurrentEnabledState() {
         
         super.updateContentForCurrentEnabledState()
         

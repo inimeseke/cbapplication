@@ -37,16 +37,28 @@ declare module AutoLayout {
     }
     
     
-    enum Attribute {
+    const enum Attribute {
         
-        LEFT, RIGHT, BOTTOM, TOP, CENTERX, CENTERY, WIDTH, HEIGHT, ZINDEX, VARIABLE, NOTANATTRIBUTE
+        LEFT = 0,
+        RIGHT = 1,
+        BOTTOM = 2,
+        TOP = 3,
+        CENTERX = 4,
+        CENTERY = 5,
+        WIDTH = 6,
+        HEIGHT = 7,
+        ZINDEX = 8,
+        VARIABLE = 9,
+        NOTANATTRIBUTE = 10
         
     }
     
     
-    enum Relation {
+    const enum Relation {
         
-        EQU, LEQ, GEQ
+        EQU = 0,
+        LEQ = 1,
+        GEQ = 2
         
     }
     
@@ -84,14 +96,18 @@ export interface UIViewBroadcastEvent {
 }
 
 
-export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<string, any> }> = {
+type Mutable<T> = {
+    -readonly [P in keyof T]: T[P]
+};
+
+export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<string, any> }> = Mutable<{
     
     [K in keyof T["controlEvent"]]: ((
     sender: UIView,
     event: Event
 ) => void) & Partial<UIViewAddControlEventTargetObject<T>>
-    
-}
+
+}>
 
 
 interface Constraint {
@@ -174,6 +190,7 @@ export class UIView extends UIObject {
     
     private _isResizable = NO
     makeNotResizable?: () => void
+    resizingHandles: UIView[] = []
     
     private _isMoving: boolean = NO
     _isCBEditorTemporaryResizable = NO
@@ -466,21 +483,161 @@ export class UIView extends UIObject {
         this.viewHTMLElement.setAttribute("tabindex", "" + index)
     }
     
+    
     get propertyDescriptors(): { object: UIObject; name: string }[] {
+        
         let result: any[] = []
+        
+        function isPlainObject(value: any): value is object {
+            return value instanceof Object && Object.getPrototypeOf(value) === Object.prototype
+        }
+        
+        function isAnArray(value: any): value is any[] {
+            return value instanceof Array && Object.getPrototypeOf(value) === Array.prototype
+        }
+        
         this.withAllSuperviews.forEach(view => {
-            FIRST_OR_NIL(view.viewController).forEach((value, key, stopLooping) => {
-                if (this == value) {
-                    result.push({ object: view.viewController, name: key })
+            
+            const descriptorFromObject = function (
+                this: UIView,
+                object: object,
+                pathRootObject = object,
+                existingPathComponents: string[] = [],
+                lookInArrays = YES,
+                depthLeft = 5
+            ): {
+                subObjects: { object: object; key: string }[];
+                descriptor: { name: string; object: object } | undefined
+            } {
+                
+                let resultDescriptor: { name: string; object: object } | undefined
+                const subObjects: { object: object, key: string }[] = []
+                const subArrays: { array: any[], key: string }[] = []
+                
+                FIRST_OR_NIL(object).forEach((value, key, stopLooping) => {
+                    
+                    if (this == value) {
+                        
+                        existingPathComponents.push(key)
+                        
+                        resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
+                        stopLooping()
+                        return
+                        
+                    }
+                    
+                    
+                    if (
+                        isPlainObject(value) &&
+                        !_UIViewPropertyKeys.contains(key) &&
+                        !_UIViewControllerPropertyKeys.contains(key)
+                    ) {
+                        subObjects.push({ object: value, key: key })
+                    }
+                    if (
+                        lookInArrays &&
+                        isAnArray(value) &&
+                        !_UIViewPropertyKeys.contains(key) &&
+                        !_UIViewControllerPropertyKeys.contains(key)
+                    ) {
+                        subArrays.push({ array: value, key: key })
+                    }
+                    
+                })
+                
+                if (!resultDescriptor && lookInArrays) {
+                    
+                    subArrays.copy().forEach(value => {
+                        
+                        if (value.key.startsWith("_")) {
+                            
+                            subArrays.removeElement(value)
+                            subArrays.push(value)
+                            
+                        }
+                        
+                    })
+                    
+                    subArrays.find(arrayObject =>
+                        arrayObject.array.find((value, index) => {
+                            if (this == value) {
+                                existingPathComponents.push(arrayObject.key + "." + index)
+                                resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
+                                return YES
+                            }
+                            return NO
+                        })
+                    )
+                    
                 }
-            })
-            view.forEach((value, key, stopLooping) => {
-                if (this == value) {
-                    result.push({ object: view, name: key })
+                
+                // if (!resultDescriptor && depthLeft) {
+                //
+                //     // @ts-ignore
+                //     resultDescriptor = subObjects.find(object => descriptorFromObject(
+                //         object,
+                //         pathRootObject,
+                //         existingPathComponents,
+                //         NO,
+                //         depthLeft - 1
+                //     ))
+                //
+                // }
+                
+                if (resultDescriptor?.object?.constructor?.name == "Object") {
+                    
+                    var asd = 1
+                    
                 }
-            })
+                
+                const result = {
+                    descriptor: resultDescriptor,
+                    subObjects: subObjects
+                }
+                
+                return result
+                
+            }.bind(this)
+            
+            const viewControllerResult = descriptorFromObject(view.viewController)
+            
+            if (viewControllerResult?.descriptor) {
+                
+                result.push(viewControllerResult.descriptor)
+                
+            }
+            
+            const viewResult = descriptorFromObject(view)
+            
+            if (viewResult?.descriptor) {
+                
+                result.push(viewResult.descriptor)
+                
+            }
+            else if (this.superview && this.superview == view) {
+                
+                result.push({ object: view, key: "subviews." + view.subviews.indexOf(this) })
+                
+            }
+            
+            
+            // view.forEach((value, key, stopLooping) => {
+            //
+            //     if (this == value) {
+            //
+            //         result.push({ object: view, name: key })
+            //
+            //         stopLooping()
+            //
+            //     }
+            //
+            // })
+            
+            
         })
+        
         return result
+        
     }
     
     get styleClasses() {
@@ -818,7 +975,8 @@ export class UIView extends UIObject {
             rectangle.topLeft.y,
             rectangle.width,
             rectangle.height,
-            rectangle.zIndex
+            rectangle.zIndex,
+            this.frameTransform
         )
         
         if (frame.height != rectangle.height || frame.width != rectangle.width || performUncheckedLayout) {
@@ -853,6 +1011,18 @@ export class UIView extends UIObject {
     boundsDidChange() {
     
     
+    }
+    
+    get frameTransform(): string {
+        return this._frameTransform
+    }
+    
+    set frameTransform(value: string) {
+        
+        this._frameTransform = value
+        
+        this.setFrame(this.frame, this.frame.zIndex, YES)
+        
     }
     
     setPosition(
@@ -1217,7 +1387,8 @@ export class UIView extends UIObject {
         top: number,
         width: string | number,
         height: string | number,
-        zIndex = 0
+        zIndex = 0,
+        frameTransform = ""
     ) {
         
         if (!IS(element) || !element.obeyAutolayout && !element.getAttribute("obeyAutolayout")) {
@@ -1234,8 +1405,8 @@ export class UIView extends UIObject {
         
         let str = element.style.cssText
         
-        const frameTransform = UIView._transformAttribute + ": translate3d(" + (left).integerValue + "px, " +
-            (top).integerValue + "px, 0px)"
+        frameTransform = UIView._transformAttribute + ": translate3d(" + (left).integerValue + "px, " +
+            (top).integerValue + "px, 0px)" + frameTransform
         
         if (element.UIView) {
             
@@ -1334,12 +1505,17 @@ export class UIView extends UIObject {
                 const subView = view.subViews[key]
                 
                 if (elements[key]) {
+                    
                     UIView._setAbsoluteSizeAndPosition(
                         elements[key],
                         subView.left,
                         subView.top,
                         subView.width,
-                        subView.height
+                        subView.height,
+                        // @ts-ignore
+                        elements[key].UIView.frame.zIndex,
+                        // @ts-ignore
+                        elements[key].UIView.frameTransform
                     )
                 }
             }
@@ -1564,7 +1740,7 @@ export class UIView extends UIObject {
         "constant": AutoLayout.Attribute.NOTANATTRIBUTE,
         "variable": AutoLayout.Attribute.VARIABLE
         
-    }
+    } as const
     
     
     static constraintRelation = {
@@ -1573,7 +1749,7 @@ export class UIView extends UIObject {
         "lessThanOrEqual": AutoLayout.Relation.LEQ,
         "greaterThanOrEqual": AutoLayout.Relation.GEQ
         
-    }
+    } as const
     
     
     subviewWithID(viewID: string): UIView {
@@ -1947,7 +2123,12 @@ export class UIView extends UIObject {
     
     makeResizable(
         optionalParameters: {
-            overlayElement?: HTMLElement; borderWidth?: number; borderColor?: UIColor; cornerSize?: string; maxCornerSize?: string; viewDidChangeToSize?: (
+            overlayElement?: HTMLElement;
+            borderWidth?: number;
+            borderColor?: UIColor;
+            cornerSize?: string;
+            maxCornerSize?: string;
+            viewDidChangeToSize?: (
                 view: UIView,
                 isMovementCompleted: boolean
             ) => void
@@ -2421,6 +2602,8 @@ export class UIView extends UIObject {
         
         views.forEach(view => overlayElement.appendChild(view.viewHTMLElement))
         
+        this.resizingHandles = views
+        
         this._isResizable = YES
         
         this.makeNotResizable = () => {
@@ -2432,51 +2615,55 @@ export class UIView extends UIObject {
             views.everyElement.viewHTMLElement.remove()
             this.makeNotResizable = undefined
             this._isResizable = NO
+            this.resizingHandles = []
             
         }
         
     }
     
-    static async shouldCallPointerUpInsideOnView(view: UIView) {
+    // noinspection JSUnusedLocalSymbols
+    static async shouldCallPointerUpInsideOnView(view: UIView, event: MouseEvent | TouchEvent) {
         
         return YES
         
     }
     
-    static async shouldCallPointerHoverOnView(view: UIView) {
+    // noinspection JSUnusedLocalSymbols
+    static async shouldCallPointerHoverOnView(view: UIView, event: MouseEvent | TouchEvent) {
         
         return YES
         
     }
     
-    static async shouldCallPointerLeaveOnView(view: UIView) {
+    // noinspection JSUnusedLocalSymbols
+    static async shouldCallPointerLeaveOnView(view: UIView, event: MouseEvent | TouchEvent) {
         
         return YES
         
     }
     
-    
-    static async shouldCallPointerCancelOnView(view: UIView) {
+    // noinspection JSUnusedLocalSymbols
+    static async shouldCallPointerCancelOnView(view: UIView, event: MouseEvent | TouchEvent) {
         
         return YES
         
     }
     
-    shouldCallPointerUpInside() {
-        return UIView.shouldCallPointerUpInsideOnView(this)
+    shouldCallPointerUpInside(event: MouseEvent | TouchEvent) {
+        return UIView.shouldCallPointerUpInsideOnView(this, event)
     }
     
-    shouldCallPointerCancel() {
-        return UIView.shouldCallPointerCancelOnView(this)
+    shouldCallPointerCancel(event: MouseEvent | TouchEvent) {
+        return UIView.shouldCallPointerCancelOnView(this, event)
     }
     
-    shouldCallPointerHover() {
-        return UIView.shouldCallPointerHoverOnView(this)
+    shouldCallPointerHover(event: MouseEvent | TouchEvent) {
+        return UIView.shouldCallPointerHoverOnView(this, event)
     }
     
     
-    shouldCallPointerLeave() {
-        return UIView.shouldCallPointerLeaveOnView(this)
+    shouldCallPointerLeave(event: MouseEvent | TouchEvent) {
+        return UIView.shouldCallPointerLeaveOnView(this, event)
     }
     
     protected _loadUIEvents() {
@@ -2557,7 +2744,7 @@ export class UIView extends UIObject {
                 return
             }
             
-            if (this._isPointerInside && await this.shouldCallPointerUpInside()) {
+            if (this._isPointerInside && await this.shouldCallPointerUpInside(event)) {
                 onPointerUpInside(event)
                 if (!this._hasPointerDragged) {
                     this.sendControlEventForKey(UIView.controlEvent.PointerTap, event)
@@ -2580,7 +2767,7 @@ export class UIView extends UIObject {
                 return
             }
             
-            if (await this.shouldCallPointerLeave()) {
+            if (await this.shouldCallPointerLeave(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.PointerLeave, event)
             }
             
@@ -2599,7 +2786,7 @@ export class UIView extends UIObject {
                 return
             }
             
-            if (await this.shouldCallPointerHover()) {
+            if (await this.shouldCallPointerHover(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.PointerHover, event)
             }
             
@@ -2687,7 +2874,7 @@ export class UIView extends UIObject {
             if (this._isPointerInside && this.viewHTMLElement !=
                 document.elementFromPoint(touch.clientX, touch.clientY)) {
                 this._isPointerInside = NO
-                if (await this.shouldCallPointerLeave()) {
+                if (await this.shouldCallPointerLeave(event)) {
                     this.sendControlEventForKey(UIView.controlEvent.PointerLeave, event)
                 }
             }
@@ -2719,7 +2906,7 @@ export class UIView extends UIObject {
             
         }
         
-        const onTouchCancel = async (event: Event) => {
+        const onTouchCancel = async (event: MouseEvent | TouchEvent) => {
             
             if (!this._isPointerValid) {
                 return
@@ -2734,7 +2921,7 @@ export class UIView extends UIObject {
             this._isPointerValidForMovement = NO
             this._isPointerDown = NO
             
-            if (await this.shouldCallPointerCancel()) {
+            if (await this.shouldCallPointerCancel(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.PointerCancel, event)
             }
             
@@ -2916,7 +3103,7 @@ export class UIView extends UIObject {
         "Focus": "Focus",
         "Blur": "Blur"
         
-    }
+    } as const
     
     
     controlEvent = UIView.controlEvent
@@ -3010,7 +3197,7 @@ export class UIView extends UIObject {
         "AddedToViewTree": "AddedToViewTree",
         "PageDidScroll": "PageDidScroll"
         
-    }
+    } as const
     
     broadcastEventInSubtree(event: UIViewBroadcastEvent) {
         this.forEachViewInSubtree(view => {
@@ -3202,6 +3389,23 @@ const windowTouchFunction = () => {
 }
 window.addEventListener("touchmove", UIView._onWindowTouchMove, true)
 window.addEventListener("mouseup", windowTouchFunction, true)
+
+function props(obj: any) {
+    const p = []
+    for (; obj != null; obj = Object.getPrototypeOf(obj)) {
+        const op = Object.getOwnPropertyNames(obj)
+        for (let i = 0; i < op.length; i++) {
+            if (p.indexOf(op[i]) == -1) {
+                p.push(op[i])
+            }
+        }
+    }
+    return p
+}
+
+const _UIViewPropertyKeys = props(UIView.prototype).concat(new UIView().allKeys)
+const _UIViewControllerPropertyKeys = props(UIViewController.prototype)
+    .concat(new UIViewController(nil).allKeys)
 
 
 

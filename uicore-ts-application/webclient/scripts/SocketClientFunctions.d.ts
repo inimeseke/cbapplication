@@ -20,7 +20,7 @@ export interface CBEditorAnnotatedPropertyDescriptor {
 export interface CBEditorPropertyDescriptor {
     
     className: string
-    propertyKey: string
+    propertyKeyPath: string
     
     runtimeObjectKeyPath: string
     
@@ -61,6 +61,20 @@ export interface CBEditorPropertyReferenceLocation {
 }
 
 
+type CBEditorPropertyDeclarationType = "field" | "property"
+
+
+interface CBEditorEditablePropertyDescriptor {
+    
+    typeName: string
+    path: string
+    editingLocation: CBEditorPropertyLocation
+    declarationType: CBEditorPropertyDeclarationType
+    valueOptions: string[]
+    
+}
+
+
 export interface CBEditorEditingDescriptor {
     
     codeFileContents: string
@@ -68,13 +82,7 @@ export interface CBEditorEditingDescriptor {
     referencedFiles: { codeFileContents: string, path: string }[]
     propertyLocation: CBEditorPropertyLocation
     propertyReferenceLocations: CBEditorPropertyReferenceLocation[]
-    editableProperties: {
-        
-        typeName: string
-        path: string
-        editingLocation: CBEditorPropertyLocation
-        
-    }[]
+    editableProperties: CBEditorEditablePropertyDescriptor[]
     
 }
 

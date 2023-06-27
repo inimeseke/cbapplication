@@ -28,7 +28,7 @@ export interface UIRootViewControllerLazyContentViewControllersObject extends UI
 
 export class UIRootViewController extends UIViewController {
     
-    topBarView: UIView = nil
+    topBarView?: UIView
     backgroundView: UIView = new UIView(this.view.elementID + "BackgroundView").configuredWithObject({
         style: {
             background: "linear-gradient(" + UIColor.whiteColor.stringValue + ", " + UIColor.blueColor.stringValue + ")",
@@ -36,9 +36,9 @@ export class UIRootViewController extends UIViewController {
             backgroundRepeat: "no-repeat"
         }
     })
-    bottomBarView: UIView = nil
+    bottomBarView?: UIView
     
-    _contentViewController!: UIViewController
+    _contentViewController?: UIViewController
     contentViewControllers: UIRootViewControllerLazyContentViewControllersObject = {
         mainViewController: this.lazyViewControllerObjectWithClass(UIViewController)
     }
@@ -54,7 +54,7 @@ export class UIRootViewController extends UIViewController {
                 }
             )
         })
-    _detailsViewController: UIViewController = nil
+    _detailsViewController?: UIViewController
     detailsViewControllers: UIRootViewControllerLazyViewControllersObject = {}
     
     
@@ -123,7 +123,7 @@ export class UIRootViewController extends UIViewController {
             )
         )
         if (IS(route) && IS(this.detailsViewController) && IS_NOT(detailsViewControllerObject)) {
-            this.detailsViewController = nil
+            this.detailsViewController = undefined
             this._detailsDialogView.dismiss()
             this.view.setNeedsLayout()
             return
@@ -131,8 +131,8 @@ export class UIRootViewController extends UIViewController {
         this.detailsViewController = detailsViewControllerObject.instance
     }
     
-    get contentViewController(): UIViewController {
-        return this._contentViewController || nil
+    get contentViewController(): UIViewController | undefined {
+        return this._contentViewController
     }
     
     set contentViewController(controller: UIViewController) {
@@ -149,18 +149,20 @@ export class UIRootViewController extends UIViewController {
         this.addChildViewControllerInContainer(controller, this.backgroundView)
         this._triggerLayoutViewSubviews()
         
-        this.contentViewController.view.style.boxShadow = "0 3px 6px 0 rgba(0, 0, 0, 0.1)"
+        if (this.contentViewController) {
+            this.contentViewController.view.style.boxShadow = "0 3px 6px 0 rgba(0, 0, 0, 0.1)"
+        }
         
         this.view.setNeedsLayout()
         
     }
     
     
-    get detailsViewController(): UIViewController {
+    get detailsViewController(): UIViewController | undefined {
         return this._detailsViewController
     }
     
-    set detailsViewController(controller: UIViewController) {
+    set detailsViewController(controller: UIViewController | undefined) {
         
         if (this.detailsViewController == controller) {
             return
@@ -179,7 +181,7 @@ export class UIRootViewController extends UIViewController {
         this.addChildViewControllerInDialogView(controller, this._detailsDialogView)
         this._triggerLayoutViewSubviews()
         
-        this.detailsViewController.view.style.borderRadius = "5px"
+        FIRST_OR_NIL(this.detailsViewController).view.style.borderRadius = "5px"
         
         this._detailsDialogView.showInView(this.view, YES)
         
@@ -214,15 +216,17 @@ export class UIRootViewController extends UIViewController {
         // View bounds
         const bounds = this.view.bounds
         
-        this.topBarView.frame = new UIRectangle(0, 0, topBarHeight, bounds.width)
+        if (this.topBarView) {
+            this.topBarView.frame = new UIRectangle(0, 0, topBarHeight, bounds.width)
+        }
         
-        this.backgroundView.style.top = "" + this.topBarView.frame.height.integerValue + "px"
+        this.backgroundView.style.top = "" + this.topBarView?.frame.height.integerValue ?? 0 + "px"
         this.backgroundView.style.width = "100%"
         this.backgroundView.style.height = "fit-content"
         this.backgroundView.style.minHeight = "" +
-            (bounds.height - this.topBarView.frame.height - this.bottomBarView.frame.height).integerValue + "px"
+            (bounds.height - (this.topBarView?.frame.height ?? 0) - (this.bottomBarView?.frame.height ?? 0)).integerValue + "px"
         
-        const contentView = this.contentViewController.view
+        const contentView = this.contentViewController?.view ?? nil
         contentView.style.position = "relative"
         contentView.style.bottom = "0"
         contentView.style.top = "0"
@@ -258,7 +262,7 @@ export class UIRootViewController extends UIViewController {
         }
         
         // Triggering immediate layout to ensure that the intrinsicContentHeight calculations work well
-        this.contentViewController._triggerLayoutViewSubviews()
+        this.contentViewController?._triggerLayoutViewSubviews()
         
         let contentViewControllerViewHeight = contentView.intrinsicContentHeight(
             contentView.bounds.width
@@ -299,15 +303,16 @@ export class UIRootViewController extends UIViewController {
             
         }
         
+        if (this.bottomBarView) {
+            this.bottomBarView.frame = this.backgroundView.frame.rectangleWithY(
+                this.backgroundView.frame.max.y
+            ).rectangleWithHeight(
+                Math.max(bottomBarMinHeight, this.bottomBarView.intrinsicContentHeight(this.backgroundView.frame.width))
+            )
+        }
         
-        this.bottomBarView.frame = this.backgroundView.frame.rectangleWithY(
-            this.backgroundView.frame.max.y
-        ).rectangleWithHeight(
-            Math.max(bottomBarMinHeight, this.bottomBarView.intrinsicContentHeight(this.backgroundView.frame.width))
-        )
         
-        
-        wrapInNil(this._detailsDialogView).setMaxSizes(this.bottomBarView.frame.max.y)
+        wrapInNil(this._detailsDialogView).setMaxSizes(this.bottomBarView?.frame.max.y ?? 0)
         
     }
     

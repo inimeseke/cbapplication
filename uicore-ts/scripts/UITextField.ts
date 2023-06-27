@@ -47,7 +47,7 @@ export class UITextField extends UITextView {
     })
     
     
-    override get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<UITextField> {
+    override get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UITextField> {
         return (super.controlEventTargetAccumulator as any)
     }
     

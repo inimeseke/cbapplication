@@ -174,6 +174,9 @@ export class CBColorSelector<T> extends SearchableDropdown<T> {
     
     override layoutSubviews() {
         
+        const padding = this.core.paddingLength
+        const labelHeight = padding
+        
         let bounds = this.bounds
         
         this.hoverText = this.titleLabel.text
@@ -216,6 +219,16 @@ export class CBColorSelector<T> extends SearchableDropdown<T> {
                 )
                 
                 this.titleLabel.hidden = hidden
+                
+            }
+            
+            if (this._rightImageView) {
+                
+                // var imageHeight = bounds.height - padding;
+                // this._rightImageView.frame = new UIRectangle(bounds.width - imageHeight - padding * 0.5, padding * 0.5, imageHeight, imageHeight);
+                
+                this._rightImageView.frame = this.bounds.rectangleWithInsets(0, padding *
+                    0.5, 0, 0).rectangleWithWidth(24, 1).rectangleWithHeight(24, 0.5)
                 
             }
             

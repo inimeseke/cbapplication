@@ -1,6 +1,6 @@
 import { UIButton } from "./UIButton"
 import { UINativeScrollView } from "./UINativeScrollView"
-import { IS, IS_DEFINED, nil, NO, YES } from "./UIObject"
+import { FIRST_OR_NIL, IS, IS_DEFINED, nil, NO, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
@@ -460,7 +460,7 @@ export class UITableView extends UINativeScrollView {
     
     viewForRowWithIndex(rowIndex: number): UITableViewRowView {
         const row = this.reusableViewForIdentifier("Row", rowIndex);
-        (row as unknown as UIButton).titleLabel.text = "Row " + rowIndex
+        FIRST_OR_NIL((row as unknown as UIButton).titleLabel).text = "Row " + rowIndex
         return row
     }
     

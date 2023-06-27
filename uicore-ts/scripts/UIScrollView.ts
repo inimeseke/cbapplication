@@ -14,7 +14,7 @@ export class UIScrollView extends UIView {
     _pointerDown?: boolean
     _scrollEnabled: boolean = YES
     override _previousClientPoint: UIPoint = nil
-    _intrinsicContentFrame: UIRectangle = nil
+    _intrinsicContentFrame?: UIRectangle
     
     constructor(elementID: string, viewHTMLElement?: HTMLElement) {
         
@@ -113,7 +113,7 @@ export class UIScrollView extends UIView {
     
     
     invalidateIntrinsicContentFrame() {
-        this._intrinsicContentFrame = nil
+        this._intrinsicContentFrame = undefined
     }
     
     

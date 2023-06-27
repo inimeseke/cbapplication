@@ -18,7 +18,7 @@ export class UIBaseButton extends UIView {
     
     constructor(elementID?: string, elementType?: string) {
     
-        super(elementID, nil, elementType)
+        super(elementID, undefined, elementType)
     
         // Instance variables
     

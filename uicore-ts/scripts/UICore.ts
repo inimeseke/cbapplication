@@ -8,11 +8,11 @@ import { UIViewController } from "./UIViewController"
 
 export class UICore extends UIObject {
     
-    rootViewController: UIViewController = nil
+    rootViewController: UIViewController
     
     paddingLength = 20
     
-    static RootViewControllerClass: typeof UIViewController = nil
+    static RootViewControllerClass: typeof UIViewController
     static main: UICore
     
     static languageService: UILanguageService = nil

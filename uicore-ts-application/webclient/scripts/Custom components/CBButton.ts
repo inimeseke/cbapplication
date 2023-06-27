@@ -1,8 +1,9 @@
-import { IS_NOT, UIButton, UIColor } from "uicore-ts"
+import { IS_NOT, UIButton, UIColor, UIComponentView } from "uicore-ts"
 import { CBEditorNestedAttributes } from "../EditorViewController"
 import { CBColor } from "./CBColor"
 
 
+@UIComponentView
 export class CBButton extends UIButton {
     
     @CBEditorNestedAttributes

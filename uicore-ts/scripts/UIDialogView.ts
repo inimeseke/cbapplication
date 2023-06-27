@@ -10,7 +10,7 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     _isAUIDialogView = YES
-    _view: ViewType = nil
+    _view: ViewType = new UIView() as any
     _appearedAnimated?: boolean
     animationDuration: number = 0.25
     _zIndex: number = 100
@@ -63,7 +63,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     set view(view: ViewType) {
         
-        this._view.removeFromSuperview()
+        this._view?.removeFromSuperview()
         
         this._view = view
         
@@ -72,7 +72,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     }
     
     
-    get view() {
+    get view(): ViewType {
         
         return this._view
         
@@ -80,15 +80,15 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     
     override willAppear(animated: boolean = NO) {
-    
+        
         if (animated) {
-        
+            
             this.style.opacity = "0"
-        
+            
         }
-    
+        
         this.style.height = ""
-    
+        
         this._frame = nil
         
     }
@@ -174,18 +174,18 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 0,
                 undefined,
                 (() => {
-    
+                    
                     this.animateDisappearing()
-    
+                    
                 }).bind(this),
                 () => {
-    
+                    
                     if (this.isVisible == NO) {
-        
+                        
                         this.removeFromSuperview()
-        
+                        
                     }
-    
+                    
                 }
             )
             
@@ -215,16 +215,16 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     
     override layoutSubviews() {
-    
-    
+        
+        
         if (!IS(this.view)) {
-        
+            
             return
-        
+            
         }
-    
+        
         //this.frame = this.superview.bounds;
-    
+        
         this.setPosition(0, 0, 0, 0, 0, "100%")
         this.setPosition(
             0,
@@ -232,33 +232,33 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
             0,
             0,
             FIRST(
-                IF(this.superview.isKindOfClass(UINativeScrollView))(() => this.superview.scrollSize.height)
-                    .ELSE_IF(this.superview.isKindOfClass(UIScrollView))(() => this.superview.scrollSize.height)
-                    .ELSE(() => this.superview.frame.height),
+                IF(this.superview?.isKindOfClass(UINativeScrollView))(() => this.superview?.scrollSize.height ?? 0)
+                    .ELSE_IF(this.superview?.isKindOfClass(UIScrollView))(() => this.superview?.scrollSize.height ?? 0)
+                    .ELSE(() => this.superview?.frame.height ?? 0),
                 UIView.pageHeight
             ),
             "100%"
         )
-    
+        
         const bounds = this.bounds
-    
+        
         const margin = 20
-    
+        
         //this.view.centerInContainer();
-    
+        
         this.view.style.position = "relative"
-    
+        
         this.view.style.zIndex = "" + this.zIndex
-    
+        
         // this.view.style.maxHeight = "" + (bounds.height - margin * 2).integerValue + "px";
         // this.view.style.maxWidth = "" + (bounds.width - margin * 2).integerValue + "px";
-    
-    
+        
+        
         // var viewIntrinsicRectangle = this.view.intrinsicContentSize();
         // this.view.frame = new UIRectangle((bounds.width - viewIntrinsicRectangle.width)*0.5,  )
-    
+        
         super.layoutSubviews()
-    
+        
     }
     
     

@@ -1,5 +1,5 @@
 import { UICore } from "./UICore"
-import { IS_NOT, nil, NO, YES } from "./UIObject"
+import { IS_NOT, NO, YES } from "./UIObject"
 import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
@@ -180,7 +180,7 @@ export class UIImageView extends UIView {
     setImageSource(key: string, defaultString: string) {
     
         const languageName = UICore.languageService.currentLanguageKey
-        this.imageSource = UICore.languageService.stringForKey(key, languageName, defaultString, nil)
+        this.imageSource = UICore.languageService.stringForKey(key, languageName, defaultString, undefined)
         
     }
     

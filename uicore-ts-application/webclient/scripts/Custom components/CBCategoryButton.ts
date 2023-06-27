@@ -12,7 +12,7 @@ export class CBCategoryButton extends UIButton {
     }
     
     
-    updateContentForNormalState() {
+    override updateContentForNormalState() {
         
         this.backgroundColor = UIColor.transparentColor
         this.titleLabel.textColor = CBColor.primaryContentColor
@@ -22,13 +22,13 @@ export class CBCategoryButton extends UIButton {
         
     }
     
-    updateContentForHoveredState() {
+    override updateContentForHoveredState() {
     
         this.titleLabel.textColor = CBColor.primaryContentColor
         
     }
     
-    updateContentForHighlightedState() {
+    override updateContentForHighlightedState() {
     
         this.style.color = "#7dadef"
         this.titleLabel.textColor = CBColor.primaryTintColor
@@ -42,7 +42,7 @@ export class CBCategoryButton extends UIButton {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         //super.layoutSubviews();
     

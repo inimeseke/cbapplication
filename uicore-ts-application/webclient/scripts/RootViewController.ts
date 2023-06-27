@@ -24,8 +24,13 @@ import { LanguagesDialogView } from "./LanguagesDialogView"
 import { LanguageService } from "./LanguageService"
 import { SomeContentViewController } from "./SomeContentViewController"
 import { TopBarView } from "./TopBarView"
-import { TreeViewViewController } from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/TreeViewViewController";
-import { ChartViewController } from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/ChartViewController";
+import {
+    TreeViewViewController
+} from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/TreeViewViewController"
+import {
+    ChartViewController
+} from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/ChartViewController"
+
 
 export class RootViewController extends UIRootViewController {
     
@@ -57,6 +62,7 @@ export class RootViewController extends UIRootViewController {
         chartViewController: this.lazyViewControllerObjectWithClass(ChartViewController)
     }
     private editor?: EditorViewController
+    private editorWindow?: WindowProxy
     
     
     constructor(view: UIView) {
@@ -67,7 +73,7 @@ export class RootViewController extends UIRootViewController {
         
         document.addEventListener("keydown", event => {
             if (event.ctrlKey && event.key === "e") {
-                const isEditorOpen = IS(UIRoute.currentRoute.componentWithName("settings").parameters["editorOpen"])
+                const isEditorOpen = IS(UIRoute.currentRoute.componentWithName("settings")?.parameters["editorOpen"])
                 if (!isEditorOpen) {
                     UIRoute.currentRoute.routeBySettingParameterInComponent("settings", "editorOpen", "YES")
                         .applyByReplacingCurrentRouteInHistory()
@@ -98,6 +104,7 @@ export class RootViewController extends UIRootViewController {
         
         await super.handleRoute(route)
         
+        // @ts-ignore
         LanguageService.updateCurrentLanguageKey(route)
         
         const currentURL = "" + window.location
@@ -105,7 +112,7 @@ export class RootViewController extends UIRootViewController {
             SocketClient.RouteDidChange(currentURL).then(nil)
         }
         
-        if (route.componentWithName("settings").parameters["editorOpen"]) {
+        if (route.componentWithName("settings")?.parameters["editorOpen"]) {
             this.showEditor()
         }
         else {
@@ -119,7 +126,11 @@ export class RootViewController extends UIRootViewController {
         
         super.viewDidReceiveBroadcastEvent(event)
         
-        if ([CBCore.broadcastEventName.userDidLogIn, CBCore.broadcastEventName.userDidLogOut].contains(event.name)) {
+        const userLoggingEventNames: string[] = [
+            CBCore.broadcastEventName.userDidLogIn,
+            CBCore.broadcastEventName.userDidLogOut
+        ]
+        if (userLoggingEventNames.contains(event.name)) {
             
             this.handleRoute(UIRoute.currentRoute).then(nil)
             
@@ -135,26 +146,64 @@ export class RootViewController extends UIRootViewController {
         
     }
     
-    showEditor() {
     
-        if (IS_NOT(this.editor)) {
-            this.editor = new EditorViewController(new UINativeScrollView("CBEditorView"))
+    async showEditor() {
+        
+        // @ts-ignore
+        this.editorWindow = window.open(
+            window.location.origin + "/#cb_editor[]",
+            "CBEditorWindow",
+            "popup"
+        )
+        
+        if (this.editorWindow) {
+            
+            // @ts-ignore
+            this.editor = this.editorWindow.editorViewController
+            
+            // @ts-ignore
+            const screenDetails = await window.getScreenDetails?.()
+            // @ts-ignore
+            if (window.screen.isExtended && screenDetails?.screens?.length > 1) {
+                const secondScreen = screenDetails.screens.find((screen: any) => !screen.isPrimary)
+                this.editorWindow.resizeTo(secondScreen.availWidth, secondScreen.availHeight)
+                this.editorWindow.moveTo(secondScreen.availLeft, secondScreen.availTop)
+            }
+            
+            const timer = setInterval(() => {
+                if (this.editorWindow?.closed ?? true) {
+                    clearInterval(timer)
+                    UIRoute.currentRoute
+                        .routeByRemovingParameterInComponent("settings", "editorOpen")
+                        .apply()
+                }
+            }, 100)
+            
         }
-    
-        this.editor.view.pointerDraggingPoint = new UIPoint(0, 0)
-        this.editor?.viewWillAppear()
-        this.editor?.view.willAppear()
-        this.addChildViewController(this.editor)
-        this.editor?.viewDidAppear()
-    
+        
+        
+        // if (IS_NOT(this.editor)) {
+        //     this.editor = new EditorViewController(new UINativeScrollView("CBEditorView"))
+        // }
+        //
+        // this.editor.view.pointerDraggingPoint = new UIPoint(0, 0)
+        // this.editor?.viewWillAppear()
+        // this.editor?.view.willAppear()
+        // this.addChildViewController(this.editor)
+        // this.editor?.viewDidAppear()
+        
     }
     
     hideEditor() {
         
-        this.editor?.viewWillDisappear()
-        this.editor?.removeFromParentViewController()
-        this.editor?.viewDidDisappear()
-        this.editor = nil
+        this.editorWindow?.close()
+        this.editorWindow = undefined
+        this.editor = undefined
+        
+        // this.editor?.viewWillDisappear()
+        // this.editor?.removeFromParentViewController()
+        // this.editor?.viewDidDisappear()
+        // this.editor = nil
         
     }
     

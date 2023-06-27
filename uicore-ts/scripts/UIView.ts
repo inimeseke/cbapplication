@@ -5,7 +5,20 @@ import { UICore } from "./UICore"
 import "./UICoreExtensions"
 import type { UIDialogView } from "./UIDialogView"
 import { UILocalizedTextObject } from "./UIInterfaces"
-import { FIRST, FIRST_OR_NIL, IF, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, RETURNER, UIObject, YES } from "./UIObject"
+import {
+    FIRST,
+    FIRST_OR_NIL,
+    IF,
+    IS,
+    IS_DEFINED,
+    IS_NIL,
+    IS_NOT,
+    nil,
+    NO,
+    RETURNER,
+    UIObject,
+    YES
+} from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIViewController } from "./UIViewController"
@@ -89,7 +102,7 @@ export interface ControlEventTargetsObject {
 export interface UIViewBroadcastEvent {
     
     name: string;
-    parameters: {
+    parameters?: {
         [key: string]: string | string[];
     }
     
@@ -122,6 +135,11 @@ interface Constraint {
 }
 
 
+export function UIComponentView(target: Function, context: ClassDecoratorContext) {
+    UIObject.recordAnnotation(UIComponentView, target)
+}
+
+
 export class UIView extends UIObject {
     
     
@@ -142,16 +160,16 @@ export class UIView extends UIObject {
     _defaultInnerHTML?: string
     _parameters?: { [x: string]: (string | UILocalizedTextObject) }
     
-    _localizedTextObject?: UILocalizedTextObject = nil
+    _localizedTextObject?: UILocalizedTextObject
     
     _controlEventTargets: ControlEventTargetsObject = {} //{ "PointerDown": Function[]; "PointerMove": Function[]; "PointerLeave": Function[]; "PointerEnter": Function[]; "PointerUpInside": Function[]; "PointerUp": Function[]; "PointerHover": Function[]; };
     _frameTransform: string
-    viewController: UIViewController = nil
-    _updateLayoutFunction: any = nil
+    viewController?: UIViewController
+    _updateLayoutFunction?: Function
     // @ts-ignore
     _constraints: any[] //AutoLayout.Constraint[];
-    superview: UIView
-    subviews: UIView[]
+    superview?: UIView
+    subviews: UIView[] = []
     _styleClasses: any[]
     _isHidden: boolean = NO
     
@@ -218,12 +236,7 @@ export class UIView extends UIObject {
         
         this._initViewHTMLElement(elementID, viewHTMLElement, elementType)
         
-        this.subviews = []
-        this.superview = nil
-        
         this._constraints = []
-        this._updateLayoutFunction = nil
-        
         
         this._frameTransform = ""
         
@@ -441,9 +454,9 @@ export class UIView extends UIObject {
     }
     
     
-    get dialogView(): UIDialogView {
+    get dialogView(): UIDialogView | undefined {
         if (!IS(this.superview)) {
-            return nil
+            return
         }
         if (!((this as any)["_isAUIDialogView"])) {
             return this.superview.dialogView
@@ -500,8 +513,8 @@ export class UIView extends UIObject {
             
             const descriptorFromObject = function (
                 this: UIView,
-                object: object,
-                pathRootObject = object,
+                object?: object,
+                pathRootObject: object = object!,
                 existingPathComponents: string[] = [],
                 lookInArrays = YES,
                 depthLeft = 5
@@ -520,7 +533,7 @@ export class UIView extends UIObject {
                         
                         existingPathComponents.push(key)
                         
-                        resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
+                        resultDescriptor = { object: pathRootObject!, name: existingPathComponents.join(".") }
                         stopLooping()
                         return
                         
@@ -562,7 +575,7 @@ export class UIView extends UIObject {
                         arrayObject.array.find((value, index) => {
                             if (this == value) {
                                 existingPathComponents.push(arrayObject.key + "." + index)
-                                resultDescriptor = { object: pathRootObject, name: existingPathComponents.join(".") }
+                                resultDescriptor = { object: pathRootObject!, name: existingPathComponents.join(".") }
                                 return YES
                             }
                             return NO
@@ -692,10 +705,10 @@ export class UIView extends UIObject {
     }
     
     
-    static findViewWithElementID(elementID: string): UIView {
+    static findViewWithElementID(elementID: string): UIView | undefined {
         const viewHTMLElement = document.getElementById(elementID)
         if (IS_NOT(viewHTMLElement)) {
-            return nil
+            return
         }
         // @ts-ignore
         return viewHTMLElement.UIView
@@ -1618,9 +1631,9 @@ export class UIView extends UIObject {
         if (this.constraints.length) {
             this._updateLayoutFunction = UIView.performAutoLayout(this.viewHTMLElement, null, this.constraints)
         }
-        this._updateLayoutFunction()
+        this._updateLayoutFunction?.()
         
-        this.viewController.layoutViewSubviews()
+        this.viewController?.layoutViewSubviews()
         
         this.applyClassesAndStyles()
         
@@ -1646,13 +1659,13 @@ export class UIView extends UIObject {
     
     willLayoutSubviews() {
         
-        this.viewController.viewWillLayoutSubviews()
+        this.viewController?.viewWillLayoutSubviews()
         
     }
     
     didLayoutSubviews() {
         
-        this.viewController.viewDidLayoutSubviews()
+        this.viewController?.viewDidLayoutSubviews()
         
     }
     
@@ -1752,8 +1765,8 @@ export class UIView extends UIObject {
     } as const
     
     
-    subviewWithID(viewID: string): UIView {
-        let resultHTMLElement = nil
+    subviewWithID(viewID: string): UIView | undefined {
+        let resultHTMLElement: Element & { UIView: UIView } | null
         
         try {
             resultHTMLElement = this.viewHTMLElement.querySelector("#" + viewID)
@@ -1761,10 +1774,11 @@ export class UIView extends UIObject {
             console.log(error)
         }
         
+        // @ts-ignore
         if (resultHTMLElement && resultHTMLElement.UIView) {
             return resultHTMLElement.UIView
         }
-        return nil
+        return
     }
     
     rectangleContainingSubviews() {
@@ -1829,7 +1843,7 @@ export class UIView extends UIObject {
                 
                 view.broadcastEventInSubtree({
                     name: UIView.broadcastEventName.AddedToViewTree,
-                    parameters: nil
+                    parameters: undefined
                 })
                 
             }
@@ -1845,8 +1859,8 @@ export class UIView extends UIObject {
         views.forEach(view => this.addSubview(view))
     }
     
-    addedAsSubviewToView(view: UIView, aboveView?: UIView) {
-        view.addSubview(this, aboveView)
+    addedAsSubviewToView(view: UIView | undefined, aboveView?: UIView) {
+        view?.addSubview(this, aboveView)
         return this
     }
     
@@ -1896,10 +1910,10 @@ export class UIView extends UIObject {
             if (index > -1) {
                 this.superview.subviews.splice(index, 1)
                 this.superview.viewHTMLElement.removeChild(this.viewHTMLElement)
-                this.superview = nil
+                this.superview = undefined
                 this.broadcastEventInSubtree({
                     name: UIView.broadcastEventName.RemovedFromViewTree,
-                    parameters: nil
+                    parameters: undefined
                 })
                 
             }
@@ -1944,7 +1958,7 @@ export class UIView extends UIObject {
     
     get withAllSuperviews() {
         const result = []
-        let view: UIView = this
+        let view: UIView | undefined = this
         for (let i = 0; IS(view); i = i) {
             result.push(view)
             view = view.superview
@@ -2026,7 +2040,7 @@ export class UIView extends UIObject {
                     sender.forEachViewInSubtree(view => {
                         
                         // Cancel pointer
-                        view.sendControlEventForKey(UIView.controlEvent.PointerCancel, nil)
+                        view.sendControlEventForKey(UIView.controlEvent.PointerCancel, event)
                         
                     })
                     
@@ -3177,7 +3191,7 @@ export class UIView extends UIObject {
     }
     
     
-    sendControlEventForKey(eventKey: string, nativeEvent: Event) {
+    sendControlEventForKey(eventKey: string, nativeEvent?: Event) {
         let targets = this._controlEventTargets[eventKey]
         if (!targets) {
             return

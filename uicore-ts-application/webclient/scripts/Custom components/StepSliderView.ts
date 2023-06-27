@@ -121,7 +121,7 @@ export class StepSliderView extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
     

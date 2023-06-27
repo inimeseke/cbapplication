@@ -1,4 +1,3 @@
-import { nil } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { LooseObject, UIView } from "./UIView"
 
@@ -30,7 +29,7 @@ export class UINativeScrollView extends UIView {
             
             this.broadcastEventInSubtree({
                 name: UIView.broadcastEventName.PageDidScroll,
-                parameters: nil
+                parameters: undefined
             })
             
         })

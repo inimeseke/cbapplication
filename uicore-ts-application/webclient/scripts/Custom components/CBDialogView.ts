@@ -54,7 +54,7 @@ export class CBDialogView<ViewType extends UIView = UIView> extends UIView {
             this.cancelButton.addTargetForControlEvents([
                 UIButton.controlEvent.PointerUpInside, UIButton.controlEvent.EnterDown
             ], function (this: CBDialogView, sender: UIButton, event: Event) {
-                this.dialogView.dismiss()
+                this.dialogView?.dismiss()
             }.bind(this))
             
         }
@@ -85,7 +85,7 @@ export class CBDialogView<ViewType extends UIView = UIView> extends UIView {
                 UIButton.controlEvent.PointerUpInside, UIButton.controlEvent.EnterDown
             ], function (this: CBDialogView, sender: UIButton, event: Event) {
                 if (this.noButtonDismissesDialog) {
-                    this.dialogView.dismiss()
+                    this.dialogView?.dismiss()
                 }
             }.bind(this))
             

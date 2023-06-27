@@ -6,7 +6,7 @@ import { UIView } from "./UIView"
 export class UIRectangle extends UIObject {
     
     _isBeingUpdated: boolean
-    rectanglePointDidChange: (b: any) => void = nil
+    rectanglePointDidChange?: (b: any) => void
     max: UIPoint
     min: UIPoint
     
@@ -19,11 +19,11 @@ export class UIRectangle extends UIObject {
         this.max = new UIPoint(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY)
         
         this.min.didChange = (point) => {
-            this.rectanglePointDidChange(point)
+            this.rectanglePointDidChange?.(point)
             this._rectanglePointDidChange()
         }
         this.max.didChange = (point) => {
-            this.rectanglePointDidChange(point)
+            this.rectanglePointDidChange?.(point)
             this._rectanglePointDidChange()
         }
         

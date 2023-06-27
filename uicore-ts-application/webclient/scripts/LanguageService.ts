@@ -4,7 +4,7 @@ import { UICore } from "uicore-ts"
 
 export class LanguageService extends CBLanguageService {
     
-    static languageValues: LanguageValues = {
+    static override languageValues: LanguageValues = {
         
         en: {
             

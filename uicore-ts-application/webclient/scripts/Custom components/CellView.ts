@@ -139,7 +139,7 @@ export class CellView extends UIButton {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
     
@@ -178,7 +178,7 @@ export class CellView extends UIButton {
     }
     
     
-    intrinsicContentHeight(constrainingWidth = 0) {
+    override intrinsicContentHeight(constrainingWidth = 0) {
     
         const padding = this.core.paddingLength
         const labelHeight = padding

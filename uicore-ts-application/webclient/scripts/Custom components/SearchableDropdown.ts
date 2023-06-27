@@ -1,7 +1,7 @@
 import { CBSocketClient, SocketClient } from "cbcore-ts"
 import { CBDropdownDataItem } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import {
-    FIRST,
+    FIRST, FIRST_OR_NIL,
     IS,
     IS_NOT,
     IS_UNDEFINED,
@@ -210,13 +210,12 @@ export class SearchableDropdown<T> extends UIButton {
     
             const searchTextFieldHeight = this.bounds.height
     
-            this._dialogView.view.style.zIndex = "" + this._dialogView.zIndex
+            FIRST_OR_NIL(this._dialogView.view).style.zIndex = "" + this._dialogView.zIndex
     
-            this._containerView.frame = this.superview.rectangleInView(
+            this._containerView.frame = this.superview?.rectangleInView(
                 this.frame,
                 FIRST(this.dialogContainerView, this.rootView)
-            )
-                .rectangleWithHeight(this.expandedContainerViewHeight)
+            ).rectangleWithHeight(this.expandedContainerViewHeight)
     
             this._searchTextField.frame = this._containerView.bounds.rectangleWithHeight(searchTextFieldHeight)
                 .rectangleWithInsets(
@@ -621,7 +620,7 @@ export class SearchableDropdown<T> extends UIButton {
             return this._expandedContainerViewHeight
         }
         
-        let result = this.superview.bounds.height - this.frame.max.y - this.core.paddingLength
+        let result = this.superview?.bounds.height ?? 0 - this.frame.max.y - this.core.paddingLength
     
         // if (IS(this.dialogContainerView)) {
         //

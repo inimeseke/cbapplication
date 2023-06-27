@@ -280,7 +280,9 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         
         // Form array of strings for filtering
         this.updateFilteringArray()
-        this.updateTableDataByFiltering().then(nil)
+        this.updateTableDataByFiltering().then(() =>
+            this.setNeedsLayoutUpToRootView()
+        )
         this.setNeedsLayoutUpToRootView()
         
     }
@@ -318,7 +320,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
                     UIObject.setValueForKeyPath(parentIdentifierKeyPath, parentElementID, value, YES)
                 }
                 
-                const subElements: DataType[] = UIObject.valueForKeyPath(subElementsKey, value)
+                const subElements: DataType[] | undefined = UIObject.valueForKeyPath(subElementsKey, value)
                 if (subElements?.length) {
                     
                     // @ts-ignore
@@ -343,7 +345,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         
         this.isTreeView = YES
         
-        const groupedData = (this.data || []).groupedBy(item =>
+        const groupedData = (data || []).groupedBy(item =>
             UIObject.valueForKeyPath(identifierKeyPath, item)
         )
         flatData.forEach(value => {
@@ -470,7 +472,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
             const dataPointsToIncludeAsParentData = this.data.filter(
                 value => !filteringResult.contains(value) &&
                     subDataParentKeys.contains(
-                        UIObject.valueForKeyPath(identifierKeyPath as string, value)
+                        UIObject.valueForKeyPath(identifierKeyPath as string, value) as string
                     )
             )
             dataPointsToIncludeAsParentData.forEach(value => filteringResult.push(value))
@@ -480,7 +482,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         
         // Sort the data
         const { sortedIndexes } = await this._stringSorter.sortedData(
-            filteringResult,
+            JSON.parse(JSON.stringify(filteringResult)),
             this.tableHeaderView.sortingInstructions
         )
         const sortedData: DataType[] = []

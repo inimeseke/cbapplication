@@ -22,7 +22,7 @@ export class BottomBarView extends UIView {
         
     }
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         

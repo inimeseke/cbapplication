@@ -45,17 +45,17 @@ export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDial
         
         const dialogLayoutFunction = this.dialogView.layoutSubviews.bind(this.dialogView)
         this.dialogView.layoutSubviews = () => {
-    
+            
             dialogLayoutFunction()
-    
+            
             const superview = this.dialogView.superview
-            const superviewBounds: UIRectangle = IF(superview.isKindOfClass(UINativeScrollView))(
-                () => superview.scrollSize)
-                .ELSE_IF(superview.isKindOfClass(UIScrollView))(() => superview.scrollSize)
-                .ELSE(() => superview.frame)
+            const superviewBounds: UIRectangle = IF(superview?.isKindOfClass(UINativeScrollView))(
+                () => superview?.scrollSize)
+                .ELSE_IF(superview?.isKindOfClass(UIScrollView))(() => superview?.scrollSize)
+                .ELSE(() => superview?.frame)
             const height = superviewBounds.height || window.innerHeight
             const width = superviewBounds.width || window.innerWidth
-    
+            
             this.dialogView.view.frame = new UIRectangle(
                 0,
                 0,
@@ -89,31 +89,31 @@ export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDial
         const labelHeight = padding * 0.75
         
         let result = 250
-    
+        
         const width = this.dialogView.view.titleLabel.intrinsicContentWidth() + padding * 2
-    
+        
         result = Math.max(
             result,
             this.dialogView.view.view.intrinsicContentWidth(
                 this.dialogView.view.view.viewHTMLElement.naturalHeight || 1000000000
             )
         )
-    
+        
         result = [
             result,
             this.dialogView.view.intrinsicContentWidth(
                 this.dialogView.view.viewHTMLElement.naturalHeight || 1000000000
             ) + padding * 2
         ].max()
-    
+        
         result = Math.max(result, width)
         result = Math.min(result, 1000)
-    
+        
         const dialogMaxWidth = (this.dialogView.superview ||
             { "bounds": new UIRectangle(0, 0, 0, result) }).bounds.width
-    
+        
         result = Math.min(result, dialogMaxWidth)
-    
+        
         return result
         
     }
@@ -187,14 +187,14 @@ export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDial
         this.dialogView.view.noButton.addTargetForControlEvents([
             UIButton.controlEvent.EnterDown, UIButton.controlEvent.PointerUpInside
         ], () => this.noButtonWasPressed())
-    
+        
         this.dialogView.view.yesButton.addTargetForControlEvents([
             UIButton.controlEvent.EnterDown, UIButton.controlEvent.PointerUpInside
         ], () => this.yesButtonWasPressed())
-    
-    
+        
+        
         this.dialogView.showInRootView(YES)
-    
+        
     }
     
     showMessageDialogInRootView(

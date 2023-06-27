@@ -29,12 +29,12 @@ export interface UIButtonElementColorSpecifier {
 export class UIButton extends UIBaseButton {
     
     _contentPadding = 0
-    _titleLabel?: UITextView
+    _titleLabel: UITextView = nil
     _imageView: UIImageView
     
     usesAutomaticTitleFontSize = NO
-    minAutomaticFontSize: number = nil
-    maxAutomaticFontSize: number = 25
+    minAutomaticFontSize?: number
+    maxAutomaticFontSize?: number = 25
     
     colors: UIButtonColorSpecifier = {
         
@@ -57,7 +57,11 @@ export class UIButton extends UIBaseButton {
     }
     
     
-    constructor(elementID?: string, elementType?: string, titleType: string | ValueOf<typeof UITextView.type> = UITextView.type.span) {
+    constructor(
+        elementID?: string,
+        elementType?: string,
+        titleType: string | ValueOf<typeof UITextView.type> = UITextView.type.span
+    ) {
         
         super(elementID, elementType)
         
@@ -71,20 +75,22 @@ export class UIButton extends UIBaseButton {
         
         
         if (IS_NOT_NIL(titleType)) {
-    
-            this._titleLabel = new UITextView(this.elementID + "TitleLabel", titleType)
-            this.titleLabel.style.whiteSpace = "nowrap"
-            this.addSubview(this.titleLabel)
             
-            this.titleLabel.userInteractionEnabled = NO
+            this._titleLabel = new UITextView(this.elementID + "TitleLabel", titleType)
+            this.titleLabel!.style.whiteSpace = "nowrap"
+            this.addSubview(this.titleLabel!)
+            
+            this.titleLabel!.userInteractionEnabled = NO
             
         }
         
         this.contentPadding = 10
         
         this.imageView.userInteractionEnabled = NO
-        this.titleLabel.textAlignment = UITextView.textAlignment.center
-        this.titleLabel.nativeSelectionEnabled = NO
+        if (this.titleLabel) {
+            this.titleLabel.textAlignment = UITextView.textAlignment.center
+            this.titleLabel.nativeSelectionEnabled = NO
+        }
         
     }
     
@@ -162,13 +168,15 @@ export class UIButton extends UIBaseButton {
         }
         
         if (!IS(updateFunction)) {
-            this.titleLabel.textColor = UIColor.nilColor
+            if (this.titleLabel) {
+                this.titleLabel.textColor = UIColor.nilColor
+            }
             this.backgroundColor = UIColor.nilColor
         }
         else {
             updateFunction.call(this)
         }
-    
+        
         this.updateContentForCurrentEnabledState()
         
     }
@@ -176,7 +184,9 @@ export class UIButton extends UIBaseButton {
     override updateContentForNormalState() {
         
         this.backgroundColor = this.colors.background.normal
-        this.titleLabel.textColor = this.colors.titleLabel.normal
+        if (this.titleLabel) {
+            this.titleLabel.textColor = this.colors.titleLabel.normal
+        }
         
     }
     
@@ -188,7 +198,7 @@ export class UIButton extends UIBaseButton {
             this.backgroundColor = this.colors.background.hovered
         }
         
-        if (this.colors.titleLabel.hovered) {
+        if (this.colors.titleLabel.hovered && this.titleLabel) {
             this.titleLabel.textColor = this.colors.titleLabel.hovered
         }
         
@@ -202,7 +212,7 @@ export class UIButton extends UIBaseButton {
             this.backgroundColor = this.colors.background.focused
         }
         
-        if (this.colors.titleLabel.focused) {
+        if (this.colors.titleLabel.focused && this.titleLabel) {
             this.titleLabel.textColor = this.colors.titleLabel.focused
         }
         
@@ -211,14 +221,18 @@ export class UIButton extends UIBaseButton {
     override updateContentForHighlightedState() {
         
         this.backgroundColor = this.colors.background.highlighted
-        this.titleLabel.textColor = this.colors.titleLabel.highlighted
+        if (this.titleLabel) {
+            this.titleLabel.textColor = this.colors.titleLabel.highlighted
+        }
         
     }
     
     override updateContentForSelectedState() {
         
         this.backgroundColor = this.colors.background.selected
-        this.titleLabel.textColor = this.colors.titleLabel.selected
+        if (this.titleLabel) {
+            this.titleLabel.textColor = this.colors.titleLabel.selected
+        }
         
     }
     
@@ -230,7 +244,7 @@ export class UIButton extends UIBaseButton {
             this.backgroundColor = this.colors.background.selectedAndHighlighted
         }
         
-        if (this.colors.titleLabel.selectedAndHighlighted) {
+        if (this.colors.titleLabel.selectedAndHighlighted && this.titleLabel) {
             this.titleLabel.textColor = this.colors.titleLabel.selectedAndHighlighted
         }
         
@@ -281,7 +295,7 @@ export class UIButton extends UIBaseButton {
     
     
     get titleLabel(): UITextView {
-        return this._titleLabel ?? nil
+        return this._titleLabel
     }
     
     get imageView() {
@@ -297,18 +311,18 @@ export class UIButton extends UIBaseButton {
         
         let bounds = this.bounds
         
-        this.hoverText = this.titleLabel.text
+        this.hoverText = this.titleLabel?.text ?? ""
         
         // Image only if text is not present
-        if (IS_NOT(this.imageView.hidden) && !IS(this.titleLabel.text)) {
+        if (IS_NOT(this.imageView.hidden) && !IS(this.titleLabel?.text)) {
             
             this.imageView.frame = bounds
             
         }
         
         // Text only if image is not present
-        if (IS(this.imageView.hidden) && IS(this.titleLabel.text)) {
-    
+        if (IS(this.imageView.hidden) && this.titleLabel?.text) {
+            
             this.titleLabel.style.left = this.contentPadding + "px"
             this.titleLabel.style.right = this.contentPadding + "px"
             // this.titleLabel.style.marginLeft = ""
@@ -316,9 +330,9 @@ export class UIButton extends UIBaseButton {
             this.titleLabel.style.top = "50%"
             this.titleLabel.style.transform = "translateY(-50%)"
             this.titleLabel.frame = new UIRectangle(nil, nil, nil, nil)
-    
+            
             if (this.usesAutomaticTitleFontSize) {
-        
+                
                 const hidden = this.titleLabel.hidden
                 
                 this.titleLabel.hidden = YES
@@ -346,29 +360,29 @@ export class UIButton extends UIBaseButton {
         }
         
         // Image and text both present
-        if (IS_NOT(this.imageView.hidden) && IS(this.titleLabel.text)) {
-    
+        if (IS_NOT(this.imageView.hidden) && this.titleLabel?.text) {
+            
             //const imageShareOfWidth = 0.25
-    
+            
             bounds = bounds.rectangleWithInset(this.contentPadding)
-    
+            
             const imageFrame = bounds.copy()
             imageFrame.width = bounds.height - this.contentPadding * 0.5
             this.imageView.frame = imageFrame
-    
+            
             this.titleLabel.style.left = imageFrame.max.x + this.contentPadding + "px"
             this.titleLabel.style.right = this.contentPadding + "px"
             this.titleLabel.style.top = "50%"
             this.titleLabel.style.transform = "translateY(-50%)"
-    
+            
             if (this.usesAutomaticTitleFontSize) {
-        
+                
                 const hidden = this.titleLabel.hidden
-        
+                
                 this.titleLabel.hidden = YES
-        
+                
                 this.titleLabel.fontSize = 15
-        
+                
                 this.titleLabel.fontSize = UITextView.automaticallyCalculatedFontSize(
                     new UIRectangle(
                         0,

@@ -1,7 +1,7 @@
 onmessage = function (event) {
     
     //console.log('Message received from main script');
-    var workerResult = sortData(
+    const workerResult = sortData(
         event.data.data,
         event.data.sortingInstructions
     )

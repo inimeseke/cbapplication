@@ -95,7 +95,7 @@ export class LanguagesDialogView extends UIView {
             languageButton.updateContentForCurrentState()
             
             // Setting initial button selected state
-            const currentLanguageKey = UIRoute.currentRoute.componentWithName("settings").parameters.language
+            const currentLanguageKey = UIRoute.currentRoute.componentWithName("settings")?.parameters.language
             if (IS(currentLanguageKey)) {
                 if (currentLanguageKey == languageKey) {
                     languageButton.selected = YES

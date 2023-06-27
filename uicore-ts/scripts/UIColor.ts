@@ -11,9 +11,6 @@ export interface UIColorDescriptor {
 }
 
 
-
-
-
 export class UIColor extends UIObject {
     
     
@@ -22,7 +19,6 @@ export class UIColor extends UIObject {
         super()
         
     }
-    
     
     
     override toString() {
@@ -76,7 +72,6 @@ export class UIColor extends UIObject {
     static get nilColor() {
         return new UIColor("")
     }
-    
     
     
     static nameToHex(name: string) {
@@ -225,7 +220,6 @@ export class UIColor extends UIObject {
     }
     
     
-    
     static hexToDescriptor(c: string): UIColorDescriptor {
         if (c[0] === "#") {
             c = c.substr(1)
@@ -234,9 +228,9 @@ export class UIColor extends UIObject {
         const g = parseInt(c.slice(2, 4), 16)
         const b = parseInt(c.slice(4, 6), 16)
         const a = parseInt(c.slice(6, 8), 16)
-    
+        
         const result = { "red": r, "green": g, "blue": b, "alpha": a }
-    
+        
         return result
         
         //return 'rgb(' + r + ',' + g + ',' + b + ')';
@@ -257,33 +251,31 @@ export class UIColor extends UIObject {
             colorString = colorString.slice(4, colorString.length - 1) + ", 0"
             
         }
-    
-    
+        
+        
         const components = colorString.split(",")
-    
-    
-    
+        
+        
         const result = {
             "red": Number(components[0]),
             "green": Number(components[1]),
             "blue": Number(components[2]),
             "alpha": Number(components[3])
         }
-    
-    
+        
+        
         return result
         
         
     }
     
     
-    
     get colorDescriptor(): UIColorDescriptor {
-    
+        
         var descriptor
-    
+        
         const colorHEXFromName = UIColor.nameToHex(this.stringValue)
-    
+        
         if (this.stringValue.startsWith("rgb")) {
             
             descriptor = UIColor.rgbToDescriptor(this.stringValue)
@@ -305,74 +297,72 @@ export class UIColor extends UIObject {
     }
     
     
-    
     colorWithRed(red: number) {
-    
-    
+        
+        
         const descriptor = this.colorDescriptor
-    
+        
         const result = new UIColor("rgba(" + red + "," + descriptor.green + "," + descriptor.blue + "," +
             descriptor.alpha + ")")
-    
+        
         return result
         
     }
     
     colorWithGreen(green: number) {
-    
-    
+        
+        
         const descriptor = this.colorDescriptor
-    
+        
         const result = new UIColor("rgba(" + descriptor.red + "," + green + "," + descriptor.blue + "," +
             descriptor.alpha + ")")
-    
+        
         return result
         
     }
     
     colorWithBlue(blue: number) {
-    
-    
+        
+        
         const descriptor = this.colorDescriptor
-    
+        
         const result = new UIColor("rgba(" + descriptor.red + "," + descriptor.green + "," + blue + "," +
             descriptor.alpha + ")")
-    
+        
         return result
         
     }
     
     
     colorWithAlpha(alpha: number) {
-    
-    
+        
+        
         const descriptor = this.colorDescriptor
-    
+        
         const result = new UIColor("rgba(" + descriptor.red + "," + descriptor.green + "," + descriptor.blue + "," +
             alpha + ")")
-    
+        
         return result
         
     }
     
     
-    
     static colorWithRGBA(red: number, green: number, blue: number, alpha: number = 1) {
-    
-    
+        
+        
         const result = new UIColor("rgba(" + red + "," + green + "," + blue + "," + alpha + ")")
-    
+        
         return result
         
         
     }
     
     static colorWithDescriptor(descriptor: UIColorDescriptor) {
-    
-    
+        
+        
         const result = new UIColor("rgba(" + descriptor.red.toFixed(0) + "," + descriptor.green.toFixed(0) + "," +
             descriptor.blue.toFixed(0) + "," + this.defaultAlphaToOne(descriptor.alpha) + ")")
-    
+        
         return result
         
     }
@@ -386,23 +376,19 @@ export class UIColor extends UIObject {
     }
     
     
-    
     colorByMultiplyingRGB(multiplier: number) {
-    
+        
         const descriptor = this.colorDescriptor
-    
+        
         descriptor.red = descriptor.red * multiplier
         descriptor.green = descriptor.green * multiplier
         descriptor.blue = descriptor.blue * multiplier
-    
+        
         const result = UIColor.colorWithDescriptor(descriptor)
-    
+        
         return result
         
     }
-    
-    
-    
     
     
 }

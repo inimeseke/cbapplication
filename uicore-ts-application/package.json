@@ -68,6 +68,6 @@
   "devDependencies": {
     "concurrently": "^7.3.0",
     "mongodb-memory-server": "^8.8.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.1.2"
   }
 }

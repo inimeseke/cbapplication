@@ -19,8 +19,8 @@ export class UITextView extends UIView {
     
     _notificationAmount = 0
     
-    _minFontSize: number = nil
-    _maxFontSize: number = nil
+    _minFontSize?: number
+    _maxFontSize?: number
     
     _automaticFontSizeSelection = NO
     

@@ -1,5 +1,6 @@
 import { UICoreExtensionValueObject } from "./UICoreExtensionValueObject"
 import { UITimer } from "./UITimer"
+import { UIComponentView } from "./UIView"
 
 
 function NilFunction() {
@@ -34,7 +35,11 @@ export var nil: any = new Proxy(Object.assign(NilFunction, { "class": null, "cla
 })
 
 
-export function wrapInNil<T>(object?: T): T {
+export type RecursiveRequired<T> = Required<{
+    [P in keyof T]: T[P] extends object | undefined ? RecursiveRequired<Required<T[P]>> : T[P];
+}>;
+
+export function wrapInNil<T>(object?: T): RecursiveRequired<T> {
     let result = FIRST_OR_NIL(object)
     if (object instanceof Object && !(object instanceof Function)) {
         result = new Proxy(object as Object & T, {
@@ -60,7 +65,7 @@ export function wrapInNil<T>(object?: T): T {
             }
         })
     }
-    return result
+    return result as any
 }
 
 
@@ -307,7 +312,7 @@ export type UIInitializerObject<T> = {
     //T[P] extends (infer U)[] ? UIInitializerObject<U>[] :
     T[P] extends (...args: any) => any ? UIFunctionCall<T[P]> | UIFunctionExtender<T[P]> | T[P] :
         T[P] extends object ? UIInitializerObject<T[P]> | UILazyPropertyValue<T[P]> :
-            T[P];
+            Partial<T[P]>;
     
 }
 
@@ -343,6 +348,21 @@ export class UIObject {
     
     isMemberOfClass(classObject: any) {
         return (this.class == classObject)
+    }
+    
+    
+    static annotationsMap: WeakMap<any, Function[]> = new WeakMap<ClassDecoratorContext, Function[]>()
+    static recordAnnotation(annotation: Function, target: Function) {
+        if (!UIObject.annotationsMap.has(target)) {
+            UIObject.annotationsMap.set(target, [])
+        }
+        UIObject.annotationsMap.get(target)!.push(annotation)
+    }
+    static classHasAnnotation(classObject: Function, annotation: Function) {
+        return UIObject.annotationsMap.get(classObject)?.contains(annotation)
+    }
+    static annotationsOnClass(classObject: Function) {
+        return UIObject.annotationsMap.get(classObject) ?? []
     }
     
     public static wrapObject<T>(object: T): UIObject & T {

@@ -1,4 +1,5 @@
-import { UICore } from "uicore-ts"
+import { IS, UICore, UIRoute } from "uicore-ts"
+import { EditorViewController } from "./EditorViewController"
 import { RootViewController } from "./RootViewController"
 
 
@@ -33,7 +34,21 @@ try {
     
     setLoadingLabelTextIfNeeded()
     
-    UICore.main = new UICore("RootView", RootViewController)
+    const editorControllerComponent = UIRoute.currentRoute.componentWithName(EditorViewController.routeComponentName)
+    
+    if (IS(editorControllerComponent)) {
+        
+        UICore.main = new UICore("RootView", EditorViewController)
+        
+        // @ts-ignore
+        window.editorViewController = UICore.main.rootViewController
+        
+    }
+    else {
+        
+        UICore.main = new UICore("RootView", RootViewController)
+        
+    }
     
     removeLoadingView()
     

@@ -1,7 +1,7 @@
 import { UIBaseButton } from "./UIBaseButton"
 import { UIButtonColorSpecifier } from "./UIButton"
 import { UICore } from "./UICore"
-import { nil, NO } from "./UIObject"
+import { NO } from "./UIObject"
 import { UIRoute } from "./UIRoute"
 import { UIViewBroadcastEvent } from "./UIView"
 

@@ -36,7 +36,7 @@ export class CBCheckbox extends UIView {
     }
     
     
-    static controlEvent = Object.assign({}, UIView.controlEvent, {
+    static override controlEvent = Object.assign({}, UIView.controlEvent, {
         
         "SelectionChange": "SelectionChange"
         
@@ -86,7 +86,7 @@ export class CBCheckbox extends UIView {
     }
     
     
-    layoutSubviews() {
+    override layoutSubviews() {
         
         super.layoutSubviews()
         

@@ -16,16 +16,16 @@ export class InformationViewController extends UIViewController {
     }
     
     
-    static readonly routeComponentName = "information"
+    static override readonly routeComponentName = "information"
     
-    static readonly ParameterIdentifierName = {
+    static override readonly ParameterIdentifierName = {
         
         "key": "key"
         
     }
     
     
-    async handleRoute(route: UIRoute) {
+    override async handleRoute(route: UIRoute) {
     
         await super.handleRoute(route)
         
@@ -33,7 +33,7 @@ export class InformationViewController extends UIViewController {
     
         const inquiryComponent = route.componentWithName(InformationViewController.routeComponentName)
     
-        const key = inquiryComponent.parameters[InformationViewController.ParameterIdentifierName.key]
+        const key = inquiryComponent?.parameters[InformationViewController.ParameterIdentifierName.key]
     
         this.view.setInnerHTML(key, "Failed to load data for key")
     
@@ -58,7 +58,7 @@ export class InformationViewController extends UIViewController {
     
     
     
-    updateViewConstraints() {
+    override updateViewConstraints() {
         
         super.updateViewConstraints()
         
@@ -66,7 +66,7 @@ export class InformationViewController extends UIViewController {
     
     
     
-    updateViewStyles() {
+    override updateViewStyles() {
         
         super.updateViewStyles()
         
@@ -74,7 +74,7 @@ export class InformationViewController extends UIViewController {
     
     
     
-    viewDidLayoutSubviews() {
+    override viewDidLayoutSubviews() {
         
         super.viewDidLayoutSubviews()
         
@@ -82,7 +82,7 @@ export class InformationViewController extends UIViewController {
     
     
     
-    layoutViewSubviews() {
+    override layoutViewSubviews() {
         
         super.layoutViewSubviews()
     

@@ -74,7 +74,7 @@ export class CBFlatButton extends CBButton {
     }
     
     
-    updateContentForNormalState() {
+    override updateContentForNormalState() {
         
         UIButton.prototype.updateContentForNormalState.call(this)
         
@@ -83,7 +83,7 @@ export class CBFlatButton extends CBButton {
     }
     
     
-    updateContentForHoveredState() {
+    override updateContentForHoveredState() {
         
         UIButton.prototype.updateContentForHoveredState.call(this)
         
@@ -94,7 +94,7 @@ export class CBFlatButton extends CBButton {
         
     }
     
-    updateContentForFocusedState() {
+    override updateContentForFocusedState() {
         
         UIButton.prototype.updateContentForFocusedState.call(this)
         
@@ -106,7 +106,7 @@ export class CBFlatButton extends CBButton {
     }
     
     
-    updateContentForHighlightedState() {
+    override updateContentForHighlightedState() {
         
         UIButton.prototype.updateContentForHighlightedState.call(this)
         

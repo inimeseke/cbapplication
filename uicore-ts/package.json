@@ -1,6 +1,6 @@
 {
   "name": "uicore-ts",
-  "version": "1.0.501",
+  "version": "1.0.521",
   "description": "UICore is a library to build native-like user interfaces using pure Typescript. No HTML is needed at all. Components are described as TS classes and all user interactions are handled explicitly. This library is strongly inspired by the UIKit framework that is used in IOS. In addition, UICore has tools to handle URL based routing, array sorting and filtering and adds a number of other utilities for convenience.",
   "main": "compiledScripts/index.js",
   "types": "compiledScripts/index.d.ts",
@@ -42,6 +42,6 @@
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-typescript2": "^0.32.1",
     "rollup-plugin-web-worker-loader": "^1.6.1",
-    "typescript": "^5.0.2"
+    "typescript": "^5.1.2"
   }
 }

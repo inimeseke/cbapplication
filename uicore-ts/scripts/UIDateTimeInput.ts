@@ -1,4 +1,3 @@
-import { nil } from "./UIObject"
 import { UIView, UIViewAddControlEventTargetObject } from "./UIView"
 
 
@@ -7,7 +6,7 @@ export class UIDateTimeInput extends UIView {
     
     constructor(elementID: string, type: string = UIDateTimeInput.type.DateTime) {
         
-        super(elementID, nil, "input")
+        super(elementID, undefined, "input")
         
         this.viewHTMLElement.setAttribute("type", type)
         

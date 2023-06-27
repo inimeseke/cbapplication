@@ -1,7 +1,7 @@
 import { UIButton } from "./UIButton"
 import { UIColor } from "./UIColor"
 import { UICore } from "./UICore"
-import { IS, nil, NO, YES } from "./UIObject"
+import { FIRST_OR_NIL, IS, nil, NO, YES } from "./UIObject"
 import { UIRectangle } from "./UIRectangle"
 import { UIScrollView } from "./UIScrollView"
 import { UITimer } from "./UITimer"
@@ -15,7 +15,7 @@ export class UISlideScrollerView extends UIView {
     pageIndicatorsView: UIView
     _isAnimating: boolean = NO
     _isAnimationOngoing: boolean = NO
-    _animationTimer: UITimer = nil
+    _animationTimer?: UITimer
     _scrollView: UIScrollView
     _slideViews: UIView[] = []
     
@@ -40,41 +40,41 @@ export class UISlideScrollerView extends UIView {
         this._scrollView.addTargetForControlEvent(
             UIView.controlEvent.PointerMove,
             (sender: UIView, event: Event) => {
-        
+                
                 if (event instanceof MouseEvent) {
-                    this._animationTimer.invalidate()
+                    this._animationTimer?.invalidate()
                 }
-        
+                
             }
         )
-    
-        this._scrollView.addTargetForControlEvent(UIView.controlEvent.PointerLeave, () => {
         
+        this._scrollView.addTargetForControlEvent(UIView.controlEvent.PointerLeave, () => {
+            
             if (this._isAnimating && event instanceof MouseEvent) {
                 this.startAnimating()
             }
-        
+            
         })
         
         // Touch events
         this._scrollView.addTargetForControlEvent(UIView.controlEvent.PointerDown, (sender, event) => {
-        
+            
             if (event instanceof TouchEvent) {
-                this._animationTimer.invalidate()
+                this._animationTimer?.invalidate()
             }
-        
+            
         })
         
         this._scrollView.addTargetForControlEvents([
             UIView.controlEvent.PointerUp, UIView.controlEvent.PointerCancel
         ], (sender, event) => {
-    
+            
             if (event instanceof TouchEvent && this._isAnimating) {
-        
+                
                 this.startAnimating()
-        
+                
             }
-    
+            
         })
         
         
@@ -88,36 +88,36 @@ export class UISlideScrollerView extends UIView {
     
     
     buttonForPageIndicatorWithIndex(index: number): UIButton {
-    
+        
         const result = new UIButton(this.viewHTMLElement.id + "PageIndicatorButton" + index)
-    
+        
         result.addTargetForControlEvents([
             UIView.controlEvent.PointerUpInside, UIView.controlEvent.EnterUp
         ], (sender, event) => {
-        
+            
             this.scrollToPageWithIndex(index, YES)
-        
+            
             if (this._isAnimating) {
-            
+                
                 this.startAnimating()
-            
+                
             }
-        
-        
+            
+            
         })
-    
+        
         result.addTargetForControlEvent(UIView.controlEvent.PointerMove, () => {
-        
-            this._animationTimer.invalidate()
-        
+            
+            this._animationTimer?.invalidate()
+            
         })
-    
-    
+        
+        
         result.updateContentForNormalState = () => {
-        
+            
             result.backgroundColor = UIColor.blueColor
-            result.titleLabel.textColor = UIColor.whiteColor
-        
+            FIRST_OR_NIL(result.titleLabel).textColor = UIColor.whiteColor
+            
         }
         
         
@@ -183,9 +183,9 @@ export class UISlideScrollerView extends UIView {
         if (this.slideViews.length == 0) {
             return
         }
-    
+        
         var targetIndex = this.currentPageIndex
-    
+        
         if (this.wrapAround) {
             targetIndex = (this.currentPageIndex - 1) % (this.slideViews.length)
         }
@@ -205,9 +205,9 @@ export class UISlideScrollerView extends UIView {
         if (this.slideViews.length == 0) {
             return
         }
-    
+        
         var targetIndex = this.currentPageIndex
-    
+        
         if (this.wrapAround) {
             targetIndex = (this.currentPageIndex + 1) % (this.slideViews.length)
         }
@@ -279,9 +279,9 @@ export class UISlideScrollerView extends UIView {
     
     
     willScrollToPageWithIndex(index: number) {
-    
+        
         const targetView = this.slideViews[index]
-    
+        
         if (IS(targetView) && (targetView as any).willAppear && (targetView as any).willAppear instanceof Function) {
             
             (targetView as any).willAppear()
@@ -300,12 +300,12 @@ export class UISlideScrollerView extends UIView {
         
         this._isAnimating = YES
         
-        this._animationTimer.invalidate()
-    
+        this._animationTimer?.invalidate()
+        
         this._animationTimer = new UITimer(this.animationDelay + this.animationDuration, YES, () => {
-        
+            
             this.scrollToNextPage(YES)
-        
+            
         })
         
     }
@@ -313,7 +313,7 @@ export class UISlideScrollerView extends UIView {
     stopAnimating() {
         
         this._isAnimating = NO
-        this._animationTimer.invalidate()
+        this._animationTimer?.invalidate()
         
     }
     
@@ -331,27 +331,27 @@ export class UISlideScrollerView extends UIView {
             subview.removeFromSuperview()
             
         })
-    
+        
         this._slideViews.forEach((view, index) => {
-        
+            
             this._scrollView.addSubview(view)
-        
+            
             this.pageIndicatorsView.addSubview(this.buttonForPageIndicatorWithIndex(index))
-        
+            
         })
         
     }
     
     
     override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
-    
+        
         super.didReceiveBroadcastEvent(event)
-    
+        
         if (event.name == UICore.broadcastEventName.WindowDidResize) {
-        
+            
             this.currentPageIndex = this.currentPageIndex
-        
-        
+            
+            
         }
         
         
@@ -396,11 +396,11 @@ export class UISlideScrollerView extends UIView {
             return self
             
         }.bind(this))
-    
+        
         this._slideViews.forEach((view, index) => {
-        
+            
             view.frame = bounds.rectangleWithX((this.bounds.width + 1) * index)
-        
+            
         })
         
         

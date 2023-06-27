@@ -7,7 +7,7 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 export class UIViewController extends UIObject {
     
     
-    parentViewController: UIViewController = nil
+    parentViewController?: UIViewController
     childViewControllers: UIViewController[] = []
     static readonly routeComponentName: string
     static readonly ParameterIdentifierName: any
@@ -147,7 +147,7 @@ export class UIViewController extends UIObject {
     
     removeFromParentViewController() {
     
-        this.parentViewController.removeChildViewController(this)
+        this.parentViewController?.removeChildViewController(this)
     
     }
     
@@ -168,11 +168,11 @@ export class UIViewController extends UIObject {
         controller.viewWillDisappear()
         if (IS(controller.parentViewController)) {
     
-            const index = this.parentViewController.childViewControllers.indexOf(this)
+            const index = this.parentViewController?.childViewControllers.indexOf(this) ?? -1
             if (index > -1) {
-                this.parentViewController.childViewControllers.splice(index, 1)
+                this.parentViewController?.childViewControllers.splice(index, 1)
                 this.view.removeFromSuperview()
-                this.parentViewController = nil
+                this.parentViewController = undefined
             }
     
         }

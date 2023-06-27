@@ -1,4 +1,4 @@
-import { IS_NIL, IS_NOT, nil, NO } from "./UIObject"
+import { IS_NIL, IS_NOT, NO } from "./UIObject"
 import { UIViewController } from "./UIViewController"
 
 
@@ -134,11 +134,8 @@ export class UIRoute extends Array<UIRouteComponent> {
     
     
     routeByRemovingParameterInComponent(componentName: string, parameterName: string, removeComponentIfEmpty = NO) {
-        var result = this.copy()
-        var parameters = result.componentWithName(componentName).parameters
-        if (IS_NOT(parameters)) {
-            parameters = {}
-        }
+        let result = this.copy()
+        let parameters = result.componentWithName(componentName)?.parameters ?? {}
         delete parameters[parameterName]
         result = result.routeWithComponent(componentName, parameters)
         if (removeComponentIfEmpty && Object.keys(parameters).length == 0) {
@@ -148,11 +145,11 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     routeBySettingParameterInComponent(componentName: string, parameterName: string, valueToSet: string) {
-        var result = this.copy()
+        let result = this.copy()
         if (IS_NIL(valueToSet) || IS_NIL(parameterName)) {
             return result
         }
-        var parameters = result.componentWithName(componentName).parameters
+        let parameters = result.componentWithName(componentName)?.parameters
         if (IS_NOT(parameters)) {
             parameters = {}
         }
@@ -175,7 +172,7 @@ export class UIRoute extends Array<UIRouteComponent> {
     routeWithComponent(name: string, parameters: UIRouteParameters, extendParameters: boolean = NO) {
         
         const result = this.copy()
-        var component = result.componentWithName(name)
+        let component = result.componentWithName(name)
         if (IS_NOT(component)) {
             component = {
                 name: name,
@@ -208,14 +205,14 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    componentWithViewController<T extends typeof UIViewController>(viewController: T): UIRouteComponent<{ [P in keyof T["ParameterIdentifierName"]]: string }> {
+    componentWithViewController<T extends typeof UIViewController>(viewController: T): UIRouteComponent<{ [P in keyof T["ParameterIdentifierName"]]: string }> | undefined {
         
         return this.componentWithName(viewController.routeComponentName)
         
     }
     
-    componentWithName(name: string): UIRouteComponent {
-        var result = nil
+    componentWithName(name: string): UIRouteComponent | undefined {
+        let result
         this.forEach(function (component, index, self) {
             if (component.name == name) {
                 result = component
@@ -231,8 +228,8 @@ export class UIRoute extends Array<UIRouteComponent> {
     
     
     get stringRepresentation() {
-    
-        var result = ""
+        
+        let result = ""
         this.forEach(function (component, index, self) {
             result = result + component.name
             const parameters = component.parameters

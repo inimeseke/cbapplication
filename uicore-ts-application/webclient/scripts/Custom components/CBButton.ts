@@ -1,4 +1,4 @@
-import { IS_NOT, UIButton, UIColor, UIComponentView } from "uicore-ts"
+import { IS_NOT, UIButton, UIButtonColorSpecifier, UIColor, UIComponentView } from "uicore-ts"
 import { CBEditorNestedAttributes } from "../EditorViewController"
 import { CBColor } from "./CBColor"
 
@@ -6,10 +6,13 @@ import { CBColor } from "./CBColor"
 @UIComponentView
 export class CBButton extends UIButton {
     
-    @CBEditorNestedAttributes
+    @CBEditorNestedAttributes()
     override get titleLabel() {
         return super.titleLabel
     }
+    
+    @CBEditorNestedAttributes(2)
+    override colors!: UIButtonColorSpecifier
     
     constructor(elementID?: string, elementType?: string) {
         

@@ -1,6 +1,6 @@
 import { CBCore, SocketClient } from "cbcore-ts"
 import {
-    CALL,
+    CALL, IF,
     IS,
     IS_NOT,
     nil,
@@ -72,11 +72,14 @@ export class RootViewController extends UIRootViewController {
         UITextView.defaultTextColor = CBColor.primaryContentColor
         
         document.addEventListener("keydown", event => {
-            if (event.ctrlKey && event.key === "e") {
+            if (event.ctrlKey && ["e", "w"].contains(event.key)) {
                 const isEditorOpen = IS(UIRoute.currentRoute.componentWithName("settings")?.parameters["editorOpen"])
                 if (!isEditorOpen) {
-                    UIRoute.currentRoute.routeBySettingParameterInComponent("settings", "editorOpen", "YES")
-                        .applyByReplacingCurrentRouteInHistory()
+                    UIRoute.currentRoute.routeBySettingParameterInComponent(
+                        "settings",
+                        "editorOpen",
+                        IF(event.key == "e")(() => "YES").ELSE(() => "WINDOW")
+                    ).applyByReplacingCurrentRouteInHistory()
                 }
                 else {
                     UIRoute.currentRoute.routeByRemovingParameterInComponent("settings", "editorOpen")
@@ -112,8 +115,9 @@ export class RootViewController extends UIRootViewController {
             SocketClient.RouteDidChange(currentURL).then(nil)
         }
         
-        if (route.componentWithName("settings")?.parameters["editorOpen"]) {
-            this.showEditor()
+        const editorParameterValue: string = route.componentWithName("settings")?.parameters["editorOpen"]
+        if (editorParameterValue) {
+            this.showEditor(editorParameterValue.toUpperCase() == "WINDOW")
         }
         else {
             this.hideEditor()
@@ -147,63 +151,81 @@ export class RootViewController extends UIRootViewController {
     }
     
     
-    async showEditor() {
+    async showEditor(separateWindow: boolean) {
         
-        // @ts-ignore
-        this.editorWindow = window.open(
-            window.location.origin + "/#cb_editor[]",
-            "CBEditorWindow",
-            "popup"
-        )
-        
-        if (this.editorWindow) {
+        if (separateWindow) {
             
             // @ts-ignore
-            this.editor = this.editorWindow.editorViewController
+            this.editorWindow = window.open(
+                window.location.origin + "/#cb_editor[]",
+                "CBEditorWindow",
+                "popup"
+            )
             
-            // @ts-ignore
-            const screenDetails = await window.getScreenDetails?.()
-            // @ts-ignore
-            if (window.screen.isExtended && screenDetails?.screens?.length > 1) {
-                const secondScreen = screenDetails.screens.find((screen: any) => !screen.isPrimary)
-                this.editorWindow.resizeTo(secondScreen.availWidth, secondScreen.availHeight)
-                this.editorWindow.moveTo(secondScreen.availLeft, secondScreen.availTop)
+            if (this.editorWindow) {
+                
+                // @ts-ignore
+                this.editor = this.editorWindow.editorViewController
+                
+                // @ts-ignore
+                const screenDetails = await window.getScreenDetails?.()
+                
+                // @ts-ignore
+                if (window.screen.isExtended && screenDetails?.screens?.length > 1) {
+                    const secondScreen = screenDetails.screens.find((screen: any) => !screen.isPrimary)
+                    this.editorWindow.resizeTo(secondScreen.availWidth, secondScreen.availHeight)
+                    this.editorWindow.moveTo(secondScreen.availLeft, secondScreen.availTop)
+                    
+                }
+                
+                const timer = setInterval(async () => {
+                    if (this.editorWindow?.closed ?? true) {
+                        clearInterval(timer)
+                        UIRoute.currentRoute
+                            .routeByRemovingParameterInComponent("settings", "editorOpen")
+                            .apply()
+                        await SocketClient.EditorWasClosed()
+                    }
+                }, 100)
+                
             }
             
-            const timer = setInterval(() => {
-                if (this.editorWindow?.closed ?? true) {
-                    clearInterval(timer)
-                    UIRoute.currentRoute
-                        .routeByRemovingParameterInComponent("settings", "editorOpen")
-                        .apply()
-                }
-            }, 100)
             
         }
-        
-        
-        // if (IS_NOT(this.editor)) {
-        //     this.editor = new EditorViewController(new UINativeScrollView("CBEditorView"))
-        // }
-        //
-        // this.editor.view.pointerDraggingPoint = new UIPoint(0, 0)
-        // this.editor?.viewWillAppear()
-        // this.editor?.view.willAppear()
-        // this.addChildViewController(this.editor)
-        // this.editor?.viewDidAppear()
+        else {
+            
+            if (IS_NOT(this.editor)) {
+                this.editor = new EditorViewController(new UINativeScrollView("CBEditorView"))
+            }
+            
+            this.editor.view.pointerDraggingPoint = new UIPoint(0, 0)
+            this.editor?.viewWillAppear()
+            this.editor?.view.willAppear()
+            this.addChildViewController(this.editor)
+            this.editor?.viewDidAppear()
+            
+        }
         
     }
     
     hideEditor() {
         
-        this.editorWindow?.close()
-        this.editorWindow = undefined
-        this.editor = undefined
+        if (this.editorWindow) {
+            
+            this.editorWindow?.close()
+            this.editorWindow = undefined
+            this.editor = undefined
+            
+        }
+        else {
+            
+            this.editor?.viewWillDisappear()
+            this.editor?.removeFromParentViewController()
+            this.editor?.viewDidDisappear()
+            this.editor = undefined
+            
+        }
         
-        // this.editor?.viewWillDisappear()
-        // this.editor?.removeFromParentViewController()
-        // this.editor?.viewDidDisappear()
-        // this.editor = nil
         
     }
     

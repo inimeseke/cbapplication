@@ -220,7 +220,7 @@ export class UIRootViewController extends UIViewController {
             this.topBarView.frame = new UIRectangle(0, 0, topBarHeight, bounds.width)
         }
         
-        this.backgroundView.style.top = "" + this.topBarView?.frame.height.integerValue ?? 0 + "px"
+        this.backgroundView.style.top = "" + (this.topBarView?.frame.height.integerValue ?? 0) + "px"
         this.backgroundView.style.width = "100%"
         this.backgroundView.style.height = "fit-content"
         this.backgroundView.style.minHeight = "" +

@@ -133,12 +133,19 @@ console.log = function (obj, ...placeholders) {
     
 }
 
-export function CBEditorNestedAttributes(
-    _object: any,
-    _context: ClassFieldDecoratorContext | ClassSetterDecoratorContext | ClassGetterDecoratorContext
-) {
+
+export function CBEditorNestedAttributes(numberOfLevels = 1) {
     
-    // var asd = 1
+    const result = (
+        _object: any,
+        _context: ClassFieldDecoratorContext | ClassSetterDecoratorContext | ClassGetterDecoratorContext
+    ) => {
+        
+        // var asd = 1
+        
+    }
+    
+    return result
     
 }
 
@@ -851,7 +858,7 @@ export class EditorViewController extends UIViewController {
     }
 
 
-// section Code editor events
+    // section Code editor events
     private async editorContentChanged(event: editor.IModelContentChangedEvent) {
         
         console.log("Editor content changed")
@@ -1796,7 +1803,7 @@ export class EditorViewController extends UIViewController {
         
         classNameDropdown.controlEventTargetAccumulator.SelectionDidChange = async (
             sender: SearchableDropdown<string>,
-            event
+            event: Event
         ) => {
             
             await SocketClient.SetPropertyClassName({
@@ -1959,6 +1966,7 @@ export class EditorViewController extends UIViewController {
             view.makeResizable(
                 {
                     //overlayElement: overlayElement,
+                    borderWidth: 1,
                     viewDidChangeToSize: (view, isMovementCompleted) => this.viewFrameDidChange(
                         view,
                         isMovementCompleted
@@ -2086,7 +2094,6 @@ export class EditorViewController extends UIViewController {
                 if (viewControllerResult.descriptor.name || pathArray.length) {
                     
                     pathArray = pathArray.copy()
-                    
                     pathArray.push(
                         viewControllerResult.descriptor.name ??
                         ("subviews." + viewController.view.superview?.subviews.indexOf(view) + ".viewController")
@@ -2122,7 +2129,6 @@ export class EditorViewController extends UIViewController {
             if (result.descriptor.name || pathArray.length) {
                 
                 pathArray = pathArray.copy()
-                
                 pathArray.push(result.descriptor.name ?? ("subviews." + view.superview?.subviews.indexOf(view)))
                 
             }
@@ -2361,26 +2367,6 @@ export class EditorViewController extends UIViewController {
         
         super.handleRoute(route)
         // const inquiryComponent = route.componentWithName(EditorViewController.routeComponentName)
-        
-    }
-    
-    
-    override updateViewConstraints() {
-        
-        super.updateViewConstraints()
-        
-    }
-    
-    
-    override updateViewStyles() {
-        
-        super.updateViewStyles()
-        
-    }
-    
-    override viewDidLayoutSubviews() {
-        
-        super.viewDidLayoutSubviews()
         
     }
     

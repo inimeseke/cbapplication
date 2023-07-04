@@ -115,11 +115,8 @@ type Mutable<T> = {
 
 export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<string, any> }> = Mutable<{
     
-    [K in keyof T["controlEvent"]]: ((
-    sender: UIView,
-    event: Event
-) => void) & Partial<UIViewAddControlEventTargetObject<T>>
-
+    [K in keyof T["controlEvent"]]: (( sender: UIView, event: Event) => void) & Partial<UIViewAddControlEventTargetObject<T>>
+    
 }>
 
 

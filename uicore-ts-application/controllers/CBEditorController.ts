@@ -5,6 +5,7 @@ import * as path from "path"
 import { Server } from "socket.io"
 import {
     ClassDeclaration,
+    createWrappedNode,
     ExpressionStatement,
     GetAccessorDeclaration,
     Node,
@@ -13,13 +14,16 @@ import {
     PropertyDeclaration,
     SetAccessorDeclaration,
     SourceFile,
-    SyntaxKind
+    SyntaxKind,
+    ts,
+    Type
 } from "ts-morph"
-import { IndentStyle } from "typescript"
+import { CompletionTriggerKind, IndentStyle } from "typescript"
 import "../Extensions"
 import Utils from "../Utils"
 import {
-    CBEditorAnnotatedPropertyDescriptor, CBEditorEditablePropertyDescriptor,
+    CBEditorAnnotatedPropertyDescriptor,
+    CBEditorEditablePropertyDescriptor,
     CBEditorPropertyDescriptor,
     CBEditorPropertyLocation
 } from "../webclient/scripts/SocketClientFunctions"
@@ -31,7 +35,7 @@ import { SocketController } from "./SocketController"
 
 
 interface EditableDeclarationObject {
-    declaration: (SetAccessorDeclaration | PropertyDeclaration)
+    declaration: (SetAccessorDeclaration | PropertyDeclaration | (ts.CompletionEntry & { typeName: string }))
     keyPathComponents: string[]
 }
 
@@ -65,6 +69,8 @@ export class CBEditorController extends RoutesController {
         //     }
         // }
     })
+    
+    testingSourceFile = this.webclientProject.createSourceFile("test_file_for_CBEditorController.ts", "")
     
     private currentEditingTarget: CBEditorPropertyDescriptor
     private compilerProject: Project
@@ -196,14 +202,14 @@ export class CBEditorController extends RoutesController {
                     let typeName: string
                     let declarationType: "field" | "property"
                     
+                    
                     if (declaration instanceof SetAccessorDeclaration) {
                         
                         typeName = declaration.getStructure().parameters.firstElement.type as string
                         declarationType = "property"
                         
                     }
-                    
-                    if (declaration instanceof PropertyDeclaration) {
+                    else if (declaration instanceof PropertyDeclaration) {
                         
                         typeName = declaration.getStructure().type as string
                         declarationType = "field"
@@ -211,8 +217,18 @@ export class CBEditorController extends RoutesController {
                     }
                     
                     // Add editing values straight to the descriptor
-                    const unionTypeStrings = declaration.getType().getUnionTypes()
-                        .filter(value => value.isStringLiteral())
+                    let unionTypeStrings: Type[] = []
+                    if (declaration instanceof SetAccessorDeclaration || declaration instanceof PropertyDeclaration) {
+                        unionTypeStrings = declaration.getType?.().getUnionTypes()
+                            .filter(value => value.isStringLiteral())
+                    }
+                    
+                    if (!(declaration instanceof SetAccessorDeclaration) && !(declaration instanceof PropertyDeclaration)) {
+                        
+                        typeName = declaration.typeName
+                        declarationType = "field"
+                        
+                    }
                     
                     // if (unionTypes.length) {
                     //
@@ -861,7 +877,17 @@ export class CBEditorController extends RoutesController {
                 }
                 
                 // Add editing values straight to the descriptor
-                const unionTypes = declaration.getType().getUnionTypes()
+                let unionTypes: Type[] = []
+                if (declaration instanceof SetAccessorDeclaration || declaration instanceof PropertyDeclaration) {
+                    unionTypes = declaration.getType().getUnionTypes()
+                }
+                
+                if (!(declaration instanceof SetAccessorDeclaration) && !(declaration instanceof PropertyDeclaration)) {
+                    
+                    typeName = declaration.typeName
+                    declarationType = "field"
+                    
+                }
                 
                 const result: CBEditorEditablePropertyDescriptor = {
                     typeName: typeName,
@@ -1629,6 +1655,9 @@ export class CBEditorController extends RoutesController {
             "webclient/node_modules/uicore-ts/**/*.ts",
             "webclient/node_modules/cbcore-ts/**/*.ts"
         ])
+        
+        this.testingSourceFile = this.webclientProject.createSourceFile("test_file_for_CBEditorController.ts", "")
+        
     }
     
     private isNodeContainedInNode(node: Node, parentNode: Node) {
@@ -1795,7 +1824,11 @@ export class CBEditorController extends RoutesController {
                 const declarationStructure = propertyDeclaration.getStructure()
                 
                 let result = propertyDeclaration.getDecorator(
-                    declaration => declaration.getName() == "CBEditorNestedAttributes"
+                    declaration => {
+                        const result = declaration.getName() == "CBEditorNestedAttributes"
+                        const numberOfLevels: number = (declaration.getStructure().arguments[0] ?? "1").numericalValue
+                        return result
+                    }
                 ) && true
                 
                 const name = declarationStructure.name
@@ -1814,13 +1847,98 @@ export class CBEditorController extends RoutesController {
             }
         )
         
-        propertyDeclarationsWithNestedAttributes.forEach(value =>
-            result = result.concat(
-                this.editableDeclarations(
-                    this.classDeclarationWithName(value.getStructure()?.type as string),
-                    keyPathComponentsToPrepend.concat([value.getName()])
+        propertyDeclarationsWithNestedAttributes.forEach(propertyDeclaration => {
+                
+                const declaration = propertyDeclaration.getDecorator(
+                    declaration => declaration.getName() == "CBEditorNestedAttributes"
                 )
-            )
+                
+                const numberOfLevelsValue: number = (declaration.getStructure().arguments[0] ?? "1").numericalValue
+                
+                if (numberOfLevelsValue > 1) {
+
+                    const editableDeclarationsWithAutocomplete = (
+                        propertyType: Type,
+                        depthLeft: number,
+                        keyPathComponentsToPrepend: string[] = []
+                    ) => {
+                        
+                        let result: EditableDeclarationObject[] = []
+                        
+                        const sourceFileText = ("var test_variable_for_CBEditorController: " + propertyType.getText() + ";\n" + ["test_variable_for_CBEditorController"].concat(
+                            keyPathComponentsToPrepend).join(".") + ".")
+                        const filePath = this.testingSourceFile.getFilePath()
+                        
+                        this.testingSourceFile.replaceWithText(sourceFileText)
+                        
+                        const completionsAtPosition = this.webclientProject.getLanguageService()
+                            .compilerObject.getCompletionsAtPosition(
+                                filePath,
+                                sourceFileText.length,
+                                { triggerKind: CompletionTriggerKind.Invoked }
+                            )
+                        const propertyEntries = completionsAtPosition.entries.filter((entry) => entry.kind == "property")
+                        
+                        result = propertyEntries.flatMap((declaration) => {
+                            
+                            if (depthLeft) {
+                                return editableDeclarationsWithAutocomplete(
+                                    propertyType,
+                                    depthLeft - 1,
+                                    keyPathComponentsToPrepend.concat([declaration.name])
+                                )
+                            }
+                            
+                            const symbolObject = this.webclientProject.getLanguageService()
+                                .compilerObject.getCompletionEntrySymbol(
+                                    filePath,
+                                    sourceFileText.length,
+                                    declaration.name,
+                                    undefined
+                                )
+                            const wrappedNode = createWrappedNode(symbolObject.valueDeclaration)
+                            const propertySignature = wrappedNode.asKind(SyntaxKind.PropertySignature)
+                            
+                            const resultObject: EditableDeclarationObject[] = [
+                                {
+                                    
+                                    declaration: Object.assign(
+                                        {},
+                                        declaration,
+                                        {
+                                            typeName: "" + propertySignature.getStructure().type
+                                        }
+                                    ),
+                                    keyPathComponents: [propertyDeclaration.getName()].concat(
+                                        keyPathComponentsToPrepend.concat([declaration.name])
+                                    )
+                                    
+                                }
+                            ]
+                            
+                            return resultObject
+                            
+                        })
+                        
+                        return result
+                        
+                    }
+                    
+                    result = result.concat(editableDeclarationsWithAutocomplete(
+                        propertyDeclaration.getType(),
+                        numberOfLevelsValue - 1
+                    ))
+                    
+                }
+                
+                
+                result = result.concat(
+                    this.editableDeclarations(
+                        this.classDeclarationWithName(propertyDeclaration.getStructure()?.type as string),
+                        keyPathComponentsToPrepend.concat([propertyDeclaration.getName()])
+                    )
+                )
+            }
         )
         
         return result

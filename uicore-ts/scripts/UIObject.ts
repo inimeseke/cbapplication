@@ -39,7 +39,7 @@ export type RecursiveRequired<T> = Required<{
     [P in keyof T]: T[P] extends object | undefined ? RecursiveRequired<Required<T[P]>> : T[P];
 }>;
 
-export function wrapInNil<T>(object?: T): RecursiveRequired<T> {
+export function wrapInNil<T>(object?: T): Required<T> {
     let result = FIRST_OR_NIL(object)
     if (object instanceof Object && !(object instanceof Function)) {
         result = new Proxy(object as Object & T, {

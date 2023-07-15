@@ -67,6 +67,7 @@ type CBEditorPropertyDeclarationType = "field" | "property"
 interface CBEditorEditablePropertyDescriptor {
     
     typeName: string
+    typeNames: string[]
     path: string
     editingLocation: CBEditorPropertyLocation
     declarationType: CBEditorPropertyDeclarationType

@@ -53,6 +53,11 @@ export class TreeViewViewController extends UIViewController {
         titleLabel: {
             text: "Asdasdasdasdasd",
             textAlignment: "center"
+        },
+        colors: {
+            background: {
+                hovered: UIColor.greenColor
+            }
         }
     })
     

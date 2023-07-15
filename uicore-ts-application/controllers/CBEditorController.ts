@@ -11,14 +11,14 @@ import {
     Node,
     ObjectLiteralExpression,
     Project,
-    PropertyDeclaration,
+    PropertyDeclaration, PropertySignature,
     SetAccessorDeclaration,
     SourceFile,
     SyntaxKind,
     ts,
     Type
 } from "ts-morph"
-import { CompletionTriggerKind, IndentStyle } from "typescript"
+import { CompletionEntry, CompletionTriggerKind, IndentStyle } from "typescript"
 import "../Extensions"
 import Utils from "../Utils"
 import {
@@ -35,7 +35,7 @@ import { SocketController } from "./SocketController"
 
 
 interface EditableDeclarationObject {
-    declaration: (SetAccessorDeclaration | PropertyDeclaration | (ts.CompletionEntry & { typeName: string }))
+    declaration: (SetAccessorDeclaration | PropertyDeclaration | PropertySignature)
     keyPathComponents: string[]
 }
 
@@ -70,7 +70,11 @@ export class CBEditorController extends RoutesController {
         // }
     })
     
-    testingSourceFile = this.webclientProject.createSourceFile("test_file_for_CBEditorController.ts", "")
+    testingSourceFile = (() => {
+        const filePath = "test_file_for_CBEditorController.ts"
+        this.webclientProject.getSourceFile(filePath)?.deleteImmediatelySync()
+        return this.webclientProject.createSourceFile(filePath, "")
+    })()
     
     private currentEditingTarget: CBEditorPropertyDescriptor
     private compilerProject: Project
@@ -200,6 +204,7 @@ export class CBEditorController extends RoutesController {
                     const declaration = declarationObject.declaration
                     const propertyKeyPath = message.propertyKeyPath + "." + declarationObject.keyPathComponents.join(".")
                     let typeName: string
+                    let typeNames: string[] = []
                     let declarationType: "field" | "property"
                     
                     
@@ -209,11 +214,30 @@ export class CBEditorController extends RoutesController {
                         declarationType = "property"
                         
                     }
-                    else if (declaration instanceof PropertyDeclaration) {
+                    else {
+                        //if (declaration instanceof PropertyDeclaration || declaration instanceof PropertySignature) {
                         
                         typeName = declaration.getStructure().type as string
+                        
+                        let nonOptionalTypes = [declaration.getType()]
+                        
+                        if (nonOptionalTypes) {
+                            
+                            nonOptionalTypes = nonOptionalTypes.flatMap(
+                                value => value.getUnionTypes().filter(
+                                    value => !value.isUndefined()
+                                )
+                            )
+                            
+                        }
+                        
+                        typeNames = nonOptionalTypes.map(value => value.getText(declaration)).concat(
+                            nonOptionalTypes.flatMap(value => value.getBaseTypes())
+                                .map(value => value.getText(declaration))
+                        )
                         declarationType = "field"
                         
+                        //}
                     }
                     
                     // Add editing values straight to the descriptor
@@ -221,12 +245,6 @@ export class CBEditorController extends RoutesController {
                     if (declaration instanceof SetAccessorDeclaration || declaration instanceof PropertyDeclaration) {
                         unionTypeStrings = declaration.getType?.().getUnionTypes()
                             .filter(value => value.isStringLiteral())
-                    }
-                    
-                    if (!(declaration instanceof SetAccessorDeclaration) && !(declaration instanceof PropertyDeclaration)) {
-                        
-                        typeName = declaration.typeName
-                        declarationType = "field"
                         
                     }
                     
@@ -238,6 +256,7 @@ export class CBEditorController extends RoutesController {
                     
                     const result: CBEditorEditablePropertyDescriptor = {
                         typeName: typeName,
+                        typeNames: typeNames,
                         path: propertyKeyPath,
                         editingLocation: this.locationOfEditing(
                             resultFile,
@@ -529,7 +548,7 @@ export class CBEditorController extends RoutesController {
             const resultFile = classObject.getSourceFile()
             const fileText = resultFile.getText()
             
-            let propertyObject = this.propertyDeclarationForClassAndKey(
+            const propertyObject = this.propertyDeclarationForClassAndKey(
                 classObject,
                 message.propertyKeyPath.split(".").firstElement
             )
@@ -538,12 +557,16 @@ export class CBEditorController extends RoutesController {
                 classObject,
                 message.propertyKeyPath
             )
-            
+            const valueString = this.valueStringForPropertyAndMessageValue(
+                valuePropertyOrAccessorObject,
+                message.valueString
+            )
             
             const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
             
             const targetObjectClassDeclaration = this.classDeclarationWithName(classPropertyTypeName)
             const keyPathComponents = message.propertyKeyPath.split(".")
+            
             let targetObjectClassPropertyObject = this.setAccessorOrPropertyDeclarationForClassAndKeyPath(
                 targetObjectClassDeclaration,
                 message.propertyKeyPath
@@ -556,11 +579,6 @@ export class CBEditorController extends RoutesController {
                 const propertyReferences = targetObjectClassPropertyObject?.findReferencesAsNodes()?.filter(
                     reference => reference.getSourceFile() == classObject.getSourceFile()
                 ) ?? []
-                
-                let valueString = this.valueStringForPropertyAndMessageValue(
-                    valuePropertyOrAccessorObject,
-                    message.valueString
-                )
                 
                 const propertyReferenceDescriptors = propertyReferences.map(reference => {
                     
@@ -586,8 +604,8 @@ export class CBEditorController extends RoutesController {
                     }
                     
                 })
-                // Find existing value assignment in constructor and assign value
                 
+                // Find existing value assignment in constructor and assign value
                 const assignmentObject = propertyReferenceDescriptors.find(
                     referenceDescriptor => (
                         referenceDescriptor.isAssignment &&
@@ -868,13 +886,15 @@ export class CBEditorController extends RoutesController {
                     declarationType = "property"
                     
                 }
-                
-                if (declaration instanceof PropertyDeclaration) {
+                else {
+                    //if (declaration instanceof PropertyDeclaration || declaration instanceof PropertySignature) {
                     
                     typeName = declaration.getStructure().type as string
                     declarationType = "field"
                     
+                    //}
                 }
+                
                 
                 // Add editing values straight to the descriptor
                 let unionTypes: Type[] = []
@@ -882,15 +902,9 @@ export class CBEditorController extends RoutesController {
                     unionTypes = declaration.getType().getUnionTypes()
                 }
                 
-                if (!(declaration instanceof SetAccessorDeclaration) && !(declaration instanceof PropertyDeclaration)) {
-                    
-                    typeName = declaration.typeName
-                    declarationType = "field"
-                    
-                }
-                
                 const result: CBEditorEditablePropertyDescriptor = {
                     typeName: typeName,
+                    typeNames: [typeName],
                     path: propertyKeyPath,
                     editingLocation: this.locationOfEditing(
                         resultFile,
@@ -1540,7 +1554,7 @@ export class CBEditorController extends RoutesController {
         
         const keyPathComponents = keyPath.split(".")
         
-        let propertyDeclaration: PropertyDeclaration | SetAccessorDeclaration | undefined
+        let propertyDeclaration: PropertyDeclaration | PropertySignature | SetAccessorDeclaration | undefined
         
         for (let i = 0; i < keyPathComponents.length; i++) {
             
@@ -1587,12 +1601,59 @@ export class CBEditorController extends RoutesController {
             
         }
         
+        if (!propertyDeclaration || propertyDeclaration.getName() != keyPathComponents.lastElement) {
+            
+            const completionsAtPositionObject = this.completionsAtPosition(classObject.getType(), keyPath)
+            propertyDeclaration = this.propertyObjectWithCompletionsObject(completionsAtPositionObject, keyPath)
+            
+        }
+        
         return propertyDeclaration
         
     }
     
+    private propertyObjectWithCompletionsObject(
+        completionsAtPositionObject: {
+            completionsAtPosition: any;
+            sourceFileText: string;
+            filePath: string
+        },
+        keyPath: string
+    ) {
+        
+        if (!completionsAtPositionObject.completionsAtPosition) {
+            return
+        }
+        
+        const keyPathComponents = keyPath.split(".")
+        const declaration: CompletionEntry = completionsAtPositionObject.completionsAtPosition?.entries.find((entry) => entry.name == keyPathComponents.lastElement)
+        const filePath = completionsAtPositionObject.filePath
+        const symbolObject = this.webclientProject.getLanguageService()
+            .compilerObject.getCompletionEntrySymbol(
+                filePath,
+                completionsAtPositionObject.sourceFileText.length,
+                declaration?.name,
+                undefined
+            )
+        
+        if (!symbolObject) {
+            return
+        }
+        
+        const sourceFile = this.webclientProject.getSourceFile(symbolObject.valueDeclaration.getSourceFile()["path"])
+        const propertyIdentifier = sourceFile.getDescendantAtPos(symbolObject.valueDeclaration.getStart())
+        
+        // const wrappedNode = createWrappedNode(symbolObject.valueDeclaration)
+        
+        const propertyObject = propertyIdentifier.getParentIfKind(SyntaxKind.PropertySignature) ??
+            propertyIdentifier.getParentIfKind(SyntaxKind.PropertyDeclaration)
+        
+        return propertyObject
+        
+    }
+    
     private valueStringForPropertyAndMessageValue(
-        targetObjectClassPropertyObject: SetAccessorDeclaration | PropertyDeclaration,
+        targetObjectClassPropertyObject: SetAccessorDeclaration | PropertyDeclaration | PropertySignature,
         valueString: string
     ) {
         
@@ -1656,6 +1717,7 @@ export class CBEditorController extends RoutesController {
             "webclient/node_modules/cbcore-ts/**/*.ts"
         ])
         
+        this.testingSourceFile.deleteImmediatelySync()
         this.testingSourceFile = this.webclientProject.createSourceFile("test_file_for_CBEditorController.ts", "")
         
     }
@@ -1856,27 +1918,21 @@ export class CBEditorController extends RoutesController {
                 const numberOfLevelsValue: number = (declaration.getStructure().arguments[0] ?? "1").numericalValue
                 
                 if (numberOfLevelsValue > 1) {
-
+                    
                     const editableDeclarationsWithAutocomplete = (
                         propertyType: Type,
                         depthLeft: number,
-                        keyPathComponentsToPrepend: string[] = []
+                        keyPathComponentsToPrependForAutocomplete: string[] = []
                     ) => {
                         
                         let result: EditableDeclarationObject[] = []
                         
-                        const sourceFileText = ("var test_variable_for_CBEditorController: " + propertyType.getText() + ";\n" + ["test_variable_for_CBEditorController"].concat(
-                            keyPathComponentsToPrepend).join(".") + ".")
-                        const filePath = this.testingSourceFile.getFilePath()
-                        
-                        this.testingSourceFile.replaceWithText(sourceFileText)
-                        
-                        const completionsAtPosition = this.webclientProject.getLanguageService()
-                            .compilerObject.getCompletionsAtPosition(
-                                filePath,
-                                sourceFileText.length,
-                                { triggerKind: CompletionTriggerKind.Invoked }
-                            )
+                        const { sourceFileText, filePath, completionsAtPosition } = this.completionsAtPosition(
+                            propertyDeclaration.getParent().getType(),
+                            Utils.IF(keyPathComponentsToPrependForAutocomplete.length)(
+                                () => keyPathComponentsToPrependForAutocomplete.join(".") + ".")
+                                .ELSE(() => "")
+                        )
                         const propertyEntries = completionsAtPosition.entries.filter((entry) => entry.kind == "property")
                         
                         result = propertyEntries.flatMap((declaration) => {
@@ -1885,7 +1941,7 @@ export class CBEditorController extends RoutesController {
                                 return editableDeclarationsWithAutocomplete(
                                     propertyType,
                                     depthLeft - 1,
-                                    keyPathComponentsToPrepend.concat([declaration.name])
+                                    keyPathComponentsToPrependForAutocomplete.concat([declaration.name])
                                 )
                             }
                             
@@ -1896,23 +1952,21 @@ export class CBEditorController extends RoutesController {
                                     declaration.name,
                                     undefined
                                 )
-                            const wrappedNode = createWrappedNode(symbolObject.valueDeclaration)
-                            const propertySignature = wrappedNode.asKind(SyntaxKind.PropertySignature)
+                            
+                            const sourceFile = this.webclientProject.getSourceFile(symbolObject.valueDeclaration.getSourceFile()["path"])
+                            const propertyIdentifier = sourceFile.getDescendantAtPos(symbolObject.valueDeclaration.getStart())
+                            
+                            // const wrappedNode = createWrappedNode(symbolObject.valueDeclaration)
+                            
+                            const propertyObject = propertyIdentifier.getParentIfKind(SyntaxKind.PropertySignature) ??
+                                propertyIdentifier.getParentIfKind(SyntaxKind.PropertyDeclaration)
                             
                             const resultObject: EditableDeclarationObject[] = [
                                 {
-                                    
-                                    declaration: Object.assign(
-                                        {},
-                                        declaration,
-                                        {
-                                            typeName: "" + propertySignature.getStructure().type
-                                        }
-                                    ),
+                                    declaration: propertyObject,
                                     keyPathComponents: [propertyDeclaration.getName()].concat(
-                                        keyPathComponentsToPrepend.concat([declaration.name])
+                                        keyPathComponentsToPrependForAutocomplete.slice(1).concat([declaration.name])
                                     )
-                                    
                                 }
                             ]
                             
@@ -1926,7 +1980,8 @@ export class CBEditorController extends RoutesController {
                     
                     result = result.concat(editableDeclarationsWithAutocomplete(
                         propertyDeclaration.getType(),
-                        numberOfLevelsValue - 1
+                        numberOfLevelsValue - 1,
+                        [propertyDeclaration.getName()]
                     ))
                     
                 }
@@ -1942,6 +1997,25 @@ export class CBEditorController extends RoutesController {
         )
         
         return result
+        
+    }
+    
+    private completionsAtPosition(objectType: Type, keyPath: string) {
+        
+        var sourceFileText = ("var test_variable_for_CBEditorController: (" + objectType.getText() + ");\n" +
+            "test_variable_for_CBEditorController." + keyPath)
+        var filePath = this.testingSourceFile.getFilePath()
+        this.testingSourceFile.replaceWithText(sourceFileText)
+        
+        
+        var completionsAtPosition = this.webclientProject.getLanguageService()
+            .compilerObject.getCompletionsAtPosition(
+                this.testingSourceFile.getFilePath(),
+                sourceFileText.length,
+                { triggerKind: CompletionTriggerKind.Invoked }
+            )
+        
+        return { sourceFileText, filePath, completionsAtPosition }
         
     }
     

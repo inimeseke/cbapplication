@@ -1,6 +1,6 @@
 import { CBDropdownDataItem, CBSocketClient, SocketClient } from "cbcore-ts"
+import type { editor, IPosition } from "monaco-editor"
 import { Position } from "monaco-editor"
-import type { editor, IPosition, IRange } from "monaco-editor"
 import {
     FIRST_OR_NIL,
     IF,
@@ -112,7 +112,7 @@ interface PathKeyObject {
 }
 
 
-var origlog = console.log
+const origlog = console.log
 
 console.log = function (obj, ...placeholders) {
     
@@ -129,7 +129,7 @@ console.log = function (obj, ...placeholders) {
         
     }
     
-    origlog.apply(this, placeholders)
+    origlog?.apply(this, placeholders)
     
 }
 
@@ -635,7 +635,6 @@ export class EditorViewController extends UIViewController {
         }).addedAsSubviewToView(this.view)
     
     buttons: CBFlatButton[] = []
-    
     buttonsRow = new RowView().addedAsSubviewToView(this.view)
     
     editorContainer = new UIView("EditorEditorContainer", nil, "iframe")
@@ -661,6 +660,8 @@ export class EditorViewController extends UIViewController {
     private _currentClassName?: string
     private _bottomView = new UIView().addedAsSubviewToView(this.view)
     private _layoutFunctionText?: string
+    
+    private _propertyDescriptor?: { object: UIObject; className: string; name: string }
     
     UIViewClass: typeof UIView = UIView
     
@@ -856,8 +857,8 @@ export class EditorViewController extends UIViewController {
     get UICoreClass(): typeof UICore {
         return window.opener?.require_UICore?.()?.UICore ?? UICore
     }
-
-
+    
+    
     // section Code editor events
     private async editorContentChanged(event: editor.IModelContentChangedEvent) {
         
@@ -866,6 +867,9 @@ export class EditorViewController extends UIViewController {
         console.log(event)
         
         //this._selectedView.viewHTMLElement.classList.add("loading-border")
+        
+        
+        
         
         const editorText = await this._editor.getValue() as string
         
@@ -888,14 +892,9 @@ export class EditorViewController extends UIViewController {
         // const messages = (await this._editor.getCurrentFileMessages() as Diagnostic[]).filter(
         //     value => value.category == 1
         // )
-        //
         // if (messages.length) {
-        //
         //     this._selectedView.viewHTMLElement.classList.remove("loading-border")
-        //
-        //
         //     return
-        //
         // }
         
         const scriptTextSocketResult = (await SocketClient.JSStringFromTSString(
@@ -966,7 +965,14 @@ export class EditorViewController extends UIViewController {
             return methodBlockString
         }
         
-        return ("function " + methodBlockString).replace(" super.", " this.superclass.prototype.")
+        const result = ("function " + methodBlockString).replace(" super.", " this.superclass.prototype.")
+            .replace(
+                new RegExp("\\sthis.superclass.prototype.layoutViewSubviews\\(\\)"),
+                " this.superclass.prototype.layoutViewSubviews?.apply(this)"
+            )
+        
+        
+        return result
         
     }
     
@@ -975,8 +981,14 @@ export class EditorViewController extends UIViewController {
         
         const replacementFunction = this.runScript(scriptText)
         
-        if (this._selectedView?.viewController) {
-            this._selectedView.viewController.layoutViewSubviews = replacementFunction
+        if (!this.buttons.firstElement.selected) {
+            return
+        }
+
+        const viewController = this._propertyDescriptor?.object
+        
+        if (viewController instanceof UIViewController) {
+            viewController.layoutViewSubviews = replacementFunction
         }
         else {
             this._selectedView.layoutSubviews = replacementFunction
@@ -1072,18 +1084,13 @@ export class EditorViewController extends UIViewController {
         
         event.stopPropagation()
         
+        // Move only one step into the view tree in normal case
         if (!event.metaKey && this._currentEditingView) {
-            
             const viewWithAllSuperviews = view.withAllSuperviews
-            
             const currentEditingViewIndex = viewWithAllSuperviews.indexOf(this._currentEditingView)
-            
             if (currentEditingViewIndex > 0) {
-                
                 view = viewWithAllSuperviews[currentEditingViewIndex - 1]
-                
             }
-            
         }
         
         this.view.userInteractionEnabled = NO
@@ -1332,6 +1339,8 @@ export class EditorViewController extends UIViewController {
             await this.reloadEditor()
         }
         
+        this._propertyDescriptor = propertyDescriptor
+        
         const fileObject = (await SocketClient.EditProperty({
             className: propertyDescriptor.className,
             propertyKeyPath: propertyDescriptor.name,
@@ -1344,7 +1353,9 @@ export class EditorViewController extends UIViewController {
             
             const property = fileObject.editableProperties[i]
             
-            const isColor = propertyDescriptor.object.valueForKeyPath(property.path)?.isKindOfClass?.(UIColor)
+            const isColor = propertyDescriptor.object.valueForKeyPath(property.path)
+                ?.isKindOfClass
+                ?.(UIColor) || property.typeNames.contains("UIColor")
             if (IS(isColor)) {
                 
                 propertyEditors.push(

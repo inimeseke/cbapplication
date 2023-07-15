@@ -1,18 +1,6 @@
-import {
-    FIRST,
-    FIRST_OR_NIL,
-    IS,
-    IS_NOT,
-    nil,
-    UICore,
-    UILink,
-    UIObject,
-    UIRoute,
-    UIViewBroadcastEvent,
-    YES
-} from "../../uicore-ts"
-import { CBLanguageService } from "./CBLanguageService"
+import { FIRST, IS, IS_NOT, nil, UICore, UILink, UIObject, UIRoute, UIViewBroadcastEvent, YES } from "../../uicore-ts"
 import { CBLocalizedTextObject, CBUserProfile } from "./CBDataInterfaces"
+import { CBLanguageService } from "./CBLanguageService"
 import { CBServerClient } from "./CBServerClient"
 import { CBSocketClient } from "./CBSocketClient"
 
@@ -20,12 +8,15 @@ import { CBSocketClient } from "./CBSocketClient"
 declare interface CBDialogViewShower {
     
     alert(text: string, dismissCallback?: Function): void
+    
     localizedAlert(textObject: CBLocalizedTextObject, dismissCallback?: Function): void
     
     showActionIndicatorDialog(message: string, dismissCallback?: Function): void
+    
     hideActionIndicatorDialog(): void
     
 }
+
 
 declare const CBCoreInitializerObject: any
 
@@ -61,38 +52,32 @@ export class CBCore extends UIObject {
         window.addEventListener("storage", function (this: CBCore, event: StorageEvent) {
             
             if (event.newValue == event.oldValue) {
-                
                 return
-                
             }
             
             //console.log("" + event.key + " changed to " + event.newValue + " from " + event.oldValue);
             
             
-            
             if (event.key == "CBLanguageKey") {
-                
                 this.didSetLanguageKey()
-                
             }
             
         }.bind(this))
-    
-    
+        
+        
         //this.checkIfUserIsAuthenticated();
-    
+        
         this.didSetLanguageKey()
-    
-    
+        
+        
     }
     
     
     static initIfNeededWithViewCore(viewCore: UICore) {
         
-        CBCore.sharedInstance.viewCores.push(viewCore);
+        CBCore.sharedInstance.viewCores.push(viewCore)
         
     }
-    
     
     
     static get sharedInstance() {
@@ -103,9 +88,6 @@ export class CBCore extends UIObject {
     }
     
     
-    
-    
-    
     static broadcastEventName = {
         
         "userDidLogIn": "UserDidLogIn",
@@ -114,13 +96,10 @@ export class CBCore extends UIObject {
     } as const
     
     broadcastMessageInRootViewTree(message: UIViewBroadcastEvent) {
-    
+        
         this.viewCores.everyElement.rootViewController.view.broadcastEventInSubtree(message)
         
     }
-    
-    
-    
     
     
     get socketClient() {
@@ -132,21 +111,10 @@ export class CBCore extends UIObject {
     }
     
     
-    
-    
-    
     set isUserLoggedIn(isUserLoggedIn: boolean) {
-        
         const previousValue = this.isUserLoggedIn
-        
-        
         localStorage.setItem("CBIsUserLoggedIn", "" + isUserLoggedIn)
-        
-        
-        //this._isUserLoggedIn = isUserLoggedIn;
-        
         this.didSetIsUserLoggedIn(previousValue)
-        
     }
     
     didSetIsUserLoggedIn(previousValue: boolean) {
@@ -156,167 +124,90 @@ export class CBCore extends UIObject {
         if (isUserLoggedIn && previousValue != isUserLoggedIn) {
             
             // Send message to views
-            
             this.broadcastMessageInRootViewTree({
-                
                 name: CBCore.broadcastEventName.userDidLogIn,
                 parameters: nil
-                
             })
             
             this.updateLinkTargets()
             
-            
         }
         else if (previousValue != isUserLoggedIn) {
-            
             
             this.performFunctionWithDelay(0.01, function (this: CBCore) {
                 
                 UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed([
-                    
-                    "settings",
-                    "inquiry"
-                
+                    "settings"
                 ]).apply()
                 
                 this.broadcastMessageInRootViewTree({
-                    
                     name: CBCore.broadcastEventName.userDidLogOut,
                     parameters: nil
-                    
                 })
                 
                 this.updateLinkTargets()
-                
                 
             }.bind(this))
             
         }
         
-        
     }
     
     private updateLinkTargets() {
-    
         this.viewCores.everyElement.rootViewController.view.forEachViewInSubtree(function (view) {
             if (view instanceof UILink) {
                 view.updateTarget()
             }
         })
-    
     }
     
     get isUserLoggedIn() {
-        
-        const result = (localStorage.getItem("CBIsUserLoggedIn") == "true")
-        
-        return result
-        
+        return (localStorage.getItem("CBIsUserLoggedIn") == "true")
     }
-    
     
     
     get userProfile() {
-    
-        let result = nil
-    
-    
-        try {
-            // @ts-ignore
-            result = JSON.parse(localStorage.getItem("CBUserProfile"))
-        } catch (error) {
-            
+        const text = localStorage.getItem("CBUserProfile")
+        if (text) {
+            return JSON.parse(text) as CBUserProfile
         }
-        
-        // if (IS_NOT(result)) {
-        
-        //     // Get userID from inquiryAccessKey if possible
-        //     var inquiryKey = this.inquiryAccessKey;
-        
-        //     if (IS(inquiryKey)) {
-        
-        //         result = FIRST_OR_NIL(this.inquiriesModel.inquiriesByCurrentUser.firstElement).inquirer
-        
-        //     }
-        
-        // }
-        
-        return FIRST_OR_NIL(result)
-        
+        return undefined
     }
     
     set userProfile(userProfile: CBUserProfile) {
-        
         if (IS_NOT(userProfile)) {
-            
             localStorage.removeItem("CBUserProfile")
-            
         }
-        
         localStorage.setItem("CBUserProfile", JSON.stringify(userProfile))
-        
         this.didSetUserProfile()
-        
     }
     
     didSetUserProfile() {
-        
         this.isUserLoggedIn = IS(this.userProfile)
-        
     }
     
     
     set languageKey(languageKey: string) {
-        
         if (IS_NOT(languageKey)) {
-            
             localStorage.removeItem("CBLanguageKey")
-            
         }
-        
         localStorage.setItem("CBLanguageKey", JSON.stringify(languageKey))
-        
         this.didSetLanguageKey()
-        
     }
     
     get languageKey() {
-        
-        const result = FIRST(localStorage.getItem("CBLanguageKey"), CBLanguageService.defaultLanguageKey).replace(
+        return FIRST(localStorage.getItem("CBLanguageKey"), CBLanguageService.defaultLanguageKey).replace(
             "\"",
             ""
         ).replace("\"", "")
-        
-        
-        return result
-        
     }
     
     didSetLanguageKey() {
-        
         UIRoute.currentRoute.routeWithComponent(
             "settings",
             { "language": this.languageKey },
             YES
         ).applyByReplacingCurrentRouteInHistory()
-        
-    }
-    
-    
-    get externalServiceIdentifier(): { accessKey: string; serviceID: string; organizationID: string } {
-        
-        // @ts-ignore
-        const result = JSON.parse(localStorage.getItem("CBExternalServiceIdentifier"))
-        
-        return result
-        
-    }
-    
-    set externalServiceIdentifier(externalServiceIdentifier: { accessKey: string; serviceID: string; organizationID: string }) {
-        
-        localStorage.setItem("CBExternalServiceIdentifier", JSON.stringify(externalServiceIdentifier))
-        
     }
     
     
@@ -348,7 +239,6 @@ export class CBCore extends UIObject {
             functionToCall()
             
         })
-        
         
         
     }

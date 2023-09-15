@@ -115,7 +115,10 @@ type Mutable<T> = {
 
 export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<string, any> }> = Mutable<{
     
-    [K in keyof T["controlEvent"]]: (( sender: UIView, event: Event) => void) & Partial<UIViewAddControlEventTargetObject<T>>
+    [K in keyof T["controlEvent"]]: ((
+    sender: UIView,
+    event: Event
+) => void) & Partial<UIViewAddControlEventTargetObject<T>>
     
 }>
 
@@ -198,7 +201,14 @@ export class UIView extends UIObject {
     static _pageScale = 1
     _scale: number = 1
     isInternalScaling: boolean = YES
-    private _resizeObserver!: ResizeObserver
+    static resizeObserver = new ResizeObserver((entries, observer) => {
+        for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i]
+            // @ts-ignore
+            const view: UIView = entry.target.UIView
+            view?.didResize?.(entry)
+        }
+    })
     
     private _isMovable = NO
     makeNotMovable?: () => void
@@ -213,6 +223,8 @@ export class UIView extends UIObject {
     static _onWindowTouchMove: (event: TouchEvent) => void = nil
     static _onWindowMouseMove: (event: MouseEvent) => void = nil
     static _onWindowMouseup: (event: MouseEvent) => void = nil
+    private _resizeObserverEntry?: ResizeObserverEntry
+    private _intrinsicSizesCache: Record<string, UIRectangle> = {}
     
     
     constructor(
@@ -317,9 +329,6 @@ export class UIView extends UIObject {
         this.viewHTMLElement.obeyAutolayout = YES
         this.viewHTMLElement.UIView = this
         this.addStyleClass(this.styleClassName)
-        
-        this._resizeObserver = new ResizeObserver(() => this.setNeedsLayout())
-        this._resizeObserver.observe(this.viewHTMLElement)
         
     }
     
@@ -944,10 +953,10 @@ export class UIView extends UIObject {
         let result: UIRectangle & { zIndex?: number } = this._frame?.copy() as any
         if (!result) {
             result = new UIRectangle(
-                this.viewHTMLElement.offsetLeft,
-                this.viewHTMLElement.offsetTop,
-                this.viewHTMLElement.offsetHeight,
-                this.viewHTMLElement.offsetWidth
+                this._resizeObserverEntry?.contentRect.left ?? this.viewHTMLElement.offsetLeft,
+                this._resizeObserverEntry?.contentRect.top ?? this.viewHTMLElement.offsetTop,
+                this._resizeObserverEntry?.contentRect.height ?? this.viewHTMLElement.offsetHeight,
+                this._resizeObserverEntry?.contentRect.width ?? this.viewHTMLElement.offsetWidth
             ) as any
             result.zIndex = 0
         }
@@ -991,7 +1000,7 @@ export class UIView extends UIObject {
         
         if (frame.height != rectangle.height || frame.width != rectangle.width || performUncheckedLayout) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(this.bounds)
         }
         
     }
@@ -999,7 +1008,12 @@ export class UIView extends UIObject {
     get bounds() {
         let result: UIRectangle
         if (IS_NOT(this._frame)) {
-            result = new UIRectangle(0, 0, this.viewHTMLElement.offsetHeight, this.viewHTMLElement.offsetWidth)
+            result = new UIRectangle(
+                0,
+                0,
+                this._resizeObserverEntry?.contentRect.height ?? this.viewHTMLElement.offsetHeight,
+                this._resizeObserverEntry?.contentRect.width ?? this.viewHTMLElement.offsetWidth
+            )
         }
         else {
             result = this.frame.copy()
@@ -1010,7 +1024,7 @@ export class UIView extends UIObject {
     }
     
     
-    set bounds(rectangle) {
+    set bounds(rectangle: UIRectangle) {
         const frame = this.frame
         const newFrame = new UIRectangle(frame.topLeft.x, frame.topLeft.y, rectangle.height, rectangle.width)
         // @ts-ignore
@@ -1018,9 +1032,18 @@ export class UIView extends UIObject {
         this.frame = newFrame
     }
     
-    boundsDidChange() {
+    boundsDidChange(bounds: UIRectangle) {
     
     
+    }
+    
+    didResize(entry: ResizeObserverEntry) {
+        
+        this._resizeObserverEntry = entry
+        this.setNeedsLayout()
+        
+        this.boundsDidChange(new UIRectangle(0, 0, entry.contentRect.height, entry.contentRect.width))
+        
     }
     
     get frameTransform(): string {
@@ -1056,7 +1079,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1071,7 +1094,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1086,7 +1109,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1101,7 +1124,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1115,7 +1138,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1132,7 +1155,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1147,7 +1170,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1165,7 +1188,7 @@ export class UIView extends UIObject {
         const bounds = this.bounds
         if (bounds.height != previousBounds.height || bounds.width != previousBounds.width) {
             this.setNeedsLayout()
-            this.boundsDidChange()
+            this.boundsDidChange(bounds)
         }
         
     }
@@ -1413,42 +1436,62 @@ export class UIView extends UIObject {
             width = width.integerValue + "px"
         }
         
-        let str = element.style.cssText
+        //let str = element.style.cssText
         
-        frameTransform = UIView._transformAttribute + ": translate3d(" + (left).integerValue + "px, " +
+        frameTransform =
+            "translate3d(" + (left).integerValue + "px, " +
             (top).integerValue + "px, 0px)" + frameTransform
+        
+        const style = element.style
         
         if (element.UIView) {
             
-            str = str + frameTransform +
-                (element.style.transform.match(
-                    new RegExp("scale\\(.*\\)", "g")
-                )?.firstElement ?? "") + ";"
+            frameTransform = frameTransform + (style.transform.match(
+                new RegExp("scale\\(.*\\)", "g")
+            )?.firstElement ?? "")
+            
+            //str = str + UIView._transformAttribute + ": " + frameTransform + ";"
             
         }
         
         if (IS_NIL(height)) {
-            str = str + " height: unset;"
+            
+            //str = str + " height: unset;"
+            height = "unset"
+            
         }
-        else {
-            str = str + " height:" + height + ";"
-        }
+        // else {
+        //     str = str + " height:" + height + ";"
+        // }
         
         if (IS_NIL(width)) {
-            str = str + " width: unset;"
+            
+            //str = str + " width: unset;"
+            width = "unset"
+            
         }
-        else {
-            str = str + " width:" + width + ";"
-        }
+        // else {
+        //     str = str + " width:" + width + ";"
+        // }
+        
+        let zIndexString = "" + zIndex
         
         if (IS_NIL(zIndex)) {
-            str = str + " z-index: unset;"
+            
+            //str = str + " z-index: unset;"
+            zIndexString = "unset"
+            
         }
-        else {
-            str = str + " z-index:" + zIndex + ";"
-        }
+        // else {
+        //     str = str + " z-index:" + zIndex + ";"
+        // }
         
-        element.style.cssText = element.style.cssText + str
+        style.transform = frameTransform
+        style.height = height
+        style.width = width
+        style.zIndex = zIndexString
+        
+        //element.style.cssText = element.style.cssText + str
         
     }
     
@@ -1584,6 +1627,8 @@ export class UIView extends UIObject {
         // Register view for layout before next frame
         UIView._viewsToLayout.push(this)
         
+        this._intrinsicSizesCache = {}
+        
         if (UIView._viewsToLayout.length == 1) {
             UIView.scheduleLayoutViewsIfNeeded()
         }
@@ -1648,7 +1693,7 @@ export class UIView extends UIObject {
     applyClassesAndStyles() {
         for (let i = 0; i < this.styleClasses.length; i++) {
             const styleClass = this.styleClasses[i]
-            if (styleClass) {
+            if (styleClass && !this.viewHTMLElement.classList.contains(styleClass)) {
                 this.viewHTMLElement.classList.add(styleClass)
             }
         }
@@ -1932,12 +1977,16 @@ export class UIView extends UIObject {
     }
     
     wasAddedToViewTree() {
-    
+        
+        UIView.resizeObserver.observe(this.viewHTMLElement)
+        
     }
     
     
     wasRemovedFromViewTree() {
-    
+        
+        UIView.resizeObserver.unobserve(this.viewHTMLElement)
+        
     }
     
     
@@ -3272,6 +3321,12 @@ export class UIView extends UIObject {
     
     intrinsicContentSizeWithConstraints(constrainingHeight: number = 0, constrainingWidth: number = 0) {
         
+        const cacheKey = "h_" + constrainingHeight + "__w_" + constrainingWidth
+        const cachedResult = this._intrinsicSizesCache[cacheKey]
+        if (cachedResult) {
+            return cachedResult
+        }
+        
         // This works but is slow
         
         const result = new UIRectangle(0, 0, 0, 0)
@@ -3340,6 +3395,8 @@ export class UIView extends UIObject {
         result.width = resultWidth
         
         
+        this._intrinsicSizesCache[cacheKey] = result.copy()
+        
         return result
         
     }
@@ -3363,6 +3420,7 @@ export class UIView extends UIObject {
         return nil
         
     }
+    
     
 }
 

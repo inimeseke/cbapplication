@@ -5,6 +5,7 @@ import { LooseObject, UIView } from "./UIView"
 export class UINativeScrollView extends UIView {
     
     animationDuration = 0
+    private _contentOffset?: UIPoint
     
     constructor(elementID?: string, viewHTMLElement?: (HTMLElement & LooseObject) | null | undefined) {
         
@@ -25,7 +26,9 @@ export class UINativeScrollView extends UIView {
                 ) + "translateX(" + this.viewHTMLElement.scrollLeft + "px)" + " translateY(" + this.viewHTMLElement.scrollTop + "px)"
             )
             
-            this.didScrollToPosition(new UIPoint(this.viewHTMLElement.scrollLeft, this.viewHTMLElement.scrollTop))
+            this._contentOffset = new UIPoint(this.viewHTMLElement.scrollLeft, this.viewHTMLElement.scrollTop)
+            
+            this.didScrollToPosition(this._contentOffset)
             
             this.broadcastEventInSubtree({
                 name: UIView.broadcastEventName.PageDidScroll,
@@ -74,12 +77,16 @@ export class UINativeScrollView extends UIView {
     
     
     get contentOffset() {
-        const result = new UIPoint(this.viewHTMLElement.scrollLeft, this.viewHTMLElement.scrollTop)
-        return result
+        if (!this._contentOffset) {
+            this._contentOffset = new UIPoint(this.viewHTMLElement.scrollLeft, this.viewHTMLElement.scrollTop)
+        }
+        return this._contentOffset
     }
     
     
     set contentOffset(offsetPoint: UIPoint) {
+        
+        this._contentOffset = offsetPoint.copy()
         
         if (this.animationDuration) {
             
@@ -89,7 +96,6 @@ export class UINativeScrollView extends UIView {
             return
             
         }
-        
         
         this.viewHTMLElement.scrollLeft = offsetPoint.x
         this.viewHTMLElement.scrollTop = offsetPoint.y

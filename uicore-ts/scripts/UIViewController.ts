@@ -79,9 +79,13 @@ export class UIViewController extends UIObject {
     
     _triggerLayoutViewSubviews() {
         
-        this.view.layoutSubviews()
-        
-        this.viewDidLayoutSubviews()
+        if (this.view.needsLayout) {
+            
+            this.view.layoutSubviews()
+            
+            this.viewDidLayoutSubviews()
+            
+        }
         
     }
     

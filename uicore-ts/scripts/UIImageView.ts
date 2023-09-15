@@ -172,7 +172,7 @@ export class UIImageView extends UIView {
         // this.actionIndicator.backgroundColor = UIColor.redColor
     
         // @ts-ignore
-        this.viewHTMLElement.onload = () => this.superview.setNeedsLayout()
+        this.viewHTMLElement.onload = () => this.superview?.setNeedsLayout()
     
     }
     

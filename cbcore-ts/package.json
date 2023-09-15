@@ -1,6 +1,6 @@
 {
   "name": "cbcore-ts",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "CBCore is a library to build web applications using pure Typescript.",
   "main": "compiledScripts/index.js",
   "types": "compiledScripts/index.d.ts",

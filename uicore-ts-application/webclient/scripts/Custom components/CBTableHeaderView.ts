@@ -1,4 +1,11 @@
-import { IF, nil, UIButton, UIKeyValueStringSorter, UIKeyValueStringSorterSortingInstruction } from "uicore-ts"
+import {
+    IF,
+    nil,
+    UIButton,
+    UIImageView,
+    UIKeyValueStringSorter,
+    UIKeyValueStringSorterSortingInstruction
+} from "uicore-ts"
 import { CBColor } from "./CBColor"
 import { CBDataViewCellDescriptor } from "./CBDataView"
 import { CellView } from "./CellView"
@@ -13,6 +20,8 @@ const kAscendingColumnImageAddress = "images/baseline-expand_more-24px.svg"
 export class CBTableHeaderView<DataType = Record<string, any>> extends RowView<CellView> {
     
     orderingStates: string[] = []
+    
+    sideCellsWidth = 20
     
     private _descriptors: CBDataViewCellDescriptor<DataType>[] = []
     
@@ -127,8 +136,9 @@ export class CBTableHeaderView<DataType = Record<string, any>> extends RowView<C
             
         })
         
+        cells.insertElementAtIndex(0, new CellView())
+        cells.push(new CellView())
         this.cells = cells
-        
         
         const allUnordered = this.orderingStates.allMatch((value, index, obj) => value ==
             CBTableHeaderView.orderingState.unordered)
@@ -148,8 +158,8 @@ export class CBTableHeaderView<DataType = Record<string, any>> extends RowView<C
     sortingInstructionsForCurrentState() {
         
         const result: UIKeyValueStringSorterSortingInstruction[] = []
-        
-        this.cells.forEach((button, index, array) => {
+        UIImageView
+        this.cells.slice(1, -1).forEach((button, index, array) => {
             
             const buttonState = this.orderingStates[index]
             
@@ -199,6 +209,18 @@ export class CBTableHeaderView<DataType = Record<string, any>> extends RowView<C
         "unordered": UIKeyValueStringSorter.direction.descending,
         [UIKeyValueStringSorter.direction.descending]: UIKeyValueStringSorter.direction.ascending,
         [UIKeyValueStringSorter.direction.ascending]: UIKeyValueStringSorter.direction.descending
+        
+    }
+    
+    
+    override layoutSubviews() {
+        
+        const cellWidths = [nil].arrayByRepeating(this.cells.length)
+        cellWidths.firstElement = this.sideCellsWidth
+        cellWidths.lastElement = this.sideCellsWidth
+        this.cellWidths = cellWidths
+        
+        super.layoutSubviews()
         
     }
     

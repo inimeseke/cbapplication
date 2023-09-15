@@ -182,7 +182,7 @@ export class CBColorSelector<T> extends SearchableDropdown<T> {
         this.hoverText = this.titleLabel.text
         
         // Image and text both present
-        if (IS_NOT(this.imageView.hidden) && IS(this.titleLabel.text)) {
+        if (IS_NOT(this.imageView.hidden) && IS_NOT(this.titleLabel.hidden)) {
             
             //const imageShareOfWidth = 0.25
             
@@ -222,15 +222,15 @@ export class CBColorSelector<T> extends SearchableDropdown<T> {
                 
             }
             
-            if (this._rightImageView) {
-                
-                // var imageHeight = bounds.height - padding;
-                // this._rightImageView.frame = new UIRectangle(bounds.width - imageHeight - padding * 0.5, padding * 0.5, imageHeight, imageHeight);
-                
-                this._rightImageView.frame = this.bounds.rectangleWithInsets(0, padding *
-                    0.5, 0, 0).rectangleWithWidth(24, 1).rectangleWithHeight(24, 0.5)
-                
-            }
+        }
+        
+        if (this._rightImageView) {
+            
+            // var imageHeight = bounds.height - padding;
+            // this._rightImageView.frame = new UIRectangle(bounds.width - imageHeight - padding * 0.5, padding * 0.5, imageHeight, imageHeight);
+            
+            this._rightImageView.frame = this.bounds.rectangleWithInsets(0, padding *
+                0.5, 0, 0).rectangleWithWidth(24, 1).rectangleWithHeight(24, 0.5)
             
         }
         

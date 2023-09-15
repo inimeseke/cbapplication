@@ -280,176 +280,176 @@ a {
 } */
 
 
-.input {
-    position: relative;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
+/*.input {*/
+/*    position: relative;*/
+/*    margin-top: 1rem;*/
+/*    margin-bottom: 1rem;*/
+/*}*/
 
-.input > label {
-    color: #9e9e9e;
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 1rem;
-    cursor: text;
-    -webkit-transition: color .2s ease-out, -webkit-transform .2s ease-out;
-    transition: color .2s ease-out, -webkit-transform .2s ease-out;
-    transition: transform .2s ease-out, color .2s ease-out;
-    transition: transform .2s ease-out, color .2s ease-out, -webkit-transform .2s ease-out;
-    -webkit-transform-origin: 0 100%;
-    transform-origin: 0 100%;
-    text-align: initial;
-    -webkit-transform: translateY(12px);
-    transform: translateY(12px);
-}
+/*.input > label {*/
+/*    color: #9e9e9e;*/
+/*    position: absolute;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    font-size: 1rem;*/
+/*    cursor: text;*/
+/*    -webkit-transition: color .2s ease-out, -webkit-transform .2s ease-out;*/
+/*    transition: color .2s ease-out, -webkit-transform .2s ease-out;*/
+/*    transition: transform .2s ease-out, color .2s ease-out;*/
+/*    transition: transform .2s ease-out, color .2s ease-out, -webkit-transform .2s ease-out;*/
+/*    -webkit-transform-origin: 0 100%;*/
+/*    transform-origin: 0 100%;*/
+/*    text-align: initial;*/
+/*    -webkit-transform: translateY(12px);*/
+/*    transform: translateY(12px);*/
+/*}*/
 
-.input > label:after {
-    display: block;
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 0;
-    opacity: 0;
-    -webkit-transition: .2s opacity ease-out, .2s color ease-out;
-    transition: .2s opacity ease-out, .2s color ease-out;
-}
+/*.input > label:after {*/
+/*    display: block;*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    top: 100%;*/
+/*    left: 0;*/
+/*    opacity: 0;*/
+/*    -webkit-transition: .2s opacity ease-out, .2s color ease-out;*/
+/*    transition: .2s opacity ease-out, .2s color ease-out;*/
+/*}*/
 
-.input > label.active {
-    -webkit-transform: translateY(-14px) scale(0.8);
-    transform: translateY(-14px) scale(0.8);
-    -webkit-transform-origin: 0 0;
-    transform-origin: 0 0;
-    color: #347FE6;
-}
-
-
-input:not([type]),
-input[type=date],
-input[type=datetime-local],
-input[type=datetime],
-input[type=email],
-input[type=number],
-input[type=password],
-input[type=search],
-input[type=tel],
-input[type=text],
-input[type=time],
-input[type=url],
-textarea {
-
-    background-color: transparent;
-    border: none;
-    outline: none;
-    height: 3rem;
-    width: 100%;
-    font-size: 16px;
-    margin: 0 0 8px;
-    padding: 0;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    -webkit-box-sizing: content-box;
-    box-sizing: content-box;
-    -webkit-appearance: none;
-    -webkit-transition: border .3s, -webkit-box-shadow .3s;
-    transition: border .3s, -webkit-box-shadow .3s;
-    transition: box-shadow .3s, border .3s;
-    transition: box-shadow .3s, border .3s, -webkit-box-shadow .3s;
-
-}
-
-input:not([type]):not([readonly]),
-input[type=date]:not([readonly]),
-input[type=datetime-local]:not([readonly]),
-input[type=datetime]:not([readonly]),
-input[type=email]:not([readonly]),
-input[type=number]:not([readonly]),
-input[type=password]:not([readonly]),
-input[type=search]:not([readonly]),
-input[type=tel]:not([readonly]),
-input[type=text]:not([readonly]),
-input[type=time]:not([readonly]),
-input[type=url]:not([readonly]),
-textarea {
+/*.input > label.active {*/
+/*    -webkit-transform: translateY(-14px) scale(0.8);*/
+/*    transform: translateY(-14px) scale(0.8);*/
+/*    -webkit-transform-origin: 0 0;*/
+/*    transform-origin: 0 0;*/
+/*    color: #347FE6;*/
+/*}*/
 
 
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 0;
+/*input:not([type]),*/
+/*input[type=date],*/
+/*input[type=datetime-local],*/
+/*input[type=datetime],*/
+/*input[type=email],*/
+/*input[type=number],*/
+/*input[type=password],*/
+/*input[type=search],*/
+/*input[type=tel],*/
+/*input[type=text],*/
+/*input[type=time],*/
+/*input[type=url],*/
+/*textarea {*/
 
-}
+/*    background-color: transparent;*/
+/*    border: none;*/
+/*    outline: none;*/
+/*    height: 3rem;*/
+/*    width: 100%;*/
+/*    font-size: 16px;*/
+/*    margin: 0 0 8px;*/
+/*    padding: 0;*/
+/*    -webkit-box-shadow: none;*/
+/*    box-shadow: none;*/
+/*    -webkit-box-sizing: content-box;*/
+/*    box-sizing: content-box;*/
+/*    -webkit-appearance: none;*/
+/*    -webkit-transition: border .3s, -webkit-box-shadow .3s;*/
+/*    transition: border .3s, -webkit-box-shadow .3s;*/
+/*    transition: box-shadow .3s, border .3s;*/
+/*    transition: box-shadow .3s, border .3s, -webkit-box-shadow .3s;*/
 
-input:not([type]):focus:not([readonly]) + label,
-input[type=date]:focus:not([readonly]) + label,
-input[type=datetime-local]:focus:not([readonly]) + label,
-input[type=datetime]:focus:not([readonly]) + label,
-input[type=email]:focus:not([readonly]) + label,
-input[type=number]:focus:not([readonly]) + label,
-input[type=password]:focus:not([readonly]) + label,
-input[type=search]:focus:not([readonly]) + label,
-input[type=tel]:focus:not([readonly]) + label,
-input[type=text]:focus:not([readonly]) + label,
-input[type=time]:focus:not([readonly]) + label,
-input[type=url]:focus:not([readonly]) + label,
-textarea:focus:not([readonly]) + label {
-    -webkit-transform: translateY(-14px) scale(0.8);
-    transform: translateY(-14px) scale(0.8);
-    -webkit-transform-origin: 0 0;
-    transform-origin: 0 0;
-    color: #347FE6;
-}
+/*}*/
 
-textarea {
-    width: 100%;
-    height: 3rem;
-    background-color: transparent;
-    line-height: normal;
-    overflow-y: hidden;
-    padding: .8rem 0;
-    resize: none;
-    min-height: 3rem;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-}
+/*input:not([type]):not([readonly]),*/
+/*input[type=date]:not([readonly]),*/
+/*input[type=datetime-local]:not([readonly]),*/
+/*input[type=datetime]:not([readonly]),*/
+/*input[type=email]:not([readonly]),*/
+/*input[type=number]:not([readonly]),*/
+/*input[type=password]:not([readonly]),*/
+/*input[type=search]:not([readonly]),*/
+/*input[type=tel]:not([readonly]),*/
+/*input[type=text]:not([readonly]),*/
+/*input[type=time]:not([readonly]),*/
+/*input[type=url]:not([readonly]),*/
+/*textarea {*/
 
-input:not([type]):focus:not([readonly]),
-input[type=date]:focus:not([readonly]),
-input[type=datetime-local]:focus:not([readonly]),
-input[type=datetime]:focus:not([readonly]),
-input[type=email]:focus:not([readonly]),
-input[type=number]:focus:not([readonly]),
-input[type=password]:focus:not([readonly]),
-input[type=tel]:focus:not([readonly]),
-input[type=text]:focus:not([readonly]),
-input[type=time]:focus:not([readonly]),
-input[type=url]:focus:not([readonly]),
-textarea:focus:not([readonly]) {
-    border-bottom: 1px solid #347FE6;
-    -webkit-box-shadow: 0 1px 0 0 #347FE6;
-    box-shadow: 0 1px 0 0 #347FE6;
-}
 
-input:not([type]) + label:after,
-input[type=date] + label:after,
-input[type=datetime-local] + label:after,
-input[type=datetime] + label:after,
-input[type=email] + label:after,
-input[type=number] + label:after,
-input[type=password] + label:after,
-input[type=search] + label:after,
-input[type=tel] + label:after,
-input[type=text] + label:after,
-input[type=time] + label:after,
-input[type=url] + label:after,
-textarea + label:after {
-    display: block;
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 0;
-    opacity: 0;
-    -webkit-transition: .2s opacity ease-out, .2s color ease-out;
-    transition: .2s opacity ease-out, .2s color ease-out;
-}
+/*    border-bottom: 1px solid rgba(0, 0, 0, 0.12);*/
+/*    border-radius: 0;*/
+
+/*}*/
+
+/*input:not([type]):focus:not([readonly]) + label,*/
+/*input[type=date]:focus:not([readonly]) + label,*/
+/*input[type=datetime-local]:focus:not([readonly]) + label,*/
+/*input[type=datetime]:focus:not([readonly]) + label,*/
+/*input[type=email]:focus:not([readonly]) + label,*/
+/*input[type=number]:focus:not([readonly]) + label,*/
+/*input[type=password]:focus:not([readonly]) + label,*/
+/*input[type=search]:focus:not([readonly]) + label,*/
+/*input[type=tel]:focus:not([readonly]) + label,*/
+/*input[type=text]:focus:not([readonly]) + label,*/
+/*input[type=time]:focus:not([readonly]) + label,*/
+/*input[type=url]:focus:not([readonly]) + label,*/
+/*textarea:focus:not([readonly]) + label {*/
+/*    -webkit-transform: translateY(-14px) scale(0.8);*/
+/*    transform: translateY(-14px) scale(0.8);*/
+/*    -webkit-transform-origin: 0 0;*/
+/*    transform-origin: 0 0;*/
+/*    color: #347FE6;*/
+/*}*/
+
+/*textarea {*/
+/*    width: 100%;*/
+/*    height: 3rem;*/
+/*    background-color: transparent;*/
+/*    line-height: normal;*/
+/*    overflow-y: hidden;*/
+/*    padding: .8rem 0;*/
+/*    resize: none;*/
+/*    min-height: 3rem;*/
+/*    -webkit-box-sizing: border-box;*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*input:not([type]):focus:not([readonly]),*/
+/*input[type=date]:focus:not([readonly]),*/
+/*input[type=datetime-local]:focus:not([readonly]),*/
+/*input[type=datetime]:focus:not([readonly]),*/
+/*input[type=email]:focus:not([readonly]),*/
+/*input[type=number]:focus:not([readonly]),*/
+/*input[type=password]:focus:not([readonly]),*/
+/*input[type=tel]:focus:not([readonly]),*/
+/*input[type=text]:focus:not([readonly]),*/
+/*input[type=time]:focus:not([readonly]),*/
+/*input[type=url]:focus:not([readonly]),*/
+/*textarea:focus:not([readonly]) {*/
+/*    border-bottom: 1px solid #347FE6;*/
+/*    -webkit-box-shadow: 0 1px 0 0 #347FE6;*/
+/*    box-shadow: 0 1px 0 0 #347FE6;*/
+/*}*/
+
+/*input:not([type]) + label:after,*/
+/*input[type=date] + label:after,*/
+/*input[type=datetime-local] + label:after,*/
+/*input[type=datetime] + label:after,*/
+/*input[type=email] + label:after,*/
+/*input[type=number] + label:after,*/
+/*input[type=password] + label:after,*/
+/*input[type=search] + label:after,*/
+/*input[type=tel] + label:after,*/
+/*input[type=text] + label:after,*/
+/*input[type=time] + label:after,*/
+/*input[type=url] + label:after,*/
+/*textarea + label:after {*/
+/*    display: block;*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    top: 100%;*/
+/*    left: 0;*/
+/*    opacity: 0;*/
+/*    -webkit-transition: .2s opacity ease-out, .2s color ease-out;*/
+/*    transition: .2s opacity ease-out, .2s color ease-out;*/
+/*}*/
 
 .input--search {
     display: -webkit-box;

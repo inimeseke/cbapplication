@@ -15,7 +15,7 @@
     "watch": "rollup --config --watch --environment NODE_ENV:development",
     "build": "rollup --config --environment NODE_ENV:development",
     "esbuild": "node esbuild.mjs",
-    "esbuild-watch": "node esbuild.watch.mjs",
+    "esbuild-watch": "node esbuild.mjs",
     "link": "npx link ../../uicore-ts && npx link ../../cbcore-ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,8 +27,10 @@
     "browserify": "^17.0.0",
     "cbcore-ts": "^1.0.21",
     "codemirror": "^6.0.1",
+    "esbuild": "^0.19.2",
     "monaco-editor": "^0.37.1",
     "monaco-editor-auto-typings": "^0.4.3",
+    "node-watch": "^0.7.4",
     "object-hash": "^3.0.0",
     "socket.io": "^4.5.1",
     "tsify": "^5.0.4",
@@ -42,9 +44,10 @@
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@swc/cli": "^0.1.57",
     "@swc/core": "^1.2.224",
-    "esbuild-plugin-inline-image": "^0.0.8",
+    "esbuild-plugin-decorator": "^0.4.0",
+    "esbuild-plugin-inline-image": "^0.0.9",
     "esbuild-plugin-inline-worker": "^0.1.1",
-    "esbuild-wasm": "^0.17.7",
+    "esbuild-wasm": "^0.19.2",
     "parcel": "^2.6.2",
     "parcel-plugin-inline-worker": "^0.1.0",
     "parcel-transformer-ejs": "^1.0.0",
@@ -52,6 +55,6 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.32.1",
     "rollup-plugin-web-worker-loader": "^1.6.1",
-    "typescript": "^5.0.2"
+    "typescript": "^5.2.2"
   }
 }

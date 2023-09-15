@@ -2,6 +2,7 @@
 
 import { execSync } from "child_process"
 import { magenta } from "colorette"
+import { deleteSync } from "del"
 import * as fs from "fs"
 import * as https from "https"
 import inquirer from "inquirer"
@@ -42,23 +43,35 @@ export async function run() {
         
         const projectName = answers.projectName
         
-        execSync("mkdir " + projectName, {
-            
+        const options = {
             // we need this so node will print the command output
             stdio: [0, 1, 2],
-            // path to where you want to save the file
             cwd: Path.resolve()
-            
-        })
+        }
+        // execSync("mkdir " + projectName, options)
+        // execSync("git clone https://github.com/inimeseke/cbapplication.git " + projectName, options)
+        //
+        // execSync("pwd", options)
         
-        execSync("git clone https://github.com/inimeseke/UICoreApplication.git " + projectName, {
-            
-            // we need this so node will print the command output
-            stdio: [0, 1, 2],
-            // path to where you want to save the file
-            cwd: Path.resolve()
-            
-        })
+        const source = "./dist/template"
+        const destination = "./" + projectName
+        
+        if (fs.existsSync(destination)) {
+            deleteSync(destination)
+        }
+        
+        fs.cpSync(
+            source,
+            destination,
+            {
+                recursive: true,
+                dereference: true,
+                filter: (source, destination) => !source.includes("node_modules")
+            }
+        )
+        
+        //var asd = await downloader.download("cbapplication", "uicore-ts-application")
+        
         
         if (projectName != defaultProjectName) {
             
@@ -109,9 +122,6 @@ export async function run() {
         )
         
         
-        
-        
-        
     }
     
     
@@ -153,9 +163,7 @@ export async function run() {
         )
         
         
-        
     }
-    
     
     
 }

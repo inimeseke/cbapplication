@@ -195,7 +195,7 @@ export class UIRootViewController extends UIViewController {
             maxScale = 1
         } = {}
     ) {
-        const actualPageWidth = (UIView.pageWidth * UIView.pageScale).integerValue
+        const actualPageWidth = window.innerWidth ?? (UIView.pageWidth * UIView.pageScale).integerValue
         let scale = minScale + (maxScale - minScale) *
             ((actualPageWidth - minScaleWidth) / (maxScaleWidth - minScaleWidth))
         scale = Math.min(scale, maxScale)
@@ -226,13 +226,16 @@ export class UIRootViewController extends UIViewController {
         this.backgroundView.style.minHeight = "" +
             (bounds.height - (this.topBarView?.frame.height ?? 0) - (this.bottomBarView?.frame.height ?? 0)).integerValue + "px"
         
-        const contentView = this.contentViewController?.view ?? nil
+        const contentView: UIView = this.contentViewController?.view ?? nil
+        
+        //var contentViewStyleString = contentView.viewHTMLElement.style.cssText
+        
         contentView.style.position = "relative"
         contentView.style.bottom = "0"
         contentView.style.top = "0"
         contentView.style.width = "100%"
         contentView.setPaddings(nil, nil, paddingLength, nil)
-        contentView.setNeedsLayout()
+        
         
         if (contentViewMaxWidth < this.backgroundView.bounds.width) {
             
@@ -261,6 +264,14 @@ export class UIRootViewController extends UIViewController {
             
         }
         
+        // if (contentViewStyleString != contentView.style.cssText) {
+        //
+        //     contentView.setNeedsLayout()
+        //
+        // }
+        
+        
+        
         // Triggering immediate layout to ensure that the intrinsicContentHeight calculations work well
         this.contentViewController?._triggerLayoutViewSubviews()
         
@@ -276,7 +287,7 @@ export class UIRootViewController extends UIViewController {
         
         
         contentView.style.height = "" + contentViewControllerViewHeight.integerValue + "px"
-        contentView.setNeedsLayout()
+        //contentView.setNeedsLayout()
         
         if (IS(this.detailsViewController)) {
             

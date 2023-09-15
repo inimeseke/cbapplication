@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/create-uicore-ts-application/dist" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/uicore-ts-application/webclient/compiledScripts" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/uicore-ts/compiledScripts" isTestSource="false" generated="true" />
+      <excludeFolder url="file://$MODULE_DIR$/create-uicore-ts-application/template" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

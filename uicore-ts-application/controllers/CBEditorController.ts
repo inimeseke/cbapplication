@@ -1,3 +1,4 @@
+import * as child_process from "child_process"
 import { transformSync } from "esbuild"
 import { Application } from "express"
 import * as fs from "fs"
@@ -73,7 +74,7 @@ export class CBEditorController extends RoutesController {
     testingSourceFile = (() => {
         const filePath = "test_file_for_CBEditorController.ts"
         this.webclientProject.getSourceFile(filePath)?.deleteImmediatelySync()
-        return this.webclientProject.createSourceFile(filePath, "")
+        return this.webclientProject.createSourceFile(filePath, "", { overwrite: true })
     })()
     
     private currentEditingTarget: CBEditorPropertyDescriptor
@@ -519,7 +520,7 @@ export class CBEditorController extends RoutesController {
                 )
                 
                 await this.webclientProject.save()
-                
+                this.rebuildWebclient()
                 this.reloadEditorProject()
                 
             }
@@ -741,6 +742,7 @@ export class CBEditorController extends RoutesController {
             if (message.saveChanges) {
                 
                 await this.webclientProject.save()
+                this.rebuildWebclient()
                 
             }
             else {
@@ -1153,6 +1155,7 @@ export class CBEditorController extends RoutesController {
             rootViewControllerFile.organizeImports()
             await this.webclientProject.save()
             fs.unlinkSync(viewController.getSourceFile().getFilePath())
+            this.rebuildWebclient()
             
             this.reloadEditorProject()
             
@@ -1175,6 +1178,7 @@ export class CBEditorController extends RoutesController {
             
             
             await this.webclientProject.save()
+            this.rebuildWebclient()
             
             await respondWithMessage(resultFile.getText())
             
@@ -1190,6 +1194,12 @@ export class CBEditorController extends RoutesController {
         
     }
     
+    
+    private rebuildWebclient() {
+        
+        child_process.execSync("arch -x86_64 /bin/sh -c \"cd webclient && npm run esbuild \"").toString()
+        
+    }
     
     private setValueForKeyPathInObjectCreatingPath<T>(
         keyPathComponents: string[],
@@ -1552,7 +1562,7 @@ export class CBEditorController extends RoutesController {
         }
         
         
-        const keyPathComponents = keyPath.split(".")
+        let keyPathComponents = keyPath.split(".")
         
         let propertyDeclaration: PropertyDeclaration | PropertySignature | SetAccessorDeclaration | undefined
         
@@ -1584,26 +1594,32 @@ export class CBEditorController extends RoutesController {
             }
             
             
-            const classDeclarationWithName = this.classDeclarationWithName(propertyDeclaration?.getType()
+            const classDeclarationOfPropertyType = this.classDeclarationWithName(propertyDeclaration?.getType()
                 ?.compilerType
                 ?.symbol
                 ?.getName())
             
-            if (!classDeclarationWithName) {
+            if (!classDeclarationOfPropertyType) {
                 
                 var asdasdasdasdasd = 1
+                
+                keyPathComponents = keyPathComponents.slice(i)
                 
                 break
                 
             }
             
-            classObject = classDeclarationWithName
+            classObject = classDeclarationOfPropertyType
             
         }
         
         if (!propertyDeclaration || propertyDeclaration.getName() != keyPathComponents.lastElement) {
             
-            const completionsAtPositionObject = this.completionsAtPosition(classObject.getType(), keyPath)
+            keyPath = keyPathComponents.join(".")
+            const completionsAtPositionObject = this.completionsAtPosition(
+                classObject.getType(),
+                keyPath
+            )
             propertyDeclaration = this.propertyObjectWithCompletionsObject(completionsAtPositionObject, keyPath)
             
         }
@@ -1660,7 +1676,8 @@ export class CBEditorController extends RoutesController {
         let result = valueString
         
         const valueTypeName = targetObjectClassPropertyObject.getType().compilerType.symbol?.getName() ??
-            targetObjectClassPropertyObject.getType().compilerType["intrinsicName"]
+            targetObjectClassPropertyObject.getType().compilerType["intrinsicName"] ??
+            targetObjectClassPropertyObject.getType().getNonNullableType().getText(targetObjectClassPropertyObject)
         
         if (valueTypeName == "UIColor") {
             

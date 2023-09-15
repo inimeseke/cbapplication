@@ -655,7 +655,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
     }
     
     
-    override intrinsicContentHeight(constrainingWidth: number = 0): number {
+    override intrinsicContentHeight = (constrainingWidth: number = 0): number => {
         
         const padding = this.core.paddingLength
         const labelHeight = padding

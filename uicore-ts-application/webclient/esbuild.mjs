@@ -1,7 +1,10 @@
 import filePlugin from "@chialab/esbuild-plugin-any-file"
 import {build} from "esbuild"
+import {esbuildPluginDecorator} from "esbuild-plugin-decorator"
 import inlineImage from "esbuild-plugin-inline-image"
 import inlineWorkerPlugin from "esbuild-plugin-inline-worker"
+import ts from "typescript"
+import fs from "fs"
 // import esbuildSvelte from "esbuild-svelte"
 // import sveltePreprocess from "svelte-preprocess"
 
@@ -14,7 +17,7 @@ const workerEntryPoints = [
     "vs/editor/editor.worker.js"
 ]
 
-build({
+await build({
     entryPoints: workerEntryPoints.map((entry) => `./node_modules/monaco-editor/esm/${entry}`),
     bundle: true,
     format: "iife",
@@ -23,14 +26,15 @@ build({
     outdir: "compiledScripts"
 })
 
-build({
+await build({
     
     entryPoints: ["scripts/RunApplication.ts"],
     bundle: true,
     outfile: "compiledScripts/webclient.js",
     plugins: [
-        inlineWorkerPlugin({sourcemap: "inline"}),
+        inlineWorkerPlugin({sourcemap: "external"}),
         inlineImage(),
+        //esbuildPluginDecorator(),
         filePlugin()
         // "esbuild-svelte": "^0.7.1",
         // "svelte-preprocess": "^4.10.7",
@@ -71,6 +75,21 @@ build({
 //     format: "esm"
 //
 // })
+
+let result = fs.readFileSync("compiledScripts/webclient.js").toString()
+result = result.replace("@(import_uicore_ts2.UIComponentView)", "")
+    .replace("@CBEditorNestedAttributes()", "")
+fs.writeFileSync("compiledScripts/webclient.js", result)
+
+// const result = ts.transpile(fs.readFileSync("compiledScripts/webclient_raw.js").toString(), {
+//     compilerOptions: {
+//         allowJs: true,
+//         outFile: "compiledScripts/webclient.js",
+//         target: "ES2018"
+//     }
+// })
+//
+// fs.writeFileSync("compiledScripts/webclient.js", result)
 
 
 

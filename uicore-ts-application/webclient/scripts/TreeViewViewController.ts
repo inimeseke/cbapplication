@@ -51,13 +51,8 @@ export class TreeViewViewController extends UIViewController {
     
     exampleButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
         titleLabel: {
-            text: "Asdasdasdasdasd",
+            text: "Asdasdasdasdasd asdasd",
             textAlignment: "center"
-        },
-        colors: {
-            background: {
-                hovered: UIColor.greenColor
-            }
         }
     })
     

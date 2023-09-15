@@ -41,7 +41,11 @@ export class UITextView extends UIView {
     _text?: string
     
     
-    constructor(elementID?: string, textViewType: string | ValueOf<typeof UITextView.type> = UITextView.type.paragraph, viewHTMLElement = null) {
+    constructor(
+        elementID?: string,
+        textViewType: string | ValueOf<typeof UITextView.type> = UITextView.type.paragraph,
+        viewHTMLElement = null
+    ) {
         
         super(elementID, viewHTMLElement, textViewType)
         
@@ -57,15 +61,15 @@ export class UITextView extends UIView {
         
         
         if (textViewType == UITextView.type.textArea) {
-    
+            
             this.pausesPointerEvents = YES
-    
+            
             this.addTargetForControlEvent(
                 UIView.controlEvent.PointerUpInside,
                 (sender, event) => sender.focus()
             )
-    
-    
+            
+            
         }
         
         
@@ -73,18 +77,18 @@ export class UITextView extends UIView {
     
     
     static _determinePXAndPTRatios() {
-    
+        
         if (UITextView._ptToPx) {
             return
         }
-    
+        
         const o = document.createElement("div")
         o.style.width = "1000pt"
         document.body.appendChild(o)
         UITextView._ptToPx = o.clientWidth / 1000
         document.body.removeChild(o)
         UITextView._pxToPt = 1 / UITextView._ptToPx
-    
+        
     }
     
     
@@ -218,17 +222,21 @@ export class UITextView extends UIView {
             
         }
         
-        this._intrinsicHeightCache = new UIObject() as any
-        this._intrinsicWidthCache = new UIObject() as any
+        if (this.changesOften) {
+            
+            this._intrinsicHeightCache = new UIObject() as any
+            this._intrinsicWidthCache = new UIObject() as any
+            
+        }
         
         this.setNeedsLayout()
         
     }
     
     override set innerHTML(innerHTML: string) {
-    
+        
         this.text = innerHTML
-    
+        
     }
     
     override get innerHTML() {

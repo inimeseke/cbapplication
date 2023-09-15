@@ -280,7 +280,7 @@ export class UITableView extends UINativeScrollView {
                 row
             )
             row.removeFromSuperview()
-            this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row)
+            this._removedReusableViews[row?._UITableViewReusabilityIdentifier]?.push(row)
         
         
         })
@@ -460,6 +460,7 @@ export class UITableView extends UINativeScrollView {
     
     viewForRowWithIndex(rowIndex: number): UITableViewRowView {
         const row = this.reusableViewForIdentifier("Row", rowIndex);
+        row._UITableViewRowIndex = rowIndex
         FIRST_OR_NIL((row as unknown as UIButton).titleLabel).text = "Row " + rowIndex
         return row
     }

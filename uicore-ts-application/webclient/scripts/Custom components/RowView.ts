@@ -1,4 +1,4 @@
-import { IF, IS, IS_NOT_NIL, nil, UIRectangle, UIView } from "uicore-ts"
+import { IF, IS, IS_LIKE_NULL, IS_NOT, IS_NOT_NIL, nil, UIRectangle, UIView } from "uicore-ts"
 
 
 export class RowView<CellType extends UIView = UIView> extends UIView {
@@ -28,28 +28,28 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     
     
     set cells(cells: CellType[]) {
-    
+        
         const previousCells = this.cells
         const cellWeights = this.cellWeights.copy()
-    
-    
-        // The cells are added to this._cells in this.addCell()
-    
-        previousCells.copy().forEach((cell: CellType, index: number) => {
         
-            if (!cells.contains(cell)) {
+        
+        // The cells are added to this._cells in this.addCell()
+        
+        previousCells.copy().forEach((cell: CellType, index: number) => {
             
+            if (!cells.contains(cell)) {
+                
                 cell.removeFromSuperview()
                 this._cells.removeElement(cell)
-            
+                
                 cellWeights[index] = nil
-            
+                
             }
-        
+            
         })
-    
+        
         this.cellWeights = cellWeights.filter((cellWeight) => IS_NOT_NIL(cellWeight))
-    
+        
         cells.copy().forEach((cell: CellType, index: number) => {
             if (!IS(cell.superview)) {
                 this.addCell(cell, 1, index)
@@ -124,8 +124,10 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     
     
     get rowHeight() {
-        return IF(this._rowHeight)(() => this._rowHeight)
-            .ELSE(() => this.cells.map(cell => cell.intrinsicContentHeight(this.bounds.width)).max())
+        if (IS_LIKE_NULL(this._rowHeight)) {
+            this._rowHeight = this.cells.map(cell => cell.intrinsicContentHeight(this.bounds.width)).max()
+        }
+        return this._rowHeight
     }
     
     
@@ -142,13 +144,52 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
         this._previousLayoutBounds = bounds
         
         if (this.cellWidths.length < this.cells.length && this.cells.length) {
-        
-            this.cellWidths = [(bounds.width - this.padding * (this.cells.length - 1)) / this.cells.length].arrayByRepeating(this.cells.length)
-        
+            
+            this.cellWidths = [
+                (bounds.width - this.padding * (this.cells.length - 1)) / this.cells.length
+            ].arrayByRepeating(this.cells.length)
+            
         }
         
-        bounds.distributeViewsAlongWidth(this._cells, this._cellWeights, this.padding, this._cellWidths)
-        this.cells.forEach(cell => cell.frame = cell.frame.rectangleWithHeight(this.rowHeight))
+        bounds.rectangleWithHeight(this.rowHeight)
+            .distributeViewsAlongWidth(this._cells, this._cellWeights, this.padding, this._cellWidths)
+        
+        // this.forEachViewInSubtree((view: UIView) => {
+        //
+        //     // @ts-ignore
+        //     const resizeObserver: ResizeObserver = view._resizeObserver
+        //     resizeObserver?.disconnect()
+        //
+        //     // @ts-ignore
+        //     view._resizeObserver = nil
+        //
+        // })
+        
+        // const widthFrames = bounds.rectangleWithHeight(this.rowHeight)
+        //     .rectanglesBySplittingWidth(this._cellWeights, this.padding, this._cellWidths)
+        //
+        // this._cells.forEach((view, index, array) => {
+        //
+        //     var widthFrame = widthFrames[index]
+        //
+        //     const bounds = view.superview?.bounds ?? new UIRectangle(0, 0, 0, 0)
+        //     const relativeXPosition = widthFrame.x / bounds.width
+        //     const widthMultiplier = widthFrame.width / bounds.width
+        //
+        //     const relativeYPosition = widthFrame.y / bounds.height
+        //     const heightMultiplier = widthFrame.height / bounds.height
+        //
+        //     //view._frame = nil
+        //
+        //     view.style.height = "" + (heightMultiplier * 100) + "%"
+        //     view.style.width = "" + (widthMultiplier * 100) + "%"
+        //     view.style.left = "" + (relativeXPosition * 100) + "%"
+        //     view.style.top = "" + (relativeYPosition * 100) + "%"
+        //
+        // })
+        
+        
+        
         
     }
     

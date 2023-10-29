@@ -1,4 +1,4 @@
-import { CALL, UIColor, UIRoute, UITextView, UIView, UIViewController, YES } from "uicore-ts"
+import { CALL, UIColor, UIRoute, UITextField, UITextView, UIView, UIViewController, YES } from "uicore-ts"
 import { CBButton } from "./Custom components/CBButton"
 import { CBDataView } from "./Custom components/CBDataView"
 
@@ -57,7 +57,12 @@ export class TreeViewViewController extends UIViewController {
     })
     
     bottomView = new UIView().addedAsSubviewToView(this.view)
+    testView: UITextField = new UITextField().addedAsSubviewToView(this.view).configuredWithObject({
+        placeholderText: "This is the test view text field",
+        textAlignment: "center"
+    });
     asdasd = new UIView().addedAsSubviewToView(this.view)
+    
 
     constructor(view: UIView) {
         
@@ -75,8 +80,7 @@ export class TreeViewViewController extends UIViewController {
         // })
         
         this.view.configureWithObject({
-            backgroundColor: UIColor.whiteColor,
-            hoverText: ""
+            backgroundColor: UIColor.whiteColor
         })
         
     }
@@ -148,9 +152,13 @@ export class TreeViewViewController extends UIViewController {
             padding,
             1
         )
-        this.asdasd.frame = this.bottomView.frame.rectangleForNextRow(
+        this.testView.frame = this.bottomView.frame.rectangleForNextRow(
             padding,
-            [this.asdasd.intrinsicContentHeight(this.bottomView.frame.width), padding].max()
+            [this.testView.intrinsicContentHeight(this.bottomView.frame.width), padding].max()
+        )
+        this.asdasd.frame = this.testView.frame.rectangleForNextRow(
+            padding,
+            [this.asdasd.intrinsicContentHeight(this.asdasd.frame.width), padding].max()
         )
 
 

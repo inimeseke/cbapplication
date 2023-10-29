@@ -13,7 +13,7 @@ import {
     UIDialogView,
     UIImageView,
     UIKeyValueStringFilter,
-    UILocalizedTextObject,
+    UILocalizedTextObject, UIRectangle,
     UITableView,
     UITextView,
     UIView,
@@ -243,8 +243,7 @@ export class SearchableDropdown<T> extends UIButton {
             identifier: string,
             rowIndex: number
         ) => new SearchableDropdownRow(elementID + identifier + rowIndex).configuredWithObject({
-            stopsPointerEventPropagation: NO,
-            pausesPointerEvents: NO
+            stopsPointerEventPropagation: NO
         })
         
         
@@ -459,8 +458,8 @@ export class SearchableDropdown<T> extends UIButton {
         this._dialogView.dismiss(YES)
     }
     
-    override boundsDidChange() {
-        super.boundsDidChange()
+    override boundsDidChange(bounds:UIRectangle) {
+        super.boundsDidChange(bounds)
         this.setNeedsLayout()
     }
     

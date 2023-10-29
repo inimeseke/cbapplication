@@ -5,20 +5,7 @@ import { UICore } from "./UICore"
 import "./UICoreExtensions"
 import type { UIDialogView } from "./UIDialogView"
 import { UILocalizedTextObject } from "./UIInterfaces"
-import {
-    FIRST,
-    FIRST_OR_NIL,
-    IF,
-    IS,
-    IS_DEFINED,
-    IS_NIL,
-    IS_NOT,
-    nil,
-    NO,
-    RETURNER,
-    UIObject,
-    YES
-} from "./UIObject"
+import { FIRST, FIRST_OR_NIL, IF, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, RETURNER, UIObject, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIViewController } from "./UIViewController"
@@ -83,6 +70,17 @@ if (!window.AutoLayout) {
     
     // @ts-ignore
     window.AutoLayout = nil
+    
+}
+
+
+declare global {
+    
+    interface HTMLElement {
+        
+        UIView?: UIView;
+        
+    }
     
 }
 
@@ -2012,6 +2010,19 @@ export class UIView extends UIObject {
         return result
     }
     
+    get elementWithAllSuperviewElements(): HTMLElement[] {
+        const result = []
+        let view: (HTMLElement & { UIView?: UIView }) | undefined | null = this.viewHTMLElement
+        for (let i = 0; IS(view); i = i) {
+            if (!view) {
+                return result
+            }
+            result.push(view)
+            view = view.parentElement
+        }
+        return result
+    }
+    
     
     setNeedsLayoutOnAllSuperviews() {
         this.withAllSuperviews.reverse().everyElement.setNeedsLayout()
@@ -3298,19 +3309,52 @@ export class UIView extends UIObject {
     }
     
     rectangleInView(rectangle: UIRectangle, view: UIView) {
+        
         if (!view.isMemberOfViewTree || !this.isMemberOfViewTree) {
             return nil
         }
         
-        const viewClientRectangle = view.viewHTMLElement.getBoundingClientRect()
-        const viewLocation = new UIPoint(viewClientRectangle.left, viewClientRectangle.top)
+        // Get all the superview elements
+        const allViewSuperviewElements = view.elementWithAllSuperviewElements
         
-        const selfClientRectangle = this.viewHTMLElement.getBoundingClientRect()
-        const selfLocation = new UIPoint(selfClientRectangle.left, selfClientRectangle.top)
+        // Find the first common element and the views in between
+        const superviewElementsUntilCommonElement = this.elementWithAllSuperviewElements.slice(
+            0,
+            this.elementWithAllSuperviewElements.findIndex(
+                viewElement => allViewSuperviewElements.contains(viewElement)
+            ) + 1
+        )
+        const commonElement = superviewElementsUntilCommonElement.lastElement
+        const viewSuperviewElementsUntilCommonElement = allViewSuperviewElements.slice(
+            0,
+            allViewSuperviewElements.findIndex(viewElement => viewElement == commonElement) + 1
+        )
         
-        const offsetPoint = selfLocation.subtract(viewLocation)
+        // Step until the common element and record the offsets
+        let selfOffsetPoint = new UIPoint(0, 0)
+        //let selfScale = 1
+        for (let i = 0; i < superviewElementsUntilCommonElement.length - 1; i++) {
+            const element = superviewElementsUntilCommonElement[i]
+            selfOffsetPoint = selfOffsetPoint.add(
+                element.UIView?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
+            )
+            //selfScale = selfScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width / element.offsetWidth))
+        }
+        
+        let viewOffsetPoint = new UIPoint(0, 0)
+        //let viewScale = 1
+        for (let i = 0; i < viewSuperviewElementsUntilCommonElement.length - 1; i++) {
+            const element = viewSuperviewElementsUntilCommonElement[i]
+            viewOffsetPoint = viewOffsetPoint.add(
+                element.UIView?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
+            )
+            //viewScale = viewScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width / element.offsetWidth))
+        }
+        
+        const offsetPoint = selfOffsetPoint.subtract(viewOffsetPoint)
         
         return rectangle.copy().offsetByPoint(offsetPoint)
+        
     }
     
     

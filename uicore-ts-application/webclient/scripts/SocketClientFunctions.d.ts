@@ -105,6 +105,8 @@ export interface CBApplicationSocketClientInterface {
         CBEditorEditingDescriptor>
     EditingValuesForProperty: SocketClientFunction<CBEditorPropertyDescriptor,
         CBEditorPropertyDescriptor[]>
+    // EditingLocationForProperty: SocketClientFunction<CBEditorPropertyDescriptor,
+    //     { location: CBEditorPropertyLocation }>
     
     JSStringFromTSString: SocketClientFunction<string, string>
     

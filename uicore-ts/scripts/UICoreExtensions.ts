@@ -340,12 +340,12 @@ if ("everyElement" in Array.prototype == NO) {
                         element
                     ) || element
             
-                    const elementFunction = (UIObject.valueForKeyPath(valueKeys.join("."), element) as Function).bind(
+                    const elementFunction = (UIObject.valueForKeyPath(valueKeys.join("."), element) as Function)?.bind(
                         thisObject,
                         objects
                     )
                     
-                    return elementFunction()
+                    return elementFunction?.()
                     
                 })
                 

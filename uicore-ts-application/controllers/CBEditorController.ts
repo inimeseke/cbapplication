@@ -543,6 +543,32 @@ export class CBEditorController extends RoutesController {
         }
         
         
+        // targets.EditingLocationForProperty = async (message, socketSession, respondWithMessage) => {
+        //
+        //     const sourceFiles = this.webclientProject.getSourceFiles()
+        //     const resultFile = sourceFiles.find(
+        //         file => file.getClass(
+        //             declaration => declaration.getName() == message.className
+        //         )
+        //     )
+        //
+        //     const classObject = resultFile.getClass(message.className)
+        //     const propertyObject = this.propertyDeclarationForClassAndKey(classObject, message.propertyKeyPath)
+        //
+        //     const classPropertyTypeName = propertyObject.getType().compilerType.symbol.getName()
+        //     const targetFile = sourceFiles.find(
+        //         file => file.getClass(
+        //             declaration => declaration.getName() == classPropertyTypeName
+        //         )
+        //     )
+        //
+        //     await respondWithMessage({
+        //         location: await this.locationOfEditing(resultFile, targetFile, message)
+        //     })
+        //
+        // }
+        
+        
         targets.SetPropertyValue = async (message, socketSession, respondWithMessage) => {
             
             const classObject = this.classDeclarationWithName(message.className)

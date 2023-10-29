@@ -4,7 +4,7 @@ import {
     IS_NOT,
     nil,
     NO,
-    UIColor,
+    UIColor, UIObject,
     UIRectangle,
     UITextView,
     UIViewAddControlEventTargetObject,
@@ -122,7 +122,7 @@ export class CBColorSelector<T> extends SearchableDropdown<T> {
         else {
             
             // @ts-ignore
-            result = UIColor[this.selectedData.firstElement.attachedObject.propertyKey]
+            result = UIObject.valueForKeyPath(this.selectedData.firstElement.attachedObject.propertyKeyPath, UIColor)
             
         }
         

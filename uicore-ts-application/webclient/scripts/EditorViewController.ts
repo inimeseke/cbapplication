@@ -2,6 +2,7 @@ import { CBDropdownDataItem, CBSocketClient, SocketClient } from "cbcore-ts"
 import type { editor, IPosition } from "monaco-editor"
 import { Position } from "monaco-editor"
 import {
+    EXTEND,
     FIRST_OR_NIL,
     IF,
     IS,
@@ -16,7 +17,8 @@ import {
     UICore,
     UIObject,
     UIRectangle,
-    UIRoute, UITextField,
+    UIRoute,
+    UITextField,
     UITextView,
     UIView,
     UIViewController,
@@ -28,7 +30,6 @@ import { CBColorSelector } from "./Custom components/CBColorSelector"
 import { CBDataView } from "./Custom components/CBDataView"
 import { CBDialogViewShower } from "./Custom components/CBDialogViewShower"
 import { CBFlatButton } from "./Custom components/CBFlatButton"
-import { CBTextField } from "./Custom components/CBTextField"
 import { CellView } from "./Custom components/CellView"
 import { RowView } from "./Custom components/RowView"
 import { SearchableDropdown } from "./Custom components/SearchableDropdown"
@@ -1588,6 +1589,62 @@ export class EditorViewController extends UIViewController {
                             let editingLocation = property.editingLocation
                             let currentFileText = initialFileText
                             
+                            
+                            const dropdownOpened = async () => {
+                                
+                                console.log("Open dropdown")
+                                
+                                // Move editor focus to editing location
+                                
+                                editingLocation = (await SocketClient.SetPropertyValue({
+                                    className: this._currentClassName!,
+                                    propertyKeyPath: property.path,
+                                    valueString: self.selectedData.firstElement.attachedObject.slice(1, -1),
+                                    saveChanges: NO
+                                }, CBSocketClient.completionPolicy.last)).result.location
+                                
+                                // Make it possible to reload the editing location
+                                
+                                if (editingLocation) {
+                                    
+                                    this.view.layoutSubviews()
+                                    
+                                    initialEditingLocation = JSON.parse(JSON.stringify(editingLocation))
+                                    
+                                    // Set position to the correct editing location
+                                    this._editor.setPosition(editingLocation.end).then(nil)
+                                    
+                                    // Highlight the value that is being edited
+                                    this._editor.setSelection({
+                                        startColumn: editingLocation.start.column,
+                                        startLineNumber: editingLocation.start.lineNumber,
+                                        endColumn: editingLocation.end.column,
+                                        endLineNumber: editingLocation.end.lineNumber
+                                    }).then(nil)
+                                    
+                                    this._editor.revealLineInCenterIfOutsideViewport(editingLocation.end.lineNumber)
+                                         .then(nil)
+                                    
+                                }
+                                
+                                
+                            }
+                            const dropdownClosed = () => {
+                                
+                                console.log("Dismiss dialog")
+                                
+                                // Move editor focus back to initial editing location
+                                
+                            }
+                            self.configureWithObject({
+                                openDropdown: EXTEND(dropdownOpened),
+                                closeDropdown: EXTEND(dropdownClosed),
+                                _dialogView: {
+                                    dismiss: EXTEND(dropdownClosed)
+                                }
+                            })
+                            
+                            
                             self.controlEventTargetAccumulator.SelectionDidChange = async () => {
                                 
                                 const newValue = self.selectedData.firstElement.attachedObject.slice(1, -1)
@@ -1598,7 +1655,7 @@ export class EditorViewController extends UIViewController {
                                     
                                     // Revert the file to the beginning of editing
                                     currentFileText = initialFileText
-                                    this._editor.setValue(currentFileText)
+                                    this._editor.setValue(currentFileText).then(nil)
                                     
                                     editingLocation = initialEditingLocation
                                     
@@ -1618,12 +1675,14 @@ export class EditorViewController extends UIViewController {
                                 
                                 text = newValue
                                 
-                                await SocketClient.SetPropertyValue({
-                                    className: this._currentClassName!,
-                                    propertyKeyPath: property.path,
-                                    valueString: self.selectedData.firstElement.attachedObject,
-                                    saveChanges: YES
-                                })
+                                // await SocketClient.SetPropertyValue({
+                                //     className: this._currentClassName!,
+                                //     propertyKeyPath: property.path,
+                                //     valueString: self.selectedData.firstElement.attachedObject,
+                                //     saveChanges: YES
+                                // })
+                                
+                                // Enable a save button to send changes to the server
                                 
                                 await this.shouldCallPointerUpInsideOnView(
                                     // @ts-ignore
@@ -1686,6 +1745,13 @@ export class EditorViewController extends UIViewController {
                                 currentFileText = await this._editor.getValue() as string
                                 initialFileText = currentFileText
                                 
+                                editingLocation = (await SocketClient.SetPropertyValue({
+                                    className: this._currentClassName!,
+                                    propertyKeyPath: property.path,
+                                    valueString: self.text,
+                                    saveChanges: NO
+                                }, CBSocketClient.completionPolicy.last)).result.location
+                                
                                 // Make it possible to reload the editing location
                                 
                                 if (editingLocation) {
@@ -1729,6 +1795,18 @@ export class EditorViewController extends UIViewController {
                                     property.path,
                                     newValue
                                 )
+                                
+                                const subview = propertyDescriptor.object.valueForKeyPath(
+                                    property.path.split(".").slice(0, -1).join(".")
+                                )
+                                if (subview instanceof UIView) {
+                                    const isSubview = subview.withAllSuperviews.slice(1).contains(
+                                        propertyDescriptor.object.valueForKeyPath(
+                                            property.path.split(".").firstElement
+                                        )!
+                                    )
+                                    this.highlightSingleView(subview, isSubview)
+                                }
                                 
                                 // if (!isValueChanged) {
                                 //     return

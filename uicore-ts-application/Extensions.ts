@@ -68,7 +68,7 @@ declare global {
         
         readonly allValues: Array<any>;
     
-        readonly allKeys: string[];
+        readonly allKeys: (keyof this)[];
     
     }
     

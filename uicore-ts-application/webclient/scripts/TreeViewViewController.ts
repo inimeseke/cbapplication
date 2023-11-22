@@ -58,8 +58,7 @@ export class TreeViewViewController extends UIViewController {
     
     bottomView = new UIView().addedAsSubviewToView(this.view)
     testView: UITextField = new UITextField().addedAsSubviewToView(this.view).configuredWithObject({
-        placeholderText: "This is the test view text field",
-        textAlignment: "center"
+        placeholderText: "This is the test view text field"
     });
     asdasd = new UIView().addedAsSubviewToView(this.view)
     

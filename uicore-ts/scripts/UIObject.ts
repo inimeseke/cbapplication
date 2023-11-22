@@ -1,6 +1,5 @@
 import { UICoreExtensionValueObject } from "./UICoreExtensionValueObject"
 import { UITimer } from "./UITimer"
-import { UIComponentView } from "./UIView"
 
 
 function NilFunction() {
@@ -228,11 +227,15 @@ export class UIFunctionExtender<T extends (...args: any) => any> {
     isAUIFunctionExtenderObject = YES
     extendingFunction: T
     
+    static functionByExtendingFunction<T extends (...args: any) => any>(functionToExtend: T, extendingFunction: T) {
+        return EXTEND(extendingFunction).extendedFunction(functionToExtend)
+    }
+    
     constructor(extendingFunction: T) {
         this.extendingFunction = extendingFunction
     }
     
-    extendedFunction(functionToExtend: T) {
+    extendedFunction(functionToExtend: T): T & { extendedFunction: T } {
         const extendingFunction = this.extendingFunction
         
         function extendedFunction(this: any, ...objects: any[]) {
@@ -243,7 +246,7 @@ export class UIFunctionExtender<T extends (...args: any) => any> {
         }
         
         extendedFunction.extendedFunction = functionToExtend
-        return extendedFunction
+        return extendedFunction as any
     }
     
 }
@@ -352,15 +355,18 @@ export class UIObject {
     
     
     static annotationsMap: WeakMap<any, Function[]> = new WeakMap<ClassDecoratorContext, Function[]>()
+    
     static recordAnnotation(annotation: Function, target: Function) {
         if (!UIObject.annotationsMap.has(target)) {
             UIObject.annotationsMap.set(target, [])
         }
         UIObject.annotationsMap.get(target)!.push(annotation)
     }
+    
     static classHasAnnotation(classObject: Function, annotation: Function) {
         return UIObject.annotationsMap.get(classObject)?.contains(annotation)
     }
+    
     static annotationsOnClass(classObject: Function) {
         return UIObject.annotationsMap.get(classObject) ?? []
     }
@@ -627,6 +633,7 @@ export class UIObject {
     
     
 }
+
 
 export type MethodsOnly<T> =
     Pick<T, { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]>;

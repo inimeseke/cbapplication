@@ -1699,11 +1699,21 @@ export class CBEditorController extends RoutesController {
         valueString: string
     ) {
         
+        if (Utils.IS_UNDEFINED(valueString)) {
+            return "undefined";
+        }
+        if (Utils.IS_LIKE_NULL(valueString)) {
+            return "null";
+        }
+        
         let result = valueString
         
         const valueTypeName = targetObjectClassPropertyObject.getType().compilerType.symbol?.getName() ??
             targetObjectClassPropertyObject.getType().compilerType["intrinsicName"] ??
-            targetObjectClassPropertyObject.getType().getNonNullableType().getText(targetObjectClassPropertyObject)
+            targetObjectClassPropertyObject.getType()
+                .getNonNullableType()
+                .getBaseTypeOfLiteralType()
+                .getText(targetObjectClassPropertyObject)
         
         if (valueTypeName == "UIColor") {
             

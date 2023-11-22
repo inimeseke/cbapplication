@@ -8,7 +8,7 @@ import {
     UIButton,
     UIColor,
     UICore,
-    UIDialogView,
+    UIDialogView, UIFunctionExtender,
     UIImageView,
     UINativeScrollView,
     UIObject,
@@ -302,7 +302,7 @@ export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDial
         
     }
     
-    showActionIndicatorDialogInRootView(message: string) {
+    showActionIndicatorDialogInRootView(message: string, rootView = UICore.main.rootViewController.view) {
         
         const actionIndicator = new UIActionIndicator()
         
@@ -322,7 +322,7 @@ export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDial
         
         CBDialogViewShower.currentActionIndicatorDialogViewShower = this
         
-        this.dialogView.showInRootView(NO)
+        this.dialogView.showInView(rootView, NO)
         this.dialogView.view.cancelButton.focus()
         
     }
@@ -412,27 +412,29 @@ export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDial
         
     }
     
-    static showActionIndicatorDialog(message: string, dismissCallback: Function = nil) {
-        
+    static showActionIndicatorDialog(message: string, dismissCallback: () => void = nil, rootView?: UIView) {
         
         if (IS(CBDialogViewShower.currentActionIndicatorDialogViewShower)) {
             
-            
             CBDialogViewShower.currentActionIndicatorDialogViewShower.dialogView.view.questionLabel.text = message
-            
             CBDialogViewShower.currentActionIndicatorDialogViewShower.dialogView.view.setNeedsLayoutUpToRootView()
-            
             return
             
         }
         
+        const dialogShower = CBDialogViewShower._dialogShowerWithDismissCallback(
+            UIFunctionExtender.functionByExtendingFunction(
+                () => {
+                    if (CBDialogViewShower.currentActionIndicatorDialogViewShower == dialogShower) {
+                        CBDialogViewShower.currentActionIndicatorDialogViewShower = nil
+                    }
+                },
+                dismissCallback
+            )
+        )
         
-        const dialogShower = CBDialogViewShower._dialogShowerWithDismissCallback(dismissCallback)
-        
-        dialogShower.showActionIndicatorDialogInRootView(message)
-        
+        dialogShower.showActionIndicatorDialogInRootView(message, rootView)
         return dialogShower
-        
         
     }
     

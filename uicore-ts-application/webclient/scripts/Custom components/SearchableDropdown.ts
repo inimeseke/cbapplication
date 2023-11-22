@@ -1058,6 +1058,10 @@ export class SearchableDropdown<T> extends UIButton {
         
         const padding = this.core.paddingLength
         
+        if (this._dialogView.isVisible) {
+            this._dialogView.setNeedsLayout()
+        }
+        
         this.updateTitleWithSelection(this.selectedData)
         
         if (this._rightImageView) {

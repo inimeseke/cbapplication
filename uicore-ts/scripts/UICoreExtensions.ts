@@ -79,9 +79,11 @@ declare global {
     interface Object {
     
         forEach(callbackFunction: (value: any, key: string, stopLooping: () => void) => void): void;
+        
+        objectByCopyingValuesRecursivelyFromObject<T extends object>(object: T): T & this;
     
         readonly allValues: Array<any>;
-        readonly allKeys: string[];
+        readonly allKeys: (keyof this)[];
     
     }
     
@@ -662,7 +664,7 @@ if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO) {
                         // }
                         // else {
                         
-                        output[key] = mergeRecursively(target[key], source[key])
+                        output[key] = mergeRecursively(target[key] ?? {}, source[key])
                         
                         //}
                         

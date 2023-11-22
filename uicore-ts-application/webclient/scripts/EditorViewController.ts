@@ -1553,10 +1553,8 @@ export class EditorViewController extends UIViewController {
                             
                             let text: string = propertyDescriptor.object.valueForKeyPath(property.path) ?? ""
                             
-                            self.data = property.valueOptions.map((value, index, array) => {
-                                
+                            const dropdownDataItemForValue = (value: string) => {
                                 const result: CBDropdownDataItem<string> = {
-                                    
                                     _id: value,
                                     attachedObject: value,
                                     dropdownCode: nil,
@@ -1568,12 +1566,14 @@ export class EditorViewController extends UIViewController {
                                         //titleText + " (" +
                                         value // + ")"
                                     )
-                                    
                                 }
-                                
                                 return result
-                                
-                            })
+                            }
+                            const data = property.valueOptions.map(value => dropdownDataItemForValue(value))
+                            data.push(dropdownDataItemForValue("undefined"))
+                            
+                            
+                            self.data = data
                             
                             if (text) {
                                 self.selectedItemCodes = ["\"" + text + "\""]
@@ -1584,49 +1584,64 @@ export class EditorViewController extends UIViewController {
                             
                             let outerHTMLIfNeeded = ""
                             
-                            let initialFileText = await this._editor.getValue()
+                            let initialFileText = await this._editor.getValue() as string
                             let initialEditingLocation: CBEditorPropertyLocation
                             let editingLocation = property.editingLocation
                             let currentFileText = initialFileText
+                            
+                            let actionIndicatorDialogViewShower: undefined | CBDialogViewShower
                             
                             
                             const dropdownOpened = async () => {
                                 
                                 console.log("Open dropdown")
                                 
+                                this.dialogContainer.addedAsSubviewToView(this.view.superview)
+                                actionIndicatorDialogViewShower = CBDialogViewShower.showActionIndicatorDialog(
+                                    "",
+                                    () => {
+                                        
+                                        this._editorViews.removeElement(actionIndicatorDialogViewShower?.dialogView ?? nil)
+                                        this.dialogContainer.userInteractionEnabled = NO
+                                        
+                                        actionIndicatorDialogViewShower = nil
+                                        
+                                    },
+                                    this.dialogContainer
+                                )
+                                this.dialogContainer.userInteractionEnabled = YES
+                                
+                                
+                                currentFileText = await this._editor.getValue() as string
+                                
+                                initialFileText = currentFileText
+                                
                                 // Move editor focus to editing location
                                 
-                                editingLocation = (await SocketClient.SetPropertyValue({
+                                const resultOfTestRequest = (await SocketClient.SetPropertyValue({
                                     className: this._currentClassName!,
                                     propertyKeyPath: property.path,
-                                    valueString: self.selectedData.firstElement.attachedObject.slice(1, -1),
+                                    valueString: self.selectedData.firstElement?.attachedObject?.slice(1, -1),
                                     saveChanges: NO
-                                }, CBSocketClient.completionPolicy.last)).result.location
+                                }, CBSocketClient.completionPolicy.last)).result
+                                editingLocation = resultOfTestRequest.location
+                                
+                                currentFileText = resultOfTestRequest.newFileContent
+                                await this._editor.setValue(currentFileText)
+                                
+                                actionIndicatorDialogViewShower?.dialogView.dismiss()
+                                // this._editorViews.removeElement(actionIndicatorDialogViewShower?.dialogView ?? nil)
+                                // this.dialogContainer.userInteractionEnabled = NO
                                 
                                 // Make it possible to reload the editing location
                                 
                                 if (editingLocation) {
                                     
                                     this.view.layoutSubviews()
-                                    
                                     initialEditingLocation = JSON.parse(JSON.stringify(editingLocation))
-                                    
-                                    // Set position to the correct editing location
-                                    this._editor.setPosition(editingLocation.end).then(nil)
-                                    
-                                    // Highlight the value that is being edited
-                                    this._editor.setSelection({
-                                        startColumn: editingLocation.start.column,
-                                        startLineNumber: editingLocation.start.lineNumber,
-                                        endColumn: editingLocation.end.column,
-                                        endLineNumber: editingLocation.end.lineNumber
-                                    }).then(nil)
-                                    
-                                    this._editor.revealLineInCenterIfOutsideViewport(editingLocation.end.lineNumber)
-                                         .then(nil)
+                                    this.highlightEditingLocation(editingLocation)
                                     
                                 }
-                                
                                 
                             }
                             const dropdownClosed = () => {
@@ -1634,6 +1649,8 @@ export class EditorViewController extends UIViewController {
                                 console.log("Dismiss dialog")
                                 
                                 // Move editor focus back to initial editing location
+                                actionIndicatorDialogViewShower?.dialogView.dismiss()
+                                this._editor.setValue(initialFileText)
                                 
                             }
                             self.configureWithObject({
@@ -1647,7 +1664,7 @@ export class EditorViewController extends UIViewController {
                             
                             self.controlEventTargetAccumulator.SelectionDidChange = async () => {
                                 
-                                const newValue = self.selectedData.firstElement.attachedObject.slice(1, -1)
+                                const newValue = self.selectedData.firstElement.attachedObject
                                 const isValueChanged = text != newValue
                                 this.view.setNeedsLayout()
                                 
@@ -1668,12 +1685,18 @@ export class EditorViewController extends UIViewController {
                                 }
                                 
                                 
-                                propertyDescriptor.object.setValueForKeyPath(
-                                    property.path,
-                                    newValue
-                                )
-                                
+                                propertyDescriptor.object.setValueForKeyPath(property.path, newValue.slice(1, -1))
                                 text = newValue
+                                
+                                const textReplacingResult = this.replaceTextAtLocation(
+                                    currentFileText,
+                                    editingLocation,
+                                    self.selectedData.firstElement.attachedObject
+                                )
+                                editingLocation = textReplacingResult.editingLocation
+                                await this._editor.setValue(textReplacingResult.editedText)
+                                await this._editor.setValue(textReplacingResult.editedText)
+                                this.highlightEditingLocation(editingLocation)
                                 
                                 // await SocketClient.SetPropertyValue({
                                 //     className: this._currentClassName!,
@@ -1684,12 +1707,12 @@ export class EditorViewController extends UIViewController {
                                 
                                 // Enable a save button to send changes to the server
                                 
-                                await this.shouldCallPointerUpInsideOnView(
-                                    // @ts-ignore
-                                    propertyDescriptor.object[propertyDescriptor.name],
-                                    nil,
-                                    YES
-                                )
+                                // await this.shouldCallPointerUpInsideOnView(
+                                //     // @ts-ignore
+                                //     propertyDescriptor.object[propertyDescriptor.name],
+                                //     nil,
+                                //     YES
+                                // )
                                 
                             }
                             
@@ -1760,18 +1783,7 @@ export class EditorViewController extends UIViewController {
                                     
                                     initialEditingLocation = JSON.parse(JSON.stringify(editingLocation))
                                     
-                                    // Set position to the correct editing location
-                                    this._editor.setPosition(editingLocation.end).then(nil)
-                                    
-                                    // Highlight the value that is being edited
-                                    this._editor.setSelection({
-                                        startColumn: editingLocation.start.column,
-                                        startLineNumber: editingLocation.start.lineNumber,
-                                        endColumn: editingLocation.end.column,
-                                        endLineNumber: editingLocation.end.lineNumber
-                                    }).then(nil)
-                                    
-                                    this._editor.revealLineInCenterIfOutsideViewport(editingLocation.end.lineNumber)
+                                    this.highlightEditingLocation(editingLocation)
                                     
                                 }
                                 
@@ -2121,6 +2133,54 @@ export class EditorViewController extends UIViewController {
         
     }
     
+    
+    private replaceTextAtLocation(
+        editableText: string,
+        editingLocation: CBEditorPropertyLocation,
+        replacementText: string
+    ) {
+        
+        editingLocation = {}.objectByCopyingValuesRecursivelyFromObject(editingLocation)
+        
+        const lines = editableText.split("\n")
+        const startLine = lines[editingLocation.start.lineNumber - 1].substring(0, editingLocation.start.column - 1)
+        const endLine = lines[editingLocation.end.lineNumber - 1].substring(editingLocation.end.column - 1)
+        
+        
+        const addedLines = replacementText.split("\n")
+        const numberOfLinesAdded = addedLines.length
+        editingLocation.end.lineNumber = editingLocation.start.lineNumber + numberOfLinesAdded - 1
+        editingLocation.end.column = IF(numberOfLinesAdded == 1)(() =>
+            startLine.length + addedLines.firstElement.length
+        ).ELSE(() =>
+            addedLines.lastElement.length
+        ) + 1
+        
+        return {
+            editingLocation: editingLocation,
+            editedText: lines.slice(0, editingLocation.start.lineNumber - 1).join("\n") + "\n" +
+                startLine + replacementText + endLine + "\n" +
+                lines.slice(editingLocation.end.lineNumber).join("\n")
+        }
+        
+    }
+    
+    private highlightEditingLocation(editingLocation: CBEditorPropertyLocation) {
+        
+        // Set position to the correct editing location
+        this._editor.setPosition(editingLocation.end).then(nil)
+        
+        // Highlight the value that is being edited
+        this._editor.setSelection({
+            startColumn: editingLocation.start.column,
+            startLineNumber: editingLocation.start.lineNumber,
+            endColumn: editingLocation.end.column,
+            endLineNumber: editingLocation.end.lineNumber
+        }).then(nil)
+        
+        this._editor.revealLineInCenterIfOutsideViewport(editingLocation.end.lineNumber).then(nil)
+        
+    }
     
     private async showEditorPosition(positionToShow: IPosition) {
         await this._editor.setPosition(
@@ -2636,6 +2696,9 @@ export class EditorViewController extends UIViewController {
         
         const padding = this.core.paddingLength
         const labelHeight = padding
+        
+        this.dialogContainer.setFrame(this.view.frame, 501)
+        this.dialogContainer.subviews.everyElement.setNeedsLayout()
         
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)

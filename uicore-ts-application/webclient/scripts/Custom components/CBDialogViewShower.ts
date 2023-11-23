@@ -53,8 +53,8 @@ export class CBDialogViewShower<DialogViewViewType extends CBDialogView = CBDial
                 () => superview?.scrollSize)
                 .ELSE_IF(superview?.isKindOfClass(UIScrollView))(() => superview?.scrollSize)
                 .ELSE(() => superview?.frame)
-            const height = superviewBounds.height || window.innerHeight
-            const width = superviewBounds.width || window.innerWidth
+            const height = superviewBounds?.height || window.innerHeight
+            const width = superviewBounds?.width || window.innerWidth
             
             this.dialogView.view.frame = new UIRectangle(
                 0,

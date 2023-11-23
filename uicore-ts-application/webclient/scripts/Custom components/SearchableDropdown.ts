@@ -203,20 +203,24 @@ export class SearchableDropdown<T> extends UIButton {
         
         
         this._dialogView.layoutSubviews = () => {
-    
-            this._dialogView.frame = this.rootView.bounds
-    
+            
+            const dialogContainerView = FIRST(this.dialogContainerView, this.rootView)
+            
+            this._dialogView.frame = dialogContainerView.bounds
+                .rectangleWithHeight(dialogContainerView.viewHTMLElement.scrollHeight)
+                .rectangleWithWidth(dialogContainerView.viewHTMLElement.scrollWidth)
+            
             const padding = this.core.paddingLength
-    
+            
             const searchTextFieldHeight = this.bounds.height
-    
+            
             FIRST_OR_NIL(this._dialogView.view).style.zIndex = "" + this._dialogView.zIndex
-    
+            
             this._containerView.frame = this.superview?.rectangleInView(
                 this.frame,
-                FIRST(this.dialogContainerView, this.rootView)
+                dialogContainerView
             ).rectangleWithHeight(this.expandedContainerViewHeight)
-    
+            
             this._searchTextField.frame = this._containerView.bounds.rectangleWithHeight(searchTextFieldHeight)
                 .rectangleWithInsets(
                     0,
@@ -452,13 +456,14 @@ export class SearchableDropdown<T> extends UIButton {
     openDropdown() {
         this._dialogView.showInView(FIRST(this.dialogContainerView, this.rootView), YES)
         this._searchTextField.focus()
+        this._dialogView.setNeedsLayout()
     }
     
     closeDropdown() {
         this._dialogView.dismiss(YES)
     }
     
-    override boundsDidChange(bounds:UIRectangle) {
+    override boundsDidChange(bounds: UIRectangle) {
         super.boundsDidChange(bounds)
         this.setNeedsLayout()
     }
@@ -620,7 +625,7 @@ export class SearchableDropdown<T> extends UIButton {
         }
         
         let result = this.superview?.bounds.height ?? 0 - this.frame.max.y - this.core.paddingLength
-    
+        
         // if (IS(this.dialogContainerView)) {
         //
         //     result = 250

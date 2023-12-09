@@ -1596,16 +1596,34 @@ export class EditorViewController extends UIViewController {
                                 
                                 console.log("Open dropdown")
                                 
-                                this.dialogContainer.addedAsSubviewToView(this.view.superview)
+                                const bodyOverflowValue = document.body.style.overflow
+                                
+                                if (IS(this.view.superview)) {
+                                    this.dialogContainer.addedAsSubviewToView(this.view.superview)
+                                }
+                                else {
+                                    
+                                    document.body.style.overflow = "hidden"
+                                    this.view.viewHTMLElement.insertAdjacentElement(
+                                        "afterend",
+                                        this.dialogContainer.viewHTMLElement
+                                    )
+                                    this.dialogContainer.frame = new UIRectangle(
+                                        window.scrollX,
+                                        window.scrollY,
+                                        UIView.pageHeight,
+                                        UIView.pageWidth
+                                    )
+                                    
+                                }
+                                
                                 actionIndicatorDialogViewShower = CBDialogViewShower.showActionIndicatorDialog(
                                     "",
                                     () => {
-                                        
+                                        document.body.style.overflow = bodyOverflowValue
                                         this._editorViews.removeElement(actionIndicatorDialogViewShower?.dialogView ?? nil)
                                         this.dialogContainer.userInteractionEnabled = NO
-                                        
                                         actionIndicatorDialogViewShower = nil
-                                        
                                     },
                                     this.dialogContainer
                                 )
@@ -2697,7 +2715,20 @@ export class EditorViewController extends UIViewController {
         const padding = this.core.paddingLength
         const labelHeight = padding
         
-        this.dialogContainer.setFrame(this.view.frame, 501)
+        if (IS(this.view.superview)) {
+            this.dialogContainer.setFrame(this.view.frame, 501)
+        }
+        else {
+            this.dialogContainer.setFrame(
+                new UIRectangle(
+                    window.scrollX,
+                    window.scrollY,
+                    this.view.frame.height,
+                    this.view.frame.height
+                ),
+                501
+            )
+        }
         this.dialogContainer.subviews.everyElement.setNeedsLayout()
         
         // View bounds

@@ -978,7 +978,7 @@ export class UIView extends UIObject {
         }
         this._frame = rectangle
         
-        if (IS(frame) && frame.isEqualTo(rectangle) && frame.zIndex == rectangle.zIndex && !performUncheckedLayout) {
+        if (frame && frame != nil && frame.isEqualTo(rectangle) && frame.zIndex == rectangle.zIndex && !performUncheckedLayout) {
             return
         }
         

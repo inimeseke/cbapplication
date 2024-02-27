@@ -52,9 +52,11 @@
         // ].join("\n"),
         language: "typescript",
         lineNumbers: "off",
+        scrollbar: { alwaysConsumeMouseWheel: false },
         minimap: {enabled: false},
         wrappingIndent: "indent",
-        wordWrap: "on"
+        wordWrap: "on",
+        scrollBeyondLastLine: false
     })
 
     // // Initialize auto typing on monaco editor. Imports will now automatically be typed!
@@ -136,24 +138,24 @@
 
     editorObject.getCurrentFileMessages = async () => {
 
-        const model = editorObject.getModel();
+        const model = editorObject.getModel()
 
-        const _worker = await monaco.languages.typescript.getTypeScriptWorker();
-        const worker = await _worker(model.uri);
+        const _worker = await monaco.languages.typescript.getTypeScriptWorker()
+        const worker = await _worker(model.uri)
 
-        const fileName = model.uri.toJSON().external;
+        const fileName = model.uri.toJSON().external
 
 
-        const semanticDiagnostics = await worker.getSemanticDiagnostics(fileName);
+        const semanticDiagnostics = await worker.getSemanticDiagnostics(fileName)
         // console.log('\n\n SEMANTIC DIAGNOSTICS FOR ' + fileName);
         // console.log(semanticDiagnostics.map(d => d.messageText))
 
 
-        const syntacticDiagnostics = await worker.getSyntacticDiagnostics(fileName);
+        const syntacticDiagnostics = await worker.getSyntacticDiagnostics(fileName)
         // console.log('\n\n SYNTACTIC DIAGNOSTICS FOR ' + fileName);
         // console.log(syntacticDiagnostics.map(d => d.messageText))
 
-        return semanticDiagnostics.concat(syntacticDiagnostics);
+        return semanticDiagnostics.concat(syntacticDiagnostics)
 
     }
 
@@ -170,7 +172,7 @@
 
                     container.style.height = messageEvent.data.parameters[0]
 
-                    return;
+                    return
 
                 }
 
@@ -179,8 +181,7 @@
                 // respond on the received port
                 messageEvent.ports[0].postMessage({type: "CBEditorFrameMessageResponse", result: result})
 
-            }
-            catch (exception) {
+            } catch (exception) {
 
                 // console.log(exception)
                 const asd = 1
@@ -190,6 +191,25 @@
         }
 
     }, false)
+
+    document.addEventListener("keydown", (event) => {
+
+        if ((event.ctrlKey || event.altKey || event.metaKey) && ["s", "r", "e", "w"].includes(event.key)) {
+
+            window.parent.postMessage({
+                type: "KeydownFromCBEditorEditor",
+                event: {
+                    ctrlKey: event.ctrlKey,
+                    altKey: event.altKey,
+                    metaKey: event.metaKey,
+                    key: event.key,
+                    keyCode: event.keyCode
+                }
+            })
+
+        }
+
+    })
 
     window.top.postMessage("CBEditorFrameReady", "*")
 

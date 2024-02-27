@@ -1,4 +1,5 @@
-import { UIButton, UIColor, UIRoute, UITextView, UIView, UIViewController } from "uicore-ts"
+import { CALL, UIButton, UIColor, UIRoute, UITextView, UIView, UIViewController } from "uicore-ts"
+import { CBButton } from "./Custom components/CBButton"
 
 
 export class SomeContentViewController extends UIViewController {
@@ -11,8 +12,22 @@ export class SomeContentViewController extends UIViewController {
         hoverText: "",
         backgroundColor: UIColor.transparentColor
     }).addedAsSubviewToView(this.view)
+    testingTheSpeedView: UITextView = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
+        text: "Autopood testing the speed now asdasd"
+    })
+    someButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
+        titleLabel: {
+            text: "Some button asdasd asdasd"
+        },
+        controlEventTargetAccumulator: {
+            PointerUpInside: (sender, event) => {
+                console.log(sender)
+                alert(sender.elementID)
+            }
+        }
+    })
     
-
+    
     constructor(view: UIView) {
         
         super(view)
@@ -80,18 +95,26 @@ export class SomeContentViewController extends UIViewController {
     
     
     override layoutViewSubviews() {
-
+        
         super.layoutViewSubviews()
-
+        
         const padding = this.core.paddingLength
         const labelHeight = padding
-
+        
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)
-
+        
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
-
-
+        this.testingTheSpeedView.frame = this.titleLabel.frame.rectangleForNextRow(
+            padding,
+            [this.testingTheSpeedView.intrinsicContentHeight(this.titleLabel.frame.width), padding].max()
+        )
+        this.someButton.frame = this.testingTheSpeedView.frame.rectangleForNextRow(
+            padding,
+            labelHeight * 2
+        )
+        
+        
     }
 }
 

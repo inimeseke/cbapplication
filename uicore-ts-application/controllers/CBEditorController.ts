@@ -1,5 +1,5 @@
 import * as child_process from "child_process"
-import { transformSync } from "esbuild"
+import { buildSync, transformSync } from "esbuild"
 import { Application } from "express"
 import * as fs from "fs"
 import * as path from "path"
@@ -33,6 +33,8 @@ import { SocketController } from "./SocketController"
 
 
 /// <reference path="../webclient/scripts/SocketClientFunctions.d.ts" />
+
+import { exec } from "child_process"
 
 
 interface EditableDeclarationObject {
@@ -416,6 +418,25 @@ export class CBEditorController extends RoutesController {
             //const classes = [classObject].concat(subclasses)
             
             const result = subclasses.map(subclass => subclass.getName())
+            
+            await respondWithMessage(result)
+            
+        }
+        
+        targets.ClassWithNameHasAnnotationWithName = async (message, socketSession, respondWithMessage) => {
+            
+            const className = message.className
+            
+            const sourceFiles = this.webclientProject.getSourceFiles()
+            const resultFile = sourceFiles.find(
+                (file, index, array) => file.getClass(
+                    declaration => declaration.getName() == className
+                )
+            )
+            
+            const classObject = resultFile?.getClass(className)
+            
+            const result = Utils.IS(classObject?.getDecorator(message.annotationName))
             
             await respondWithMessage(result)
             
@@ -835,13 +856,10 @@ export class CBEditorController extends RoutesController {
             })
             
             if (propertyObject) {
-                
                 respondWithMessage.sendErrorResponse(
                     "Property withe name " + message.propertyKeyPath + " is already present in class " + message.className
                 )
-                
                 return
-                
             }
             
             respondWithMessage.sendIntermediateResponse("Adding property " +
@@ -955,6 +973,8 @@ export class CBEditorController extends RoutesController {
                 runtimeObjectKeyPath: runtimeObjectKeyPathComponents.join(".")
             }
             
+            // Compile the webclient here to make it work again
+            this.rebuildWebclient()
             
             await respondWithMessage({
                 codeFileContents: resultFile.getFullText(),

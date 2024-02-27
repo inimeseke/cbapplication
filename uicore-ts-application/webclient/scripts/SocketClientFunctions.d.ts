@@ -112,6 +112,8 @@ export interface CBApplicationSocketClientInterface {
     
     AllDerivedClassNames: SocketClientFunction<string, string[]>
     
+    ClassWithNameHasAnnotationWithName: SocketClientFunction<{ className: string, annotationName: string }, boolean>
+    
     SetPropertyClassName: SocketClientFunction<CBEditorPropertyValueDescriptor,
         { location: CBEditorPropertyLocation, fileContent: string, newFileContent: string }>
     

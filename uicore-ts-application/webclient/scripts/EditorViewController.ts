@@ -142,7 +142,7 @@ export function CBEditorNestedAttributes(numberOfLevels = 1) {
         _context: ClassFieldDecoratorContext | ClassSetterDecoratorContext | ClassGetterDecoratorContext
     ) => {
         
-        // var asd = 1
+        var asd = 1
         
     }
     
@@ -235,25 +235,28 @@ export class EditorViewController extends UIViewController {
     saveButton = new CBButton().configuredWithObject({
         titleLabel: { text: "Save file" },
         controlEventTargetAccumulator: {
-            PointerUpInside: async () => {
-                
-                this.view.alpha = 0.5
-                
-                this.view.userInteractionEnabled = NO
-                
-                const editorText = await this._editor.getValue() as string
-                
-                await SocketClient.SaveFile({
+            // @ts-ignore
+            EnterDown: {
+                PointerUpInside: async () => {
                     
-                    className: this._currentClassName!,
-                    valueString: editorText
+                    this.view.alpha = 0.5
                     
-                })
-                
-                if (this._currentEditingView) {
-                    await this.shouldCallPointerUpInsideOnView(this._currentEditingView, nil, YES)
+                    this.view.userInteractionEnabled = NO
+                    
+                    const editorText = await this._editor.getValue() as string
+                    
+                    await SocketClient.SaveFile({
+                        
+                        className: this._currentClassName!,
+                        valueString: editorText
+                        
+                    })
+                    
+                    if (this._currentEditingView) {
+                        await this.shouldCallPointerUpInsideOnView(this._currentEditingView, nil, YES)
+                    }
+                    
                 }
-                
             }
         }
     }).addedAsSubviewToView(this.view)
@@ -432,7 +435,7 @@ export class EditorViewController extends UIViewController {
                     })).result
                     
                     // Reload the class with the new code
-                    UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"])
+                    this.UIRouteClass.currentRoute.routeByRemovingComponentsOtherThanOnesNamed(["settings"])
                         .routeWithComponent(
                             result.componentName,
                             {}
@@ -751,6 +754,13 @@ export class EditorViewController extends UIViewController {
     private _propertyDescriptor?: { object: UIObject; className: string; name: string }
     
     UIViewClass: typeof UIView = UIView
+    UIRouteClass: typeof UIRoute = UIRoute
+    
+    private keydownListener = (event: KeyboardEvent) => {
+        if (event.ctrlKey && ["s"].contains(event.key)) {
+            this.saveButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
+        }
+    }
     
     constructor(view: UIView) {
         
@@ -810,6 +820,7 @@ export class EditorViewController extends UIViewController {
         if (window.opener) {
             
             this.UIViewClass = window.opener.require_UIView().UIView
+            this.UIRouteClass = window.opener.require_UIRoute().UIRoute
             
             document.addEventListener("keydown", event => {
                 if (event.ctrlKey && event.key === "e") {
@@ -867,6 +878,9 @@ export class EditorViewController extends UIViewController {
             return YES
             
         }
+        
+        document.addEventListener("keydown", this.keydownListener)
+        
         
     }
     
@@ -1602,19 +1616,10 @@ export class EditorViewController extends UIViewController {
                                     this.dialogContainer.addedAsSubviewToView(this.view.superview)
                                 }
                                 else {
-                                    
                                     document.body.style.overflow = "hidden"
-                                    this.view.viewHTMLElement.insertAdjacentElement(
-                                        "afterend",
+                                    this.view.viewHTMLElement.parentElement?.appendChild(
                                         this.dialogContainer.viewHTMLElement
                                     )
-                                    this.dialogContainer.frame = new UIRectangle(
-                                        window.scrollX,
-                                        window.scrollY,
-                                        UIView.pageHeight,
-                                        UIView.pageWidth
-                                    )
-                                    
                                 }
                                 
                                 actionIndicatorDialogViewShower = CBDialogViewShower.showActionIndicatorDialog(
@@ -1835,7 +1840,22 @@ export class EditorViewController extends UIViewController {
                                             property.path.split(".").firstElement
                                         )!
                                     )
-                                    this.highlightSingleView(subview, isSubview)
+                                    // Avoid highlighting if the selected view is a UIComponentView
+                                    const selectedView = propertyDescriptor.object.valueForKeyPath(
+                                        property.path.split(".").slice(0, -2).join(".")
+                                    )
+                                    let className: string | undefined = selectedView?.class?.name
+                                    if (className?.startsWith("_")) {
+                                        className = className.substring(1)
+                                    }
+                                    const selectedViewIsAComponentView = (await SocketClient.ClassWithNameHasAnnotationWithName(
+                                        {
+                                            className: className ?? "",
+                                            annotationName: "UIComponentView"
+                                        })).result
+                                    if (!selectedViewIsAComponentView) {
+                                        this.highlightSingleView(subview, isSubview)
+                                    }
                                 }
                                 
                                 // if (!isValueChanged) {
@@ -2231,14 +2251,25 @@ export class EditorViewController extends UIViewController {
     }
     
     // section View highlighting
-    private highlightView(view: UIView) {
+    private async highlightView(view: UIView) {
         
         this.removeElementChanges()
         this._selectedView = view
         
         this.highlightSingleView(view)
         
-        if (UIObject.classHasAnnotation(view.class, UIComponentView)) {
+        let className: string | undefined = view?.class?.name
+        if (className?.startsWith("_")) {
+            className = className.substring(1)
+        }
+        
+        if (UIObject.classHasAnnotation(
+            view.class,
+            UIComponentView
+        ) || (await SocketClient.ClassWithNameHasAnnotationWithName({
+            className: className ?? "",
+            annotationName: "UIComponentView"
+        })).result) {
             return
         }
         
@@ -2695,6 +2726,7 @@ export class EditorViewController extends UIViewController {
         await super.viewDidDisappear()
         
         await SocketClient.EditorWasClosed()
+        document.removeEventListener("keydown", this.keydownListener)
         
     }
     

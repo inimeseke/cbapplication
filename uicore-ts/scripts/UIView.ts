@@ -134,6 +134,7 @@ interface Constraint {
 
 
 export function UIComponentView(target: Function, context: ClassDecoratorContext) {
+    console.log("Recording annotation UIComponentView on " + target.name)
     UIObject.recordAnnotation(UIComponentView, target)
 }
 

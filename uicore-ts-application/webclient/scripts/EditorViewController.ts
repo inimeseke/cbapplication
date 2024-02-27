@@ -217,17 +217,20 @@ export class EditorViewController extends UIViewController {
     reloadButton = new CBButton().configuredWithObject({
         titleLabel: { text: "Reload files" },
         controlEventTargetAccumulator: {
-            PointerUpInside: async (sender, event) => {
-                
-                this.view.alpha = 0.5
-                
-                this.view.userInteractionEnabled = NO
-                
-                await SocketClient.ReloadEditorFiles()
-                if (this._currentEditingView) {
-                    await this.shouldCallPointerUpInsideOnView(this._currentEditingView, event as any, YES)
+            // @ts-ignore
+            EnterDown: {
+                PointerUpInside: async (sender, event) => {
+                    
+                    this.view.alpha = 0.5
+                    
+                    this.view.userInteractionEnabled = NO
+                    
+                    await SocketClient.ReloadEditorFiles()
+                    if (this._currentEditingView) {
+                        await this.shouldCallPointerUpInsideOnView(this._currentEditingView, event as any, YES)
+                    }
+                    
                 }
-                
             }
         }
     }).addedAsSubviewToView(this.view)
@@ -757,9 +760,15 @@ export class EditorViewController extends UIViewController {
     UIRouteClass: typeof UIRoute = UIRoute
     
     private keydownListener = (event: KeyboardEvent) => {
+        
         if (event.ctrlKey && ["s"].contains(event.key)) {
             this.saveButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
         }
+        
+        if (event.ctrlKey && ["r"].contains(event.key)) {
+            this.reloadButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
+        }
+        
     }
     
     constructor(view: UIView) {
@@ -927,9 +936,11 @@ export class EditorViewController extends UIViewController {
                 }
                 
                 if (event.data.type == "CBEditorFrameModelContentDidChangeMessage") {
-                    
                     this.editorContentChanged(event.data.event)
-                    
+                }
+                
+                if (event.data.type == "KeydownFromCBEditorEditor") {
+                    this.keydownListener(event.data.event)
                 }
                 
             }
@@ -2740,7 +2751,7 @@ export class EditorViewController extends UIViewController {
     
     
     // section Editor layout
-    override layoutViewSubviews() {
+    override async layoutViewSubviews() {
         
         super.layoutViewSubviews()
         
@@ -2846,6 +2857,7 @@ export class EditorViewController extends UIViewController {
                 (this.propertyEditorsTreeView || this.currentViewLabel).frame.max.y -
                 padding *
                 2,
+                (await this._editor.getContentHeight() as number) + padding,
                 550
             ].max()
         )

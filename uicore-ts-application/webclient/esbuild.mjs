@@ -77,7 +77,7 @@ await build({
 // })
 
 let result = fs.readFileSync("compiledScripts/webclient.js").toString()
-result = result.replace("@(import_uicore_ts2.UIComponentView)", "")
+result = result.replace("@import_uicore_ts2.UIComponentView", "")
     .replace("@CBEditorNestedAttributes()", "")
 fs.writeFileSync("compiledScripts/webclient.js", result)
 

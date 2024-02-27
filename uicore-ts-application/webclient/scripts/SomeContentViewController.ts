@@ -17,7 +17,7 @@ export class SomeContentViewController extends UIViewController {
     })
     someButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
         titleLabel: {
-            text: "Some button asdasd asdasd"
+            text: "Some button asdasd"
         },
         controlEventTargetAccumulator: {
             PointerUpInside: (sender, event) => {
@@ -33,15 +33,6 @@ export class SomeContentViewController extends UIViewController {
         super(view)
         
         // Code for further setup if necessary
-        
-        //this.view.backgroundColor = new UIColor("#ffffff")
-        
-        //this.view = this.view.configuredWithObject({ backgroundColor: new UIColor("#df5858") })
-        
-        //     .configuredWithObject({
-        //     //backgroundColor: new UIColor("#d94545")
-        //     backgroundColor: new UIColor("#ca0707")
-        // })
         
         this.view.configureWithObject({
             backgroundColor: UIColor.whiteColor,
@@ -117,75 +108,5 @@ export class SomeContentViewController extends UIViewController {
         
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

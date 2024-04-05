@@ -11,7 +11,7 @@ import {
     nil,
     NO, UIColor,
     UIKeyValueStringSorter,
-    UIObject,
+    UIObject, UIPoint, UIRectangle,
     UIStringFilter,
     UITableView,
     UITextField,
@@ -25,6 +25,7 @@ import { LanguageService } from "../LanguageService"
 import { CBTableHeaderView } from "./CBTableHeaderView"
 import { CBTableRowView } from "./CBTableRowView"
 import { CellView } from "./CellView"
+import { RowView } from "./RowView"
 
 
 type StringOnly<T> = T extends string ? T : never;
@@ -61,14 +62,12 @@ export interface CBDataViewCellDescriptor<DataType = Record<string, any>> {
 
 export class CBDataView<DataType = Record<string, any>> extends UIView {
     
-    
     private _descriptors: CBDataViewCellDescriptor<DataType>[] = []
     
     private _filteringArray: string[] = []
     private _data: DataType[] = []
     
     highlightedDataItem?: DataType
-    
     
     private _filteredData: any[] = []
     
@@ -85,6 +84,9 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
     _highlightNextFilterChange = NO
     isTreeView = NO
     _rowToKeepStaticAfterUpdate?: CBTableRowView<DataType>
+    
+    private _hasResizableColumns = NO
+    _resizingHandleViews: UIView[] = []
     
     
     constructor(elementID?: string) {
@@ -133,14 +135,14 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         this.tableView.numberOfRows = () => this.filteredData.length
         
         
-        this.tableView.newReusableViewForIdentifier = (identifier, rowIDIndex) => {
+        this.tableView.newReusableViewForIdentifier = (_identifier, rowIDIndex) => {
             
             const rowView = new CBTableRowView(
                 this.elementID + "TableRow" + rowIDIndex
             )
             
             
-            rowView.expandedValueDidChange = (row: UIView, event: MouseEvent) => {
+            rowView.expandedValueDidChange = (_row: UIView, event: MouseEvent) => {
                 
                 // @ts-ignore
                 this.rowExpandedValueDidChange(rowView, event)
@@ -148,7 +150,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
                 // @ts-ignore
                 this.keepRowStaticDuringNextUpdate(rowView)
                 
-                this.updateTableDataByFiltering()
+                this.updateTableDataByFiltering().then(nil)
                 
             }
             
@@ -191,7 +193,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         
         this.searchTextField.addTargetForControlEvent(
             UITextField.controlEvent.TextChange,
-            (sender, event) => {
+            () => {
                 
                 if (this.tableView.isMemberOfViewTree) {
                     
@@ -228,7 +230,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         
         super.wasAddedToViewTree()
         
-        this.updateTableDataByFiltering()
+        this.updateTableDataByFiltering().then(nil)
         
     }
     
@@ -268,6 +270,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         this.updateFilteringArray()
         this.updateTableDataByFiltering().then(nil)
         
+        this.hasResizableColumns = this.hasResizableColumns
         
     }
     
@@ -586,9 +589,9 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
     }
     
     
-    override boundsDidChange() {
+    override boundsDidChange(bounds: UIRectangle) {
         
-        super.boundsDidChange()
+        super.boundsDidChange(bounds)
         
         this.tableView.invalidateSizeOfRowWithIndex(0)
         this.tableView.setNeedsLayoutUpToRootView()
@@ -605,6 +608,89 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         //     this.tableHeaderView.sortingInstructions,
         //     MAKE_ID()
         // )).sortedData
+        
+    }
+    
+    get hasResizableColumns(): boolean {
+        return this._hasResizableColumns
+    }
+    
+    set hasResizableColumns(hasResizableColumns: boolean) {
+        
+        this._hasResizableColumns = hasResizableColumns
+        
+        this._resizingHandleViews.everyElement.removeFromSuperview()
+        this._resizingHandleViews = []
+        
+        if (!this._hasResizableColumns) {
+            return
+        }
+        
+        for (let i = 1; i < this.tableHeaderView.cells.length - 2; i++) {
+            
+            const view = new UIView().configuredWithObject({
+                //backgroundColor: UIColor.blackColor,
+                style: {
+                    cursor: "col-resize"
+                },
+                calculateAndSetViewFrame: () => {
+                    view.frame = this.tableHeaderView.cells[i].frame.rectangleWithWidth(2, 1)
+                        .rectangleByAddingX(1)
+                        .rectangleWithHeight(this.tableView.frame.height + this.tableHeaderView.frame.height)
+                        .rectangleWithY(this.tableHeaderView.frame.y)
+                }
+            })
+            
+            // noinspection JSMismatchedCollectionQueryUpdate
+            let initialWeights: number[] = []
+            let initialUserSelect = ""
+            
+            view.controlEventTargetAccumulator.PointerDown = () => {
+                
+                initialWeights = this.tableHeaderView.cells.map(cell => cell.frame.width)
+                
+                initialUserSelect = this.rootView.style.userSelect
+                this.rootView.style.userSelect = "none"
+                
+                view.pointerDraggingPoint = new UIPoint(0, 0)
+                
+            }
+            
+            view.controlEventTargetAccumulator.PointerDrag = sender => {
+                
+                // Get the x movement value
+                const movementX = sender.pointerDraggingPoint.x
+                
+                // Change the cellWeights of the tableView
+                
+                const weights = initialWeights.copy()
+                
+                const leftWeight = initialWeights[i]
+                const rightWeight = initialWeights[i + 1]
+                
+                const minWeight = [this.core.paddingLength * 2, 57].max()
+                const maxWeight = leftWeight + rightWeight - minWeight
+                
+                weights[i] = (leftWeight + movementX).constrainedValue(minWeight, maxWeight)
+                weights[i + 1] = (rightWeight - movementX).constrainedValue(minWeight, maxWeight)
+                
+                this.tableView.cellWeights = weights
+                this.tableHeaderView.cellWeights = weights;
+                
+                (this.tableView._visibleRows as RowView[]).everyElement.layoutParametersDidChange()
+                this.setNeedsLayout()
+                
+            }
+            
+            view.controlEventTargetAccumulator.PointerUp.PointerCancel = () => {
+                this.rootView.style.userSelect = initialUserSelect
+            }
+            
+            this._resizingHandleViews.push(view)
+            
+        }
+        
+        this.addSubviews(this._resizingHandleViews)
         
     }
     

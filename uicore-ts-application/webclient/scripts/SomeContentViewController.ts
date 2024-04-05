@@ -17,7 +17,7 @@ export class SomeContentViewController extends UIViewController {
     })
     someButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
         titleLabel: {
-            text: "Some button asdasd"
+            text: "Some button"
         },
         controlEventTargetAccumulator: {
             PointerUpInside: (sender, event) => {

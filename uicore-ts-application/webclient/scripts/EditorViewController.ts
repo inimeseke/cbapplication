@@ -396,7 +396,8 @@ export class EditorViewController extends UIViewController {
             }
             
             
-        }
+        },
+        hasResizableColumns: YES
     }).addedAsSubviewToView(this.view)
     
     addViewControllerButton = new CBButton().configuredWithObject({
@@ -761,12 +762,14 @@ export class EditorViewController extends UIViewController {
     
     private keydownListener = (event: KeyboardEvent) => {
         
-        if (event.ctrlKey && ["s"].contains(event.key)) {
+        if ((event.ctrlKey || event.metaKey) && ["s"].contains(event.key)) {
             this.saveButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
+            event?.preventDefault?.()
         }
         
-        if (event.ctrlKey && ["r"].contains(event.key)) {
+        if ((event.ctrlKey || event.metaKey) && ["r"].contains(event.key)) {
             this.reloadButton.sendControlEventForKey(UIButton.controlEvent.EnterDown, event)
+            event?.preventDefault?.()
         }
         
     }

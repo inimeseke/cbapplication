@@ -66,6 +66,8 @@ declare global {
         
         readonly integerValue: number;
         
+        constrainedValue(min: number, max: number): number;
+        
     }
     
     
@@ -861,8 +863,28 @@ if ("integerValue" in Number.prototype == NO) {
     Object.defineProperty(Number.prototype, "integerValue", {
         get: function (this: number) {
             return parseInt("" + (Math.round(this) + 0.5))
-        }
+        },
+        enumerable: NO
     })
+}
+
+if ("constrainedValue" in Number.prototype == NO) {
+    
+    (Number.prototype as any).constrainedValue = function (this: number, min: number, max: number) {
+        if (this < min) {
+            return min;
+        }
+        if (this > max) {
+            return max;
+        }
+        return this
+    }
+    
+    // Hide method from for-in loops
+    Object.defineProperty(Number.prototype, "constrainedValue", {
+        enumerable: NO
+    })
+    
 }
 
 

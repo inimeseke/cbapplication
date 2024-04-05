@@ -42,16 +42,14 @@ export class UITableView extends UINativeScrollView {
     _highestValidRowPositionIndex: number = 0
     
     _reusableViews: UITableViewReusableViewsContainerObject = {}
-    
     _removedReusableViews: UITableViewReusableViewsContainerObject = {}
     
     _fullHeightView: UIView
-    
     _rowIDIndex: number = 0
-    
     reloadsOnLanguageChange = YES
-    
     sidePadding = 0
+
+    cellWeights?: number[]
     
     _persistedData: any[] = []
     _needsDrawingOfVisibleRowsBeforeLayout = NO

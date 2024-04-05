@@ -98,6 +98,10 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     
     set cellWeights(widths: number[]) {
         this._cellWeights = widths
+        this.layoutParametersDidChange()
+    }
+    
+    layoutParametersDidChange() {
         this._previousLayoutBounds = nil
         this.setNeedsLayout()
     }
@@ -108,8 +112,7 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
     
     set cellWidths(widths: number[]) {
         this._cellWidths = widths
-        this._previousLayoutBounds = nil
-        this.setNeedsLayout()
+        this.layoutParametersDidChange()
     }
     
     
@@ -152,7 +155,7 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
         }
         
         bounds.rectangleWithHeight(this.rowHeight)
-            .distributeViewsAlongWidth(this._cells, this._cellWeights, this.padding, this._cellWidths)
+            .distributeViewsAlongWidth(this.cells, this.cellWeights, this.padding, this._cellWidths)
         
         // this.forEachViewInSubtree((view: UIView) => {
         //

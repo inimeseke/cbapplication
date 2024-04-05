@@ -165,8 +165,19 @@ export class CBTableRowView<DataType = Record<string, any>> extends RowView {
         cellWidths.lastElement = this.sideCellsWidth
         this.cellWidths = cellWidths
         
-        this.cellWeights = [1].arrayByRepeating(this.cells.length)
         
+    }
+    
+    override get cellWeights(): number[] {
+        
+        var result = (this.superview as UITableView)?.cellWeights ?? super.cellWeights ?? [1].arrayByRepeating(this.cells.length)
+        
+        return result
+        
+    }
+    
+    override set cellWeights(widths: number[]) {
+        super.cellWeights = widths
     }
     
     override get frame(): UIRectangle & { zIndex?: number } {
@@ -291,9 +302,9 @@ export class CBTableRowView<DataType = Record<string, any>> extends RowView {
         
     }
     
-    override boundsDidChange() {
+    override boundsDidChange(bounds:UIRectangle) {
         
-        super.boundsDidChange()
+        super.boundsDidChange(bounds)
         
         
         const tableView = wrapInNil(this.superview as UITableView)

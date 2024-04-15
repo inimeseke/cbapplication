@@ -644,6 +644,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
             // noinspection JSMismatchedCollectionQueryUpdate
             let initialWeights: number[] = []
             let initialUserSelect = ""
+            let minWidths: number[] = []
             
             view.controlEventTargetAccumulator.PointerDown = () => {
                 
@@ -652,28 +653,19 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
                 initialUserSelect = this.rootView.style.userSelect
                 this.rootView.style.userSelect = "none"
                 
-                view.pointerDraggingPoint = new UIPoint(0, 0)
+                view.pointerDraggingPoint.x = 0
+                view.pointerDraggingPoint.y = 0
+                
+                minWidths = this.minWidths
                 
             }
             
             view.controlEventTargetAccumulator.PointerDrag = sender => {
                 
                 // Get the x movement value
-                const movementX = sender.pointerDraggingPoint.x
+                const movementX = sender.pointerDraggingPoint?.x ?? 0
                 
-                // Change the cellWeights of the tableView
-                
-                const weights = initialWeights.copy()
-                
-                const leftWeight = initialWeights[i]
-                const rightWeight = initialWeights[i + 1]
-                
-                const minWeight = [this.core.paddingLength * 2, 57].max()
-                const maxWeight = leftWeight + rightWeight - minWeight
-                
-                weights[i] = (leftWeight + movementX).constrainedValue(minWeight, maxWeight)
-                weights[i + 1] = (rightWeight - movementX).constrainedValue(minWeight, maxWeight)
-                
+                const weights = this.cellWeightsWhenResizingWithParameters(initialWeights, i, minWidths, movementX)
                 this.tableView.cellWeights = weights
                 this.tableHeaderView.cellWeights = weights;
                 
@@ -691,6 +683,40 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         }
         
         this.addSubviews(this._resizingHandleViews)
+        
+    }
+    
+    
+    get minWidths() {
+        return this.tableHeaderView.cells.map(cell => [
+            (cell.titleLabel.intrinsicContentWidth(cell.frame.height) + 50),
+            this.core.paddingLength * 2,
+            57
+        ].max())
+    }
+    
+    private cellWeightsWhenResizingWithParameters(
+        initialWeights: number[],
+        leftColumnIndex: number,
+        minWidths: number[],
+        movementX: number
+    ) {
+        // Change the cellWeights of the tableView
+        
+        const weights = initialWeights.copy()
+        
+        const leftWeight = initialWeights[leftColumnIndex]
+        const rightWeight = initialWeights[leftColumnIndex + 1]
+        
+        const minLeftWeight = minWidths[leftColumnIndex]
+        const minRightWeight = [minWidths[leftColumnIndex + 1], this.core.paddingLength * 2, 57].max()
+        const maxLeftWeight = leftWeight + rightWeight - minRightWeight
+        const maxRightWeight = leftWeight + rightWeight - minLeftWeight
+        
+        weights[leftColumnIndex] = (leftWeight + movementX).constrainedValue(minLeftWeight, maxLeftWeight)
+        weights[leftColumnIndex + 1] = (rightWeight - movementX).constrainedValue(minRightWeight, maxRightWeight)
+        
+        return weights
         
     }
     
@@ -736,6 +762,82 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
             padding,
             this.tableHeaderView.frame.max.y
         )
+        
+        // Trigger the resize handlers if the header view bounds have changed to make the minimums work
+        
+        if (this.tableHeaderView.boundsHaveChangedSinceLayout && this.hasResizableColumns) {
+            
+            const minWidths = this.minWidths
+            const weights = this.tableHeaderView.cellWeights
+            
+            const weightDescriptors: {
+                currentWeight: number;
+                index: number;
+                widthWithCurrentWeight: number;
+                minWidth: number,
+                widthLeftAboveMin: number
+                needsExpanding: boolean,
+            }[] = []
+            
+            const availableTotalWidth = bounds.width - this.tableHeaderView.sideCellsWidth * 2
+            
+            for (let i = 1; i < this.tableHeaderView.cells.length - 1; i++) {
+                
+                const weight = weights[i]
+                const minWidth = minWidths[i]
+                
+                const widthWithCurrentWeight = (weight / weights.summedValue) * availableTotalWidth
+                
+                const needsExpanding = widthWithCurrentWeight < minWidth
+                
+                weightDescriptors.push({
+                    
+                    index: i,
+                    currentWeight: weight,
+                    minWidth: minWidth,
+                    widthWithCurrentWeight: widthWithCurrentWeight,
+                    widthLeftAboveMin: widthWithCurrentWeight - minWidth,
+                    needsExpanding: needsExpanding
+                    
+                })
+                
+                
+            }
+            
+            const sortedWeightDescriptors = weightDescriptors.copy().sort((
+                a,
+                b
+            ) => (a.widthLeftAboveMin) - (b.widthLeftAboveMin))
+            
+            const weightDescriptorsThatNeedExpanding = sortedWeightDescriptors.filter(
+                descriptor => descriptor.needsExpanding
+            )
+            
+            const weightDescriptorsThatHaveSpace = sortedWeightDescriptors.filter(
+                descriptor => !descriptor.needsExpanding
+            )
+            
+            const totalSpace = weightDescriptorsThatHaveSpace.everyElement.widthLeftAboveMin.UI_elementValues?.summedValue ?? 0
+            
+            const totalSpaceNeededForExpansion = weightDescriptorsThatNeedExpanding.map(descriptor => -descriptor.widthLeftAboveMin).summedValue
+            
+            weightDescriptorsThatNeedExpanding.forEach(descriptor => weights[descriptor.index] = descriptor.minWidth)
+            weightDescriptorsThatHaveSpace.forEach(descriptor => {
+                
+                const spaceChangeMultiplier = descriptor.widthLeftAboveMin / totalSpace
+                
+                weights[descriptor.index] = descriptor.widthWithCurrentWeight - totalSpaceNeededForExpansion * spaceChangeMultiplier
+                
+            })
+            
+            
+            var asdasd = 1
+            
+            this.tableHeaderView.cellWeights = weights
+            this.tableView.cellWeights = weights
+            
+            
+        }
         
         
     }

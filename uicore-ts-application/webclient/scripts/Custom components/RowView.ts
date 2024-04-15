@@ -1,4 +1,4 @@
-import { IF, IS, IS_LIKE_NULL, IS_NOT, IS_NOT_NIL, nil, UIRectangle, UIView } from "uicore-ts"
+import { IS, IS_LIKE_NULL, IS_NOT_NIL, nil, UIRectangle, UIView } from "uicore-ts"
 
 
 export class RowView<CellType extends UIView = UIView> extends UIView {
@@ -133,12 +133,16 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
         return this._rowHeight
     }
     
+    get boundsHaveChangedSinceLayout() {
+        return !this.bounds.isEqualTo(this._previousLayoutBounds)
+    }
+    
     
     override layoutSubviews() {
         
         const bounds = this.bounds
         
-        if (bounds.isEqualTo(this._previousLayoutBounds)) {
+        if (!this.boundsHaveChangedSinceLayout) {
             return
         }
         
@@ -195,8 +199,6 @@ export class RowView<CellType extends UIView = UIView> extends UIView {
         
         
     }
-    
-    
 }
 
 

@@ -50,6 +50,7 @@ const DropdownDataItemSchema = new Schema({
     ]
     
 }, { collection: ENV_PREFIX + "dropdown_data_item", timestamps: true })
+// @ts-ignore
 DropdownDataItemSchema.plugin(mongooseAutopopulate)
 export const DropdownDataItemModel = mongoose.model<CBDocument<CBDropdownDataItem<any>>>(
     "DropdownDataItem",

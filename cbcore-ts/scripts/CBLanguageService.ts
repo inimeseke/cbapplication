@@ -130,7 +130,7 @@ export class CBLanguageService implements UILanguageService {
     
     static updateCurrentLanguageKey(route = UIRoute.currentRoute) {
         
-        let result = route.componentWithName("settings").parameters.language
+        let result = route.componentWithName("settings")?.parameters?.language
         
         if (IS_NOT(result)) {
             

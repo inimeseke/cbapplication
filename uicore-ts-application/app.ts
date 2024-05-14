@@ -10,6 +10,7 @@ import * as path from "path"
 import * as SocketIO from "socket.io"
 import { PORT } from "./config"
 import { CBEditorController } from "./controllers/CBEditorController"
+import { ChatGPTController } from "./controllers/ChahGPTController"
 import { FilesController } from "./controllers/FilesController"
 import { InternalSettingsController } from "./controllers/InternalSettingsController"
 import { SocketController } from "./controllers/SocketController"
@@ -71,6 +72,8 @@ export default class App {
         
         InternalSettingsController.Instance(this.expressApp, this.socketIO).registerRoutes()
         CBEditorController.Instance(this.expressApp, this.socketIO).registerRoutes()
+        
+        ChatGPTController.Instance(this.expressApp, this.socketIO).registerRoutes()
         
         
     }

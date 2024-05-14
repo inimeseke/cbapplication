@@ -103,7 +103,7 @@ export class CBSocketClient extends UIObject {
         
         this.socket.on("connect", () => {
             
-            console.log("Socket.io connected to server. clientID = " + this.socket + ", socketID = " + this.socket)
+            console.log("Socket.io connected to server. clientID = ", this.socket, " socketID = ", this.socket)
             
             var instanceIdentifier = localStorage.getItem("InstanceIdentifier")
             
@@ -117,7 +117,7 @@ export class CBSocketClient extends UIObject {
             const handshakeMessage: CBSocketHandshakeInitMessage = {
                 
                 accessToken: undefined,
-                userID: this._core.userProfile._id,
+                userID: this._core.userProfile?._id,
                 
                 inquiryAccessKey: undefined,
                 
@@ -160,7 +160,9 @@ export class CBSocketClient extends UIObject {
                     
                     this._callbackHolder = new CBSocketCallbackHolder(this, this._callbackHolder)
                     
-                    core.userProfile = message.messageData.userProfile
+                    
+                    core.userProfile = message.messageData.userProfile ?? {}
+                    
                     
                     this.sendUnsentMessages()
                     
@@ -173,7 +175,7 @@ export class CBSocketClient extends UIObject {
         
         this.socket.on("disconnect", () => {
             
-            console.log("Socket.io disconnected from server. clientID = " + this.socket + ".")
+            console.log("Socket.io disconnected from server. clientID = ", this.socket)
             
             this._isConnectionEstablished = NO
             
@@ -192,7 +194,7 @@ export class CBSocketClient extends UIObject {
             core.reloadSocketConnection()
             
             if (message) {
-    
+                
                 this._core.dialogViewShowerClass.alert(message)
                 
             }
@@ -360,7 +362,7 @@ export class CBSocketClient extends UIObject {
         "directOnly": "directOnly",
         "firstOnly": "firstOnly",
         "storedOrFirst": "storedOrFirst"
-    
+        
     } as const
     
     
@@ -431,7 +433,7 @@ export class CBSocketClient extends UIObject {
                 isUserBound,
                 nil,
                 (responseMessage, respondWithMessage) => resolve({
-        
+                    
                     responseMessage: responseMessage,
                     result: IF(IS_NOT_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE(RETURNER(undefined)),
                     errorResult: IF(IS_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE(RETURNER(undefined)),

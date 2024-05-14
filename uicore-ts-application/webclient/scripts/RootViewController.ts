@@ -26,11 +26,11 @@ import { SomeContentViewController } from "./SomeContentViewController"
 import { TopBarView } from "./TopBarView"
 import {
     TreeViewViewController
-} from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/TreeViewViewController"
+} from "./TreeViewViewController"
 import {
     ChartViewController
-} from "/Users/mart/cbapplication/uicore-ts-application/webclient/scripts/ChartViewController"
-
+} from "./ChartViewController"
+import { ChatGPTViewController } from "./ChatGPTViewController";
 
 export class RootViewController extends UIRootViewController {
     
@@ -59,7 +59,8 @@ export class RootViewController extends UIRootViewController {
         ),
         mainViewController: this.lazyViewControllerObjectWithClass(SomeContentViewController),
         treeViewViewController: this.lazyViewControllerObjectWithClass(TreeViewViewController),
-        chartViewController: this.lazyViewControllerObjectWithClass(ChartViewController)
+        chartViewController: this.lazyViewControllerObjectWithClass(ChartViewController),
+        chatGPTViewController: this.lazyViewControllerObjectWithClass(ChatGPTViewController)
     }
     private editor?: EditorViewController
     private editorWindow?: WindowProxy

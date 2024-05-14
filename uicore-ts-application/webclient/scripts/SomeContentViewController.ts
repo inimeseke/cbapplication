@@ -13,7 +13,7 @@ export class SomeContentViewController extends UIViewController {
         backgroundColor: UIColor.transparentColor
     }).addedAsSubviewToView(this.view)
     testingTheSpeedView: UITextView = new UITextView().addedAsSubviewToView(this.view).configuredWithObject({
-        text: "Autopood testing the speed now asdasd autopood"
+        text: "Autopood testing the speed view asdasd"
     })
     someButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
         titleLabel: {
@@ -24,7 +24,9 @@ export class SomeContentViewController extends UIViewController {
                 console.log(sender)
                 alert(sender.elementID)
             }
-        }
+        },
+        hoverText: "Some button",
+        style: { margin: "20px" }
     })
     
     

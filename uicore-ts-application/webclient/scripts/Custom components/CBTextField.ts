@@ -14,8 +14,9 @@ export class CBTextField extends UIView {
         this.viewHTMLElement.classList.add("input")
         
         this.textField = new UITextField(elementID + "TextField")
+        this.textField.style.width = "100%"
         this.addSubview(this.textField)
-    
+        
         this.titleLabel = new UITextView(elementID + "TitleLabel", UITextView.type.label)
         this.titleLabel.textColor = UIColor.greyColor
         this.titleLabel.style.fontStyle = "italic"

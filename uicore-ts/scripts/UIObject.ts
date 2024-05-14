@@ -32,6 +32,13 @@ export var nil: any = new Proxy(Object.assign(NilFunction, { "class": null, "cla
         return NilFunction()
     }
 })
+window.nil = nil
+
+declare global {
+    interface Window {
+        nil: any;
+    }
+}
 
 
 export type RecursiveRequired<T> = Required<{

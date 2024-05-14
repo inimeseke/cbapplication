@@ -4,6 +4,7 @@ import {
     SocketClientFunction,
     SocketClientNoMessageFunction
 } from "cbcore-ts"
+import { Message } from "openai/resources/beta/threads/messages"
 
 
 export interface CBEditorAnnotatedPropertyDescriptor {
@@ -87,8 +88,9 @@ export interface CBEditorEditingDescriptor {
     
 }
 
-export interface CBApplicationSocketClientInterface {
 
+export interface CBApplicationSocketClientInterface {
+    
     
     PerformAction: SocketClientNoMessageFunction<void>;
     PerformActionAndRetrieveData: SocketClientNoMessageFunction<boolean>;
@@ -133,6 +135,19 @@ export interface CBApplicationSocketClientInterface {
     
     ReloadEditorFiles: SocketClientNoMessageFunction<void>
     
+    // ChatGPT controller
+    
+    ChatGPTResponseBySendingMessage: SocketClientFunction<
+        {
+            threadID?: string,
+            messageText: string
+        },
+        {
+            threadID: string,
+            threadMessages: Message[]
+        }
+    >;
+    
     
     // Internal settings controller
     
@@ -153,10 +168,10 @@ export interface CBApplicationSocketClientInterface {
 declare module "cbcore-ts" {
     
     export interface SocketClientInterface extends CBApplicationSocketClientInterface {
-    
+        
         // Not putting anything here actually
         // The extended interface has all the functions
-    
+        
     }
     
 }

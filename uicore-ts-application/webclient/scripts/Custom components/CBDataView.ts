@@ -1,7 +1,6 @@
 import { CBLocalizedTextObject } from "cbcore-ts/compiledScripts/CBDataInterfaces"
 import {
     EXTEND,
-    FIRST,
     IF,
     IS,
     IS_NIL,
@@ -9,9 +8,10 @@ import {
     IS_UNDEFINED,
     MAKE_ID,
     nil,
-    NO, UIColor,
+    NO,
     UIKeyValueStringSorter,
-    UIObject, UIPoint, UIRectangle,
+    UIObject,
+    UIRectangle,
     UIStringFilter,
     UITableView,
     UITextField,
@@ -62,6 +62,7 @@ export interface CBDataViewCellDescriptor<DataType = Record<string, any>> {
 
 export class CBDataView<DataType = Record<string, any>> extends UIView {
     
+    
     private _descriptors: CBDataViewCellDescriptor<DataType>[] = []
     
     private _filteringArray: string[] = []
@@ -87,6 +88,7 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
     
     private _hasResizableColumns = NO
     _resizingHandleViews: UIView[] = []
+    _userRequestedWeights?: number[]
     
     
     constructor(elementID?: string) {
@@ -667,7 +669,9 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
                 
                 const weights = this.cellWeightsWhenResizingWithParameters(initialWeights, i, minWidths, movementX)
                 this.tableView.cellWeights = weights
-                this.tableHeaderView.cellWeights = weights;
+                this.tableHeaderView.cellWeights = weights
+                
+                this.userRequestedWeights = weights.copy();
                 
                 (this.tableView._visibleRows as RowView[]).everyElement.layoutParametersDidChange()
                 this.setNeedsLayout()
@@ -686,6 +690,26 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
         
     }
     
+    get userRequestedWeights(): number[] {
+        
+        this._userRequestedWeights = this._userRequestedWeights ?? JSON.parse(localStorage.getItem(
+            "userRequestedWeights__" + this.superview?.class.name + "_" + this.class.name + "_" + this.propertyDescriptors.firstElement.name
+        ) ?? "[]")
+        
+        return this._userRequestedWeights!
+        
+    }
+    
+    set userRequestedWeights(weights: number[]) {
+        
+        localStorage.setItem(
+            "userRequestedWeights__" + this.superview?.class.name + "_" + this.class.name + "_" + this.propertyDescriptors.firstElement.name,
+            JSON.stringify(weights ?? [])
+        )
+        
+        this._userRequestedWeights = weights
+        
+    }
     
     get minWidths() {
         return this.tableHeaderView.cells.map(cell => [
@@ -763,12 +787,13 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
             this.tableHeaderView.frame.max.y
         )
         
-        // Trigger the resize handlers if the header view bounds have changed to make the minimums work
         
         if (this.tableHeaderView.boundsHaveChangedSinceLayout && this.hasResizableColumns) {
             
             const minWidths = this.minWidths
-            const weights = this.tableHeaderView.cellWeights
+            const weights = this.tableHeaderView.cellWeights.map(
+                (weight, index) => [this.userRequestedWeights?.[index] ?? weight, weight].min()
+            )
             
             const weightDescriptors: {
                 currentWeight: number;
@@ -830,8 +855,6 @@ export class CBDataView<DataType = Record<string, any>> extends UIView {
                 
             })
             
-            
-            var asdasd = 1
             
             this.tableHeaderView.cellWeights = weights
             this.tableView.cellWeights = weights

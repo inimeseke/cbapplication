@@ -721,7 +721,7 @@ export class CBEditorController extends RoutesController {
                     classConstructor.getSourceFile().fixMissingImports()
                     
                     locationOfEditedValue = this.locationOfNode(
-                        newStatement.getFirstChildByKind(SyntaxKind.BinaryExpression).getRight()
+                        newStatement.getFirstChildByKind(SyntaxKind.BinaryExpression)?.getRight()
                     )
                     
                 }

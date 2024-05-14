@@ -35,7 +35,7 @@ import { RowView } from "./Custom components/RowView"
 import { SearchableDropdown } from "./Custom components/SearchableDropdown"
 import { LanguageService } from "./LanguageService"
 import {
-    CBEditorAnnotatedPropertyDescriptor,
+    CBEditorAnnotatedPropertyDescriptor, CBEditorEditingDescriptor,
     CBEditorPropertyDescriptor,
     CBEditorPropertyLocation
 } from "./SocketClientFunctions"
@@ -1451,15 +1451,13 @@ export class EditorViewController extends UIViewController {
         
         //this.propertyEditors.everyElement.view.removeFromSuperview()
         this.propertyEditors = []
-        for (let i = 0; i < fileObject.editableProperties.length; i++) {
+        for (let i = 0; i < (fileObject?.editableProperties.length ?? 0); i++) {
+            
+            if (!fileObject) {
+                break
+            }
             
             const property = fileObject.editableProperties[i]
-            
-            if (property.path.contains("titleLabel.innerHTML")) {
-                
-                var asd = 1
-                
-            }
             
             const isColor = propertyDescriptor.object.valueForKeyPath(property.path)
                 ?.isKindOfClass
@@ -2155,7 +2153,7 @@ export class EditorViewController extends UIViewController {
         if (isClassChanged || forced) {
             
             
-            fileObject.referencedFiles.forEach(object => {
+            fileObject?.referencedFiles.forEach(object => {
                 
                 // this._editor.addModelFromContents(
                 //     object.codeFileContents,
@@ -2169,7 +2167,7 @@ export class EditorViewController extends UIViewController {
                 
             })
             
-            this._editor.loadModelFromContents(fileObject.codeFileContents, fileObject.path)
+            this._editor.loadModelFromContents(fileObject?.codeFileContents, fileObject?.path)
             
             this._currentClassName = propertyDescriptor.className
             
@@ -2178,9 +2176,9 @@ export class EditorViewController extends UIViewController {
         this.view.setNeedsLayout()
         
         await this.showEditorPosition(IF(fileObject?.propertyLocation?.className == this._currentClassName)(
-            () => fileObject.propertyLocation.end
+            () => fileObject!.propertyLocation.end
         ).ELSE(
-            () => fileObject.propertyReferenceLocations?.firstElement?.end ?? { lineNumber: 0, column: 0 }
+            () => fileObject?.propertyReferenceLocations?.firstElement?.end ?? { lineNumber: 0, column: 0 }
         ))
         
     }

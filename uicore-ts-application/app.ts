@@ -10,7 +10,7 @@ import * as path from "path"
 import * as SocketIO from "socket.io"
 import { PORT } from "./config"
 import { CBEditorController } from "./controllers/CBEditorController"
-import { ChatGPTController } from "./controllers/ChahGPTController"
+import { ChatGPTController } from "./controllers/ChatGPTController"
 import { FilesController } from "./controllers/FilesController"
 import { InternalSettingsController } from "./controllers/InternalSettingsController"
 import { SocketController } from "./controllers/SocketController"
@@ -111,29 +111,29 @@ export default class App {
     }
     
     private async mongoSetup() {
-        
+
         (mongoose as any).Promise = global.Promise// @see https://stackoverflow.com/a/38833920/4782491
-        
+
         const mongodb = await MongoMemoryServer.create()
-        
+
         const address = mongodb.getUri("ui_core_application") //"mongodb://localhost:27017/ui_core_application"
-        
+
         try {
-            
+
             console.log("Connecting to database with URL " + address)
-            
+
             await mongoose.connect(address)
-            
+
             //await mongoose.connect(App.mongoUrl)
-            
+
             console.log("Database is " + JSON.stringify(mongoose.connection.db))
-            
+
         } catch (exception) {
-            
+
             console.log(JSON.stringify(exception))
-            
+
         }
-        
+
     }
     
     

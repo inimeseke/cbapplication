@@ -1,4 +1,3 @@
-import * as AWS from "aws-sdk"
 import * as bent from "bent"
 import { Application } from "express"
 import * as passport from "passport"
@@ -19,12 +18,13 @@ export class FilesController extends RoutesController {
     
     private static _instance: FilesController
     
-    storageService = new AWS.S3({
-        
-        accessKeyId: process.env.AWS_ID,
-        secretAccessKey: process.env.AWS_KEY
-        
-    })
+     storageService = Utils.nil
+    //      new AWS.S3({
+    //
+    //     accessKeyId: process.env.AWS_ID,
+    //     secretAccessKey: process.env.AWS_KEY
+    //
+    // })
     
     public registerRoutes() {
         
@@ -45,12 +45,13 @@ export class FilesController extends RoutesController {
                     
                 }
                 
-                const storageService = new AWS.S3({
-                    
-                    accessKeyId: process.env.AWS_ID,
-                    secretAccessKey: process.env.AWS_KEY
-                    
-                })
+                const storageService = Utils.nil
+                //     new AWS.S3({
+                //    
+                //     accessKeyId: process.env.AWS_ID,
+                //     secretAccessKey: process.env.AWS_KEY
+                //    
+                // })
                 
                 let imageData: Buffer
                 

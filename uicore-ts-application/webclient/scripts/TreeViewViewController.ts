@@ -51,7 +51,7 @@ export class TreeViewViewController extends UIViewController {
     
     exampleButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
         titleLabel: {
-            text: "Asdasdasdasdasd asdasd",
+            text: "This text was written live",
             textAlignment: "center"
         }
     })

@@ -1,6 +1,5 @@
 import filePlugin from "@chialab/esbuild-plugin-any-file"
 import {build} from "esbuild"
-import {esbuildPluginDecorator} from "esbuild-plugin-decorator"
 import inlineImage from "esbuild-plugin-inline-image"
 import inlineWorkerPlugin from "esbuild-plugin-inline-worker"
 import ts from "typescript"
@@ -76,10 +75,10 @@ await build({
 //
 // })
 
-let result = fs.readFileSync("compiledScripts/webclient.js").toString()
-result = result.replace("@import_uicore_ts2.UIComponentView", "")
-    .replace("@CBEditorNestedAttributes()", "")
-fs.writeFileSync("compiledScripts/webclient.js", result)
+// let result = fs.readFileSync("compiledScripts/webclient.js").toString()
+// result = result.replace("@import_uicore_ts2.UIComponentView", "")
+//     .replace("@CBEditorNestedAttributes()", "")
+// fs.writeFileSync("compiledScripts/webclient.js", result)
 
 // const result = ts.transpile(fs.readFileSync("compiledScripts/webclient_raw.js").toString(), {
 //     compilerOptions: {

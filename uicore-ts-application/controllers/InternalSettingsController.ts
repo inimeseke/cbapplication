@@ -1,4 +1,4 @@
-import { ObjectID } from "bson"
+import { ObjectId } from "bson"
 import {
     CBDropdownData,
     CBDropdownDataItem,
@@ -435,7 +435,7 @@ export class InternalSettingsController extends RoutesController {
                         
                         if (message.documentID) {
                             
-                            message.filterOptions._id = new ObjectID(message.documentID)
+                            message.filterOptions._id = new ObjectId(message.documentID)
                             
                         }
                         
@@ -478,7 +478,7 @@ export class InternalSettingsController extends RoutesController {
                         
                         if (message.documentID) {
                             
-                            message.filterOptions._id = new ObjectID(message.documentID)
+                            message.filterOptions._id = new ObjectId(message.documentID)
                             
                         }
                         

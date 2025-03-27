@@ -400,6 +400,48 @@ export class CBEditorController extends RoutesController {
             
         }
         
+        targets.SymbolAtPosition = async (message, socketSession, respondWithMessage) => {
+            
+            try {
+                
+                const sourceFiles = this.webclientProject.getSourceFiles()
+                const resultFile = sourceFiles.find(
+                    (file, index, array) => file.getClass(
+                        declaration => declaration.getName() == message.className
+                    )
+                )
+                
+                resultFile.replaceText([0, resultFile.getEnd()], message.fileText)
+                
+                // const referencedFiles = sourceFiles.map(
+                //     (file) => {
+                //         return {
+                //             codeFileContents: file.getFullText(),
+                //             path: file.getFilePath().replace(path.join(process.cwd(), "webclient") + "/", "")
+                //         }
+                //     }
+                // )
+                
+                const classObject = resultFile.getClass(message.className)
+                
+                const childAtPos = resultFile.getDescendantAtPos(message.position - 2)
+                
+                
+                const result = childAtPos.getType().compilerType["types"][0].symbol.escapedName
+                //swc.transformSync(message).code
+                
+                await resultFile.refreshFromFileSystem()
+                
+                respondWithMessage(result)
+                
+            } catch (exception) {
+                
+                respondWithMessage.sendErrorResponse("")
+                
+            }
+            
+        }
+        
         
         targets.AllDerivedClassNames = async (message, socketSession, respondWithMessage) => {
             
@@ -1720,10 +1762,10 @@ export class CBEditorController extends RoutesController {
     ) {
         
         if (Utils.IS_UNDEFINED(valueString)) {
-            return "undefined";
+            return "undefined"
         }
         if (Utils.IS_LIKE_NULL(valueString)) {
-            return "null";
+            return "null"
         }
         
         let result = valueString

@@ -27,6 +27,21 @@ export interface CBEditorPropertyDescriptor {
     
 }
 
+export interface CBEditorPosition {
+    
+    className: string
+    fileText: string
+    
+    position: number
+    
+    startLineNumber: number
+    startColumn: number
+    
+    endLineNumber: number
+    endColumn: number
+    
+}
+
 
 export interface CBEditorPropertyValueDescriptor {
     
@@ -111,6 +126,8 @@ export interface CBApplicationSocketClientInterface {
     //     { location: CBEditorPropertyLocation }>
     
     JSStringFromTSString: SocketClientFunction<string, string>
+    
+    SymbolAtPosition: SocketClientFunction<CBEditorPosition, string>
     
     AllDerivedClassNames: SocketClientFunction<string, string[]>
     

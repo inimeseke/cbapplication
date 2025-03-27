@@ -191,7 +191,17 @@
         }
 
     }, false)
-
+    
+    
+    editorObject.onDidChangeCursorPosition((event) => {
+        
+        window.parent.postMessage({
+            type: "OnDidChangeCursorPositionFromCBEditorEditor",
+            event: event
+        })
+        
+    })
+    
     document.addEventListener("keydown", (event) => {
 
         if ((event.ctrlKey || event.altKey || event.metaKey) && ["s", "r", "e", "w"].includes(event.key)) {

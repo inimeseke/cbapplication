@@ -1,4 +1,3 @@
-
 import {
     CBAuthenticationSource,
     CBSubscription,
@@ -10,9 +9,6 @@ import { LoginKeyModel, SubscriptionModel, UserModel } from "../models"
 import { SocketController } from "./SocketController"
 import { InternalSettingsController } from "./InternalSettingsController"
 import Utils from "../Utils"
-
-
-
 
 
 export class UserController {
@@ -43,7 +39,6 @@ export class UserController {
             }, respondWithMessage) => {
                 
                 
-                
                 try {
                     
                     if (!InternalSettingsController.sharedInstance.isUserAnAdministrator(socketSession.userProfile)) {
@@ -72,19 +67,10 @@ export class UserController {
                 }
                 
                 
-                
-                
-                
             })
             
             
-            
-            
-            
         })
-        
-        
-        
         
         
     }
@@ -182,7 +168,8 @@ export class UserController {
         UserModel.findOne({ "_id": currentUser.id })
             .select("subscriptions")
             .populate("subscriptions")
-            .exec((error, user: CBUserProfile) => {
+            .exec()
+            .then((error, user: CBUserProfile) => {
                 completion(error, user.subscriptions)
             })
     }
@@ -220,14 +207,9 @@ export class UserController {
         }
         
         
-        
-        
         return result
         
     }
-    
-    
-    
     
     
     public static get sharedInstance() {

@@ -110,18 +110,18 @@ export class CBSocketClient extends UIObject {
             if (IS_NOT(instanceIdentifier)) {
                 
                 instanceIdentifier = MAKE_ID()
-                localStorage.setItem("InstanceIdentifier", instanceIdentifier)
+                localStorage.setItem("InstanceIdentifier", instanceIdentifier!)
                 
             }
             
             const handshakeMessage: CBSocketHandshakeInitMessage = {
                 
-                accessToken: undefined,
+                accessToken: localStorage.getItem("CBUserAccessToken") ?? undefined,
                 userID: this._core.userProfile?._id,
                 
                 inquiryAccessKey: undefined,
                 
-                instanceIdentifier: instanceIdentifier
+                instanceIdentifier: instanceIdentifier!
                 
             }
             

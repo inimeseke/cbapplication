@@ -6,6 +6,7 @@ import { deleteSync } from "del"
 import * as fs from "fs"
 import * as https from "https"
 import inquirer from "inquirer"
+import * as path from "path"
 import * as Path from "path"
 
 
@@ -50,10 +51,11 @@ export async function run() {
         }
         // execSync("mkdir " + projectName, options)
         // execSync("git clone https://github.com/inimeseke/cbapplication.git " + projectName, options)
-        //
-        // execSync("pwd", options)
+
+        execSync("pwd", options)
+        console.log(__dirname + " is the current __dirname.")
         
-        const source = "./dist/template"
+        const source = path.join(__dirname, "/dist/template") 
         const destination = "./" + projectName
         
         if (fs.existsSync(destination)) {

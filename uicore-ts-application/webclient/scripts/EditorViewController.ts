@@ -35,7 +35,7 @@ import { RowView } from "./Custom components/RowView"
 import { SearchableDropdown } from "./Custom components/SearchableDropdown"
 import { LanguageService } from "./LanguageService"
 import {
-    CBEditorAnnotatedPropertyDescriptor, CBEditorEditingDescriptor,
+    CBEditorAnnotatedPropertyDescriptor,
     CBEditorPropertyDescriptor,
     CBEditorPropertyLocation
 } from "./SocketClientFunctions"
@@ -750,6 +750,8 @@ export class EditorViewController extends UIViewController {
     
     private _editor: EditorType = nil
     
+    _frameDisplayView = new UIView()
+    
     private _currentEditingView?: UIView
     private _currentClassName?: string
     private _bottomView = new UIView().addedAsSubviewToView(this.view)
@@ -860,35 +862,17 @@ export class EditorViewController extends UIViewController {
             await this.shouldCallPointerUpInsideOnView(eventView, event) ?? YES
         
         this.UIViewClass.shouldCallPointerHoverOnView = async view => {
-            
-            // @ts-ignore
-            //const editorOverlayElement = view._CBEditorOverlayElement
-            
             if (view != this._currentEditingView && !view.withAllSuperviews.contains(this.view)) {
-                
-                //this.highlightSingleView(view, YES)
-                
                 return NO
-                
             }
-            
             return YES
-            
         }
         
         this.UIViewClass.shouldCallPointerLeaveOnView = async view => {
-            
             if (view != this._currentEditingView && !view.withAllSuperviews.contains(this.view)) {
-                
-                // @ts-ignore
-                //(view._CBEditorOverlayElement as HTMLElement)?.remove()
-                
                 return NO
-                
             }
-            
             return YES
-            
         }
         
         document.addEventListener("keydown", this.keydownListener)
@@ -898,6 +882,7 @@ export class EditorViewController extends UIViewController {
     
     
     private initEditor() {
+        
         
         return new Promise(resolveInitEditor => {
             
@@ -934,6 +919,8 @@ export class EditorViewController extends UIViewController {
                         }
                     })
                     
+                    this._editor.onDidChangeCursorPosition()
+                    
                     resolveInitEditor(YES)
                     
                 }
@@ -945,6 +932,64 @@ export class EditorViewController extends UIViewController {
                 if (event.data.type == "KeydownFromCBEditorEditor") {
                     this.keydownListener(event.data.event)
                 }
+                
+                if (event.data.type == "OnDidChangeCursorPositionFromCBEditorEditor") {
+                    
+                    const handler = async (event: editor.ICursorPositionChangedEvent) => {
+                        
+                        function indexWithPosition(position: IPosition, editorText: string) {
+                            
+                            const editorLines = editorText.split("\n")
+                            const linesBefore = editorLines.slice(0, position.lineNumber)
+                            linesBefore.lastElement = linesBefore.lastElement.substring(0, position.column)
+                            return linesBefore.join("\n").length
+                            
+                        }
+                        
+                        console.log(event)
+                        
+                        // Remove previous frame displayer DIV elements from view, keeping a reference
+                        this._frameDisplayView.removeFromSuperview()
+                        
+                        // Find the symbol that is associated with the position and show a box on the page if it is a frame inside the layout method
+                        // Check if the position is inside the layout method
+                        const editorText = await this._editor.getValue() as string
+                        const locationOfLayoutFunctionInnerText = this.locationOfLayoutMethodInnerText(editorText)
+                        const eventIndex = indexWithPosition(event.position, editorText)
+                        if (eventIndex < locationOfLayoutFunctionInnerText.startIndex || locationOfLayoutFunctionInnerText.endIndex < eventIndex) {
+                            return
+                        }
+                        // if (event.position.column < locationOfLayoutFunctionInnerText.startColumn || locationOfLayoutFunctionInnerText.endColumn < event.position.column) {
+                        //     return
+                        // }
+                        
+                        // Position must be inside the layout method because the function would have returned otherwise
+                        
+                        // Find out the associated symbol, probably on the server side
+                        
+                        const symbolRequestResult = await SocketClient.SymbolAtPosition({
+                            className: this._currentClassName!,
+                            fileText: editorText,
+                            position: eventIndex,
+                            startLineNumber: event.position.lineNumber,
+                            startColumn: event.position.column,
+                            endLineNumber: event.position.lineNumber,
+                            endColumn: event.position.column
+                        })
+                        
+                        var asd = 1
+                        
+                        // If the symbol is a rectangle, calculate that rectangle by running the method up to that point
+                        
+                        // Display a frame displayer DIV on the page, showing the location of the rectangle
+                        
+                        
+                    }
+                    
+                    handler(event.data.event)
+                    
+                }
+                
                 
             }
             
@@ -978,25 +1023,14 @@ export class EditorViewController extends UIViewController {
     private async editorContentChanged(event: editor.IModelContentChangedEvent) {
         
         console.log("Editor content changed")
-        
         console.log(event)
         
-        //this._selectedView.viewHTMLElement.classList.add("loading-border")
-        
-        
         const editorText = await this._editor.getValue() as string
-        
         const layoutFunctionText = this.layoutFunctionText(editorText)
         
-        
         if (layoutFunctionText == this._layoutFunctionText && this._layoutFunctionText) {
-            
             this._layoutFunctionText = layoutFunctionText
-            
-            //this._selectedView.viewHTMLElement.classList.remove("loading-border")
-            
             return
-            
         }
         
         this._layoutFunctionText = layoutFunctionText
@@ -1035,7 +1069,61 @@ export class EditorViewController extends UIViewController {
         return functionText.substring(functionText.indexOf("{") + 1, functionText.lastIndexOf("}"))
     }
     
+    private locationOfLayoutMethodInnerText(editorText: string) {
+        
+        const functionText = this.layoutMethodText(editorText)
+        const linesFromFunctionText = functionText.split("\n")
+        
+        const startIndex = editorText.indexOf(functionText) + functionText.indexOf("{") + 1
+        const precedingLines = editorText.substring(0, startIndex).split("\n")
+        const functionStartLine = precedingLines.pop()!
+        const endIndex = startIndex + functionText.length - functionStartLine.indexOf("{")
+        const functionTextExcludingFirstLine = linesFromFunctionText.slice(1).join("\n")
+        const linesIncludingFunction = precedingLines.copy()
+            .concat(functionStartLine)
+            .concat(
+                functionTextExcludingFirstLine
+                    .substring(0, functionTextExcludingFirstLine.lastIndexOf("}") + 1)
+                    .split("\n")
+            )
+        const result = {
+            
+            startIndex: startIndex,
+            endIndex: linesIncludingFunction.join("\n").length,
+            
+            startLineNumber: precedingLines.length,
+            startColumn: precedingLines.lastElement.length,
+            
+            endLineNumber: linesIncludingFunction.length,
+            endColumn: linesIncludingFunction.lastElement.length
+            
+        }
+        
+        
+        return result
+        
+    }
+    
     private layoutFunctionText(editorText: string) {
+        
+        const methodBlockString = this.layoutMethodText(editorText)
+        
+        if (!methodBlockString) {
+            return methodBlockString
+        }
+        
+        return ("function " + methodBlockString).replace(" super.", " this.superclass.prototype.")
+            .replace(
+                new RegExp("\\sthis.superclass.prototype.layoutViewSubviews\\(\\)"),
+                " this.superclass.prototype.layoutViewSubviews?.apply(this)"
+            )
+        
+    }
+    
+    
+    private layoutMethodText(editorText: string) {
+        
+        let methodBlockString = ""
         
         const matchedText = editorText.match(
                 new RegExp("layoutViewSubviews\\(\\) \\{")
@@ -1043,8 +1131,6 @@ export class EditorViewController extends UIViewController {
             editorText.match(
                 new RegExp("layoutSubviews\\(\\) \\{")
             )?.firstElement
-        
-        let methodBlockString = ""
         
         if (matchedText) {
             
@@ -1074,21 +1160,9 @@ export class EditorViewController extends UIViewController {
             
         }
         
-        if (!methodBlockString) {
-            return methodBlockString
-        }
-        
-        const result = ("function " + methodBlockString).replace(" super.", " this.superclass.prototype.")
-            .replace(
-                new RegExp("\\sthis.superclass.prototype.layoutViewSubviews\\(\\)"),
-                " this.superclass.prototype.layoutViewSubviews?.apply(this)"
-            )
-        
-        
-        return result
+        return methodBlockString
         
     }
-    
     
     private replaceLayoutFunction(scriptText: string) {
         
@@ -1268,13 +1342,10 @@ export class EditorViewController extends UIViewController {
             )
             
             if (parentDescriptor) {
-                
                 resultArray.push(parentDescriptor)
-                
                 if (parentDescriptor._parent) {
                     getParentDescriptorsOfDescriptor(parentDescriptor, resultArray)
                 }
-                
             }
             
             return resultArray

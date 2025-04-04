@@ -165,10 +165,12 @@ export class CBTableHeaderView<DataType = Record<string, any>> extends RowView<C
             
             if (buttonState != CBTableHeaderView.orderingState.unordered) {
                 
+                const descriptor = this.descriptors[index]
+                
                 result.push({
                     
-                    keyPath: this.descriptors[index].keyPath,
-                    dataType: UIKeyValueStringSorter.dataType.string,
+                    keyPath: descriptor.keyPath,
+                    dataType: descriptor.dataType ?? UIKeyValueStringSorter.dataType.string,
                     direction: buttonState
                     
                 })

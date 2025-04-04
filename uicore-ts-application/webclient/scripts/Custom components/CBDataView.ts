@@ -41,6 +41,7 @@ export interface CBDataViewCellDescriptor<DataType = Record<string, any>> {
     identifierKeyPath?: StringOnly<keyof DataType> | string;
     parentIdentifierKeyPath?: StringOnly<keyof DataType> | string;
     
+    dataType?: keyof typeof UIKeyValueStringSorter.dataType;
     // @ts-ignore
     initialOrderingState?: ValueOf<{
         

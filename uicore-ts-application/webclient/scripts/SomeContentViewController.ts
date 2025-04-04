@@ -21,15 +21,19 @@ export class SomeContentViewController extends UIViewController {
         },
         controlEventTargetAccumulator: {
             PointerUpInside: (sender, event) => {
+                
                 console.log(sender)
-                alert(sender.elementID)
+                //alert(sender.elementID)
+
+                UIRoute.currentRoute.routeWithComponent("treeview", {}).apply()
+
             }
         },
         hoverText: "Some button",
         style: { margin: "20px" }
     })
-    
-    
+    bottomView = new UIView().addedAsSubviewToView(this.view);
+
     constructor(view: UIView) {
         
         super(view)
@@ -88,26 +92,30 @@ export class SomeContentViewController extends UIViewController {
     
     
     override layoutViewSubviews() {
-        
+
         super.layoutViewSubviews()
-        
+
         const padding = this.core.paddingLength
         const labelHeight = padding
-        
+
         // View bounds
         const bounds = this.view.bounds.rectangleWithInset(padding)
-        
+
         this.titleLabel.frame = bounds.rectangleWithHeight(labelHeight * 2)
         this.testingTheSpeedView.frame = this.titleLabel.frame.rectangleForNextRow(
             padding,
             [this.testingTheSpeedView.intrinsicContentHeight(this.titleLabel.frame.width), padding].max()
         )
         this.someButton.frame = this.testingTheSpeedView.frame.rectangleForNextRow(
-            padding,
+            padding ** 0,
             labelHeight * 2
+        ).rectangleByAddingX(-padding)
+        this.bottomView.frame = this.someButton.frame.rectangleForNextRow(
+            padding,
+            [this.bottomView.intrinsicContentHeight(this.someButton.frame.width), padding].max()
         )
-        
-        
+
+
     }
 }
 

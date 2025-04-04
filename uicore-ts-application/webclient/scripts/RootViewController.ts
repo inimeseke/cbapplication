@@ -22,6 +22,7 @@ import { InternalDropdownSettingsViewController } from "./InternalDropdownSettin
 import { InternalLanguageSettingsViewController } from "./InternalLanguageSettingsViewController"
 import { LanguagesDialogView } from "./LanguagesDialogView"
 import { LanguageService } from "./LanguageService"
+import { ProcurementViewController } from "./ProcurementViewController"
 import { SomeContentViewController } from "./SomeContentViewController"
 import { TopBarView } from "./TopBarView"
 import {
@@ -60,7 +61,8 @@ export class RootViewController extends UIRootViewController {
         mainViewController: this.lazyViewControllerObjectWithClass(SomeContentViewController),
         treeViewViewController: this.lazyViewControllerObjectWithClass(TreeViewViewController),
         chartViewController: this.lazyViewControllerObjectWithClass(ChartViewController),
-        chatGPTViewController: this.lazyViewControllerObjectWithClass(ChatGPTViewController)
+        chatGPTViewController: this.lazyViewControllerObjectWithClass(ChatGPTViewController),
+        procurementViewController: this.lazyViewControllerObjectWithClass(ProcurementViewController)
     }
     private editor?: EditorViewController
     private editorWindow?: WindowProxy

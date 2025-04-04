@@ -18,6 +18,7 @@ export class WebClientController extends RoutesController {
             const result: CBCoreInitializer = {
                 
                 languageValues: await InternalSettingsController.sharedInstance.retrieveLanguagesValues(),
+                // Set the default language key here
                 defaultLanguageKey: "en"
                 
             }

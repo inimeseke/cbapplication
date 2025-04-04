@@ -52,7 +52,17 @@ export class TreeViewViewController extends UIViewController {
     exampleButton: CBButton = new CBButton().addedAsSubviewToView(this.view).configuredWithObject({
         titleLabel: {
             text: "This text was written live",
-            textAlignment: "center"
+            textAlignment: "center",
+            controlEventTargetAccumulator: {
+            PointerUpInside: (sender, event) => {
+                
+                console.log(sender)
+                //alert(sender.elementID)
+
+                UIRoute.currentRoute.routeByRemovingComponentNamed("treeview").apply()
+
+            }
+        }
         }
     })
     

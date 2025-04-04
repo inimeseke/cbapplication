@@ -15,7 +15,7 @@ export interface UIKeyValueStringSorterSortingInstruction {
 }
 
 
-export class UIKeyValueStringSorter extends UIObject {
+export class UIKeyValueSorter extends UIObject {
     
     static _sharedWebWorkerHolder = {
         UICore_completionFunctions: {},
@@ -38,7 +38,7 @@ export class UIKeyValueStringSorter extends UIObject {
             filteredIndexes: number[],
             identifier: any
         ) => void>
-    } = UIKeyValueStringSorter._sharedWebWorkerHolder
+    } = UIKeyValueSorter._sharedWebWorkerHolder
     
     
     constructor(useSeparateWebWorkerHolder = NO) {
@@ -56,8 +56,8 @@ export class UIKeyValueStringSorter extends UIObject {
             
         }
         
-        UIKeyValueStringSorter._instanceNumber = UIKeyValueStringSorter._instanceNumber + 1
-        this._instanceNumber = UIKeyValueStringSorter._instanceNumber
+        UIKeyValueSorter._instanceNumber = UIKeyValueSorter._instanceNumber + 1
+        this._instanceNumber = UIKeyValueSorter._instanceNumber
         
         if (IS_NOT(this._webWorkerHolder.webWorker.onmessage)) {
     
@@ -163,7 +163,8 @@ export class UIKeyValueStringSorter extends UIObject {
     
     static dataType = {
         
-        "string": "string"
+        "string": "string",
+        "number": "number"
         
     }
     
@@ -264,7 +265,7 @@ export class UIKeyValueStringSorter extends UIObject {
         
         this._isThreadClosed = YES
         
-        if (this._webWorkerHolder != UIKeyValueStringSorter._sharedWebWorkerHolder) {
+        if (this._webWorkerHolder != UIKeyValueSorter._sharedWebWorkerHolder) {
     
             this._webWorkerHolder.webWorker.terminate()
             

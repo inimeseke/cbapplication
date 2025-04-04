@@ -1,5 +1,5 @@
 // @ts-ignore
-import UIKeyValueStringSorterWebWorker from "./UIKeyValueStringSorterWebWorker.worker.js"
+import UIKeyValueSorterWebWorker from "./UIKeyValueSorterWebWorker.worker"
 import { IS, IS_NOT, MAKE_ID, NO, UIObject, YES } from "./UIObject"
 
 
@@ -21,7 +21,7 @@ export class UIKeyValueSorter extends UIObject {
         UICore_completionFunctions: {},
         UICore_isWorking: false,
         UICore_messagesToPost: undefined,
-        webWorker: new UIKeyValueStringSorterWebWorker()
+        webWorker: new UIKeyValueSorterWebWorker()
     }
     
     static _instanceNumber = -1
@@ -48,7 +48,7 @@ export class UIKeyValueSorter extends UIObject {
         if (useSeparateWebWorkerHolder) {
             
             this._webWorkerHolder = {
-                webWorker: new UIKeyValueStringSorterWebWorker(),
+                webWorker: new UIKeyValueSorterWebWorker(),
                 UICore_isWorking: false,
                 UICore_messagesToPost: undefined,
                 UICore_completionFunctions: {}

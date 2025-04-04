@@ -104,17 +104,28 @@ function sortData(data: any[], sortingInstructions: any[]) {
     
     const sortingObjects = data.map(function (dataItem: any, index: any, array: any) {
         
-        const result: { _UIKeyValueStringSorterWebWorkerSortingObjectIndex: any } & Record<string, string> = {
+        const result: { _UIKeyValueStringSorterWebWorkerSortingObjectIndex: any } & Record<string, string | number> = {
             
             "_UIKeyValueStringSorterWebWorkerSortingObjectIndex": index
             
         }
         
         
-        sortingInstructions.forEach((instruction: { keyPath: string | number }) => {
+        sortingInstructions.forEach((instruction: { keyPath: string | number, dataType:string }) => {
             
-            result[instruction.keyPath] = JSON.stringify(valueForKeyPath("" + instruction.keyPath, dataItem) || {})
-                .toLowerCase()
+            if (instruction.dataType == "string") {
+                
+                result[instruction.keyPath] = JSON.stringify(valueForKeyPath("" + instruction.keyPath, dataItem) || {})
+                    .toLowerCase()
+                
+            }
+            else if (instruction.dataType == "number") {
+                
+                result[instruction.keyPath] = JSON.stringify(valueForKeyPath("" + instruction.keyPath, dataItem) || {})
+                    .toLowerCase().numericalValue
+                
+            }
+            
         })
         
         return result

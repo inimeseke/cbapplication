@@ -3,7 +3,7 @@ import UIKeyValueSorterWebWorker from "./UIKeyValueSorterWebWorker.worker"
 import { IS, IS_NOT, MAKE_ID, NO, UIObject, YES } from "./UIObject"
 
 
-export interface UIKeyValueStringSorterSortingInstruction {
+export interface UIKeyValueSorterSortingInstruction {
     
     keyPath: string;
     
@@ -179,7 +179,7 @@ export class UIKeyValueSorter extends UIObject {
     
     sortData<T>(
         data: T[],
-        sortingInstructions: UIKeyValueStringSorterSortingInstruction[],
+        sortingInstructions: UIKeyValueSorterSortingInstruction[],
         identifier: any,
         completion: (sortedData: T[], sortedIndexes: number[], identifier: any) => void
     ) {
@@ -224,7 +224,7 @@ export class UIKeyValueSorter extends UIObject {
     
     sortedData<T>(
         data: T[],
-        sortingInstructions: UIKeyValueStringSorterSortingInstruction[],
+        sortingInstructions: UIKeyValueSorterSortingInstruction[],
         identifier: any = MAKE_ID()
     ) {
     

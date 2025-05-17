@@ -1,4 +1,4 @@
-import { IS_NIL, IS_NOT, NO } from "./UIObject"
+import { IS_NIL, IS_NOT, NO, ValueOf } from "./UIObject"
 import { UIViewController } from "./UIViewController"
 
 
@@ -39,35 +39,35 @@ export class UIRoute extends Array<UIRouteComponent> {
         
         const components = hash.split("]")
         components.forEach(component => {
-    
+            
             const componentName = component.split("[")[0]
             const parameters: Record<string, string> = {}
-    
+            
             if (!componentName) {
                 return
             }
-    
+            
             const parametersString = component.split("[")[1] || ""
             const parameterPairStrings = parametersString.split(",") || []
-    
+            
             parameterPairStrings.forEach(pairString => {
-        
+                
                 const keyAndValueArray = pairString.split(":")
                 const key = decodeURIComponent(keyAndValueArray[0])
                 const value = decodeURIComponent(keyAndValueArray[1])
-        
+                
                 if (key) {
                     parameters[key] = value
                 }
-        
+                
             })
-    
-    
+            
+            
             this.push({
                 name: componentName,
                 parameters: parameters
             })
-    
+            
         })
         
         
@@ -81,27 +81,32 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    
-    
-    
     apply() {
         
-        window.location.hash = this.stringRepresentation
+        const stringRepresentation = this.stringRepresentation
+        if (new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
+            return
+        }
+        
+        window.location.hash = stringRepresentation
         
     }
     
     
     applyByReplacingCurrentRouteInHistory() {
         
+        const stringRepresentation = this.stringRepresentation
+        if (new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
+            return
+        }
+        
         window.location.replace(this.linkRepresentation)
         
     }
     
     
-    
     override copy() {
-        var result = new UIRoute()
-        result = Object.assign(result, this)
+        const result = new UIRoute(this.stringRepresentation)
         return result
     }
     
@@ -205,7 +210,7 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    componentWithViewController<T extends typeof UIViewController>(viewController: T): UIRouteComponent<{ [P in keyof T["ParameterIdentifierName"]]: string }> | undefined {
+    componentWithViewController<T extends typeof UIViewController>(viewController: T): UIRouteComponent<{ [P in ValueOf<T["ParameterIdentifierName"]>]: string }> | undefined {
         
         return this.componentWithName(viewController.routeComponentName)
         
@@ -242,9 +247,9 @@ export class UIRoute extends Array<UIRouteComponent> {
             })
             result = result + "]"
         })
-    
+        
         return result
-    
+        
     }
     
     

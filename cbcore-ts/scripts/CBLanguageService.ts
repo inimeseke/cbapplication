@@ -39,6 +39,8 @@ export interface LanguageValues {
 
 export class CBLanguageService implements UILanguageService {
     
+    static currentClassObject = CBLanguageService
+    
     static _currentLanguageKey: string
     
     static languageValues: LanguageValues = {
@@ -69,23 +71,21 @@ export class CBLanguageService implements UILanguageService {
         }
         
         
-        
-        
     }
     
-    static languages = JSON.parse(JSON.stringify(CBLanguageService.languageValues))
+    static languages = JSON.parse(JSON.stringify(this.languageValues))
     
     static useStoredLanguageValues(values = {}) {
-    
-        const result = JSON.parse(JSON.stringify(CBLanguageService.languageValues))
+        
+        const result = JSON.parse(JSON.stringify(this.languageValues))
             .objectByCopyingValuesRecursivelyFromObject(
                 values) as any
         
-        if (JSON.stringify(result) != JSON.stringify(CBLanguageService.languages)) {
-    
-            CBLanguageService.languages = result
-    
-            CBLanguageService.broadcastLanguageChangeEvent()
+        if (JSON.stringify(result) != JSON.stringify(this.languages)) {
+            
+            this.languages = result
+            
+            this.broadcastLanguageChangeEvent()
             
         }
         
@@ -93,7 +93,7 @@ export class CBLanguageService implements UILanguageService {
     
     
     static broadcastLanguageChangeEvent(view?: UIView) {
-    
+        
         view = view as any || CBCore.sharedInstance.viewCores.everyElement.rootViewController.view.rootView as any
         
         view?.broadcastEventInSubtree({
@@ -112,19 +112,19 @@ export class CBLanguageService implements UILanguageService {
     
     static get currentLanguageKey() {
         
-        if (!CBLanguageService._currentLanguageKey) {
+        if (!this._currentLanguageKey) {
             
-            CBLanguageService.updateCurrentLanguageKey()
+            this.updateCurrentLanguageKey()
             
         }
         
-        return CBLanguageService._currentLanguageKey
+        return this._currentLanguageKey
         
     }
     
     updateCurrentLanguageKey() {
         
-        CBLanguageService.updateCurrentLanguageKey()
+        CBLanguageService.currentClassObject.updateCurrentLanguageKey()
         
     }
     
@@ -134,19 +134,19 @@ export class CBLanguageService implements UILanguageService {
         
         if (IS_NOT(result)) {
             
-            result = CBLanguageService.defaultLanguageKey
+            result = this.defaultLanguageKey
             
         }
         
-        const isChanged = (result != CBLanguageService._currentLanguageKey)
+        const isChanged = (result != this._currentLanguageKey)
         
-        CBLanguageService._currentLanguageKey = result
+        this._currentLanguageKey = result
         
         if (isChanged) {
             
             CBCore.sharedInstance.languageKey = result
             
-            CBLanguageService.broadcastLanguageChangeEvent()
+            this.broadcastLanguageChangeEvent()
             
         }
         
@@ -154,12 +154,11 @@ export class CBLanguageService implements UILanguageService {
     
     get currentLanguageKey() {
         
-        const result = CBLanguageService.currentLanguageKey
+        const result = CBLanguageService.currentClassObject.currentLanguageKey
         
         return result
         
     }
-    
     
     
     static stringForKey(
@@ -171,10 +170,10 @@ export class CBLanguageService implements UILanguageService {
         
         var result: string
         
-        if (IS(key) && CBLanguageService.languages[languageKey] &&
-            IS_DEFINED(CBLanguageService.languages[languageKey][key])) {
+        if (IS(key) && this.languages[languageKey] &&
+            IS_DEFINED(this.languages[languageKey][key])) {
             
-            result = CBLanguageService.languages[languageKey][key]
+            result = this.languages[languageKey][key]
             
         }
         else {
@@ -225,7 +224,7 @@ export class CBLanguageService implements UILanguageService {
     ) {
         
         
-        return CBLanguageService.stringForKey(key, languageKey, defaultString, parameters)
+        return CBLanguageService.currentClassObject.stringForKey(key, languageKey, defaultString, parameters)
         
         
     }
@@ -239,10 +238,10 @@ export class CBLanguageService implements UILanguageService {
         
         const result = {}
         
-        CBLanguageService.languages.forEach(function (languageObject: any, languageKey: string) {
+        this.languages.forEach((languageObject: any, languageKey: string) => {
             
             // @ts-ignore
-            result[languageKey] = CBLanguageService.stringForKey(key, languageKey, defaultString, parameters)
+            result[languageKey] = this.stringForKey(key, languageKey, defaultString, parameters)
             
         })
         
@@ -256,7 +255,7 @@ export class CBLanguageService implements UILanguageService {
         parameters?: { [x: string]: string | UILocalizedTextObject; }
     ) {
         
-        const result = CBLanguageService.localizedTextObjectForKey(key, defaultString, parameters)
+        const result = CBLanguageService.currentClassObject.localizedTextObjectForKey(key, defaultString, parameters)
         
         return result
         
@@ -273,7 +272,7 @@ export class CBLanguageService implements UILanguageService {
         
         const result = {
             
-            [CBLanguageService.defaultLanguageKey]: text
+            [this.defaultLanguageKey]: text
             
         }
         
@@ -283,7 +282,7 @@ export class CBLanguageService implements UILanguageService {
     
     localizedTextObjectForText(text: string) {
         
-        const result = CBLanguageService.localizedTextObjectForText(text)
+        const result = CBLanguageService.currentClassObject.localizedTextObjectForText(text)
         
         return result
         
@@ -291,12 +290,6 @@ export class CBLanguageService implements UILanguageService {
     
     
     static stringForCurrentLanguage(localizedTextObject: CBLocalizedTextObject | string) {
-        
-        if (!CBLanguageService || !localizedTextObject) {
-            
-            const asd = 1
-            
-        }
         
         if (localizedTextObject === "" + localizedTextObject) {
             
@@ -307,12 +300,12 @@ export class CBLanguageService implements UILanguageService {
         localizedTextObject = FIRST_OR_NIL(localizedTextObject)
         
         // @ts-ignore
-        let result: string = localizedTextObject[CBLanguageService.currentLanguageKey]
-    
+        let result: string = localizedTextObject[this.currentLanguageKey]
+        
         if (IS_NOT(result)) {
             
             // @ts-ignore
-            result = localizedTextObject[CBLanguageService.defaultLanguageKey]
+            result = localizedTextObject[this.defaultLanguageKey]
             
         }
         
@@ -335,11 +328,9 @@ export class CBLanguageService implements UILanguageService {
     
     stringForCurrentLanguage(localizedTextObject: CBLocalizedTextObject) {
         
-        return CBLanguageService.stringForCurrentLanguage(localizedTextObject)
+        return CBLanguageService.currentClassObject.stringForCurrentLanguage(localizedTextObject)
         
     }
-    
-    
     
     
 }

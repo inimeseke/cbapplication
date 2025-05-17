@@ -236,7 +236,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                     .ELSE_IF(this.superview?.isKindOfClass(UIScrollView))(() => this.superview?.scrollSize.height ?? 0)
                     .ELSE(() => this.superview?.frame.height ?? 0),
                 UIView.pageHeight
-            ),
+            ) / UIView.pageScale,
             "100%"
         )
         

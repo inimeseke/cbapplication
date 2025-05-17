@@ -20,7 +20,9 @@ declare global {
     
         findAsyncSequential(functionToCall: (value: any) => Promise<boolean>): Promise<any>;
     
-        groupedBy(keyFunction: (item: T) => any): { [key: string]: Array<T> } & Object;
+        groupedBy<T>(keyFunction: (item: T) => any): { [key: string]: Array<T> } & Object;
+        
+        uniqueMap<T, R>(keyFunction: (item: T) => R): R[]; 
     
         copy(): Array<T>;
         
@@ -287,6 +289,29 @@ if ("groupedBy" in Array.prototype == NO) {
             (acc[funcProp(val)] = acc[funcProp(val)] || []).push(val)
             return acc
         }, {})
+    }
+    
+}
+
+if ("uniqueMap" in Array.prototype == NO) {
+    
+    Array.prototype.uniqueMap = function (this: Array<any>, funcProp) {
+        
+        const result: any[] = []
+        
+        for (let i = 0; i < this.length; i++){
+            
+            const element = this[i]
+            const elementResult = funcProp(element)
+            
+            if (!result.contains(elementResult)) {
+                result.push(elementResult);
+            }
+            
+        }
+        
+        return result;
+        
     }
     
 }

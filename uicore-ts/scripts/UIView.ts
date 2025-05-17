@@ -78,7 +78,7 @@ declare global {
     
     interface HTMLElement {
         
-        UIView?: UIView;
+        UIViewObject?: UIView;
         
     }
     
@@ -326,7 +326,7 @@ export class UIView extends UIObject {
         }
         
         this.viewHTMLElement.obeyAutolayout = YES
-        this.viewHTMLElement.UIView = this
+        this.viewHTMLElement.UIViewObject = this
         this.addStyleClass(this.styleClassName)
         
     }
@@ -3337,7 +3337,7 @@ export class UIView extends UIObject {
         for (let i = 0; i < superviewElementsUntilCommonElement.length - 1; i++) {
             const element = superviewElementsUntilCommonElement[i]
             selfOffsetPoint = selfOffsetPoint.add(
-                element.UIView?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
+                element.UIViewObject?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
             )
             //selfScale = selfScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width / element.offsetWidth))
         }
@@ -3347,7 +3347,7 @@ export class UIView extends UIObject {
         for (let i = 0; i < viewSuperviewElementsUntilCommonElement.length - 1; i++) {
             const element = viewSuperviewElementsUntilCommonElement[i]
             viewOffsetPoint = viewOffsetPoint.add(
-                element.UIView?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
+                element.UIViewObject?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
             )
             //viewScale = viewScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width / element.offsetWidth))
         }

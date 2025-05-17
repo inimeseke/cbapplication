@@ -1,5 +1,5 @@
 import { UIDialogView } from "./UIDialogView"
-import { FIRST_OR_NIL, IS, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST_OR_NIL, IS, NO, UIObject, YES } from "./UIObject"
 import { UIRoute } from "./UIRoute"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
@@ -21,55 +21,59 @@ export class UIViewController extends UIObject {
     }
     
     
+    get routeComponent() {
+        return UIRoute.currentRoute.componentWithViewController(this.class)
+    }
+    
     handleRouteRecursively(route: UIRoute) {
         
         this.handleRoute(route)
-    
+        
         this.childViewControllers.forEach(controller => {
-        
+            
             controller.handleRouteRecursively(route)
-        
+            
         })
         
     }
     
     async handleRoute(route: UIRoute) {
-    
-    
+        
+        
     }
     
     
     async viewWillAppear() {
-    
-    
+        
+        
     }
     
     
     async viewDidAppear() {
-    
-    
+        
+        
     }
     
     
     async viewWillDisappear() {
-    
-    
+        
+        
     }
     
     async viewDidDisappear() {
-    
-    
+        
+        
     }
     
     
     updateViewConstraints() {
-    
-    
+        
+        
     }
     
     updateViewStyles() {
-    
-    
+        
+        
     }
     
     layoutViewSubviews() {
@@ -150,13 +154,13 @@ export class UIViewController extends UIObject {
     
     
     removeFromParentViewController() {
-    
+        
         this.parentViewController?.removeChildViewController(this)
-    
+        
     }
     
     willMoveToParentViewController(parentViewController: UIViewController) {
-    
+        
     }
     
     
@@ -167,18 +171,18 @@ export class UIViewController extends UIObject {
     }
     
     removeChildViewController(controller: UIViewController) {
-    
+        
         controller = FIRST_OR_NIL(controller)
         controller.viewWillDisappear()
         if (IS(controller.parentViewController)) {
-    
+            
             const index = this.parentViewController?.childViewControllers.indexOf(this) ?? -1
             if (index > -1) {
                 this.parentViewController?.childViewControllers.splice(index, 1)
                 this.view.removeFromSuperview()
                 this.parentViewController = undefined
             }
-    
+            
         }
         if (IS(controller.view)) {
             controller.view.removeFromSuperview()
@@ -189,41 +193,43 @@ export class UIViewController extends UIObject {
     
     
     addChildViewControllerInContainer(controller: UIViewController, containerView: UIView) {
-    
+        
         controller = FIRST_OR_NIL(controller)
         containerView = FIRST_OR_NIL(containerView)
         controller.viewWillAppear()
         this.addChildViewController(controller)
         containerView.addSubview(controller.view)
+        
+        controller.handleRouteRecursively(UIRoute.currentRoute)
+        
         controller.didMoveToParentViewController(this)
         controller.viewDidAppear()
-    
-        controller.handleRouteRecursively(UIRoute.currentRoute)
-    
+        
+        
     }
     
     addChildViewControllerInDialogView(controller: UIViewController, dialogView: UIDialogView) {
-    
+        
         controller = FIRST_OR_NIL(controller)
         dialogView = FIRST_OR_NIL(dialogView)
         controller.viewWillAppear()
         this.addChildViewController(controller)
         dialogView.view = controller.view
-    
-        const originalDismissFunction = dialogView.dismiss.bind(dialogView)
-    
-        dialogView.dismiss = animated => {
         
+        const originalDismissFunction = dialogView.dismiss.bind(dialogView)
+        
+        dialogView.dismiss = animated => {
+            
             originalDismissFunction(animated)
             
             this.removeChildViewController(controller)
             
         }
         
+        controller.handleRouteRecursively(UIRoute.currentRoute)
+        
         controller.didMoveToParentViewController(this)
         controller.viewDidAppear()
-    
-        controller.handleRouteRecursively(UIRoute.currentRoute)
         
     }
     

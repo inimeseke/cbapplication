@@ -105,9 +105,15 @@ export class CBSocketClient extends UIObject {
             
             console.log("Socket.io connected to server. clientID = ", this.socket, " socketID = ", this.socket)
             
-            var instanceIdentifier = localStorage.getItem("InstanceIdentifier")
+            const isInstanceIdentifierAllowed = localStorage.getItem("IsInstanceIdentifierAllowed") == "true"
             
-            if (IS_NOT(instanceIdentifier)) {
+            let instanceIdentifier = IF(isInstanceIdentifierAllowed)(() => 
+                localStorage.getItem("InstanceIdentifier")
+            ).ELSE(() => 
+                ""
+            )
+            
+            if (IS_NOT(instanceIdentifier) && isInstanceIdentifierAllowed) {
                 
                 instanceIdentifier = MAKE_ID()
                 localStorage.setItem("InstanceIdentifier", instanceIdentifier!)

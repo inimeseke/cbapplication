@@ -115,14 +115,13 @@ function sortData(data: any[], sortingInstructions: any[]) {
             
             if (instruction.dataType == "string") {
                 
-                result[instruction.keyPath] = JSON.stringify(valueForKeyPath("" + instruction.keyPath, dataItem) || {})
+                result[instruction.keyPath] = JSON.stringify(valueForKeyPath("" + instruction.keyPath, dataItem) || "")
                     .toLowerCase()
                 
             }
             else if (instruction.dataType == "number") {
                 
-                result[instruction.keyPath] = JSON.stringify(valueForKeyPath("" + instruction.keyPath, dataItem) || {})
-                    .toLowerCase().numericalValue
+                result[instruction.keyPath] = valueForKeyPath("" + instruction.keyPath, dataItem)
                 
             }
             

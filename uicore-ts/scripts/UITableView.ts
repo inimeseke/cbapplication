@@ -48,7 +48,7 @@ export class UITableView extends UINativeScrollView {
     _rowIDIndex: number = 0
     reloadsOnLanguageChange = YES
     sidePadding = 0
-
+    
     cellWeights?: number[]
     
     _persistedData: any[] = []
@@ -98,28 +98,28 @@ export class UITableView extends UINativeScrollView {
     
     
     highlightChanges(previousData: any[], newData: any[]) {
-    
+        
         previousData = previousData.map(dataPoint => JSON.stringify(dataPoint))
         newData = newData.map(dataPoint => JSON.stringify(dataPoint))
-    
+        
         const newIndexes: number[] = []
-    
+        
         newData.forEach((value, index) => {
-        
+            
             if (!previousData.contains(value)) {
-            
+                
                 newIndexes.push(index)
-            
+                
             }
-        
+            
         })
-    
-        newIndexes.forEach(index => {
         
+        newIndexes.forEach(index => {
+            
             if (this.isRowWithIndexVisible(index)) {
                 this.highlightRowAsNew(this.visibleRowWithIndex(index) as UIView)
             }
-        
+            
         })
         
     }
@@ -269,18 +269,18 @@ export class UITableView extends UINativeScrollView {
     
     
     _removeVisibleRows() {
-    
+        
         const visibleRows: UITableViewRowView[] = []
         this._visibleRows.forEach((row: UIView) => {
-        
+            
             this._persistedData[row._UITableViewRowIndex as number] = this.persistenceDataItemForRowWithIndex(
                 row._UITableViewRowIndex as number,
                 row
             )
             row.removeFromSuperview()
             this._removedReusableViews[row?._UITableViewReusabilityIdentifier]?.push(row)
-        
-        
+            
+            
         })
         this._visibleRows = visibleRows
         
@@ -290,15 +290,15 @@ export class UITableView extends UINativeScrollView {
     _removeAllReusableRows() {
         this._reusableViews.forEach((rows: UIView[]) =>
             rows.forEach((row: UIView) => {
-            
+                
                 this._persistedData[row._UITableViewRowIndex as number] = this.persistenceDataItemForRowWithIndex(
                     row._UITableViewRowIndex as number,
                     row
                 )
                 row.removeFromSuperview()
-            
+                
                 this._markReusableViewAsUnused(row)
-            
+                
             })
         )
     }
@@ -315,38 +315,38 @@ export class UITableView extends UINativeScrollView {
         if (!this.isMemberOfViewTree) {
             return
         }
-    
+        
         const visibleIndexes = this.indexesForVisibleRows()
         
         const minIndex = visibleIndexes[0]
         const maxIndex = visibleIndexes[visibleIndexes.length - 1]
-    
+        
         const removedViews: UITableViewRowView[] = []
         
         const visibleRows: UITableViewRowView[] = []
         this._visibleRows.forEach((row) => {
             if (IS_DEFINED(row._UITableViewRowIndex) && (row._UITableViewRowIndex < minIndex || row._UITableViewRowIndex > maxIndex)) {
-            
+                
                 //row.removeFromSuperview();
-            
+                
                 this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
                     row._UITableViewRowIndex,
                     row
                 )
-            
+                
                 this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row)
-            
+                
                 removedViews.push(row)
-            
+                
             }
             else {
                 visibleRows.push(row)
             }
         })
         this._visibleRows = visibleRows
-    
-        visibleIndexes.forEach((rowIndex: number) => {
         
+        visibleIndexes.forEach((rowIndex: number) => {
+            
             if (this.isRowWithIndexVisible(rowIndex)) {
                 return
             }
@@ -355,19 +355,19 @@ export class UITableView extends UINativeScrollView {
             this._firstLayoutVisibleRows.push(view)
             this._visibleRows.push(view)
             this.addSubview(view)
-        
+            
         })
-    
-        for (let i = 0; i < removedViews.length; i++) {
         
+        for (let i = 0; i < removedViews.length; i++) {
+            
             const view = removedViews[i]
             if (this._visibleRows.indexOf(view) == -1) {
-            
+                
                 //this._persistedData[view._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(view._UITableViewRowIndex, view);
                 view.removeFromSuperview()
-            
+                
                 //this._removedReusableViews[view._UITableViewReusabilityIdentifier].push(view);
-            
+                
             }
             
         }
@@ -457,7 +457,7 @@ export class UITableView extends UINativeScrollView {
     }
     
     viewForRowWithIndex(rowIndex: number): UITableViewRowView {
-        const row = this.reusableViewForIdentifier("Row", rowIndex);
+        const row = this.reusableViewForIdentifier("Row", rowIndex)
         row._UITableViewRowIndex = rowIndex
         FIRST_OR_NIL((row as unknown as UIButton).titleLabel).text = "Row " + rowIndex
         return row
@@ -531,21 +531,24 @@ export class UITableView extends UINativeScrollView {
     private _layoutAllRows(positions = this._rowPositions) {
         
         const bounds = this.bounds
-    
-        this._visibleRows.forEach(row => {
         
-            const frame = bounds.copy()
-        
-            const positionObject = positions[row._UITableViewRowIndex!]
-            frame.min.y = positionObject.topY
-            frame.max.y = positionObject.bottomY
-            row.frame = frame
-        
-            row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px"
-            row.style.left = "" + this.sidePadding.integerValue + "px"
-        
-        
-        })
+        this._visibleRows.sort((rowA, rowB) => rowA._UITableViewRowIndex! - rowB._UITableViewRowIndex!)
+            .forEach(row => {
+                
+                const frame = bounds.copy()
+                
+                const positionObject = positions[row._UITableViewRowIndex!]
+                frame.min.y = positionObject.topY
+                frame.max.y = positionObject.bottomY
+                row.frame = frame
+                
+                row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px"
+                row.style.left = "" + this.sidePadding.integerValue + "px"
+                
+                // This is to reorder the elements in the DOM
+                this.viewHTMLElement.appendChild(row.viewHTMLElement)
+                
+            })
         
         this._fullHeightView.frame = bounds.rectangleWithHeight((positions.lastElement ||
             nil).bottomY).rectangleWithWidth(bounds.width * 0.5)

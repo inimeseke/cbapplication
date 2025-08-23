@@ -258,7 +258,7 @@ export class CBTableRowView<DataType = Record<string, any>> extends RowView {
                 cellView.addSubview(this.expandabilityButtonView)
                 this.expandabilityButtonView.calculateAndSetViewFrame = () => {
                     
-                    const frame = cellView.titleLabel.frame.rectangleWithWidth(15).rectangleWithHeight(20)
+                    const frame = cellView.bounds.rectangleWithWidth(15).rectangleWithHeight(20)
                     frame.center = frame.center.pointWithY(cellView.bounds.center.y)
                     frame.x = frame.x + data._CB_DataView_NestingDepth * 20 + cellView.contentPadding
                     this.expandabilityButtonView!.frame = frame

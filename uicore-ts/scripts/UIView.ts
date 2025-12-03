@@ -2263,9 +2263,10 @@ export class UIView extends UIObject {
                 const scaleX = this.viewHTMLElement.getBoundingClientRect().width / this.viewHTMLElement.offsetWidth
                 const signMultiplier = 1 - 2 * centeredOnPosition
                 let movementX = event.movementX / scaleX
+                const pageScale = UIView.pageScale
                 
                 if (xOverflow * signMultiplier > 0 && 0 > movementX) {
-                    xOverflow = (xOverflow + movementX / UIView.pageScale).integerValue
+                    xOverflow = (xOverflow + movementX / pageScale).integerValue
                     if (xOverflow >= 0) {
                         return
                     }
@@ -2274,7 +2275,7 @@ export class UIView extends UIObject {
                 }
                 
                 if (xOverflow > 0 && 0 < movementX && signMultiplier < 0) {
-                    xOverflow = (xOverflow + signMultiplier * movementX / UIView.pageScale).integerValue
+                    xOverflow = (xOverflow + signMultiplier * movementX / pageScale).integerValue
                     if (xOverflow >= 0) {
                         return
                     }
@@ -2283,7 +2284,7 @@ export class UIView extends UIObject {
                 }
                 
                 const frame = this.frame
-                const widthChange = (signMultiplier * movementX) / UIView.pageScale
+                const widthChange = (signMultiplier * movementX) / pageScale
                 let frameWidth = frame.width + widthChange
                 
                 if (this.style.minWidth) {
@@ -2316,9 +2317,10 @@ export class UIView extends UIObject {
                 const scaleX = this.viewHTMLElement.getBoundingClientRect().width / this.viewHTMLElement.offsetWidth
                 const signMultiplier = 1 - 2 * centeredOnPosition
                 let movementY = event.movementY / scaleX
+                const pageScale = UIView.pageScale
                 
                 if (yOverflow * signMultiplier > 0 && 0 > movementY) {
-                    yOverflow = (yOverflow + movementY / UIView.pageScale).integerValue
+                    yOverflow = (yOverflow + movementY / pageScale).integerValue
                     if (yOverflow >= 0) {
                         return
                     }
@@ -2327,7 +2329,7 @@ export class UIView extends UIObject {
                 }
                 
                 if (yOverflow > 0 && 0 < movementY && signMultiplier < 0) {
-                    yOverflow = (yOverflow + signMultiplier * movementY / UIView.pageScale).integerValue
+                    yOverflow = (yOverflow + signMultiplier * movementY / pageScale).integerValue
                     if (yOverflow >= 0) {
                         return
                     }
@@ -2336,7 +2338,7 @@ export class UIView extends UIObject {
                 }
                 
                 const frame = this.frame
-                const heightChange = (signMultiplier * movementY) / UIView.pageScale
+                const heightChange = (signMultiplier * movementY) / pageScale
                 let frameHeight = frame.height + heightChange
                 
                 if (this.style.minHeight) {

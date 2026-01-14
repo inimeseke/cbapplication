@@ -1,4 +1,4 @@
-import { io, Socket } from "socket.io-client"
+import { io, ManagerOptions, Socket, SocketOptions } from "socket.io-client"
 import { FIRST_OR_NIL, IF, IS, IS_NIL, IS_NOT, MAKE_ID, nil, NO, RETURNER, UIObject, YES } from "../../uicore-ts"
 import { CBCore } from "./CBCore"
 import {
@@ -64,7 +64,7 @@ export function IS_NOT_SOCKET_ERROR(object: any) {
 
 export class CBSocketClient extends UIObject {
     
-    _socket: Socket = io()
+    _socket: Socket
     _isConnectionEstablished = NO
     
     _collectMessagesToSendLater = NO
@@ -99,94 +99,38 @@ export class CBSocketClient extends UIObject {
         super()
         
         this._core = core
-        
+        this._socket = io()
         
         this.socket.on("connect", () => {
             
             console.log("Socket.io connected to server. clientID = ", this.socket, " socketID = ", this.socket)
             
-            const isInstanceIdentifierAllowed = localStorage.getItem("IsInstanceIdentifierAllowed") == "true"
-            
-            let instanceIdentifier = IF(isInstanceIdentifierAllowed)(() => 
-                localStorage.getItem("InstanceIdentifier")
-            ).ELSE(() => 
-                ""
-            )
-            
-            if (IS_NOT(instanceIdentifier) && isInstanceIdentifierAllowed) {
-                
-                instanceIdentifier = MAKE_ID()
-                localStorage.setItem("InstanceIdentifier", instanceIdentifier!)
-                
-            }
-            
-            const handshakeMessage: CBSocketHandshakeInitMessage = {
-                
-                accessToken: localStorage.getItem("CBUserAccessToken") ?? undefined,
-                userID: this._core.userProfile?._id,
-                
-                inquiryAccessKey: undefined,
-                
-                instanceIdentifier: instanceIdentifier!
-                
-            }
-            
-            this.socket.emit("CBSocketHandshakeInitMessage", {
-                
-                identifier: MAKE_ID(),
-                messageData: handshakeMessage
-                
-            })
-            
+            this.sendUnsentMessages()
             
         })
         
         
+        this._callbackHolder = new CBSocketCallbackHolder(this, this._callbackHolder)
+        
         this.socket.on(
-            "CBSocketHandshakeResponseMessage",
-            (message: CBSocketMessage<CBSocketHandshakeResponseMessage>) => {
+            "CBSocketWelcomeMessage",
+            (message: CBSocketMessage<{ userProfile?: Record<string, string> }>) => {
                 
+                core.userProfile = message.messageData.userProfile
                 
-                this._isConnectionEstablished = message.messageData.accepted
+                this._isConnectionEstablished = YES
                 
-                if (!message.messageData.accepted) {
-                    
-                    console.log("SocketIO connection failed.")
-                    
-                    this._core.dialogViewShowerClass.alert(
-                        "Failed to establish connection to server.",
-                        () => {
-                        }
-                    )
-                    
-                }
-                else {
-                    
-                    console.log("SocketIO connection handshake completed.")
-                    
-                    this._callbackHolder = new CBSocketCallbackHolder(this, this._callbackHolder)
-                    
-                    
-                    core.userProfile = message.messageData.userProfile ?? {}
-                    
-                    
-                    this.sendUnsentMessages()
-                    
-                }
-                
+                this.sendUnsentMessages()
                 
             }
         )
-        
         
         this.socket.on("disconnect", () => {
             
             console.log("Socket.io disconnected from server. clientID = ", this.socket)
             
             this._isConnectionEstablished = NO
-            
             this._callbackHolder.isValid = NO
-            
             this._callbackHolder.triggerDisconnectHandlers()
             
             
@@ -198,11 +142,8 @@ export class CBSocketClient extends UIObject {
             console.log("Performing socket reconnection.")
             
             core.reloadSocketConnection()
-            
             if (message) {
-                
                 this._core.dialogViewShowerClass.alert(message)
-                
             }
             
             
@@ -512,7 +453,7 @@ export class CBSocketClient extends UIObject {
                 inResponseToMessage: inResponseToMessage,
                 keepWaitingForResponses: keepMessageConnectionOpen,
                 completionPolicy: completionPolicy,
-                isBoundToUserWithID: IF(isUserBound)(RETURNER(FIRST_OR_NIL(CBCore.sharedInstance.userProfile._id)))(),
+                isBoundToUserWithID: IF(isUserBound)(RETURNER(FIRST_OR_NIL(CBCore.sharedInstance.userProfile?._id)))(),
                 didSendFunction: didSendFunction,
                 completion: completion
                 

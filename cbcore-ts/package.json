@@ -1,6 +1,6 @@
 {
   "name": "cbcore-ts",
-  "version": "1.0.35",
+  "version": "1.0.55",
   "description": "CBCore is a library to build web applications using pure Typescript.",
   "main": "compiledScripts/index.js",
   "types": "compiledScripts/index.d.ts",
@@ -35,13 +35,13 @@
     "@types/object-hash": "^2.1.1",
     "object-hash": "^2.1.1",
     "socket.io-client": "^4.7.5",
-    "uicore-ts": "1.0.575"
+    "uicore-ts": "1.0.577"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
-    "esbuild": "^0.19.12",
-    "esbuild-node-tsc": "^1.8.8",
+    "esbuild": "^0.27.2",
+    "esbuild-node-tsc": "^2.0.5",
     "esbuild-plugin-inline-worker": "^0.1.1",
     "etsc": "^0.1.0",
     "rollup-plugin-sourcemaps": "^0.6.3",

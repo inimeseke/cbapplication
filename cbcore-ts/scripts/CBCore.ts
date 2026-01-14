@@ -1,3 +1,5 @@
+import { ManagerOptions, SocketOptions } from "socket.io-client"
+import { NO } from "uicore-ts"
 import { FIRST, IS, IS_NOT, nil, UICore, UILink, UIObject, UIRoute, UIViewBroadcastEvent, YES } from "../../uicore-ts"
 import { CBLocalizedTextObject, CBUserProfile } from "./CBDataInterfaces"
 import { CBLanguageService } from "./CBLanguageService"
@@ -27,7 +29,7 @@ export class CBCore extends UIObject {
     
     viewCores: UICore[] = []
     
-    _isUserLoggedIn: boolean = nil
+    _isUserLoggedIn = NO
     _cachedMinimizedChatInquiryIDs: string[] = nil
     _socketClient: CBSocketClient = new CBSocketClient(this)
     _serverClient: CBServerClient = new CBServerClient(this)
@@ -73,10 +75,10 @@ export class CBCore extends UIObject {
     }
     
     
-    static initIfNeededWithViewCore(viewCore: UICore) {
-        
+    static initIfNeededWithViewCore(
+        viewCore: UICore
+    ) {
         CBCore.sharedInstance.viewCores.push(viewCore)
-        
     }
     
     
@@ -113,7 +115,7 @@ export class CBCore extends UIObject {
     
     set isUserLoggedIn(isUserLoggedIn: boolean) {
         const previousValue = this.isUserLoggedIn
-        localStorage.setItem("CBIsUserLoggedIn", "" + isUserLoggedIn)
+        this._isUserLoggedIn = isUserLoggedIn
         this.didSetIsUserLoggedIn(previousValue)
     }
     
@@ -153,7 +155,7 @@ export class CBCore extends UIObject {
         
     }
     
-    private updateLinkTargets() {
+    updateLinkTargets() {
         this.viewCores.everyElement.rootViewController.view.forEachViewInSubtree(function (view) {
             if (view instanceof UILink) {
                 view.updateTarget()
@@ -162,23 +164,18 @@ export class CBCore extends UIObject {
     }
     
     get isUserLoggedIn() {
-        return (localStorage.getItem("CBIsUserLoggedIn") == "true")
+        return this._isUserLoggedIn
     }
     
     
+    private _userProfile: CBUserProfile
+    
     get userProfile() {
-        const text = localStorage.getItem("CBUserProfile")
-        if (text) {
-            return JSON.parse(text) as CBUserProfile
-        }
-        return undefined
+        return this._userProfile
     }
     
     set userProfile(userProfile: CBUserProfile) {
-        if (IS_NOT(userProfile)) {
-            localStorage.removeItem("CBUserProfile")
-        }
-        localStorage.setItem("CBUserProfile", JSON.stringify(userProfile))
+        this._userProfile = userProfile
         this.didSetUserProfile()
     }
     
@@ -219,7 +216,7 @@ export class CBCore extends UIObject {
         const messagesToBeSent = this.socketClient._messagesToBeSent.filter(function (messageItem, index, array) {
             
             return (!messageItem.isBoundToUserWithID || messageItem.isBoundToUserWithID ==
-                CBCore.sharedInstance.userProfile._id)
+                CBCore.sharedInstance.userProfile?._id)
             
         })
         

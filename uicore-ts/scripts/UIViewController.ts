@@ -184,6 +184,7 @@ export class UIViewController extends UIObject {
             }
             
         }
+        this.childViewControllers.removeElement(controller)
         if (IS(controller.view)) {
             controller.view.removeFromSuperview()
         }

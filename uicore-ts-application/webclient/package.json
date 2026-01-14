@@ -25,7 +25,7 @@
     "@codemirror/lang-javascript": "^6.1.0",
     "browser-cjs": "^1.0.3",
     "browserify": "^17.0.0",
-    "cbcore-ts": "^1.0.25",
+    "cbcore-ts": "^1.0.36",
     "codemirror": "^6.0.1",
     "monaco-editor": "^0.46.0",
     "monaco-editor-auto-typings": "^0.4.3",
@@ -33,7 +33,7 @@
     "object-hash": "^3.0.0",
     "showdown": "^2.1.0",
     "tsify": "^5.0.4",
-    "uicore-ts": "^1.0.525",
+    "uicore-ts": "^1.0.527",
     "vscode-web": "^1.72.0"
   },
   "devDependencies": {

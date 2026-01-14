@@ -320,7 +320,7 @@ export type UIInitializerObject<T> = {
     
     [P in keyof T]?:
     //T[P] extends (infer U)[] ? UIInitializerObject<U>[] :
-    T[P] extends (...args: any) => any ? UIFunctionCall<T[P]> | UIFunctionExtender<T[P]> | T[P] :
+    T[P] extends (...args: any) => any ? UIFunctionCall<T[P]> | UIFunctionCall<T[P]>[] | UIFunctionExtender<T[P]> | T[P] :
         T[P] extends object ? UIInitializerObject<T[P]> | UILazyPropertyValue<T[P]> :
             Partial<T[P]>;
     
@@ -588,6 +588,10 @@ export class UIObject {
             
             if (value instanceof UIFunctionCall) {
                 value.callFunction(getTargetFunction(YES))
+                return
+            }
+            if ((value instanceof Array && value.allMatch(element => element instanceof UIFunctionCall))) {
+                value.map(element => element.callFunction(getTargetFunction(YES)))
                 return
             }
             

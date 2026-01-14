@@ -20,9 +20,9 @@ declare global {
     
         findAsyncSequential(functionToCall: (value: any) => Promise<boolean>): Promise<any>;
     
-        groupedBy<T>(keyFunction: (item: T) => any): { [key: string]: Array<T> } & Object;
+        groupedBy(keyFunction: (item: T) => any): { [key: string]: Array<T> } & Object;
         
-        uniqueMap<T, R>(keyFunction: (item: T) => R): R[]; 
+        uniqueMap<R>(keyFunction: (item: T) => R): R[];
     
         copy(): Array<T>;
         

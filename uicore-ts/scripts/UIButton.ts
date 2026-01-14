@@ -410,7 +410,8 @@ export class UIButton extends UIBaseButton {
         
         this.initStyleSelector("." + this.styleClassName, "background-color: lightblue;")
         
-        // var selectorWithoutImage = "." + this.styleClassName + " ." + this.imageView.styleClassName + " + ." + this.titleLabel.styleClassName;
+        // var selectorWithoutImage = "." + this.styleClassName + " ." + this.imageView.styleClassName + " + ." +
+        // this.titleLabel.styleClassName;
         
         // this.initStyleSelector(
         //     selectorWithoutImage,
@@ -423,96 +424,4 @@ export class UIButton extends UIBaseButton {
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

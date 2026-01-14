@@ -161,6 +161,11 @@ export class UIKeyValueStringFilter extends UIObject {
             
         }
         
+        if (!data?.length) {
+            completion([], [], identifier)
+            return
+        }
+        
         
         const instanceIdentifier = this.instanceIdentifier
         

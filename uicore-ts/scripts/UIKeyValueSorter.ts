@@ -190,8 +190,12 @@ export class UIKeyValueSorter extends UIObject {
             return
             
         }
-    
-    
+        
+        if (!data?.length) {
+            completion([], [], identifier)
+            return
+        }
+        
         const instanceIdentifier = this.instanceIdentifier
         
         const key = "" + identifier + instanceIdentifier

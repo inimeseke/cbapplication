@@ -316,18 +316,51 @@ export function LAZY_VALUE<T>(initFunction: () => T) {
 }
 
 
+// export type UIInitializerObject<T> = {
+//
+//     [P in keyof T]?:
+//     //T[P] extends (infer U)[] ? UIInitializerObject<U>[] :
+//     T[P] extends (...args: any) => any ? UIFunctionCall<T[P]> | UIFunctionCall<T[P]>[] | UIFunctionExtender<T[P]> | T[P] :
+//         T[P] extends object ? UIInitializerObject<T[P]> | UILazyPropertyValue<T[P]> :
+//             Partial<T[P]>;
+//
+// }
+
+// 1. Native Global Types we DO NOT want to recurse into (Performance & Safety)
+type NativeGlobal = Date | RegExp | Map<any, any> | Set<any> | WeakMap<any, any> | WeakSet<any> | Error;
+
+// 2. The value type
+export type UIInitializerValue<T> =
+// Handle Functions
+    T extends Function
+        //@ts-ignore
+    ? UIFunctionCall<T> | UIFunctionCall<T>[] | UIFunctionExtender<T> | T
+        // Handle Arrays (do not recurse)
+    : T extends any[]
+      ? T
+        // Handle Native Globals (do not recurse)
+      : T extends NativeGlobal
+        ? T
+          // Handle Objects (Plain Objects AND Class Instances)
+        : T extends object
+          ? UIInitializerObject<T> | T // <--- THE FIX: Allow Config OR Instance
+          : T; // Primitives
+
+// 3. The recursive object type
 export type UIInitializerObject<T> = {
+    [P in keyof T]?: UIInitializerValue<T[P]>;
+};
+
+// 4. The optimized method (Lazy Evaluation)
+export interface Configurable {
     
-    [P in keyof T]?:
-    //T[P] extends (infer U)[] ? UIInitializerObject<U>[] :
-    T[P] extends (...args: any) => any ? UIFunctionCall<T[P]> | UIFunctionCall<T[P]>[] | UIFunctionExtender<T[P]> | T[P] :
-        T[P] extends object ? UIInitializerObject<T[P]> | UILazyPropertyValue<T[P]> :
-            Partial<T[P]>;
+    configureWithObject<K extends keyof this>(object: { [P in K]?: UIInitializerValue<this[P]> }): void;
+    configuredWithObject<K extends keyof this>(object: { [P in K]?: UIInitializerValue<this[P]> }): this;
     
 }
 
 
-export class UIObject {
+export class UIObject implements Configurable {
     
     constructor() {
         
@@ -471,13 +504,13 @@ export class UIObject {
     }
     
     
-    configureWithObject(object: UIInitializerObject<this>) {
+    configureWithObject<K extends keyof this>(object: { [P in K]?: UIInitializerValue<this[P]> }) {
         
         return UIObject.configureWithObject(this, object)
         
     }
     
-    configuredWithObject(object: UIInitializerObject<this>): this {
+    configuredWithObject<K extends keyof this>(object: { [P in K]?: UIInitializerValue<this[P]> }): this {
         
         this.configureWithObject(object)
         return this
@@ -485,10 +518,13 @@ export class UIObject {
     }
     
     
-    static configureWithObject<TargetObjectType extends object, ConfigurationObjectType extends UIInitializerObject<TargetObjectType>>(
-        configurationTarget: TargetObjectType,
-        object: ConfigurationObjectType
-    ): ConfigurationObjectType {
+    static configureWithObject<
+        TargetType extends object,
+        ConfigKeys extends keyof TargetType
+    >(
+        configurationTarget: TargetType,
+        object: { [P in ConfigKeys]?: UIInitializerValue<TargetType[P]> }
+    ): { [P in ConfigKeys]?: UIInitializerValue<TargetType[P]> } {
         
         const isAnObject = (item: any) => (item && typeof item === "object" && !Array.isArray(item) && !(item instanceof UICoreExtensionValueObject))
         const isAPureObject = (item: any) => isAnObject(item) && Object.getPrototypeOf(item) === Object.getPrototypeOf({})
@@ -504,7 +540,7 @@ export class UIObject {
                 propertyNames.includes("prototype"))
         }
         
-        const result = {} as ConfigurationObjectType
+        const result = {} as any
         
         let keyPathsAndValues: { value: any, keyPath: string }[] = []
         

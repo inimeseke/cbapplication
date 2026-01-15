@@ -201,6 +201,10 @@ export class UIRectangle extends UIObject {
         return this
     }
     
+    rectangleByConcatenatingWithRectangle(rectangle: UIRectangle) {
+        return this.copy().concatenateWithRectangle(rectangle)
+    }
+    
     
     intersectionRectangleWithRectangle(rectangle: UIRectangle): UIRectangle {
         
@@ -381,6 +385,58 @@ export class UIRectangle extends UIObject {
         
         return result
         
+    }
+    
+    
+    /**
+     * Returns a rectangle with a maximum width constraint
+     * If current width exceeds max, centers the constrained width
+     */
+    rectangleWithMaxWidth(maxWidth: number, centeredOnPosition: number = 0): UIRectangle {
+        if (this.width <= maxWidth) {
+            return this.copy()
+        }
+        return this.rectangleWithWidth(maxWidth, centeredOnPosition)
+    }
+    
+    /**
+     * Returns a rectangle with a maximum height constraint
+     */
+    rectangleWithMaxHeight(maxHeight: number, centeredOnPosition: number = 0): UIRectangle {
+        if (this.height <= maxHeight) {
+            return this.copy()
+        }
+        return this.rectangleWithHeight(maxHeight, centeredOnPosition)
+    }
+    
+    /**
+     * Returns a rectangle with minimum width constraint
+     */
+    rectangleWithMinWidth(minWidth: number, centeredOnPosition: number = 0): UIRectangle {
+        if (this.width >= minWidth) {
+            return this.copy()
+        }
+        return this.rectangleWithWidth(minWidth, centeredOnPosition)
+    }
+    
+    /**
+     * Returns a rectangle with minimum height constraint
+     */
+    rectangleWithMinHeight(minHeight: number, centeredOnPosition: number = 0): UIRectangle {
+        if (this.height >= minHeight) {
+            return this.copy()
+        }
+        return this.rectangleWithHeight(minHeight, centeredOnPosition)
+    }
+    
+    // Returns a new rectangle that is positioned relative to the reference rectangle
+    // By default, it makes a copy of this rectangle taht is centered in the target rectangle
+    rectangleByCenteringInRectangle(referenceRectangle: UIRectangle, xPosition = 0.5, yPosition = 0.5) {
+        const result = this.copy()
+        result.center = referenceRectangle.topLeft
+            .pointByAddingX(xPosition * referenceRectangle.width)
+            .pointByAddingY(yPosition * referenceRectangle.height)
+        return result
     }
     
     
@@ -599,6 +655,12 @@ export class UIRectangle extends UIObject {
     
     rectangleForPreviousColumn(padding: number = 0) {
         return this.rectangleWithX(this.min.x - this.width - padding)
+    }
+    
+    
+    assignedAsFrameOfView(view: UIView) {
+        view.frame = this
+        return this
     }
     
     

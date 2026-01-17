@@ -3,6 +3,8 @@ import { UIPoint } from "./UIPoint"
 import { UIView } from "./UIView"
 
 
+type SizeNumberOrFunctionOrView = number | ((constrainingOrthogonalSize: number) => number) | UIView
+
 export class UIRectangle extends UIObject {
     
     _isBeingUpdated: boolean
@@ -10,9 +12,10 @@ export class UIRectangle extends UIObject {
     max: UIPoint
     min: UIPoint
     
+    // The min and max values are just for storage.
+    // You need to call rectangleByEnforcingMinAndMaxSizes to make use of them.
     minHeight?: number
     maxHeight?: number
-    
     minWidth?: number
     maxWidth?: number
     
@@ -456,9 +459,9 @@ export class UIRectangle extends UIObject {
     
     
     rectanglesBySplittingWidth(
-        weights: number[],
-        paddings: number | number[] = 0,
-        absoluteWidths: number | number[] = nil
+        weights: SizeNumberOrFunctionOrView[],
+        paddings: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 0,
+        absoluteWidths: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
     ) {
         
         if (IS_NIL(paddings)) {
@@ -467,13 +470,18 @@ export class UIRectangle extends UIObject {
         if (!((paddings as any) instanceof Array)) {
             paddings = [paddings].arrayByRepeating(weights.length - 1)
         }
-        paddings = (paddings as number[]).arrayByTrimmingToLengthIfLonger(weights.length - 1)
+        paddings = (paddings as any[]).arrayByTrimmingToLengthIfLonger(weights.length - 1)
+        paddings = paddings.map(padding => this._widthNumberFromSizeNumberOrFunctionOrView(padding))
         if (!(absoluteWidths instanceof Array) && IS_NOT_NIL(absoluteWidths)) {
             absoluteWidths = [absoluteWidths].arrayByRepeating(weights.length)
         }
+        absoluteWidths = absoluteWidths.map(
+            width => this._widthNumberFromSizeNumberOrFunctionOrView(width)
+        )
         
+        weights = weights.map(weight => this._widthNumberFromSizeNumberOrFunctionOrView(weight))
         const result: UIRectangle[] = []
-        const sumOfWeights = weights.reduce(
+        const sumOfWeights = (weights as number[]).reduce(
             (a, b, index) => {
                 if (IS_NOT_NIL((absoluteWidths as number[])[index])) {
                     b = 0
@@ -482,7 +490,7 @@ export class UIRectangle extends UIObject {
             },
             0
         )
-        const sumOfPaddings = paddings.summedValue
+        const sumOfPaddings = paddings.summedValue as number
         const sumOfAbsoluteWidths = (absoluteWidths as number[]).summedValue
         const totalRelativeWidth = this.width - sumOfPaddings - sumOfAbsoluteWidths
         let previousCellMaxX = this.x
@@ -491,17 +499,17 @@ export class UIRectangle extends UIObject {
             
             let resultWidth: number
             if (IS_NOT_NIL(absoluteWidths[i])) {
-                resultWidth = absoluteWidths[i] || 0
+                resultWidth = (absoluteWidths[i] || 0) as number
             }
             else {
-                resultWidth = totalRelativeWidth * (weights[i] / sumOfWeights)
+                resultWidth = totalRelativeWidth * (weights[i] as number / sumOfWeights)
             }
             
             const rectangle = this.rectangleWithWidth(resultWidth)
             
             let padding = 0
             if (paddings.length > i && paddings[i]) {
-                padding = paddings[i]
+                padding = paddings[i] as number
             }
             
             rectangle.x = previousCellMaxX
@@ -515,9 +523,9 @@ export class UIRectangle extends UIObject {
     }
     
     rectanglesBySplittingHeight(
-        weights: number[],
-        paddings: number | number[] = 0,
-        absoluteHeights: number | number[] = nil
+        weights: SizeNumberOrFunctionOrView[],
+        paddings: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 0,
+        absoluteHeights: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
     ) {
         
         if (IS_NIL(paddings)) {
@@ -527,12 +535,17 @@ export class UIRectangle extends UIObject {
             paddings = [paddings].arrayByRepeating(weights.length - 1)
         }
         paddings = (paddings as number[]).arrayByTrimmingToLengthIfLonger(weights.length - 1)
+        paddings = paddings.map(padding => this._heightNumberFromSizeNumberOrFunctionOrView(padding))
         if (!(absoluteHeights instanceof Array) && IS_NOT_NIL(absoluteHeights)) {
             absoluteHeights = [absoluteHeights].arrayByRepeating(weights.length)
         }
+        absoluteHeights = absoluteHeights.map(
+            height => this._heightNumberFromSizeNumberOrFunctionOrView(height)
+        )
         
+        weights = weights.map(weight => this._heightNumberFromSizeNumberOrFunctionOrView(weight))
         const result: UIRectangle[] = []
-        const sumOfWeights = weights.reduce(
+        const sumOfWeights = (weights as number[]).reduce(
             (a, b, index) => {
                 if (IS_NOT_NIL((absoluteHeights as number[])[index])) {
                     b = 0
@@ -541,29 +554,29 @@ export class UIRectangle extends UIObject {
             },
             0
         )
-        const sumOfPaddings = paddings.summedValue
+        const sumOfPaddings = paddings.summedValue as number
         const sumOfAbsoluteHeights = (absoluteHeights as number[]).summedValue
         const totalRelativeHeight = this.height - sumOfPaddings - sumOfAbsoluteHeights
-        var previousCellMaxY = this.y
+        let previousCellMaxY = this.y
         
-        for (var i = 0; i < weights.length; i++) {
-            var resultHeight: number
+        for (let i = 0; i < weights.length; i++) {
+            let resultHeight: number
             if (IS_NOT_NIL(absoluteHeights[i])) {
                 
-                resultHeight = absoluteHeights[i] || 0
+                resultHeight = (absoluteHeights[i] || 0) as number
                 
             }
             else {
                 
-                resultHeight = totalRelativeHeight * (weights[i] / sumOfWeights)
+                resultHeight = totalRelativeHeight * (weights[i] as number / sumOfWeights)
                 
             }
             
             const rectangle = this.rectangleWithHeight(resultHeight)
             
-            var padding = 0
+            let padding = 0
             if (paddings.length > i && paddings[i]) {
-                padding = paddings[i]
+                padding = paddings[i] as number
             }
             
             rectangle.y = previousCellMaxY
@@ -602,9 +615,9 @@ export class UIRectangle extends UIObject {
     
     distributeViewsAlongWidth(
         views: UIView[],
-        weights: number | number[] = 1,
-        paddings?: number | number[],
-        absoluteWidths?: number | number[]
+        weights: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 1,
+        paddings?: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[],
+        absoluteWidths?: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[]
     ) {
         if (!(weights instanceof Array)) {
             weights = [weights].arrayByRepeating(views.length)
@@ -616,9 +629,9 @@ export class UIRectangle extends UIObject {
     
     distributeViewsAlongHeight(
         views: UIView[],
-        weights: number | number[] = 1,
-        paddings?: number | number[],
-        absoluteHeights?: number | number[]
+        weights: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 1,
+        paddings?: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[],
+        absoluteHeights?: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[]
     ) {
         if (!(weights instanceof Array)) {
             weights = [weights].arrayByRepeating(views.length)
@@ -642,58 +655,58 @@ export class UIRectangle extends UIObject {
     }
     
     
-    rectangleForNextRow(padding: number = 0, height: number | ((constrainingWidth: number) => number) | UIView = this.height) {
+    _heightNumberFromSizeNumberOrFunctionOrView(height: SizeNumberOrFunctionOrView) {
         if (height instanceof Function) {
-            height = height(this.width)
+            return height(this.width)
         }
         if (height instanceof UIView) {
-            height = height.intrinsicContentHeight(this.width)
+            return height.intrinsicContentHeight(this.width)
         }
+        return height
+    }
+    
+    _widthNumberFromSizeNumberOrFunctionOrView(width: SizeNumberOrFunctionOrView) {
+        if (width instanceof Function) {
+            return width(this.height)
+        }
+        if (width instanceof UIView) {
+            return width.intrinsicContentWidth(this.height)
+        }
+        return width
+    }
+    
+    rectangleForNextRow(padding: number = 0, height: SizeNumberOrFunctionOrView = this.height) {
+        const heightNumber = this._heightNumberFromSizeNumberOrFunctionOrView(height)
         const result = this.rectangleWithY(this.max.y + padding)
-        if (height != this.height) {
-            result.height = height
+        if (heightNumber != this.height) {
+            result.height = heightNumber
         }
         return result
     }
     
-    rectangleForNextColumn(padding: number = 0, width: number | ((constrainingHeight: number) => number) | UIView = this.width) {
-        if (width instanceof Function) {
-            width = width(this.height)
-        }
-        if (width instanceof UIView) {
-            width = width.intrinsicContentWidth(this.height)
-        }
+    rectangleForNextColumn(padding: number = 0, width: SizeNumberOrFunctionOrView = this.width) {
+        const widthNumber = this._widthNumberFromSizeNumberOrFunctionOrView(width)
         const result = this.rectangleWithX(this.max.x + padding)
-        if (width != this.width) {
-            result.width = width
+        if (widthNumber != this.width) {
+            result.width = widthNumber
         }
         return result
     }
     
-    rectangleForPreviousRow(padding: number = 0, height: number | ((constrainingWidth: number) => number) | UIView = this.height) {
-        if (height instanceof Function) {
-            height = height(this.width)
-        }
-        if (height instanceof UIView) {
-            height = height.intrinsicContentHeight(this.width)
-        }
-        const result = this.rectangleWithY(this.min.y - height - padding)
-        if (height != this.height) {
-            result.height = height
+    rectangleForPreviousRow(padding: number = 0, height: SizeNumberOrFunctionOrView = this.height) {
+        const heightNumber = this._heightNumberFromSizeNumberOrFunctionOrView(height)
+        const result = this.rectangleWithY(this.min.y - heightNumber - padding)
+        if (heightNumber != this.height) {
+            result.height = heightNumber
         }
         return result
     }
     
-    rectangleForPreviousColumn(padding: number = 0, width: number | ((constrainingHeight: number) => number) | UIView = this.width) {
-        if (width instanceof Function) {
-            width = width(this.height)
-        }
-        if (width instanceof UIView) {
-            width = width.intrinsicContentWidth(this.height)
-        }
-        const result = this.rectangleWithX(this.min.x - width - padding)
-        if (width != this.width) {
-            result.width = width
+    rectangleForPreviousColumn(padding: number = 0, width: SizeNumberOrFunctionOrView = this.width) {
+        const widthNumber = this._widthNumberFromSizeNumberOrFunctionOrView(width)
+        const result = this.rectangleWithX(this.min.x - widthNumber - padding)
+        if (widthNumber != this.width) {
+            result.width = widthNumber
         }
         return result
         

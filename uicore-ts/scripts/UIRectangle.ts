@@ -1,4 +1,4 @@
-import { FIRST_OR_NIL, IS, IS_NIL, IS_NOT_NIL, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST_OR_NIL, IS, IS_DEFINED, IS_NIL, IS_NOT_NIL, nil, NO, UIObject, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIView } from "./UIView"
 
@@ -9,6 +9,12 @@ export class UIRectangle extends UIObject {
     rectanglePointDidChange?: (b: any) => void
     max: UIPoint
     min: UIPoint
+    
+    minHeight?: number
+    maxHeight?: number
+    
+    minWidth?: number
+    maxWidth?: number
     
     
     constructor(x: number = 0, y: number = 0, height: number = 0, width: number = 0) {
@@ -627,9 +633,12 @@ export class UIRectangle extends UIObject {
     }
     
     
-    rectangleForNextRow(padding: number = 0, height: number | ((constrainingWidth: number) => number) = this.height) {
+    rectangleForNextRow(padding: number = 0, height: number | ((constrainingWidth: number) => number) | UIView = this.height) {
         if (height instanceof Function) {
             height = height(this.width)
+        }
+        if (height instanceof UIView) {
+            height = height.intrinsicContentHeight(this.width)
         }
         const result = this.rectangleWithY(this.max.y + padding)
         if (height != this.height) {
@@ -638,9 +647,12 @@ export class UIRectangle extends UIObject {
         return result
     }
     
-    rectangleForNextColumn(padding: number = 0, width: number | ((constrainingHeight: number) => number) = this.width) {
+    rectangleForNextColumn(padding: number = 0, width: number | ((constrainingHeight: number) => number) | UIView = this.width) {
         if (width instanceof Function) {
             width = width(this.height)
+        }
+        if (width instanceof UIView) {
+            width = width.intrinsicContentWidth(this.height)
         }
         const result = this.rectangleWithX(this.max.x + padding)
         if (width != this.width) {
@@ -649,12 +661,59 @@ export class UIRectangle extends UIObject {
         return result
     }
     
-    rectangleForPreviousRow(padding: number = 0) {
-        return this.rectangleWithY(this.min.y - this.height - padding)
+    rectangleForPreviousRow(padding: number = 0, height: number | ((constrainingWidth: number) => number) | UIView = this.height) {
+        if (height instanceof Function) {
+            height = height(this.width)
+        }
+        if (height instanceof UIView) {
+            height = height.intrinsicContentHeight(this.width)
+        }
+        const result = this.rectangleWithY(this.min.y - height - padding)
+        if (height != this.height) {
+            result.height = height
+        }
+        return result
     }
     
-    rectangleForPreviousColumn(padding: number = 0) {
-        return this.rectangleWithX(this.min.x - this.width - padding)
+    rectangleForPreviousColumn(padding: number = 0, width: number | ((constrainingHeight: number) => number) | UIView = this.width) {
+        if (width instanceof Function) {
+            width = width(this.height)
+        }
+        if (width instanceof UIView) {
+            width = width.intrinsicContentWidth(this.height)
+        }
+        const result = this.rectangleWithX(this.min.x - width - padding)
+        if (width != this.width) {
+            result.width = width
+        }
+        return result
+        
+    }
+    
+    rectangleWithIntrinsicContentSizeForView(view: UIView, centeredOnXPosition = 0, centeredOnYPosition = 0) {
+        const intrinsicContentSize = view.intrinsicContentSize()
+        return this.rectangleWithHeight(intrinsicContentSize.height, centeredOnYPosition)
+            .rectangleWithWidth(intrinsicContentSize.width, centeredOnXPosition)
+    }
+    
+    rectangleWithIntrinsicContentHeightForView(view: UIView, centeredOnPosition = 0) {
+        return this.rectangleWithHeight(view.intrinsicContentHeight(this.width), centeredOnPosition)
+    }
+    
+    rectangleWithIntrinsicContentWidthForView(view: UIView, centeredOnPosition = 0) {
+        return this.rectangleWithWidth(view.intrinsicContentWidth(this.height), centeredOnPosition)
+    }
+    
+    settingMinSizes(minHeight?: number, minWidth?: number) {
+        this.minHeight = minHeight
+        this.minWidth = minWidth
+        return this
+    }
+    
+    settingMaxSizes(maxHeight?: number, maxWidth?: number) {
+        this.maxHeight = maxHeight
+        this.maxWidth = maxWidth
+        return this
     }
     
     

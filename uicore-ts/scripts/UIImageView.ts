@@ -258,7 +258,7 @@ export class UIImageView extends UIView {
     }
     
     
-    override intrinsicContentSize() {
+    override intrinsicContentSize = () => {
         
         
         return new UIRectangle(0, 0, this.viewHTMLElement.naturalHeight, this.viewHTMLElement.naturalWidth)
@@ -266,7 +266,7 @@ export class UIImageView extends UIView {
         
     }
     
-    override intrinsicContentSizeWithConstraints(constrainingHeight = 0, constrainingWidth = 0) {
+    override intrinsicContentSizeWithConstraints = (constrainingHeight = 0, constrainingWidth = 0) => {
         
         const heightRatio = constrainingHeight / this.viewHTMLElement.naturalHeight
         

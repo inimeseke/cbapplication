@@ -166,7 +166,7 @@ export class UIKeyValueSorter extends UIObject {
         "string": "string",
         "number": "number"
         
-    }
+    } as const
     
     
     static direction = {
@@ -174,7 +174,7 @@ export class UIKeyValueSorter extends UIObject {
         "descending": "descending",
         "ascending": "ascending"
         
-    }
+    } as const
     
     
     sortData<T>(

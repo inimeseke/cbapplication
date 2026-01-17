@@ -50,7 +50,16 @@ export class UIRectangle extends UIObject {
     
     
     copy() {
-        return new UIRectangle(this.x, this.y, this.height, this.width)
+        
+        const result = new UIRectangle(this.x, this.y, this.height, this.width)
+        
+        result.minHeight = this.minHeight
+        result.minWidth = this.minWidth
+        result.maxHeight = this.maxHeight
+        result.maxWidth = this.maxWidth
+        
+        return result
+        
     }
     
     isEqualTo(rectangle: UIRectangle | null | undefined) {
@@ -704,16 +713,40 @@ export class UIRectangle extends UIObject {
         return this.rectangleWithWidth(view.intrinsicContentWidth(this.height), centeredOnPosition)
     }
     
-    settingMinSizes(minHeight?: number, minWidth?: number) {
+    settingMinHeight(minHeight?: number) {
         this.minHeight = minHeight
+        return this
+    }
+    
+    settingMinWidth(minWidth?: number) {
         this.minWidth = minWidth
         return this
     }
     
-    settingMaxSizes(maxHeight?: number, maxWidth?: number) {
+    settingMaxHeight(maxHeight?: number) {
         this.maxHeight = maxHeight
+        return this
+    }
+    
+    settingMaxWidth(maxWidth?: number) {
         this.maxWidth = maxWidth
         return this
+    }
+    
+    rectangleByEnforcingMinAndMaxSizes(centeredOnXPosition = 0, centeredOnYPosition = 0) {
+        return this.rectangleWithHeight(
+            [
+                [this.height, this.maxHeight].min(),
+                this.minHeight
+            ].max(),
+            centeredOnYPosition
+        ).rectangleWithWidth(
+            [
+                [this.width, this.maxWidth].min(),
+                this.minWidth
+            ].max(),
+            centeredOnXPosition
+        )
     }
     
     

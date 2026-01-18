@@ -223,7 +223,7 @@ export class UIView extends UIObject {
     static _onWindowMouseMove: (event: MouseEvent) => void = nil
     static _onWindowMouseup: (event: MouseEvent) => void = nil
     private _resizeObserverEntry?: ResizeObserverEntry
-    private _intrinsicSizesCache: Record<string, UIRectangle> = {}
+    protected _intrinsicSizesCache: Record<string, UIRectangle> = {}
     
     
     constructor(
@@ -1944,9 +1944,17 @@ export class UIView extends UIObject {
     }
     
     
+    cancelNeedsLayout() {
+        this._shouldLayout = NO
+    }
+    
     removeFromSuperview() {
         if (IS(this.superview)) {
-            this.forEachViewInSubtree(view => view.blur())
+            this.forEachViewInSubtree(view => {
+                view.blur()
+                view.cancelNeedsLayout()
+            })
+            this.cancelNeedsLayout()
             const index = this.superview.subviews.indexOf(this)
             if (index > -1) {
                 this.superview.subviews.splice(index, 1)

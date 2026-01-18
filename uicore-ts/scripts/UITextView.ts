@@ -1,8 +1,9 @@
 import { UIColor } from "./UIColor"
 import { UILocalizedTextObject } from "./UIInterfaces"
-import { FIRST, IS_LIKE_NULL, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST, IS, IS_LIKE_NULL, nil, NO, UIObject, YES } from "./UIObject"
 import { UIRectangle } from "./UIRectangle"
 import type { ValueOf } from "./UIObject"
+import { TextMeasurementStyle, UITextMeasurement } from "./UITextMeasurement"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
@@ -39,6 +40,9 @@ export class UITextView extends UIView {
     static _ptToPx: number
     static _pxToPt: number
     _text?: string
+    
+    private _useFastMeasurement: boolean | undefined;
+    private _cachedMeasurementStyles: TextMeasurementStyle | undefined;
     
     
     constructor(
@@ -164,6 +168,8 @@ export class UITextView extends UIView {
         
         this.style.whiteSpace = "pre-wrap"
         
+        this.invalidateMeasurementStrategy()
+        
     }
     
     
@@ -204,30 +210,26 @@ export class UITextView extends UIView {
     }
     
     set text(text) {
-        
         this._text = text
-        
         var notificationText = ""
-        
         if (this.notificationAmount) {
-            
             notificationText = "<span style=\"color: " + UITextView.notificationTextColor.stringValue + ";\">" +
                 (" (" + this.notificationAmount + ")").bold() + "</span>"
-            
         }
         
         if (this.viewHTMLElement.innerHTML != this.textPrefix + text + this.textSuffix + notificationText) {
-            
             this.viewHTMLElement.innerHTML = this.textPrefix + FIRST(text, "") + this.textSuffix + notificationText
-            
         }
         
         if (this.changesOften) {
-            
             this._intrinsicHeightCache = new UIObject() as any
             this._intrinsicWidthCache = new UIObject() as any
-            
         }
+        // Invalidate measurement strategy when text changes significantly
+        this._useFastMeasurement = undefined;
+        this._intrinsicSizesCache = {};
+        this.invalidateMeasurementStrategy()
+        this._invalidateMeasurementStyles()
         
         this.setNeedsLayout()
         
@@ -236,6 +238,7 @@ export class UITextView extends UIView {
     override set innerHTML(innerHTML: string) {
         
         this.text = innerHTML
+        this.invalidateMeasurementStrategy()
         
     }
     
@@ -249,13 +252,14 @@ export class UITextView extends UIView {
     setText(key: string, defaultString: string, parameters?: { [x: string]: string | UILocalizedTextObject }) {
         
         this.setInnerHTML(key, defaultString, parameters)
+        this.invalidateMeasurementStrategy()
         
     }
     
     
     get fontSize() {
         
-        const style = window.getComputedStyle(this.viewHTMLElement, null).fontSize
+        const style = this.style.fontSize || window.getComputedStyle(this.viewHTMLElement, null).fontSize
         
         const result = (parseFloat(style) * UITextView._pxToPt)
         
@@ -265,28 +269,29 @@ export class UITextView extends UIView {
     
     set fontSize(fontSize: number) {
         
+        if (fontSize != this.fontSize) {
+            
+            this.style.fontSize = "" + fontSize + "pt"
+            
+            this._intrinsicHeightCache = new UIObject() as any
+            this._intrinsicWidthCache = new UIObject() as any // MEETOD LUUA!!!!
+            
+            this._invalidateMeasurementStyles()  // Invalidate when font changes
         
-        this.style.fontSize = "" + fontSize + "pt"
-        
-        this._intrinsicHeightCache = new UIObject() as any
-        this._intrinsicWidthCache = new UIObject() as any // MEETOD LUUA!!!!
-        
+        }
         
     }
     
     
+    
     useAutomaticFontSize(minFontSize: number = nil, maxFontSize: number = nil) {
-        
         
         this._automaticFontSizeSelection = YES
         
-        
         this._minFontSize = minFontSize
-        
         this._maxFontSize = maxFontSize
         
         this.setNeedsLayout()
-        
         
     }
     
@@ -300,43 +305,27 @@ export class UITextView extends UIView {
     ) {
         
         minFontSize = FIRST(minFontSize, 1)
-        
         maxFontSize = FIRST(maxFontSize, 100000000000)
         
-        
         const heightMultiplier = bounds.height / (currentSize.height + 1)
-        
         const widthMultiplier = bounds.width / (currentSize.width + 1)
         
-        
         var multiplier = heightMultiplier
-        
         if (heightMultiplier > widthMultiplier) {
-            
             multiplier = widthMultiplier
-            
-            
         }
-        
         
         const maxFittingFontSize = currentFontSize * multiplier
         
-        
         if (maxFittingFontSize > maxFontSize) {
-            
             return maxFontSize
-            
         }
         
         if (minFontSize > maxFittingFontSize) {
-            
             return minFontSize
-            
         }
         
-        
         return maxFittingFontSize
-        
         
     }
     
@@ -450,6 +439,129 @@ export class UITextView extends UIView {
         return result
         
     }
+    
+    
+    // Call this when styles change (fontSize, padding, etc.)
+    private _invalidateMeasurementStyles(): void {
+        this._cachedMeasurementStyles = undefined;
+        UITextMeasurement.invalidateElement(this.viewHTMLElement);
+        this._intrinsicSizesCache = {};
+    }
+    
+    // Extract styles ONCE and cache them (avoids getComputedStyle)
+    private _getMeasurementStyles(): TextMeasurementStyle {
+        if (this._cachedMeasurementStyles) {
+            return this._cachedMeasurementStyles;
+        }
+        
+        // Only call getComputedStyle once and cache the result
+        const computed = window.getComputedStyle(this.viewHTMLElement);
+        const fontSize = parseFloat(computed.fontSize);
+        
+        this._cachedMeasurementStyles = {
+            font: [
+                computed.fontStyle,
+                computed.fontVariant,
+                computed.fontWeight,
+                computed.fontSize,
+                computed.fontFamily
+            ].join(' '),
+            fontSize: fontSize,
+            lineHeight: this._parseLineHeight(computed.lineHeight, fontSize),
+            whiteSpace: computed.whiteSpace,
+            paddingLeft: parseFloat(computed.paddingLeft) || 0,
+            paddingRight: parseFloat(computed.paddingRight) || 0,
+            paddingTop: parseFloat(computed.paddingTop) || 0,
+            paddingBottom: parseFloat(computed.paddingBottom) || 0
+        };
+        
+        return this._cachedMeasurementStyles;
+    }
+    
+    private _parseLineHeight(lineHeight: string, fontSize: number): number {
+        if (lineHeight === 'normal') {
+            return fontSize * 1.2;
+        }
+        if (lineHeight.endsWith('px')) {
+            return parseFloat(lineHeight);
+        }
+        const numericLineHeight = parseFloat(lineHeight);
+        if (!isNaN(numericLineHeight)) {
+            return fontSize * numericLineHeight;
+        }
+        return fontSize * 1.2;
+    }
+    
+    // Override the intrinsic size method
+    override intrinsicContentSizeWithConstraints(
+        constrainingHeight: number = 0,
+        constrainingWidth: number = 0
+    ): UIRectangle {
+        const cacheKey = "h_" + constrainingHeight + "__w_" + constrainingWidth;
+        const cachedResult = this._intrinsicSizesCache[cacheKey];
+        if (cachedResult) {
+            return cachedResult;
+        }
+        
+        // Determine measurement strategy
+        const shouldUseFastPath = this._useFastMeasurement ?? this._shouldUseFastMeasurement();
+        
+        let result: UIRectangle;
+        
+        if (shouldUseFastPath) {
+            // Fast path: canvas-based measurement with pre-extracted styles
+            const styles = this._getMeasurementStyles();
+            const size = UITextMeasurement.calculateTextSize(
+                this.viewHTMLElement,
+                this.text || this.innerHTML,
+                constrainingWidth || undefined,
+                constrainingHeight || undefined,
+                styles  // Pass pre-computed styles to avoid getComputedStyle!
+            );
+            result = new UIRectangle(0, 0, size.height, size.width);
+        } else {
+            // Fallback: original DOM-based measurement for complex content
+            result = super.intrinsicContentSizeWithConstraints(constrainingHeight, constrainingWidth);
+        }
+        
+        this._intrinsicSizesCache[cacheKey] = result.copy();
+        return result;
+    }
+    
+    // Helper to determine if we can use fast measurement
+    private _shouldUseFastMeasurement(): boolean {
+        const content = this.text || this.innerHTML;
+        
+        // If using dynamic innerHTML with parameters, use DOM measurement
+        if (this._innerHTMLKey || this._localizedTextObject) {
+            return false;
+        }
+        
+        // Check for notification badges
+        if (this.notificationAmount > 0) {
+            return false; // Has span with colored text
+        }
+        
+        // Check content complexity
+        const hasComplexHTML = /<(?!\/?(b|i|em|strong|span|br)\b)[^>]+>/i.test(content);
+        
+        return !hasComplexHTML;
+    }
+    
+    // Optional: Allow manual override for specific instances
+    setUseFastMeasurement(useFast: boolean): void {
+        this._useFastMeasurement = useFast;
+        this._intrinsicSizesCache = {};
+    }
+    
+    // Optional: Force re-evaluation of measurement strategy
+    invalidateMeasurementStrategy(): void {
+        this._useFastMeasurement = undefined;
+        this._invalidateMeasurementStyles();
+    }
+    
+    
+    
     
     
     override intrinsicContentSize() {

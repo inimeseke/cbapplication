@@ -1,9 +1,9 @@
-import { FIRST_OR_NIL, IS, IS_DEFINED, IS_NIL, IS_NOT_NIL, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST_OR_NIL, IS, IS_DEFINED, IS_NIL, IS_NOT_LIKE_NULL, IS_NOT_NIL, nil, NO, UIObject, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIView } from "./UIView"
 
 
-type SizeNumberOrFunctionOrView = number | ((constrainingOrthogonalSize: number) => number) | UIView
+export type SizeNumberOrFunctionOrView = number | ((constrainingOrthogonalSize: number) => number) | UIView
 
 export class UIRectangle extends UIObject {
     
@@ -380,6 +380,22 @@ export class UIRectangle extends UIObject {
         
     }
     
+    rectangleByAddingWidth(widthToAdd: number, centeredOnPosition = 0) {
+        
+        const result = this.rectangleWithWidth(this.width + widthToAdd, centeredOnPosition)
+        
+        return result
+        
+    }
+    
+    rectangleByAddingHeight(heightToAdd: number, centeredOnPosition = 0) {
+        
+        const result = this.rectangleWithHeight(this.height + heightToAdd, centeredOnPosition)
+        
+        return result
+        
+    }
+    
     
     rectangleWithRelativeValues(
         relativeXPosition: number,
@@ -712,6 +728,148 @@ export class UIRectangle extends UIObject {
         
     }
     
+    /**
+     * Distributes views vertically as a column, assigning frames and returning them.
+     * Each view is positioned below the previous one with optional padding between them.
+     * @param views - Array of views to distribute
+     * @param paddings - Padding between views (single value or array of values)
+     * @param absoluteHeights - Optional fixed heights for views (overrides intrinsic height)
+     * @returns Array of rectangles representing the frame for each view
+     */
+    framesByDistributingViewsAsColumn(
+        views: UIView[],
+        paddings: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 0,
+        absoluteHeights: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
+    ) {
+        const frames: UIRectangle[] = []
+        let currentRectangle = this.copy()
+        
+        if (!(paddings instanceof Array)) {
+            paddings = [paddings].arrayByRepeating(views.length - 1)
+        }
+        paddings = paddings.map(padding => this._heightNumberFromSizeNumberOrFunctionOrView(padding))
+        
+        if (!(absoluteHeights instanceof Array) && IS_NOT_NIL(absoluteHeights)) {
+            absoluteHeights = [absoluteHeights].arrayByRepeating(views.length)
+        }
+        absoluteHeights = absoluteHeights.map(
+            height => this._heightNumberFromSizeNumberOrFunctionOrView(height)
+        )
+        
+        for (let i = 0; i < views.length; i++) {
+            const frame = currentRectangle.rectangleWithIntrinsicContentHeightForView(views[i])
+            
+            if (IS_NOT_NIL(absoluteHeights[i])) {
+                frame.height = absoluteHeights[i] as number
+            }
+            
+            views[i].frame = frame
+            frames.push(frame)
+            
+            const padding = (paddings[i] || 0) as number
+            currentRectangle = frame.rectangleForNextRow(padding)
+        }
+        
+        return frames
+    }
+    
+    /**
+     * Distributes views horizontally as a row, assigning frames and returning them.
+     * Each view is positioned to the right of the previous one with optional padding between them.
+     * @param views - Array of views to distribute
+     * @param paddings - Padding between views (single value or array of values)
+     * @param absoluteWidths - Optional fixed widths for views (overrides intrinsic width)
+     * @returns Array of rectangles representing the frame for each view
+     */
+    framesByDistributingViewsAsRow(
+        views: UIView[],
+        paddings: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 0,
+        absoluteWidths: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
+    ) {
+        const frames: UIRectangle[] = []
+        let currentRectangle = this.copy()
+        
+        if (!(paddings instanceof Array)) {
+            paddings = [paddings].arrayByRepeating(views.length - 1)
+        }
+        paddings = paddings.map(padding => this._widthNumberFromSizeNumberOrFunctionOrView(padding))
+        
+        if (!(absoluteWidths instanceof Array) && IS_NOT_NIL(absoluteWidths)) {
+            absoluteWidths = [absoluteWidths].arrayByRepeating(views.length)
+        }
+        absoluteWidths = absoluteWidths.map(
+            width => this._widthNumberFromSizeNumberOrFunctionOrView(width)
+        )
+        
+        for (let i = 0; i < views.length; i++) {
+            const frame = currentRectangle.rectangleWithIntrinsicContentWidthForView(views[i])
+            
+            if (IS_NOT_NIL(absoluteWidths[i])) {
+                frame.width = absoluteWidths[i] as number
+            }
+            
+            views[i].frame = frame
+            frames.push(frame)
+            
+            const padding = (paddings[i] || 0) as number
+            currentRectangle = frame.rectangleForNextColumn(padding)
+        }
+        
+        return frames
+    }
+    
+    /**
+     * Distributes views as a grid (2D array), assigning frames and returning them.
+     * The first index represents rows (vertical), the second index represents columns (horizontal).
+     * Example: views[0] is the first row, views[0][0] is the first column in the first row.
+     * Each row is laid out horizontally, and rows are stacked vertically.
+     * @param views - 2D array where views[row][column] represents the grid structure
+     * @param paddings - Vertical padding between rows (single value or array of values)
+     * @param absoluteHeights - Optional fixed heights for each row (overrides intrinsic height)
+     * @returns 2D array of rectangles where frames[row][column] matches views[row][column]
+     */
+    framesByDistributingViewsAsGrid(
+        views: UIView[][],
+        paddings: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 0,
+        absoluteHeights: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
+    ) {
+        const frames: UIRectangle[][] = []
+        let currentRowRectangle = this.copy()
+        
+        if (!(paddings instanceof Array)) {
+            paddings = [paddings].arrayByRepeating(views.length - 1)
+        }
+        paddings = paddings.map(padding => this._heightNumberFromSizeNumberOrFunctionOrView(padding))
+        
+        if (!(absoluteHeights instanceof Array) && IS_NOT_NIL(absoluteHeights)) {
+            absoluteHeights = [absoluteHeights].arrayByRepeating(views.length)
+        }
+        absoluteHeights = absoluteHeights.map(
+            height => this._heightNumberFromSizeNumberOrFunctionOrView(height)
+        )
+        
+        for (let i = 0; i < views.length; i++) {
+            const rowViews = views[i]
+            const rowFrames = currentRowRectangle.framesByDistributingViewsAsRow(rowViews)
+            
+            if (IS_NOT_NIL(absoluteHeights[i])) {
+                const heightNumber = absoluteHeights[i] as number
+                rowFrames.forEach((frame, j) => {
+                    frame.height = heightNumber
+                    rowViews[j].frame = frame
+                })
+            }
+            
+            frames.push(rowFrames)
+            
+            const padding = (paddings[i] || 0) as number
+            const maxHeight = Math.max(...rowFrames.map(f => f.height))
+            currentRowRectangle = currentRowRectangle.rectangleForNextRow(padding, maxHeight)
+        }
+        
+        return frames
+    }
+    
     rectangleWithIntrinsicContentSizeForView(view: UIView, centeredOnXPosition = 0, centeredOnYPosition = 0) {
         const intrinsicContentSize = view.intrinsicContentSize()
         return this.rectangleWithHeight(intrinsicContentSize.height, centeredOnYPosition)
@@ -749,15 +907,15 @@ export class UIRectangle extends UIObject {
     rectangleByEnforcingMinAndMaxSizes(centeredOnXPosition = 0, centeredOnYPosition = 0) {
         return this.rectangleWithHeight(
             [
-                [this.height, this.maxHeight].min(),
+                [this.height, this.maxHeight].filter(value => IS_NOT_LIKE_NULL(value)).min(),
                 this.minHeight
-            ].max(),
+            ].filter(value => IS_NOT_LIKE_NULL(value)).max(),
             centeredOnYPosition
         ).rectangleWithWidth(
             [
-                [this.width, this.maxWidth].min(),
+                [this.width, this.maxWidth].filter(value => IS_NOT_LIKE_NULL(value)).min(),
                 this.minWidth
-            ].max(),
+            ].filter(value => IS_NOT_LIKE_NULL(value)).max(),
             centeredOnXPosition
         )
     }
@@ -766,6 +924,20 @@ export class UIRectangle extends UIObject {
     assignedAsFrameOfView(view: UIView) {
         view.frame = this
         return this
+    }
+    
+    
+    override toString() {
+        
+        const result = "[" + this.class.name + "] { x: " + this.x + ", y: " + this.y + ", " +
+            "height: " + this.height.toFixed(2) + ", width: " + this.height.toFixed(2) + " }"
+        
+        return result
+        
+    }
+    
+    get [Symbol.toStringTag]() {
+        return this.toString()
     }
     
     

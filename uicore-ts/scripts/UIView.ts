@@ -117,7 +117,7 @@ export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<s
     sender: UIView,
     event: Event
 ) => void) & Partial<UIViewAddControlEventTargetObject<T>>
-    
+
 }>
 
 
@@ -161,7 +161,10 @@ export class UIView extends UIObject {
     
     _localizedTextObject?: UILocalizedTextObject
     
-    _controlEventTargets: ControlEventTargetsObject = {} //{ "PointerDown": Function[]; "PointerMove": Function[]; "PointerLeave": Function[]; "PointerEnter": Function[]; "PointerUpInside": Function[]; "PointerUp": Function[]; "PointerHover": Function[]; };
+    _controlEventTargets: ControlEventTargetsObject = {} //{ "PointerDown": Function[]; "PointerMove": Function[];
+                                                         // "PointerLeave": Function[]; "PointerEnter": Function[];
+                                                         // "PointerUpInside": Function[]; "PointerUp": Function[];
+                                                         // "PointerHover": Function[]; };
     _frameTransform: string
     viewController?: UIViewController
     _updateLayoutFunction?: Function
@@ -224,6 +227,35 @@ export class UIView extends UIObject {
     static _onWindowMouseup: (event: MouseEvent) => void = nil
     private _resizeObserverEntry?: ResizeObserverEntry
     protected _intrinsicSizesCache: Record<string, UIRectangle> = {}
+    
+    private static _virtualLayoutingDepth = 0
+    
+    static get isVirtualLayouting(): boolean {
+        return this._virtualLayoutingDepth > 0
+    }
+    
+    get isVirtualLayouting(): boolean {
+        return UIView._virtualLayoutingDepth > 0
+    }
+    
+    startVirtualLayout() {
+        UIView._virtualLayoutingDepth = UIView._virtualLayoutingDepth + 1
+    }
+    
+    finishVirtualLayout() {
+        if (UIView._virtualLayoutingDepth === 0) {
+            throw new Error("Unbalanced finishVirtualLayout()")
+        }
+        UIView._virtualLayoutingDepth = UIView._virtualLayoutingDepth - 1
+    }
+    
+    _frameForVirtualLayouting?: UIRectangle
+    
+    // Change this to no if the view contains pure HTML content that does not
+    // use frame logic that can influence the intrinsic size
+    usesVirtualLayoutingForIntrinsicSizing = YES
+    
+    _contentInsets = { top: 0, left: 0, bottom: 0, right: 0 }
     
     
     constructor(
@@ -720,93 +752,23 @@ export class UIView extends UIObject {
     }
     
     
+    static injectCSS(cssText: string, id?: string) {
+        // Prevent duplicate injection if an ID is supplied
+        if (id && document.getElementById(id)) {
+            return
+        }
+        
+        const style = document.createElement("style")
+        if (id) {
+            style.id = id
+        }
+        
+        style.textContent = cssText
+        document.head.appendChild(style)
+    }
+    
     static createStyleSelector(selector: string, style: string) {
-        
-        return
-        
-        // // @ts-ignore
-        // if (!document.styleSheets) {
-        //     return
-        // }
-        // if (document.getElementsByTagName("head").length == 0) {
-        //     return
-        // }
-        //
-        // let styleSheet
-        // let mediaType
-        //
-        // if (document.styleSheets.length > 0) {
-        //     for (var i = 0, l: any = document.styleSheets.length; i < l; i++) {
-        //         if (document.styleSheets[i].disabled) {
-        //             continue
-        //         }
-        //         const media = document.styleSheets[i].media
-        //         mediaType = typeof media
-        //
-        //         if (mediaType === "string") {
-        //             if (media as any === "" || ((media as any).indexOf("screen") !== -1)) {
-        //                 styleSheet = document.styleSheets[i]
-        //             }
-        //         }
-        //         else if (mediaType == "object") {
-        //             if (media.mediaText === "" || (media.mediaText.indexOf("screen") !== -1)) {
-        //                 styleSheet = document.styleSheets[i]
-        //             }
-        //         }
-        //
-        //         if (typeof styleSheet !== "undefined") {
-        //             break
-        //         }
-        //     }
-        // }
-        //
-        // if (typeof styleSheet === "undefined") {
-        //     const styleSheetElement = document.createElement("style")
-        //     styleSheetElement.type = "text/css"
-        //     document.getElementsByTagName("head")[0].appendChild(styleSheetElement)
-        //
-        //     for (i = 0; i < document.styleSheets.length; i++) {
-        //         if (document.styleSheets[i].disabled) {
-        //             continue
-        //         }
-        //         styleSheet = document.styleSheets[i]
-        //     }
-        //
-        //     mediaType = typeof styleSheet.media
-        // }
-        //
-        // if (mediaType === "string") {
-        //     for (var i = 0, l = styleSheet.rules.length; i < l; i++) {
-        //         if (styleSheet.rules[i].selectorText && styleSheet.rules[i].selectorText.toLowerCase() ==
-        //             selector.toLowerCase()) {
-        //             styleSheet.rules[i].style.cssText = style
-        //             return
-        //         }
-        //     }
-        //     styleSheet.addRule(selector, style)
-        // }
-        // else if (mediaType === "object") {
-        //
-        //     var styleSheetLength = 0
-        //
-        //     try {
-        //
-        //         styleSheetLength = (styleSheet.cssRules) ? styleSheet.cssRules.length : 0
-        //
-        //     } catch (error) {
-        //
-        //     }
-        //
-        //
-        //     for (var i = 0; i < styleSheetLength; i++) {
-        //         if (styleSheet.cssRules[i].selectorText && styleSheet.cssRules[i].selectorText.toLowerCase() ==
-        //             selector.toLowerCase()) {
-        //             styleSheet.cssRules[i].style.cssText = style
-        //             return
-        //         }
-        //     }
-        //     styleSheet.insertRule(selector + "{" + style + "}", styleSheetLength)
-        // }
+        this.injectCSS(selector + " { " + style + " }")
     }
     
     static getStyleRules(selector: string) {
@@ -949,7 +911,13 @@ export class UIView extends UIObject {
     
     
     public get frame() {
-        let result: UIRectangle & { zIndex?: number } = this._frame?.copy() as any
+        let result: UIRectangle & { zIndex?: number }
+        if (!this.isVirtualLayouting) {
+            result = this._frame?.copy() as any
+        }
+        else {
+            result = this._frameForVirtualLayouting?.copy() as any
+        }
         if (!result) {
             result = new UIRectangle(
                 this._resizeObserverEntry?.contentRect.left ?? this.viewHTMLElement.offsetLeft,
@@ -977,9 +945,15 @@ export class UIView extends UIObject {
         if (zIndex != undefined) {
             rectangle.zIndex = zIndex
         }
-        this._frame = rectangle
+        if (!this.isVirtualLayouting) {
+            this._frame = rectangle
+        }
+        else {
+            this._frameForVirtualLayouting = rectangle
+        }
         
-        if (frame && frame != nil && frame.isEqualTo(rectangle) && frame.zIndex == rectangle.zIndex && !performUncheckedLayout) {
+        if (frame && frame != nil && frame.isEqualTo(
+            rectangle) && frame.zIndex == rectangle.zIndex && !performUncheckedLayout) {
             return
         }
         
@@ -987,15 +961,17 @@ export class UIView extends UIObject {
             rectangle.scale(1 / this.scale)
         }
         
-        UIView._setAbsoluteSizeAndPosition(
-            this.viewHTMLElement,
-            rectangle.topLeft.x,
-            rectangle.topLeft.y,
-            rectangle.width,
-            rectangle.height,
-            rectangle.zIndex,
-            this.frameTransform
-        )
+        if (!this.isVirtualLayouting) {
+            UIView._setAbsoluteSizeAndPosition(
+                this.viewHTMLElement,
+                rectangle.topLeft.x,
+                rectangle.topLeft.y,
+                rectangle.width,
+                rectangle.height,
+                rectangle.zIndex,
+                this.frameTransform
+            )
+        }
         
         if (frame.height != rectangle.height || frame.width != rectangle.width || performUncheckedLayout) {
             this.setNeedsLayout()
@@ -1005,8 +981,17 @@ export class UIView extends UIObject {
     }
     
     get bounds() {
+        
+        let _frame: (UIRectangle & { zIndex?: number }) | undefined
+        if (!this.isVirtualLayouting) {
+            _frame = this._frame
+        }
+        else {
+            _frame = this._frameForVirtualLayouting
+        }
+        
         let result: UIRectangle
-        if (IS_NOT(this._frame)) {
+        if (IS_NOT(_frame)) {
             result = new UIRectangle(
                 0,
                 0,
@@ -1015,10 +1000,21 @@ export class UIView extends UIObject {
             )
         }
         else {
-            result = this.frame.copy()
+            let frame: (UIRectangle & { zIndex?: number })
+            if (!this.isVirtualLayouting) {
+                frame = this.frame
+            }
+            else {
+                frame = this._frameForVirtualLayouting ?? this.frame
+            }
+            result = frame.copy()
             result.x = 0
             result.y = 0
         }
+        
+        result.minHeight = 0
+        result.minWidth = 0
+        
         return result
     }
     
@@ -1224,7 +1220,8 @@ export class UIView extends UIObject {
             // @ts-ignore
             this.style[propertyName] = value
             
-        } catch (exception) {
+        }
+        catch (exception) {
             
             console.log(exception)
             
@@ -1524,7 +1521,8 @@ export class UIView extends UIObject {
                 
                 element = parentElement.querySelector("#" + key)
                 
-            } catch (error) {
+            }
+            catch (error) {
                 
                 //console.log("Error occurred " + error);
                 
@@ -1607,17 +1605,52 @@ export class UIView extends UIObject {
     
     
     static layoutViewsIfNeeded() {
-        for (var i = 0; i < UIView._viewsToLayout.length; i++) {
-            const view = UIView._viewsToLayout[i]
-            view.layoutIfNeeded()
+        const maxIterations = 10
+        let iteration = 0
+        const layoutCounts = new Map<UIView, number>() // Track how many times each view has been laid out
+        
+        while (UIView._viewsToLayout.length > 0 && iteration < maxIterations) {
+            const viewsToProcess = UIView._viewsToLayout
+            UIView._viewsToLayout = []
+            
+            const viewDepthMap = new Map<UIView, number>()
+            
+            for (let i = 0; i < viewsToProcess.length; i++) {
+                const view = viewsToProcess[i]
+                const layoutCount = layoutCounts.get(view) || 0
+                
+                // Skip if this view has been laid out too many times (cycle detection)
+                if (layoutCount >= 5) {
+                    console.warn('View layout cycle detected:', view)
+                    continue
+                }
+                
+                if (!viewDepthMap.has(view)) {
+                    viewDepthMap.set(view, view.withAllSuperviews.length)
+                }
+            }
+            
+            const sortedViews = Array.from(viewDepthMap.keys()).sort((a, b) => {
+                return viewDepthMap.get(a)! - viewDepthMap.get(b)!
+            })
+            
+            for (let i = 0; i < sortedViews.length; i++) {
+                const view = sortedViews[i]
+                view.layoutIfNeeded()
+                layoutCounts.set(view, (layoutCounts.get(view) || 0) + 1)
+            }
+            
+            iteration++
         }
-        UIView._viewsToLayout = []
+        
+        // console.log(iteration + " iterations to finish layout")
+        
     }
     
     
     setNeedsLayout() {
         
-        if (this._shouldLayout) {
+        if (this._shouldLayout && UIView._viewsToLayout.contains(this)) {
             return
         }
         
@@ -1626,7 +1659,7 @@ export class UIView extends UIObject {
         // Register view for layout before next frame
         UIView._viewsToLayout.push(this)
         
-        this._intrinsicSizesCache = {}
+        this.clearIntrinsicSizeCache()
         
         if (UIView._viewsToLayout.length == 1) {
             UIView.scheduleLayoutViewsIfNeeded()
@@ -1648,13 +1681,16 @@ export class UIView extends UIObject {
             return
         }
         
-        this._shouldLayout = NO
+        if (!this.isVirtualLayouting) {
+            this._shouldLayout = NO
+        }
         
         try {
             
             this.layoutSubviews()
             
-        } catch (exception) {
+        }
+        catch (exception) {
             
             console.log(exception)
             
@@ -1666,7 +1702,9 @@ export class UIView extends UIObject {
         
         this.willLayoutSubviews()
         
-        this._shouldLayout = NO
+        if (!this.isVirtualLayouting) {
+            this._shouldLayout = NO
+        }
         
         // Autolayout
         if (this.constraints.length) {
@@ -1811,7 +1849,8 @@ export class UIView extends UIObject {
         
         try {
             resultHTMLElement = this.viewHTMLElement.querySelector("#" + viewID)
-        } catch (error) {
+        }
+        catch (error) {
             console.log(error)
         }
         
@@ -3319,9 +3358,9 @@ export class UIView extends UIObject {
         this.subviews.everyElement.forEachViewInSubtree(functionToCall)
     }
     
-    rectangleInView(rectangle: UIRectangle, view: UIView) {
+    rectangleInView(rectangle: UIRectangle, view: UIView, forceIfNotInViewTree = NO) {
         
-        if (!view.isMemberOfViewTree || !this.isMemberOfViewTree) {
+        if (!forceIfNotInViewTree && (!view.isMemberOfViewTree || !this.isMemberOfViewTree)) {
             return nil
         }
         
@@ -3349,7 +3388,8 @@ export class UIView extends UIObject {
             selfOffsetPoint = selfOffsetPoint.add(
                 element.UIViewObject?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
             )
-            //selfScale = selfScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width / element.offsetWidth))
+            //selfScale = selfScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width /
+            // element.offsetWidth))
         }
         
         let viewOffsetPoint = new UIPoint(0, 0)
@@ -3359,7 +3399,8 @@ export class UIView extends UIObject {
             viewOffsetPoint = viewOffsetPoint.add(
                 element.UIViewObject?.frame.min ?? new UIPoint(element.offsetLeft, element.offsetTop)
             )
-            //viewScale = viewScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width / element.offsetWidth))
+            //viewScale = viewScale * (element.UIView?.scale ?? (element.getBoundingClientRect().width /
+            // element.offsetWidth))
         }
         
         const offsetPoint = selfOffsetPoint.subtract(viewOffsetPoint)
@@ -3374,10 +3415,72 @@ export class UIView extends UIObject {
     }
     
     
+    get contentBounds(): UIRectangle {
+        
+        const bounds = this.bounds
+        const insets = this._contentInsets
+        
+        return new UIRectangle(
+            insets.left,
+            insets.top,
+            bounds.height - insets.top - insets.bottom,
+            bounds.width - insets.left - insets.right
+        )
+        
+    }
+    
+    contentBoundsWithInset(inset: number): UIRectangle {
+        this._contentInsets = { top: inset, left: inset, bottom: inset, right: inset }
+        const bounds = this.bounds
+        return new UIRectangle(
+            inset,
+            inset,
+            bounds.height - inset * 2,
+            bounds.width - inset * 2
+        )
+    }
+    
+    contentBoundsWithInsets(
+        left: number,
+        right: number,
+        bottom: number,
+        top: number
+    ): UIRectangle {
+        this._contentInsets = { left, right, bottom, top }
+        const bounds = this.bounds
+        return new UIRectangle(
+            left,
+            top,
+            bounds.height - top - bottom,
+            bounds.width - left - right
+        )
+    }
+    
+    private _getIntrinsicSizeCacheKey(constrainingHeight: number, constrainingWidth: number): string {
+        return `h_${constrainingHeight}__w_${constrainingWidth}`
+    }
+    
+    private _getCachedIntrinsicSize(cacheKey: string): UIRectangle | undefined {
+        return undefined //this._intrinsicSizesCache[cacheKey]
+    }
+    
+    private _setCachedIntrinsicSize(cacheKey: string, size: UIRectangle): void {
+        this._intrinsicSizesCache[cacheKey] = size.copy()
+    }
+    
+    clearIntrinsicSizeCache(): void {
+        this._intrinsicSizesCache = {}
+        
+        // Optionally clear parent cache if this view affects parent's intrinsic size
+        if (this.superview?.usesVirtualLayoutingForIntrinsicSizing) {
+            this.superview.clearIntrinsicSizeCache()
+        }
+    }
+    
     intrinsicContentSizeWithConstraints(constrainingHeight: number = 0, constrainingWidth: number = 0) {
         
-        const cacheKey = "h_" + constrainingHeight + "__w_" + constrainingWidth
-        const cachedResult = this._intrinsicSizesCache[cacheKey]
+        const cacheKey = this._getIntrinsicSizeCacheKey(constrainingHeight, constrainingWidth)
+        const cachedResult = this._getCachedIntrinsicSize(cacheKey)
         if (cachedResult) {
             return cachedResult
         }
@@ -3449,28 +3552,114 @@ export class UIView extends UIObject {
         result.height = resultHeight
         result.width = resultWidth
         
-        
-        this._intrinsicSizesCache[cacheKey] = result.copy()
+        this._setCachedIntrinsicSize(cacheKey, result)
         
         return result
         
     }
     
+    
+    private _intrinsicFrameFromSubviewFrames() {
+        
+        const framePoints: UIPoint[] = []
+        this.subviews.forEach(subview => {
+            subview.layoutIfNeeded()
+            framePoints.push(subview.frame.min)
+            framePoints.push(subview.frame.max)
+        })
+        const resultFrame = UIRectangle.boundingBoxForPoints(framePoints)
+        return resultFrame
+    }
+    
+    
     intrinsicContentWidth(constrainingHeight: number = 0): number {
         
-        return this.intrinsicContentSizeWithConstraints(constrainingHeight).width
+        const cacheKey = this._getIntrinsicSizeCacheKey(constrainingHeight, 0)
+        const cached = this._getCachedIntrinsicSize(cacheKey)
+        if (cached) {
+            return cached.width
+        }
+        
+        if (this.usesVirtualLayoutingForIntrinsicSizing) {
+            this.startVirtualLayout()
+            let resultFrame: UIRectangle
+            try {
+                this.frame = this.frame.rectangleWithHeight(constrainingHeight)
+                this.layoutIfNeeded()
+                resultFrame = this._intrinsicFrameFromSubviewFrames()
+            }
+            finally {
+                this.finishVirtualLayout()
+            }
+            
+            this._setCachedIntrinsicSize(cacheKey, new UIRectangle(0, 0, resultFrame.height, resultFrame.width))
+            return resultFrame.width
+        }
+        
+        const size = this.intrinsicContentSizeWithConstraints(constrainingHeight, 0)
+        return size.width
         
     }
     
+    
     intrinsicContentHeight(constrainingWidth: number = 0): number {
         
-        return this.intrinsicContentSizeWithConstraints(undefined, constrainingWidth).height
+        const cacheKey = this._getIntrinsicSizeCacheKey(0, constrainingWidth)
+        const cached = this._getCachedIntrinsicSize(cacheKey)
+        if (cached) {
+            return cached.height
+        }
         
+        if (this.usesVirtualLayoutingForIntrinsicSizing) {
+            this.startVirtualLayout()
+            let resultFrame: UIRectangle
+            try {
+                this.frame = this.frame.rectangleWithWidth(constrainingWidth)
+                this.layoutIfNeeded()
+                resultFrame = this._intrinsicFrameFromSubviewFrames()
+            }
+            finally {
+                this.finishVirtualLayout()
+            }
+            
+            this._setCachedIntrinsicSize(cacheKey, new UIRectangle(0, 0, resultFrame.height, resultFrame.width))
+            return resultFrame.height
+        }
+        
+        const size = this.intrinsicContentSizeWithConstraints(0, constrainingWidth)
+        
+        if (isNaN(size.height)) {
+            console.error("NaN in intrinsicContentHeight", this)
+            var asd = 1
+        }
+        
+        return size.height
         
     }
     
     
     intrinsicContentSize(): UIRectangle {
+        
+        const cacheKey = this._getIntrinsicSizeCacheKey(0, 0)
+        const cached = this._getCachedIntrinsicSize(cacheKey)
+        if (cached) {
+            return cached
+        }
+        
+        if (this.usesVirtualLayoutingForIntrinsicSizing) {
+            this.startVirtualLayout()
+            let resultFrame: UIRectangle
+            try {
+                this.layoutIfNeeded()
+                resultFrame = this._intrinsicFrameFromSubviewFrames()
+            }
+            finally {
+                this.finishVirtualLayout()
+            }
+            
+            this._setCachedIntrinsicSize(cacheKey, resultFrame)
+            return resultFrame
+        }
         
         return nil
         

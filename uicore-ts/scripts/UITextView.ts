@@ -30,9 +30,11 @@ export class UITextView extends UIView {
     static defaultTextColor = UIColor.blackColor
     static notificationTextColor = UIColor.redColor
     
+    // Global caches for all UILabels
     static _intrinsicHeightCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
     static _intrinsicWidthCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
     
+    // Local cache for this instance if the label changes often
     _intrinsicHeightCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
     _intrinsicWidthCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
     
@@ -41,9 +43,10 @@ export class UITextView extends UIView {
     static _pxToPt: number
     _text?: string
     
-    private _useFastMeasurement: boolean | undefined;
-    private _cachedMeasurementStyles: TextMeasurementStyle | undefined;
+    private _useFastMeasurement: boolean | undefined
+    private _cachedMeasurementStyles: TextMeasurementStyle | undefined
     
+    override usesVirtualLayoutingForIntrinsicSizing = NO
     
     constructor(
         elementID?: string,
@@ -226,10 +229,11 @@ export class UITextView extends UIView {
             this._intrinsicWidthCache = new UIObject() as any
         }
         // Invalidate measurement strategy when text changes significantly
-        this._useFastMeasurement = undefined;
-        this._intrinsicSizesCache = {};
+        this._useFastMeasurement = undefined
+        this._intrinsicSizesCache = {}
         this.invalidateMeasurementStrategy()
         this._invalidateMeasurementStyles()
+        this.clearIntrinsicSizeCache()
         
         this.setNeedsLayout()
         
@@ -277,11 +281,11 @@ export class UITextView extends UIView {
             this._intrinsicWidthCache = new UIObject() as any // MEETOD LUUA!!!!
             
             this._invalidateMeasurementStyles()  // Invalidate when font changes
-        
+            this.clearIntrinsicSizeCache()
+            
         }
         
     }
-    
     
     
     useAutomaticFontSize(minFontSize: number = nil, maxFontSize: number = nil) {
@@ -400,6 +404,20 @@ export class UITextView extends UIView {
         }
         
         
+        if (isNaN(result) || (!result && !this.text) ) {
+            
+            // console.error("Failed to calculate intrinsic height (" + this.elementID + ")", this, this.viewHTMLElement)
+            var asd = 1
+            
+            result = super.intrinsicContentHeight(constrainingWidth)
+            
+            cacheObject.setValueForKeyPath(keyPath, result)
+            
+            var asdasd = 1
+            
+            
+        }
+        
         return result
         
     }
@@ -443,20 +461,20 @@ export class UITextView extends UIView {
     
     // Call this when styles change (fontSize, padding, etc.)
     private _invalidateMeasurementStyles(): void {
-        this._cachedMeasurementStyles = undefined;
-        UITextMeasurement.invalidateElement(this.viewHTMLElement);
-        this._intrinsicSizesCache = {};
+        this._cachedMeasurementStyles = undefined
+        UITextMeasurement.invalidateElement(this.viewHTMLElement)
+        this._intrinsicSizesCache = {}
     }
     
     // Extract styles ONCE and cache them (avoids getComputedStyle)
     private _getMeasurementStyles(): TextMeasurementStyle {
         if (this._cachedMeasurementStyles) {
-            return this._cachedMeasurementStyles;
+            return this._cachedMeasurementStyles
         }
         
         // Only call getComputedStyle once and cache the result
-        const computed = window.getComputedStyle(this.viewHTMLElement);
-        const fontSize = parseFloat(computed.fontSize);
+        const computed = window.getComputedStyle(this.viewHTMLElement)
+        const fontSize = parseFloat(computed.fontSize)
         
         this._cachedMeasurementStyles = {
             font: [
@@ -465,7 +483,7 @@ export class UITextView extends UIView {
                 computed.fontWeight,
                 computed.fontSize,
                 computed.fontFamily
-            ].join(' '),
+            ].join(" "),
             fontSize: fontSize,
             lineHeight: this._parseLineHeight(computed.lineHeight, fontSize),
             whiteSpace: computed.whiteSpace,
@@ -473,23 +491,23 @@ export class UITextView extends UIView {
             paddingRight: parseFloat(computed.paddingRight) || 0,
             paddingTop: parseFloat(computed.paddingTop) || 0,
             paddingBottom: parseFloat(computed.paddingBottom) || 0
-        };
+        }
         
-        return this._cachedMeasurementStyles;
+        return this._cachedMeasurementStyles
     }
     
     private _parseLineHeight(lineHeight: string, fontSize: number): number {
-        if (lineHeight === 'normal') {
-            return fontSize * 1.2;
+        if (lineHeight === "normal") {
+            return fontSize * 1.2
         }
-        if (lineHeight.endsWith('px')) {
-            return parseFloat(lineHeight);
+        if (lineHeight.endsWith("px")) {
+            return parseFloat(lineHeight)
         }
-        const numericLineHeight = parseFloat(lineHeight);
+        const numericLineHeight = parseFloat(lineHeight)
         if (!isNaN(numericLineHeight)) {
-            return fontSize * numericLineHeight;
+            return fontSize * numericLineHeight
         }
-        return fontSize * 1.2;
+        return fontSize * 1.2
     }
     
     // Override the intrinsic size method
@@ -497,71 +515,80 @@ export class UITextView extends UIView {
         constrainingHeight: number = 0,
         constrainingWidth: number = 0
     ): UIRectangle {
-        const cacheKey = "h_" + constrainingHeight + "__w_" + constrainingWidth;
-        const cachedResult = this._intrinsicSizesCache[cacheKey];
+        const cacheKey = "h_" + constrainingHeight + "__w_" + constrainingWidth
+        const cachedResult = this._intrinsicSizesCache[cacheKey]
         if (cachedResult) {
-            return cachedResult;
+            return cachedResult
         }
         
         // Determine measurement strategy
-        const shouldUseFastPath = this._useFastMeasurement ?? this._shouldUseFastMeasurement();
+        const shouldUseFastPath = this._useFastMeasurement ?? this._shouldUseFastMeasurement()
         
-        let result: UIRectangle;
+        let result: UIRectangle
         
         if (shouldUseFastPath) {
             // Fast path: canvas-based measurement with pre-extracted styles
-            const styles = this._getMeasurementStyles();
+            const styles = this._getMeasurementStyles()
             const size = UITextMeasurement.calculateTextSize(
                 this.viewHTMLElement,
                 this.text || this.innerHTML,
                 constrainingWidth || undefined,
                 constrainingHeight || undefined,
                 styles  // Pass pre-computed styles to avoid getComputedStyle!
-            );
-            result = new UIRectangle(0, 0, size.height, size.width);
-        } else {
+            )
+            result = new UIRectangle(0, 0, size.height, size.width)
+        }
+        else {
             // Fallback: original DOM-based measurement for complex content
-            result = super.intrinsicContentSizeWithConstraints(constrainingHeight, constrainingWidth);
+            result = super.intrinsicContentSizeWithConstraints(constrainingHeight, constrainingWidth)
         }
         
-        this._intrinsicSizesCache[cacheKey] = result.copy();
-        return result;
+        if (isNaN(result.height) || isNaN(result.width)) {
+            
+            // console.error("Failed to calculate intrinsic height (" + this.elementID + ")", this)
+            var asd = 1
+            
+            // Fallback: original DOM-based measurement
+            result = super.intrinsicContentSizeWithConstraints(constrainingHeight, constrainingWidth)
+            
+            
+        }
+        
+        this._intrinsicSizesCache[cacheKey] = result.copy()
+        return result
     }
     
     // Helper to determine if we can use fast measurement
     private _shouldUseFastMeasurement(): boolean {
-        const content = this.text || this.innerHTML;
+        const content = this.text || this.innerHTML
         
         // If using dynamic innerHTML with parameters, use DOM measurement
         if (this._innerHTMLKey || this._localizedTextObject) {
-            return false;
+            return false
         }
         
         // Check for notification badges
         if (this.notificationAmount > 0) {
-            return false; // Has span with colored text
+            return false // Has span with colored text
         }
         
         // Check content complexity
-        const hasComplexHTML = /<(?!\/?(b|i|em|strong|span|br)\b)[^>]+>/i.test(content);
+        const hasComplexHTML = /<(?!\/?(b|i|em|strong|span|br)\b)[^>]+>/i.test(content)
         
-        return !hasComplexHTML;
+        return !hasComplexHTML
     }
     
     // Optional: Allow manual override for specific instances
     setUseFastMeasurement(useFast: boolean): void {
-        this._useFastMeasurement = useFast;
-        this._intrinsicSizesCache = {};
+        this._useFastMeasurement = useFast
+        this._intrinsicSizesCache = {}
     }
     
     // Optional: Force re-evaluation of measurement strategy
     invalidateMeasurementStrategy(): void {
-        this._useFastMeasurement = undefined;
-        this._invalidateMeasurementStyles();
+        this._useFastMeasurement = undefined
+        this._invalidateMeasurementStyles()
     }
-    
-    
-    
     
     
     override intrinsicContentSize() {

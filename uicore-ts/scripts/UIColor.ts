@@ -65,6 +65,10 @@ export class UIColor extends UIObject {
         return new UIColor("transparent")
     }
     
+    static get clearColor() {
+        return new UIColor("transparent")
+    }
+    
     static get undefinedColor() {
         return new UIColor("")
     }

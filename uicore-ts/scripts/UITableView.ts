@@ -56,6 +56,8 @@ export class UITableView extends UINativeScrollView {
     _isDrawVisibleRowsScheduled = NO
     _shouldAnimateNextLayout?: boolean
     
+    override usesVirtualLayoutingForIntrinsicSizing = NO
+    
     override animationDuration = 0.25
     
     

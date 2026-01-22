@@ -3461,7 +3461,7 @@ export class UIView extends UIObject {
     }
     
     private _getCachedIntrinsicSize(cacheKey: string): UIRectangle | undefined {
-        return undefined //this._intrinsicSizesCache[cacheKey]
+        return this._intrinsicSizesCache[cacheKey]
     }
     
     private _setCachedIntrinsicSize(cacheKey: string, size: UIRectangle): void {
@@ -3567,7 +3567,15 @@ export class UIView extends UIObject {
             framePoints.push(subview.frame.min)
             framePoints.push(subview.frame.max)
         })
+        // Since this is always called inside a virtual layouting context,
+        // we will add padding based on the _contentInsets
         const resultFrame = UIRectangle.boundingBoxForPoints(framePoints)
+            .rectangleWithInsets(
+            -this._contentInsets?.left ?? 0,
+            -this._contentInsets?.right ?? 0,
+            -this._contentInsets?.bottom ?? 0,
+            -this._contentInsets?.top ?? 0
+        )
         return resultFrame
     }
     

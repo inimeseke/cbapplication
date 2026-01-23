@@ -76,6 +76,11 @@ export class UICore extends UIObject {
         
         const windowDidResize = () => {
             
+            this.rootViewController.view.forEachViewInSubtree((view) => {
+                
+                view._frameCache = undefined
+                
+            })
             // Doing layout two times to prevent page scrollbars from confusing the layout
             this.rootViewController.view.setNeedsLayout()
             this.rootViewController._triggerLayoutViewSubviews()

@@ -149,7 +149,8 @@ export class UIView extends UIObject {
     _UIViewIntrinsicTemporaryWidth?: string
     _UIViewIntrinsicTemporaryHeight?: string
     _enabled: boolean = YES
-    _frame?: UIRectangle & { zIndex?: number }
+    _frame?: UIRectangle & { zIndex?: number };
+    _frameCache?: UIRectangle
     _backgroundColor: UIColor = UIColor.transparentColor
     
     _viewHTMLElement!: HTMLElement & LooseObject
@@ -292,23 +293,144 @@ export class UIView extends UIObject {
     }
     
     
-    static get pageHeight() {
+    // static get pageHeight() {
+    //     const body = document.body
+    //     const html = document.documentElement
+    //     return Math.max(
+    //         body.scrollHeight,
+    //         body.offsetHeight,
+    //         html.clientHeight,
+    //         html.scrollHeight,
+    //         html.offsetHeight
+    //     )
+    // }
+    //
+    // static get pageWidth() {
+    //     const body = document.body
+    //     const html = document.documentElement
+    //     return Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+    // }
+    
+    //#region Static Properties - Page Dimensions Cache
+    
+    private static _cachedPageWidth: number | undefined
+    private static _cachedPageHeight: number | undefined
+    private static _pageDimensionsCacheValid = false
+    private static _resizeObserverInitialized = false
+    
+    //#endregion
+    
+    //#region Static Methods - Page Dimensions
+    
+    /**
+     * Initialize resize observer to invalidate cache when page dimensions change.
+     * This is called lazily on first access.
+     */
+    private static _initializePageDimensionsCacheIfNeeded() {
+        if (this._resizeObserverInitialized) {
+            return
+        }
+        
+        this._resizeObserverInitialized = true
+        
+        // Invalidate cache on window resize
+        window.addEventListener('resize', () => {
+            this._pageDimensionsCacheValid = false
+        }, { passive: true })
+        
+        // Observe document.body for mutations that might affect dimensions
+        const bodyObserver = new ResizeObserver(() => {
+            this._pageDimensionsCacheValid = false
+        })
+        
+        // Start observing once body is available
+        if (document.body) {
+            bodyObserver.observe(document.body)
+        } else {
+            // Wait for DOMContentLoaded if body isn't ready yet
+            document.addEventListener('DOMContentLoaded', () => {
+                bodyObserver.observe(document.body)
+            }, { once: true })
+        }
+        
+        // Also invalidate on DOM mutations that might add/remove content
+        const mutationObserver = new MutationObserver(() => {
+            this._pageDimensionsCacheValid = false
+        })
+        
+        const observeMutations = () => {
+            mutationObserver.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            })
+        }
+        
+        if (document.body) {
+            observeMutations()
+        } else {
+            document.addEventListener('DOMContentLoaded', observeMutations, { once: true })
+        }
+    }
+    
+    /**
+     * Compute and cache page dimensions.
+     * Only triggers reflow when cache is invalid.
+     */
+    private static _updatePageDimensionsCacheIfNeeded() {
+        if (this._pageDimensionsCacheValid &&
+            this._cachedPageWidth !== undefined &&
+            this._cachedPageHeight !== undefined) {
+            return
+        }
+        
         const body = document.body
         const html = document.documentElement
-        return Math.max(
+        
+        // Compute both at once to minimize reflows
+        this._cachedPageWidth = Math.max(
+            body.scrollWidth,
+            body.offsetWidth,
+            html.clientWidth,
+            html.scrollWidth,
+            html.offsetWidth
+        )
+        
+        this._cachedPageHeight = Math.max(
             body.scrollHeight,
             body.offsetHeight,
             html.clientHeight,
             html.scrollHeight,
             html.offsetHeight
         )
+        
+        this._pageDimensionsCacheValid = true
     }
     
     static get pageWidth() {
-        const body = document.body
-        const html = document.documentElement
-        return Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+        this._initializePageDimensionsCacheIfNeeded()
+        this._updatePageDimensionsCacheIfNeeded()
+        return this._cachedPageWidth!
     }
+    
+    static get pageHeight() {
+        this._initializePageDimensionsCacheIfNeeded()
+        this._updatePageDimensionsCacheIfNeeded()
+        return this._cachedPageHeight!
+    }
+    
+    /**
+     * Manually invalidate the page dimensions cache.
+     * Useful if you know dimensions changed and want to force a recalculation.
+     */
+    static invalidatePageDimensionsCache() {
+        this._pageDimensionsCacheValid = false
+    }
+    
+    //#endregion
+    
+    
     
     centerInContainer() {
         this.style.left = "50%"
@@ -992,12 +1114,13 @@ export class UIView extends UIObject {
         
         let result: UIRectangle
         if (IS_NOT(_frame)) {
-            result = new UIRectangle(
+            result = this._frameCache ?? new UIRectangle(
                 0,
                 0,
                 this._resizeObserverEntry?.contentRect.height ?? this.viewHTMLElement.offsetHeight,
                 this._resizeObserverEntry?.contentRect.width ?? this.viewHTMLElement.offsetWidth
             )
+            this._frameCache = result
         }
         else {
             let frame: (UIRectangle & { zIndex?: number })
@@ -1035,6 +1158,7 @@ export class UIView extends UIObject {
     didResize(entry: ResizeObserverEntry) {
         
         this._resizeObserverEntry = entry
+        this._frameCache = undefined
         this.setNeedsLayout()
         
         this.boundsDidChange(new UIRectangle(0, 0, entry.contentRect.height, entry.contentRect.width))

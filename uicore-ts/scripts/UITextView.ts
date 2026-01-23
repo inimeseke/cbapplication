@@ -1,31 +1,14 @@
 import { UIColor } from "./UIColor"
 import { UILocalizedTextObject } from "./UIInterfaces"
-import { FIRST, IS, IS_LIKE_NULL, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST, IS_LIKE_NULL, nil, NO, UIObject, ValueOf, YES } from "./UIObject"
 import { UIRectangle } from "./UIRectangle"
-import type { ValueOf } from "./UIObject"
 import { TextMeasurementStyle, UITextMeasurement } from "./UITextMeasurement"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
 export class UITextView extends UIView {
     
-    
-    _textColor: UIColor = UITextView.defaultTextColor
-    _textAlignment?: ValueOf<typeof UITextView.textAlignment>
-    
-    _isSingleLine = YES
-    
-    textPrefix = ""
-    textSuffix = ""
-    
-    _notificationAmount = 0
-    
-    _minFontSize?: number
-    _maxFontSize?: number
-    
-    _automaticFontSizeSelection = NO
-    
-    changesOften = NO
+    //#region Static Properties
     
     static defaultTextColor = UIColor.blackColor
     static notificationTextColor = UIColor.redColor
@@ -34,19 +17,33 @@ export class UITextView extends UIView {
     static _intrinsicHeightCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
     static _intrinsicWidthCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
     
-    // Local cache for this instance if the label changes often
-    _intrinsicHeightCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
-    _intrinsicWidthCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
-    
-    
     static _ptToPx: number
     static _pxToPt: number
-    _text?: string
     
-    private _useFastMeasurement: boolean | undefined
-    private _cachedMeasurementStyles: TextMeasurementStyle | undefined
+    static type = {
+        "paragraph": "p",
+        "header1": "h1",
+        "header2": "h2",
+        "header3": "h3",
+        "header4": "h4",
+        "header5": "h5",
+        "header6": "h6",
+        "textArea": "textarea",
+        "textField": "input",
+        "span": "span",
+        "label": "label"
+    } as const
     
-    override usesVirtualLayoutingForIntrinsicSizing = NO
+    static textAlignment = {
+        "left": "left",
+        "center": "center",
+        "right": "right",
+        "justify": "justify"
+    } as const
+    
+    //#endregion
+    
+    //#region Constructor
     
     constructor(
         elementID?: string,
@@ -66,295 +63,31 @@ export class UITextView extends UIView {
         
         this.userInteractionEnabled = YES
         
-        
         if (textViewType == UITextView.type.textArea) {
-            
             this.pausesPointerEvents = YES
-            
             this.addTargetForControlEvent(
                 UIView.controlEvent.PointerUpInside,
                 (sender, event) => sender.focus()
             )
-            
-            
         }
-        
-        
     }
     
+    //#endregion
     
-    static _determinePXAndPTRatios() {
-        
-        if (UITextView._ptToPx) {
-            return
-        }
-        
-        const o = document.createElement("div")
-        o.style.width = "1000pt"
-        document.body.appendChild(o)
-        UITextView._ptToPx = o.clientWidth / 1000
-        document.body.removeChild(o)
-        UITextView._pxToPt = 1 / UITextView._ptToPx
-        
-    }
-    
-    
-    static type = {
-        
-        "paragraph": "p",
-        "header1": "h1",
-        "header2": "h2",
-        "header3": "h3",
-        "header4": "h4",
-        "header5": "h5",
-        "header6": "h6",
-        "textArea": "textarea",
-        "textField": "input",
-        "span": "span",
-        "label": "label"
-        
-    } as const
-    
-    
-    static textAlignment = {
-        
-        "left": "left",
-        "center": "center",
-        "right": "right",
-        "justify": "justify"
-        
-    } as const
-    
-    get textAlignment() {
-        // @ts-ignore
-        return this.style.textAlign
-    }
-    
-    set textAlignment(textAlignment: ValueOf<typeof UITextView.textAlignment>) {
-        this._textAlignment = textAlignment
-        this.style.textAlign = textAlignment
-    }
-    
-    
-    get textColor() {
-        return this._textColor
-    }
-    
-    set textColor(color: UIColor) {
-        
-        this._textColor = color || UITextView.defaultTextColor
-        this.style.color = this._textColor.stringValue
-        
-    }
-    
-    
-    get isSingleLine() {
-        
-        return this._isSingleLine
-        
-    }
-    
-    set isSingleLine(isSingleLine: boolean) {
-        
-        this._isSingleLine = isSingleLine
-        
-        this._intrinsicHeightCache = new UIObject() as any
-        this._intrinsicWidthCache = new UIObject() as any
-        
-        if (isSingleLine) {
-            
-            this.style.whiteSpace = "pre"
-            
-            return
-            
-        }
-        
-        this.style.whiteSpace = "pre-wrap"
-        
-        this.invalidateMeasurementStrategy()
-        
-    }
-    
-    
-    get notificationAmount() {
-        
-        return this._notificationAmount
-        
-    }
-    
-    set notificationAmount(notificationAmount: number) {
-        
-        if (this._notificationAmount == notificationAmount) {
-            
-            return
-            
-        }
-        
-        this._notificationAmount = notificationAmount
-        
-        this.text = this.text
-        
-        this.setNeedsLayoutUpToRootView()
-        
-        this.notificationAmountDidChange(notificationAmount)
-        
-    }
-    
-    notificationAmountDidChange(notificationAmount: number) {
-    
-    
-    }
-    
-    
-    get text() {
-        
-        return (this._text || this.viewHTMLElement.innerHTML)
-        
-    }
-    
-    set text(text) {
-        this._text = text
-        var notificationText = ""
-        if (this.notificationAmount) {
-            notificationText = "<span style=\"color: " + UITextView.notificationTextColor.stringValue + ";\">" +
-                (" (" + this.notificationAmount + ")").bold() + "</span>"
-        }
-        
-        if (this.viewHTMLElement.innerHTML != this.textPrefix + text + this.textSuffix + notificationText) {
-            this.viewHTMLElement.innerHTML = this.textPrefix + FIRST(text, "") + this.textSuffix + notificationText
-        }
-        
-        if (this.changesOften) {
-            this._intrinsicHeightCache = new UIObject() as any
-            this._intrinsicWidthCache = new UIObject() as any
-        }
-        // Invalidate measurement strategy when text changes significantly
-        this._useFastMeasurement = undefined
-        this._intrinsicSizesCache = {}
-        this.invalidateMeasurementStrategy()
-        this._invalidateMeasurementStyles()
-        this.clearIntrinsicSizeCache()
-        
-        this.setNeedsLayout()
-        
-    }
-    
-    override set innerHTML(innerHTML: string) {
-        
-        this.text = innerHTML
-        this.invalidateMeasurementStrategy()
-        
-    }
-    
-    override get innerHTML() {
-        
-        return this.viewHTMLElement.innerHTML
-        
-    }
-    
-    
-    setText(key: string, defaultString: string, parameters?: { [x: string]: string | UILocalizedTextObject }) {
-        
-        this.setInnerHTML(key, defaultString, parameters)
-        this.invalidateMeasurementStrategy()
-        
-    }
-    
-    
-    get fontSize() {
-        
-        const style = this.style.fontSize || window.getComputedStyle(this.viewHTMLElement, null).fontSize
-        
-        const result = (parseFloat(style) * UITextView._pxToPt)
-        
-        return result
-        
-    }
-    
-    set fontSize(fontSize: number) {
-        
-        if (fontSize != this.fontSize) {
-            
-            this.style.fontSize = "" + fontSize + "pt"
-            
-            this._intrinsicHeightCache = new UIObject() as any
-            this._intrinsicWidthCache = new UIObject() as any // MEETOD LUUA!!!!
-            
-            this._invalidateMeasurementStyles()  // Invalidate when font changes
-            this.clearIntrinsicSizeCache()
-            
-        }
-        
-    }
-    
-    
-    useAutomaticFontSize(minFontSize: number = nil, maxFontSize: number = nil) {
-        
-        this._automaticFontSizeSelection = YES
-        
-        this._minFontSize = minFontSize
-        this._maxFontSize = maxFontSize
-        
-        this.setNeedsLayout()
-        
-    }
-    
-    
-    static automaticallyCalculatedFontSize(
-        bounds: UIRectangle,
-        currentSize: UIRectangle,
-        currentFontSize: number,
-        minFontSize?: number,
-        maxFontSize?: number
-    ) {
-        
-        minFontSize = FIRST(minFontSize, 1)
-        maxFontSize = FIRST(maxFontSize, 100000000000)
-        
-        const heightMultiplier = bounds.height / (currentSize.height + 1)
-        const widthMultiplier = bounds.width / (currentSize.width + 1)
-        
-        var multiplier = heightMultiplier
-        if (heightMultiplier > widthMultiplier) {
-            multiplier = widthMultiplier
-        }
-        
-        const maxFittingFontSize = currentFontSize * multiplier
-        
-        if (maxFittingFontSize > maxFontSize) {
-            return maxFontSize
-        }
-        
-        if (minFontSize > maxFittingFontSize) {
-            return minFontSize
-        }
-        
-        return maxFittingFontSize
-        
-    }
-    
+    //#region Lifecycle Methods
     
     override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
-        
         super.didReceiveBroadcastEvent(event)
-        
     }
-    
     
     override willMoveToSuperview(superview: UIView) {
-        
         super.willMoveToSuperview(superview)
-        
     }
     
-    
     override layoutSubviews() {
-        
         super.layoutSubviews()
         
-        
         if (this._automaticFontSizeSelection) {
-            
             this.fontSize = UITextView.automaticallyCalculatedFontSize(
                 new UIRectangle(0, 0, 1 *
                     this.viewHTMLElement.offsetHeight, 1 *
@@ -364,115 +97,24 @@ export class UITextView extends UIView {
                 this._minFontSize,
                 this._maxFontSize
             )
-            
-            
         }
-        
-        
     }
     
+    //#endregion
     
-    override intrinsicContentHeight(constrainingWidth = 0) {
-        
-        const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this.computedStyle.font).replace(new RegExp(
-                "\\.",
-                "g"
-            ), "_") + "." +
-            ("" + constrainingWidth).replace(new RegExp("\\.", "g"), "_")
-        
-        let cacheObject = UITextView._intrinsicHeightCache
-        
-        if (this.changesOften) {
-            
-            // @ts-ignore
-            cacheObject = this._intrinsicHeightCache
-            
-            
-        }
-        
-        
-        var result = cacheObject.valueForKeyPath(keyPath)
-        
-        
-        if (IS_LIKE_NULL(result)) {
-            
-            result = super.intrinsicContentHeight(constrainingWidth)
-            
-            cacheObject.setValueForKeyPath(keyPath, result)
-            
-            
-        }
-        
-        
-        if (isNaN(result) || (!result && !this.text) ) {
-            
-            // console.error("Failed to calculate intrinsic height (" + this.elementID + ")", this, this.viewHTMLElement)
-            var asd = 1
-            
-            result = super.intrinsicContentHeight(constrainingWidth)
-            
-            cacheObject.setValueForKeyPath(keyPath, result)
-            
-            var asdasd = 1
-            
-            
-        }
-        
-        return result
-        
-    }
+    //#region Measurement & Sizing - Private Methods
     
-    override intrinsicContentWidth(constrainingHeight = 0) {
-        
-        const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this.computedStyle.font).replace(new RegExp(
-                "\\.",
-                "g"
-            ), "_") + "." +
-            ("" + constrainingHeight).replace(new RegExp("\\.", "g"), "_")
-        
-        let cacheObject = UITextView._intrinsicWidthCache
-        
-        if (this.changesOften) {
-            
-            // @ts-ignore
-            cacheObject = this._intrinsicWidthCache
-            
-            
-        }
-        
-        
-        var result = cacheObject.valueForKeyPath(keyPath)
-        
-        
-        if (IS_LIKE_NULL(result)) {
-            
-            result = super.intrinsicContentWidth(constrainingHeight)
-            
-            cacheObject.setValueForKeyPath(keyPath, result)
-            
-            
-        }
-        
-        
-        return result
-        
-    }
-    
-    
-    // Call this when styles change (fontSize, padding, etc.)
     private _invalidateMeasurementStyles(): void {
         this._cachedMeasurementStyles = undefined
         UITextMeasurement.invalidateElement(this.viewHTMLElement)
         this._intrinsicSizesCache = {}
     }
     
-    // Extract styles ONCE and cache them (avoids getComputedStyle)
     private _getMeasurementStyles(): TextMeasurementStyle {
         if (this._cachedMeasurementStyles) {
             return this._cachedMeasurementStyles
         }
         
-        // Only call getComputedStyle once and cache the result
         const computed = window.getComputedStyle(this.viewHTMLElement)
         const fontSize = parseFloat(computed.fontSize)
         
@@ -510,148 +152,396 @@ export class UITextView extends UIView {
         return fontSize * 1.2
     }
     
-    // Override the intrinsic size method
-    override intrinsicContentSizeWithConstraints(
-        constrainingHeight: number = 0,
-        constrainingWidth: number = 0
-    ): UIRectangle {
-        const cacheKey = "h_" + constrainingHeight + "__w_" + constrainingWidth
-        const cachedResult = this._intrinsicSizesCache[cacheKey]
-        if (cachedResult) {
-            return cachedResult
-        }
-        
-        // Determine measurement strategy
-        const shouldUseFastPath = this._useFastMeasurement ?? this._shouldUseFastMeasurement()
-        
-        let result: UIRectangle
-        
-        if (shouldUseFastPath) {
-            // Fast path: canvas-based measurement with pre-extracted styles
-            const styles = this._getMeasurementStyles()
-            const size = UITextMeasurement.calculateTextSize(
-                this.viewHTMLElement,
-                this.text || this.innerHTML,
-                constrainingWidth || undefined,
-                constrainingHeight || undefined,
-                styles  // Pass pre-computed styles to avoid getComputedStyle!
-            )
-            result = new UIRectangle(0, 0, size.height, size.width)
-        }
-        else {
-            // Fallback: original DOM-based measurement for complex content
-            result = super.intrinsicContentSizeWithConstraints(constrainingHeight, constrainingWidth)
-        }
-        
-        if (isNaN(result.height) || isNaN(result.width)) {
-            
-            // console.error("Failed to calculate intrinsic height (" + this.elementID + ")", this)
-            var asd = 1
-            
-            // Fallback: original DOM-based measurement
-            result = super.intrinsicContentSizeWithConstraints(constrainingHeight, constrainingWidth)
-            
-            
-        }
-        
-        this._intrinsicSizesCache[cacheKey] = result.copy()
-        return result
-    }
-    
-    // Helper to determine if we can use fast measurement
     private _shouldUseFastMeasurement(): boolean {
         const content = this.text || this.innerHTML
         
-        // If using dynamic innerHTML with parameters, use DOM measurement
         if (this._innerHTMLKey || this._localizedTextObject) {
             return false
         }
         
-        // Check for notification badges
         if (this.notificationAmount > 0) {
-            return false // Has span with colored text
+            return false
         }
         
-        // Check content complexity
         const hasComplexHTML = /<(?!\/?(b|i|em|strong|span|br)\b)[^>]+>/i.test(content)
         
         return !hasComplexHTML
     }
     
-    // Optional: Allow manual override for specific instances
+    //#endregion
+    
+    //#region Measurement & Sizing - Public Methods
+    
     setUseFastMeasurement(useFast: boolean): void {
         this._useFastMeasurement = useFast
         this._intrinsicSizesCache = {}
     }
     
-    // Optional: Force re-evaluation of measurement strategy
     invalidateMeasurementStrategy(): void {
         this._useFastMeasurement = undefined
         this._invalidateMeasurementStyles()
     }
     
+    //#endregion
     
-    override intrinsicContentSize() {
+    //#region Getters & Setters - Text Alignment
+    
+    get textAlignment() {
+        // @ts-ignore
+        return this.style.textAlign
+    }
+    
+    set textAlignment(textAlignment: ValueOf<typeof UITextView.textAlignment>) {
+        this._textAlignment = textAlignment
+        this.style.textAlign = textAlignment
+    }
+    
+    //#endregion
+    
+    //#region Getters & Setters - Text Color
+    
+    get textColor() {
+        return this._textColor
+    }
+    
+    set textColor(color: UIColor) {
+        this._textColor = color || UITextView.defaultTextColor
+        this.style.color = this._textColor.stringValue
+    }
+    
+    //#endregion
+    
+    //#region Getters & Setters - Single Line
+    
+    get isSingleLine() {
+        return this._isSingleLine
+    }
+    
+    set isSingleLine(isSingleLine: boolean) {
+        this._isSingleLine = isSingleLine
         
-        // This works but is slow
-        const result = this.intrinsicContentSizeWithConstraints(nil, nil)
+        this._intrinsicHeightCache = new UIObject() as any
+        this._intrinsicWidthCache = new UIObject() as any
+        
+        if (isSingleLine) {
+            this.style.whiteSpace = "pre"
+            return
+        }
+        
+        this.style.whiteSpace = "pre-wrap"
+        this.invalidateMeasurementStrategy()
+    }
+    
+    //#endregion
+    
+    //#region Getters & Setters - Notification Amount
+    
+    get notificationAmount() {
+        return this._notificationAmount
+    }
+    
+    set notificationAmount(notificationAmount: number) {
+        if (this._notificationAmount == notificationAmount) {
+            return
+        }
+        
+        this._notificationAmount = notificationAmount
+        this.text = this.text
+        this.setNeedsLayoutUpToRootView()
+        this.notificationAmountDidChange(notificationAmount)
+    }
+    
+    notificationAmountDidChange(notificationAmount: number) {
+    }
+    
+    //#endregion
+    
+    //#region Getters & Setters - Text Content
+    
+    get text() {
+        return (this._text || this.viewHTMLElement.innerHTML)
+    }
+    
+    set text(text) {
+        this._text = text
+        var notificationText = ""
+        if (this.notificationAmount) {
+            notificationText = "<span style=\"color: " + UITextView.notificationTextColor.stringValue + ";\">" +
+                (" (" + this.notificationAmount + ")").bold() + "</span>"
+        }
+        
+        if (this.viewHTMLElement.innerHTML != this.textPrefix + text + this.textSuffix + notificationText) {
+            this.viewHTMLElement.innerHTML = this.textPrefix + FIRST(text, "") + this.textSuffix + notificationText
+        }
+        
+        if (this.changesOften) {
+            this._intrinsicHeightCache = new UIObject() as any
+            this._intrinsicWidthCache = new UIObject() as any
+        }
+        
+        this._useFastMeasurement = undefined
+        this._intrinsicSizesCache = {}
+        this.invalidateMeasurementStrategy()
+        this._invalidateMeasurementStyles()
+        this.clearIntrinsicSizeCache()
+        
+        this.setNeedsLayout()
+    }
+    
+    override set innerHTML(innerHTML: string) {
+        this.text = innerHTML
+        this.invalidateMeasurementStrategy()
+    }
+    
+    override get innerHTML() {
+        return this.viewHTMLElement.innerHTML
+    }
+    
+    setText(key: string, defaultString: string, parameters?: { [x: string]: string | UILocalizedTextObject }) {
+        this.setInnerHTML(key, defaultString, parameters)
+        this.invalidateMeasurementStrategy()
+    }
+    
+    //#endregion
+    
+    //#region Getters & Setters - Font Size
+    
+    get fontSize() {
+        const style = this.style.fontSize || window.getComputedStyle(this.viewHTMLElement, null).fontSize
+        const result = (parseFloat(style) * UITextView._pxToPt)
+        return result
+    }
+    
+    set fontSize(fontSize: number) {
+        if (fontSize != this.fontSize) {
+            this.style.fontSize = "" + fontSize + "pt"
+            
+            this._intrinsicHeightCache = new UIObject() as any
+            this._intrinsicWidthCache = new UIObject() as any
+            
+            this._invalidateFontCache()
+            this._invalidateMeasurementStyles()
+            this.clearIntrinsicSizeCache()
+        }
+    }
+    
+    useAutomaticFontSize(minFontSize: number = nil, maxFontSize: number = nil) {
+        this._automaticFontSizeSelection = YES
+        this._minFontSize = minFontSize
+        this._maxFontSize = maxFontSize
+        this.setNeedsLayout()
+    }
+    
+    //#endregion
+    
+    //#region Font Caching - Private Methods
+    
+    /**
+     * Get a stable cache key for the font without triggering reflow.
+     * Only computes font on first access or when font properties change.
+     */
+    private _getFontCacheKey(): string {
+        // Check if font-related properties have changed
+        const currentTriggers = {
+            fontSize: this.style.fontSize || "",
+            fontFamily: this.style.fontFamily || "",
+            fontWeight: this.style.fontWeight || "",
+            fontStyle: this.style.fontStyle || "",
+            styleClasses: this.styleClasses.join(",")
+        }
+        
+        const hasChanged =
+            currentTriggers.fontSize !== this._fontInvalidationTriggers.fontSize ||
+            currentTriggers.fontFamily !== this._fontInvalidationTriggers.fontFamily ||
+            currentTriggers.fontWeight !== this._fontInvalidationTriggers.fontWeight ||
+            currentTriggers.fontStyle !== this._fontInvalidationTriggers.fontStyle ||
+            currentTriggers.styleClasses !== this._fontInvalidationTriggers.styleClasses
+        
+        if (!this._cachedFontKey || hasChanged) {
+            // Only access computedStyle when we know something changed
+            const computed = this.computedStyle
+            this._cachedFontKey = [
+                computed.fontStyle,
+                computed.fontVariant,
+                computed.fontWeight,
+                computed.fontSize,
+                computed.fontFamily
+            ].join("_").replace(/[.\s]/g, "_")
+            
+            this._fontInvalidationTriggers = currentTriggers
+        }
+        
+        return this._cachedFontKey
+    }
+    
+    /**
+     * Invalidate font cache when font properties change
+     */
+    private _invalidateFontCache(): void {
+        this._cachedFontKey = undefined
+    }
+    
+    //#endregion
+    
+    //#region Static Methods
+    
+    static _determinePXAndPTRatios() {
+        if (UITextView._ptToPx) {
+            return
+        }
+        
+        const o = document.createElement("div")
+        o.style.width = "1000pt"
+        document.body.appendChild(o)
+        UITextView._ptToPx = o.clientWidth / 1000
+        document.body.removeChild(o)
+        UITextView._pxToPt = 1 / UITextView._ptToPx
+    }
+    
+    static automaticallyCalculatedFontSize(
+        bounds: UIRectangle,
+        currentSize: UIRectangle,
+        currentFontSize: number,
+        minFontSize?: number,
+        maxFontSize?: number
+    ) {
+        minFontSize = FIRST(minFontSize, 1)
+        maxFontSize = FIRST(maxFontSize, 100000000000)
+        
+        const heightMultiplier = bounds.height / (currentSize.height + 1)
+        const widthMultiplier = bounds.width / (currentSize.width + 1)
+        
+        var multiplier = heightMultiplier
+        if (heightMultiplier > widthMultiplier) {
+            multiplier = widthMultiplier
+        }
+        
+        const maxFittingFontSize = currentFontSize * multiplier
+        
+        if (maxFittingFontSize > maxFontSize) {
+            return maxFontSize
+        }
+        
+        if (minFontSize > maxFittingFontSize) {
+            return minFontSize
+        }
+        
+        return maxFittingFontSize
+    }
+    
+    //#endregion
+    
+    //#region Instance Properties - Text Content
+    
+    _text?: string
+    textPrefix = ""
+    textSuffix = ""
+    _notificationAmount = 0
+    
+    //#endregion
+    
+    //#region Instance Properties - Styling
+    
+    _textColor: UIColor = UITextView.defaultTextColor
+    _textAlignment?: ValueOf<typeof UITextView.textAlignment>
+    _isSingleLine = YES
+    
+    //#endregion
+    
+    //#region Instance Properties - Font & Sizing
+    
+    _minFontSize?: number
+    _maxFontSize?: number
+    _automaticFontSizeSelection = NO
+    
+    // Cache for the computed font string
+    private _cachedFontKey?: string
+    private _fontInvalidationTriggers = {
+        fontSize: this.style.fontSize || "",
+        fontFamily: this.style.fontFamily || "",
+        fontWeight: this.style.fontWeight || "",
+        fontStyle: this.style.fontStyle || "",
+        styleClasses: this.styleClasses.join(",")
+    }
+    
+    //#endregion
+    
+    //#region Instance Properties - Caching & Performance
+    
+    changesOften = NO
+    
+    // Local cache for this instance if the label changes often
+    _intrinsicHeightCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
+    _intrinsicWidthCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
+    
+    private _useFastMeasurement: boolean | undefined
+    private _cachedMeasurementStyles: TextMeasurementStyle | undefined
+    
+    override usesVirtualLayoutingForIntrinsicSizing = NO
+    
+    //#endregion
+    
+    
+    
+    override intrinsicContentHeight(constrainingWidth = 0) {
+        
+        const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this._getFontCacheKey()) + "." +
+            ("" + constrainingWidth).replace(new RegExp("\\.", "g"), "_")
+        
+        let cacheObject = UITextView._intrinsicHeightCache
+        
+        if (this.changesOften) {
+            cacheObject = this._intrinsicHeightCache
+        }
+        
+        var result = cacheObject.valueForKeyPath(keyPath)
+        
+        if (IS_LIKE_NULL(result)) {
+            result = super.intrinsicContentHeight(constrainingWidth)
+            cacheObject.setValueForKeyPath(keyPath, result)
+        }
+        
+        if (isNaN(result) || (!result && !this.text)) {
+            result = super.intrinsicContentHeight(constrainingWidth)
+            cacheObject.setValueForKeyPath(keyPath, result)
+        }
         
         return result
+    }
+    
+    override intrinsicContentWidth(constrainingHeight = 0) {
         
+        const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this._getFontCacheKey()) + "." +
+            ("" + constrainingHeight).replace(new RegExp("\\.", "g"), "_")
+        
+        let cacheObject = UITextView._intrinsicWidthCache
+        
+        if (this.changesOften) {
+            cacheObject = this._intrinsicWidthCache
+        }
+        
+        var result = cacheObject.valueForKeyPath(keyPath)
+        
+        if (IS_LIKE_NULL(result)) {
+            result = super.intrinsicContentWidth(constrainingHeight)
+            cacheObject.setValueForKeyPath(keyPath, result)
+        }
+        
+        return result
+    }
+    
+    
+    // Override addStyleClass to invalidate font cache
+    override addStyleClass(styleClass: string) {
+        super.addStyleClass(styleClass)
+        this._invalidateFontCache()
+    }
+    
+    // Override removeStyleClass to invalidate font cache
+    override removeStyleClass(styleClass: string) {
+        super.removeStyleClass(styleClass)
+        this._invalidateFontCache()
     }
     
     
 }
-
-
-UITextView._determinePXAndPTRatios()
-
-
-// /**
-//  * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
-//  * 
-//  * @param {String} text The text to be rendered.
-//  * @param {String} font The css font descriptor that text is to be rendered with (e.g. "bold 14px verdana").
-//  * 
-//  * @see https://stackoverflow.com/questions/118241/calculate-text-width-with-javascript/21015393#21015393
-//  */
-// function getTextMetrics(text, font) {
-//     // re-use canvas object for better performance
-//     var canvas = getTextMetrics.canvas || (getTextMetrics.canvas = document.createElement("canvas"));
-//     var context = canvas.getContext("2d");
-//     context.font = font;
-//     var metrics = context.measureText(text);
-//     return metrics;
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

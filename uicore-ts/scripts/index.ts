@@ -32,6 +32,8 @@ export * from "./UIInterfaces"
 export * from "./ClientCheckers"
 export * from "./UICore"
 export * from "./UIRootViewController"
+export * from "./UILoadingView"
+
 
 
 

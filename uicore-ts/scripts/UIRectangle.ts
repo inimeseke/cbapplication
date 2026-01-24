@@ -942,10 +942,25 @@ export class UIRectangle extends UIObject {
     
     
     // Bounding box
-    static boundingBoxForPoints(points: string | any[]) {
+    static boundingBoxForPoints(points: UIPoint[]) {
         const result = new UIRectangle()
         for (let i = 0; i < points.length; i++) {
             result.updateByAddingPoint(points[i])
+        }
+        return result
+    }
+    
+    static boundingBoxForRectanglesAndPoints(rectanglesAndPoints: (UIPoint | UIRectangle)[]) {
+        const result = new UIRectangle()
+        for (let i = 0; i < rectanglesAndPoints.length; i++) {
+            const rectangleOrPoint = rectanglesAndPoints[i]
+            if (rectangleOrPoint instanceof UIRectangle) {
+                result.updateByAddingPoint(rectangleOrPoint.min)
+                result.updateByAddingPoint(rectangleOrPoint.max)
+            }
+            else {
+                result.updateByAddingPoint(rectangleOrPoint)
+            }
         }
         return result
     }

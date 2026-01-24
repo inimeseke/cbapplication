@@ -22,9 +22,6 @@ export class UIActionIndicator extends UIView {
     }
     
     
-    
-    
-    
     set size(size: number) {
         
         this._size = size
@@ -40,15 +37,14 @@ export class UIActionIndicator extends UIView {
     }
     
     
-    
     override set hidden(hidden: boolean) {
-    
+        
         super.hidden = hidden
-    
+        
         if (hidden) {
-        
+            
             this.indicatorView.removeFromSuperview()
-        
+            
         }
         else {
             
@@ -81,24 +77,18 @@ export class UIActionIndicator extends UIView {
         
         this.indicatorView.style.height = "" + this._size.integerValue + "px"
         this.indicatorView.style.width = "" + this._size.integerValue + "px"
-    
+        
         const minSize = Math.min(this.bounds.height, this.bounds.width)
-    
+        
         this.indicatorView.style.maxHeight = "" + minSize.integerValue + "px"
         this.indicatorView.style.maxWidth = "" + minSize.integerValue + "px"
-    
+        
         const size = Math.min(this._size, minSize)
-    
+        
         this.indicatorView.style.left = "" + ((bounds.width - size) * 0.5 - 11).integerValue + "px"
         this.indicatorView.style.top = "" + ((bounds.height - size) * 0.5 - 11).integerValue + "px"
         
-        
-        
-        
     }
-    
-    
-    
     
     
 }

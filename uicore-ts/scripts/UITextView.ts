@@ -35,10 +35,10 @@ export class UITextView extends UIView {
     } as const
     
     static textAlignment = {
-        "left": "left",
+        "left": "flex-start",
         "center": "center",
-        "right": "right",
-        "justify": "justify"
+        "right": "flex-end",
+        "justify": "stretch"
     } as const
     
     //#endregion
@@ -61,7 +61,24 @@ export class UITextView extends UIView {
         
         this.textColor = this.textColor
         
-        this.userInteractionEnabled = YES
+        this.userInteractionEnabled = YES;
+        
+        (this as UITextView).configureWithObject({
+            style: {
+                display: "flex",
+                flexDirection: "column", // Ensures vertical stacking logic
+                
+                // 'safe' ensures that if content overflows, it aligns to the start (top)
+                // instead of overflowing upwards or downwards equally.
+                justifyContent: "safe center",
+                alignItems: "flex-start",  // Keeps text left-aligned (change to "center" for horizontal center)
+                
+                // Optional: ensure text wraps if it gets too long
+                whiteSpace: "normal",
+                wordWrap: "break-word",
+                overflowWrap: "break-word"
+            }
+        })
         
         if (textViewType == UITextView.type.textArea) {
             this.pausesPointerEvents = YES
@@ -188,12 +205,11 @@ export class UITextView extends UIView {
     
     get textAlignment() {
         // @ts-ignore
-        return this.style.textAlign
+        return this.style.alignItems
     }
     
     set textAlignment(textAlignment: ValueOf<typeof UITextView.textAlignment>) {
-        this._textAlignment = textAlignment
-        this.style.textAlign = textAlignment
+        this.style.alignItems = textAlignment
     }
     
     //#endregion

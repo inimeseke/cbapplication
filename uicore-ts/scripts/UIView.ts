@@ -133,6 +133,12 @@ interface Constraint {
 }
 
 
+export interface IUILoadingView extends UIView {
+    theme: "light" | "dark";
+    // Add any other specific methods you need to call from UIView
+}
+
+
 export function UIComponentView(target: Function, context: ClassDecoratorContext) {
     console.log("Recording annotation UIComponentView on " + target.name)
     UIObject.recordAnnotation(UIComponentView, target)
@@ -149,7 +155,7 @@ export class UIView extends UIObject {
     _UIViewIntrinsicTemporaryWidth?: string
     _UIViewIntrinsicTemporaryHeight?: string
     _enabled: boolean = YES
-    _frame?: UIRectangle & { zIndex?: number };
+    _frame?: UIRectangle & { zIndex?: number }
     _frameCache?: UIRectangle
     _backgroundColor: UIColor = UIColor.transparentColor
     
@@ -219,6 +225,43 @@ export class UIView extends UIObject {
     private _isResizable = NO
     makeNotResizable?: () => void
     resizingHandles: UIView[] = []
+    
+    public static LoadingViewClass: new () => IUILoadingView
+    private _loadingView?: IUILoadingView
+    
+    public set loading(isLoading: boolean) {
+        this.userInteractionEnabled = !isLoading
+        if (isLoading) {
+            if (!IS(this._loadingView)) {
+                if (UIView.LoadingViewClass) {
+                    this._loadingView = new UIView.LoadingViewClass()
+                }
+                else {
+                    console.warn("UILoadingView class not registered yet.")
+                    return
+                }
+            }
+            
+            // Add to superview if not already added
+            if (this._loadingView.superview != this) {
+                this.addSubview(this._loadingView)
+                // Ensure it sits above other content
+                this._loadingView.style.zIndex = "1000"
+            }
+            
+            // Force an immediate layout update to position the overlay
+            // this._loadingView.setFrame(this.bounds)
+            
+        }
+        else {
+            this._loadingView?.removeFromSuperview()
+        }
+    }
+    
+    public get loading(): boolean {
+        return IS(this._loadingView) && IS(this._loadingView.superview)
+    }
+    
     
     private _isMoving: boolean = NO
     _isCBEditorTemporaryResizable = NO
@@ -334,7 +377,7 @@ export class UIView extends UIObject {
         this._resizeObserverInitialized = true
         
         // Invalidate cache on window resize
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
             this._pageDimensionsCacheValid = false
         }, { passive: true })
         
@@ -346,9 +389,10 @@ export class UIView extends UIObject {
         // Start observing once body is available
         if (document.body) {
             bodyObserver.observe(document.body)
-        } else {
+        }
+        else {
             // Wait for DOMContentLoaded if body isn't ready yet
-            document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener("DOMContentLoaded", () => {
                 bodyObserver.observe(document.body)
             }, { once: true })
         }
@@ -363,14 +407,15 @@ export class UIView extends UIObject {
                 childList: true,
                 subtree: true,
                 attributes: true,
-                attributeFilter: ['style', 'class']
+                attributeFilter: ["style", "class"]
             })
         }
         
         if (document.body) {
             observeMutations()
-        } else {
-            document.addEventListener('DOMContentLoaded', observeMutations, { once: true })
+        }
+        else {
+            document.addEventListener("DOMContentLoaded", observeMutations, { once: true })
         }
     }
     
@@ -429,7 +474,6 @@ export class UIView extends UIObject {
     }
     
     //#endregion
-    
     
     
     centerInContainer() {
@@ -1745,7 +1789,7 @@ export class UIView extends UIObject {
                 
                 // Skip if this view has been laid out too many times (cycle detection)
                 if (layoutCount >= 5) {
-                    console.warn('View layout cycle detected:', view)
+                    console.warn("View layout cycle detected:", view)
                     continue
                 }
                 
@@ -1846,6 +1890,10 @@ export class UIView extends UIObject {
             subview.calculateAndSetViewFrame()
             
         }
+        
+        // if (this._loadingView && this._loadingView.superview == this) {
+        //     this._loadingView.setFrame(this.bounds)
+        // }
         
         this.didLayoutSubviews()
         
@@ -3687,6 +3735,9 @@ export class UIView extends UIObject {
         
         const framePoints: UIPoint[] = []
         this.subviews.forEach(subview => {
+            if (subview == this._loadingView) {
+                return
+            }
             subview.layoutIfNeeded()
             framePoints.push(subview.frame.min)
             framePoints.push(subview.frame.max)
@@ -3695,11 +3746,11 @@ export class UIView extends UIObject {
         // we will add padding based on the _contentInsets
         const resultFrame = UIRectangle.boundingBoxForPoints(framePoints)
             .rectangleWithInsets(
-            -this._contentInsets?.left ?? 0,
-            -this._contentInsets?.right ?? 0,
-            -this._contentInsets?.bottom ?? 0,
-            -this._contentInsets?.top ?? 0
-        )
+                -this._contentInsets?.left ?? 0,
+                -this._contentInsets?.right ?? 0,
+                -this._contentInsets?.bottom ?? 0,
+                -this._contentInsets?.top ?? 0
+            )
         return resultFrame
     }
     

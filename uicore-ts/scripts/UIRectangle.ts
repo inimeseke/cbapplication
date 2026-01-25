@@ -941,6 +941,30 @@ export class UIRectangle extends UIObject {
     }
     
     
+    IF(condition: boolean): UIRectangleConditionalChain<UIRectangle> {
+        const conditionalBlock = new UIRectangleConditionalBlock<UIRectangle>(this, condition)
+        return conditionalBlock.getProxy()
+    }
+    
+    // These will be intercepted by the proxy, but we define them for TypeScript
+    ELSE_IF(condition: boolean): UIRectangle {
+        return this
+    }
+    
+    ELSE(): UIRectangle {
+        return this
+    }
+    
+    ENDIF(): this
+    ENDIF<T, R>(performFunction: (result: T) => R): R
+    ENDIF<T, R>(performFunction?: (result: T) => R): R | this {
+        if (performFunction) {
+            return performFunction(this as any)
+        }
+        return this
+    }
+    
+    
     // Bounding box
     static boundingBoxForPoints(points: UIPoint[]) {
         const result = new UIRectangle()
@@ -990,6 +1014,119 @@ export class UIRectangle extends UIObject {
     
     
 }
+
+
+type UIRectangleConditionalChain<T> = {
+    [K in keyof UIRectangle]: UIRectangle[K] extends (...args: infer Args) => infer R
+                              ? (...args: Args) => UIRectangleConditionalChain<T | R>
+                              : UIRectangle[K]
+} & {
+    ELSE_IF<U>(condition: boolean): UIRectangleConditionalChain<T | U>
+    ELSE<U>(): UIRectangleConditionalChain<T | U>
+    ENDIF(): T
+    ENDIF<R>(performFunction: (result: T) => R): R
+}
+
+
+class UIRectangleConditionalBlock<T> {
+    private parentRectangle: UIRectangle
+    private conditionMet: boolean
+    private branchHasExecuted: boolean = false  // Renamed for clarity
+    private currentResult: any
+    
+    constructor(rectangle: UIRectangle, condition: boolean, initialResult?: any) {
+        this.parentRectangle = rectangle
+        this.conditionMet = condition
+        this.currentResult = initialResult ?? rectangle
+    }
+    
+    private createProxy(): UIRectangleConditionalChain<T> {
+        const self = this
+        return new Proxy(this.parentRectangle, {
+            get(target, prop) {
+                // Intercept ELSE_IF
+                if (prop === 'ELSE_IF') {
+                    return <U>(condition: boolean): UIRectangleConditionalChain<T | U> => {
+                        if (!self.branchHasExecuted && !self.conditionMet) {
+                            self.conditionMet = condition
+                        }
+                        // Return new block that tracks the union type
+                        const newBlock = new UIRectangleConditionalBlock<T | U>(
+                            self.parentRectangle,
+                            self.conditionMet,
+                            self.currentResult
+                        )
+                        newBlock.branchHasExecuted = self.branchHasExecuted
+                        return newBlock.createProxy() as any
+                    }
+                }
+                
+                // Intercept ELSE
+                if (prop === 'ELSE') {
+                    return <U>(): UIRectangleConditionalChain<T | U> => {
+                        if (!self.branchHasExecuted && !self.conditionMet) {
+                            self.conditionMet = true
+                        }
+                        const newBlock = new UIRectangleConditionalBlock<T | U>(
+                            self.parentRectangle,
+                            self.conditionMet,
+                            self.currentResult
+                        )
+                        newBlock.branchHasExecuted = self.branchHasExecuted
+                        return newBlock.createProxy() as any
+                    }
+                }
+                
+                // Intercept ENDIF with overloads
+                if (prop === 'ENDIF') {
+                    // Return an overloaded function
+                    function endif(): T
+                    function endif<R>(performFunction: (result: T) => R): R
+                    function endif<R>(performFunction?: (result: T) => R): R | T {
+                        if (performFunction) {
+                            return performFunction(self.currentResult)
+                        }
+                        return self.currentResult
+                    }
+                    return endif
+                }
+                
+                // For all other methods
+                const value = target[prop as keyof UIRectangle]
+                if (value instanceof Function) {
+                    return (...args: any[]) => {
+                        if (self.conditionMet) {
+                            // Mark that this branch is executing (only on first method call)
+                            if (!self.branchHasExecuted) {
+                                self.branchHasExecuted = true
+                            }
+                            
+                            const result = (value as Function).apply(target, args)
+                            
+                            // Store the result
+                            self.currentResult = result
+                            
+                            // If the method returns a UIRectangle, update parent reference
+                            if (result instanceof UIRectangle) {
+                                self.parentRectangle = result
+                            }
+                            
+                            return self.createProxy()
+                        }
+                        // If condition not met, return proxy to continue chain
+                        return self.createProxy()
+                    }
+                }
+                return value
+            }
+        }) as any
+    }
+    
+    getProxy(): UIRectangleConditionalChain<T> {
+        return this.createProxy()
+    }
+}
+
 
 
 

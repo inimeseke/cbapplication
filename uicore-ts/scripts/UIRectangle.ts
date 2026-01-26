@@ -299,7 +299,9 @@ export class UIRectangle extends UIObject {
         return this.rectangleWithInsets(inset, inset, inset, inset)
     }
     
-    rectangleWithHeight(height: number, centeredOnPosition: number = nil) {
+    rectangleWithHeight(height: SizeNumberOrFunctionOrView, centeredOnPosition: number = nil) {
+        
+        height = this._heightNumberFromSizeNumberOrFunctionOrView(height)
         
         if (isNaN(centeredOnPosition)) {
             centeredOnPosition = nil
@@ -317,7 +319,9 @@ export class UIRectangle extends UIObject {
         
     }
     
-    rectangleWithWidth(width: number, centeredOnPosition: number = nil) {
+    rectangleWithWidth(width: SizeNumberOrFunctionOrView, centeredOnPosition: number = nil) {
+        
+        width = this._widthNumberFromSizeNumberOrFunctionOrView(width)
         
         if (isNaN(centeredOnPosition)) {
             centeredOnPosition = nil
@@ -757,7 +761,7 @@ export class UIRectangle extends UIObject {
         )
         
         for (let i = 0; i < views.length; i++) {
-            const frame = currentRectangle.rectangleWithIntrinsicContentHeightForView(views[i])
+            const frame = currentRectangle.rectangleWithHeight(views[i])
             
             if (IS_NOT_NIL(absoluteHeights[i])) {
                 frame.height = absoluteHeights[i] as number
@@ -802,7 +806,7 @@ export class UIRectangle extends UIObject {
         )
         
         for (let i = 0; i < views.length; i++) {
-            const frame = currentRectangle.rectangleWithIntrinsicContentWidthForView(views[i])
+            const frame = currentRectangle.rectangleWithWidth(views[i])
             
             if (IS_NOT_NIL(absoluteWidths[i])) {
                 frame.width = absoluteWidths[i] as number
@@ -876,14 +880,6 @@ export class UIRectangle extends UIObject {
             .rectangleWithWidth(intrinsicContentSize.width, centeredOnXPosition)
     }
     
-    rectangleWithIntrinsicContentHeightForView(view: UIView, centeredOnPosition = 0) {
-        return this.rectangleWithHeight(view.intrinsicContentHeight(this.width), centeredOnPosition)
-    }
-    
-    rectangleWithIntrinsicContentWidthForView(view: UIView, centeredOnPosition = 0) {
-        return this.rectangleWithWidth(view.intrinsicContentWidth(this.height), centeredOnPosition)
-    }
-    
     settingMinHeight(minHeight?: number) {
         this.minHeight = minHeight
         return this
@@ -942,7 +938,8 @@ export class UIRectangle extends UIObject {
     
     
     IF(condition: boolean): UIRectangleConditionalChain<UIRectangle> {
-        const conditionalBlock = new UIRectangleConditionalBlock<UIRectangle>(this, condition)
+        const conditionalBlock = new UIRectangleConditionalBlock(this, condition)
+        // @ts-ignore
         return conditionalBlock.getProxy()
     }
     
@@ -1016,115 +1013,154 @@ export class UIRectangle extends UIObject {
 }
 
 
-type UIRectangleConditionalChain<T> = {
-    [K in keyof UIRectangle]: UIRectangle[K] extends (...args: infer Args) => infer R
-                              ? (...args: Args) => UIRectangleConditionalChain<T | R>
-                              : UIRectangle[K]
-} & {
-    ELSE_IF<U>(condition: boolean): UIRectangleConditionalChain<T | U>
-    ELSE<U>(): UIRectangleConditionalChain<T | U>
-    ENDIF(): T
-    ENDIF<R>(performFunction: (result: T) => R): R
-}
+// 1. Methods available when holding a UIRectangle
+type RectangleChainMethods<TResult> = {
+    [K in keyof UIRectangle as (
+        // Exclude IF to prevent circular reference TS2615
+        // Exclude Control Flow keys as they are handled in SharedChainMethods
+        K extends 'IF' | 'ELSE' | 'ELSE_IF' | 'ENDIF' ? never : K
+        )]:
+    UIRectangle[K] extends (...args: infer Args) => infer R
+    ? R extends UIRectangle | UIRectangle[] // Filter: Must return Rect or Rect[]
+      ? (...args: Args) => UIRectangleConditionalChain<R, TResult | R>
+      : never
+    : never
+};
+
+// 2. Methods available when holding a UIRectangle[]
+type ArrayChainMethods<TResult> = {
+    [K in keyof UIRectangle[]]:
+    // Case 1: It is a property (getter) that returns a UIRectangle
+    UIRectangle[][K] extends UIRectangle
+    ? UIRectangleConditionalChain<UIRectangle, TResult | UIRectangle>
+        // Case 2: It is a function that returns a UIRectangle
+    : UIRectangle[][K] extends (...args: infer Args) => infer R
+      ? R extends UIRectangle
+        ? (...args: Args) => UIRectangleConditionalChain<R, TResult | R>
+        : never
+      : never
+};
 
 
-class UIRectangleConditionalBlock<T> {
-    private parentRectangle: UIRectangle
-    private conditionMet: boolean
-    private branchHasExecuted: boolean = false  // Renamed for clarity
-    private currentResult: any
+
+// 3. Methods available in both states (Control Flow + Transform)
+type SharedChainMethods<TCurrent, TResult> = {
+    // TRANSFORM allows manual conversion from TCurrent to a UIRectangle
+    TRANSFORM<R extends UIRectangle>(fn: (current: TCurrent) => R): UIRectangleConditionalChain<R, TResult | R>;
     
-    constructor(rectangle: UIRectangle, condition: boolean, initialResult?: any) {
-        this.parentRectangle = rectangle
+    // ELSE_IF and ELSE reset the state to the base UIRectangle
+    ELSE_IF<U>(condition: boolean): UIRectangleConditionalChain<UIRectangle, TResult | U>;
+    ELSE<U>(): UIRectangleConditionalChain<UIRectangle, TResult | U>;
+    
+    // ENDIF returns the final result
+    ENDIF(): TResult;
+    ENDIF<R>(performFunction: (result: TResult) => R): R;
+};
+
+// 4. The Main Type
+// Conditionally combines the specific methods based on TCurrent, plus the shared methods
+type UIRectangleConditionalChain<TCurrent, TResult = TCurrent> =
+// Use {} instead of never to avoid collapsing the intersection to 'never'
+    (TCurrent extends UIRectangle ? RectangleChainMethods<TResult> : {}) &
+    (TCurrent extends UIRectangle[] ? ArrayChainMethods<TResult> : {}) &
+    SharedChainMethods<TCurrent, TResult>;
+
+
+class UIRectangleConditionalBlock {
+    // The value we are currently chaining on (can be UIRectangle or UIRectangle[])
+    private currentResult: any
+    // The value where the IF block started (needed to reset for ELSE branches)
+    private originalResult: any
+    private conditionMet: boolean
+    
+    constructor(initialResult: UIRectangle, condition: boolean) {
+        this.originalResult = initialResult
+        this.currentResult = initialResult
         this.conditionMet = condition
-        this.currentResult = initialResult ?? rectangle
     }
     
-    private createProxy(): UIRectangleConditionalChain<T> {
+    private createProxy(): UIRectangleConditionalChain<any, any> {
         const self = this
-        return new Proxy(this.parentRectangle, {
-            get(target, prop) {
-                // Intercept ELSE_IF
+        
+        // The target is irrelevant; we delegate everything to self.currentResult
+        return new Proxy({}, {
+            get(_, prop) {
+                
+                // 1. Control Flow Methods
+                
+                if (prop === 'TRANSFORM') {
+                    return <R extends UIRectangle>(fn: (current: any) => R) => {
+                        if (self.conditionMet) {
+                            const result = fn(self.currentResult)
+                            self.currentResult = result
+                        }
+                        return self.createProxy()
+                    }
+                }
+                
                 if (prop === 'ELSE_IF') {
-                    return <U>(condition: boolean): UIRectangleConditionalChain<T | U> => {
-                        if (!self.branchHasExecuted && !self.conditionMet) {
+                    return <U>(condition: boolean) => {
+                        // Only enter this branch if no previous branch has run
+                        if (!self.conditionMet) {
                             self.conditionMet = condition
+                            // Reset the state to the original starting point for this new branch
+                            self.currentResult = self.originalResult
                         }
-                        // Return new block that tracks the union type
-                        const newBlock = new UIRectangleConditionalBlock<T | U>(
-                            self.parentRectangle,
-                            self.conditionMet,
-                            self.currentResult
-                        )
-                        newBlock.branchHasExecuted = self.branchHasExecuted
-                        return newBlock.createProxy() as any
+                        return self.createProxy()
                     }
                 }
                 
-                // Intercept ELSE
                 if (prop === 'ELSE') {
-                    return <U>(): UIRectangleConditionalChain<T | U> => {
-                        if (!self.branchHasExecuted && !self.conditionMet) {
+                    return <U>() => {
+                        if (!self.conditionMet) {
                             self.conditionMet = true
+                            // Reset the state to the original starting point
+                            self.currentResult = self.originalResult
                         }
-                        const newBlock = new UIRectangleConditionalBlock<T | U>(
-                            self.parentRectangle,
-                            self.conditionMet,
-                            self.currentResult
-                        )
-                        newBlock.branchHasExecuted = self.branchHasExecuted
-                        return newBlock.createProxy() as any
+                        return self.createProxy()
                     }
                 }
                 
-                // Intercept ENDIF with overloads
                 if (prop === 'ENDIF') {
-                    // Return an overloaded function
-                    function endif(): T
-                    function endif<R>(performFunction: (result: T) => R): R
-                    function endif<R>(performFunction?: (result: T) => R): R | T {
-                        if (performFunction) {
-                            return performFunction(self.currentResult)
-                        }
-                        return self.currentResult
+                    function endif(): any
+                    function endif<R>(performFunction: (result: any) => R): R
+                    function endif<R>(performFunction?: (result: any) => R): R | any {
+                        return performFunction ? performFunction(self.currentResult) : self.currentResult
                     }
                     return endif
                 }
                 
-                // For all other methods
-                const value = target[prop as keyof UIRectangle]
-                if (value instanceof Function) {
+                // 2. Forwarding to currentResult (Rectangle or Array)
+                
+                const value = self.currentResult[prop]
+                
+                // Case A: It's a function (method call)
+                if (typeof value === 'function') {
                     return (...args: any[]) => {
                         if (self.conditionMet) {
-                            // Mark that this branch is executing (only on first method call)
-                            if (!self.branchHasExecuted) {
-                                self.branchHasExecuted = true
-                            }
-                            
-                            const result = (value as Function).apply(target, args)
-                            
-                            // Store the result
+                            // Call the method on the CURRENT object, and update the state
+                            const result = value.apply(self.currentResult, args)
                             self.currentResult = result
-                            
-                            // If the method returns a UIRectangle, update parent reference
-                            if (result instanceof UIRectangle) {
-                                self.parentRectangle = result
-                            }
-                            
-                            return self.createProxy()
                         }
-                        // If condition not met, return proxy to continue chain
                         return self.createProxy()
                     }
                 }
-                return value
+                
+                // Case B: It's a property (getter)
+                // Accessing a property acts as a transition (e.g. accessing .lastElement)
+                if (self.conditionMet) {
+                    self.currentResult = value
+                }
+                
+                return self.createProxy()
             }
         }) as any
     }
     
-    getProxy(): UIRectangleConditionalChain<T> {
+    getProxy(): UIRectangleConditionalChain<any, any> {
         return this.createProxy()
     }
+    
 }
 
 

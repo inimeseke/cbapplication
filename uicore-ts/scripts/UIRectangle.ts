@@ -1016,13 +1016,12 @@ export class UIRectangle extends UIObject {
 // 1. Methods available when holding a UIRectangle
 type RectangleChainMethods<TResult> = {
     [K in keyof UIRectangle as (
-        // Exclude IF to prevent circular reference TS2615
-        // Exclude Control Flow keys as they are handled in SharedChainMethods
         K extends 'IF' | 'ELSE' | 'ELSE_IF' | 'ENDIF' ? never : K
         )]:
     UIRectangle[K] extends (...args: infer Args) => infer R
-    ? R extends UIRectangle | UIRectangle[] // Filter: Must return Rect or Rect[]
-      ? (...args: Args) => UIRectangleConditionalChain<R, TResult | R>
+    ? R extends UIRectangle | UIRectangle[]
+        // CHANGE: We do NOT add 'R' to 'TResult' here. We only update the current state (R).
+      ? (...args: Args) => UIRectangleConditionalChain<R, TResult>
       : never
     : never
 };
@@ -1030,37 +1029,35 @@ type RectangleChainMethods<TResult> = {
 // 2. Methods available when holding a UIRectangle[]
 type ArrayChainMethods<TResult> = {
     [K in keyof UIRectangle[]]:
-    // Case 1: It is a property (getter) that returns a UIRectangle
     UIRectangle[][K] extends UIRectangle
-    ? UIRectangleConditionalChain<UIRectangle, TResult | UIRectangle>
-        // Case 2: It is a function that returns a UIRectangle
+    ? UIRectangleConditionalChain<UIRectangle, TResult> // No accumulation for properties
     : UIRectangle[][K] extends (...args: infer Args) => infer R
-      ? R extends UIRectangle
-        ? (...args: Args) => UIRectangleConditionalChain<R, TResult | R>
+      ? R extends UIRectangle | UIRectangle[]
+          // CHANGE: We do NOT add 'R' to 'TResult' here either.
+        ? (...args: Args) => UIRectangleConditionalChain<R, TResult>
         : never
       : never
 };
 
-
-
 // 3. Methods available in both states (Control Flow + Transform)
 type SharedChainMethods<TCurrent, TResult> = {
-    // TRANSFORM allows manual conversion from TCurrent to a UIRectangle
-    TRANSFORM<R extends UIRectangle>(fn: (current: TCurrent) => R): UIRectangleConditionalChain<R, TResult | R>;
+    // TRANSFORM acts as a standard method, it should not leak intermediate types into TResult
+    TRANSFORM<R extends UIRectangle>(fn: (current: TCurrent) => R): UIRectangleConditionalChain<R, TResult>;
     
-    // ELSE_IF and ELSE reset the state to the base UIRectangle
-    ELSE_IF<U>(condition: boolean): UIRectangleConditionalChain<UIRectangle, TResult | U>;
-    ELSE<U>(): UIRectangleConditionalChain<UIRectangle, TResult | U>;
+    // ELSE_IF marks the end of a branch. We MUST capture the current state (TCurrent) and add it to TResult.
+    // The new chain starts with the original UIRectangle state for the next branch.
+    ELSE_IF(condition: boolean): UIRectangleConditionalChain<UIRectangle, TResult | TCurrent>;
     
-    // ENDIF returns the final result
-    ENDIF(): TResult;
-    ENDIF<R>(performFunction: (result: TResult) => R): R;
+    // ELSE marks the end of a branch. Same logic as ELSE_IF.
+    ELSE(): UIRectangleConditionalChain<UIRectangle, TResult | TCurrent>;
+    
+    // ENDIF marks the end of the block. Same logic: capture TCurrent into TResult.
+    ENDIF(): TResult | TCurrent;
+    ENDIF<R>(performFunction: (result: TResult | TCurrent) => R): R;
 };
 
-// 4. The Main Type
-// Conditionally combines the specific methods based on TCurrent, plus the shared methods
+// 4. The Main Type (No changes needed here, just re-stating for context)
 type UIRectangleConditionalChain<TCurrent, TResult = TCurrent> =
-// Use {} instead of never to avoid collapsing the intersection to 'never'
     (TCurrent extends UIRectangle ? RectangleChainMethods<TResult> : {}) &
     (TCurrent extends UIRectangle[] ? ArrayChainMethods<TResult> : {}) &
     SharedChainMethods<TCurrent, TResult>;

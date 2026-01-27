@@ -5,7 +5,21 @@ import { UICore } from "./UICore"
 import "./UICoreExtensions"
 import type { UIDialogView } from "./UIDialogView"
 import { UILocalizedTextObject } from "./UIInterfaces"
-import { FIRST, FIRST_OR_NIL, IF, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, RETURNER, UIObject, YES } from "./UIObject"
+import {
+    FIRST,
+    FIRST_OR_NIL,
+    IF,
+    IS,
+    IS_DEFINED,
+    IS_NIL,
+    IS_NOT,
+    IS_NOT_LIKE_NULL,
+    nil,
+    NO,
+    RETURNER,
+    UIObject,
+    YES
+} from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIViewController } from "./UIViewController"
@@ -642,13 +656,17 @@ export class UIView extends UIObject {
     }
     
     
-    set hoverText(hoverText: string) {
-        this.viewHTMLElement.setAttribute("title", hoverText)
+    set hoverText(hoverText: string | undefined | null) {
+        if (IS_NOT_LIKE_NULL(hoverText)) {
+            this.viewHTMLElement.setAttribute("title", hoverText)
+        }
+        else {
+            this.viewHTMLElement.removeAttribute("title")
+        }
     }
     
-    
     get hoverText() {
-        return this.viewHTMLElement.getAttribute("title") ?? ""
+        return this.viewHTMLElement.getAttribute("title")
     }
     
     

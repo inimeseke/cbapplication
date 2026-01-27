@@ -311,7 +311,7 @@ export class UIButton extends UIBaseButton {
         
         let bounds = this.bounds
         
-        this.hoverText = this.titleLabel?.text ?? ""
+        this.hoverText = this.hoverText ?? this.titleLabel?.text ?? ""
         
         // Image only if text is not present
         if (IS_NOT(this.imageView.hidden) && !IS(this.titleLabel?.text)) {

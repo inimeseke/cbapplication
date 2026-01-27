@@ -118,9 +118,11 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         
         
         containerView.addSubview(this)
+        this.view.setNeedsLayoutUpToRootView()
         
         if (animated) {
             
+            UIView.layoutViewsIfNeeded()
             this.layoutSubviews()
             
             UIView.animateViewOrViewsWithDurationDelayAndFunction(
@@ -249,6 +251,8 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         this.view.style.position = "relative"
         
         this.view.style.zIndex = "" + this.zIndex
+        
+        this.view.setNeedsLayout()
         
         // this.view.style.maxHeight = "" + (bounds.height - margin * 2).integerValue + "px";
         // this.view.style.maxWidth = "" + (bounds.width - margin * 2).integerValue + "px";

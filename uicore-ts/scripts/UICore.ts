@@ -10,7 +10,7 @@ export class UICore extends UIObject {
     
     rootViewController: UIViewController
     
-    paddingLength = 20
+    
     
     static RootViewControllerClass: typeof UIViewController
     static main: UICore
@@ -24,7 +24,7 @@ export class UICore extends UIObject {
         
     }
     
-    constructor(rootDivElementID: string, rootViewControllerClass: typeof UIViewController) {
+    constructor(rootDivElementID: string, rootViewControllerClass: typeof UIViewController, public paddingLength = 20) {
         
         super()
         

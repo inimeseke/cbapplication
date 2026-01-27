@@ -127,25 +127,47 @@ export class UITextView extends UIView {
         this._intrinsicSizesCache = {}
     }
     
-    private _getMeasurementStyles(): TextMeasurementStyle {
+    private _getMeasurementStyles(): TextMeasurementStyle | null {
         if (this._cachedMeasurementStyles) {
             return this._cachedMeasurementStyles
         }
         
+        // Ensure element is in document
+        if (!this.viewHTMLElement.isConnected) {
+            return null
+        }
+        
+        // Force a layout flush ONCE to ensure computed styles are available
+        // This is only paid once per style change, then we use cached values
+        this.viewHTMLElement.offsetHeight
+        
         const computed = window.getComputedStyle(this.viewHTMLElement)
-        const fontSize = parseFloat(computed.fontSize)
+        const fontSizeStr = computed.fontSize
+        const fontSize = parseFloat(fontSizeStr)
+        
+        if (!fontSize || isNaN(fontSize)) {
+            return null
+        }
+        
+        const lineHeight = this._parseLineHeight(computed.lineHeight, fontSize)
+        
+        if (isNaN(lineHeight)) {
+            return null
+        }
+        
+        const font = [
+            computed.fontStyle || 'normal',
+            computed.fontVariant || 'normal',
+            computed.fontWeight || 'normal',
+            fontSize + 'px',
+            computed.fontFamily || 'sans-serif'
+        ].join(" ")
         
         this._cachedMeasurementStyles = {
-            font: [
-                computed.fontStyle,
-                computed.fontVariant,
-                computed.fontWeight,
-                computed.fontSize,
-                computed.fontFamily
-            ].join(" "),
+            font: font,
             fontSize: fontSize,
-            lineHeight: this._parseLineHeight(computed.lineHeight, fontSize),
-            whiteSpace: computed.whiteSpace,
+            lineHeight: lineHeight,
+            whiteSpace: computed.whiteSpace || 'normal',
             paddingLeft: parseFloat(computed.paddingLeft) || 0,
             paddingRight: parseFloat(computed.paddingRight) || 0,
             paddingTop: parseFloat(computed.paddingTop) || 0,
@@ -491,7 +513,7 @@ export class UITextView extends UIView {
     _intrinsicWidthCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
     
     private _useFastMeasurement: boolean | undefined
-    private _cachedMeasurementStyles: TextMeasurementStyle | undefined
+    private _cachedMeasurementStyles: TextMeasurementStyle | undefined | null
     
     override usesVirtualLayoutingForIntrinsicSizing = NO
     
@@ -513,7 +535,32 @@ export class UITextView extends UIView {
         var result = cacheObject.valueForKeyPath(keyPath)
         
         if (IS_LIKE_NULL(result)) {
-            result = super.intrinsicContentHeight(constrainingWidth)
+            // Determine if we should use fast measurement
+            const shouldUseFastPath = this._useFastMeasurement ?? this._shouldUseFastMeasurement()
+            
+            if (shouldUseFastPath) {
+                // Fast path: use UITextMeasurement with pre-extracted styles
+                const styles = this._getMeasurementStyles()
+                
+                // If styles are invalid (element not properly initialized), fall back to DOM
+                if (styles) {
+                    const size = UITextMeasurement.calculateTextSize(
+                        this.viewHTMLElement,
+                        this.text || this.innerHTML,
+                        constrainingWidth || undefined,
+                        undefined,
+                        styles
+                    )
+                    result = size.height
+                } else {
+                    // Styles not ready, use DOM measurement
+                    result = super.intrinsicContentHeight(constrainingWidth)
+                }
+            } else {
+                // Fallback: DOM-based measurement for complex content
+                result = super.intrinsicContentHeight(constrainingWidth)
+            }
+            
             cacheObject.setValueForKeyPath(keyPath, result)
         }
         
@@ -539,7 +586,32 @@ export class UITextView extends UIView {
         var result = cacheObject.valueForKeyPath(keyPath)
         
         if (IS_LIKE_NULL(result)) {
-            result = super.intrinsicContentWidth(constrainingHeight)
+            // Determine if we should use fast measurement
+            const shouldUseFastPath = this._useFastMeasurement ?? this._shouldUseFastMeasurement()
+            
+            if (shouldUseFastPath) {
+                // Fast path: use UITextMeasurement with pre-extracted styles
+                const styles = this._getMeasurementStyles()
+                
+                // If styles are invalid (element not properly initialized), fall back to DOM
+                if (styles) {
+                    const size = UITextMeasurement.calculateTextSize(
+                        this.viewHTMLElement,
+                        this.text || this.innerHTML,
+                        undefined,
+                        constrainingHeight || undefined,
+                        styles
+                    )
+                    result = size.width
+                } else {
+                    // Styles not ready, use DOM measurement
+                    result = super.intrinsicContentWidth(constrainingHeight)
+                }
+            } else {
+                // Fallback: DOM-based measurement for complex content
+                result = super.intrinsicContentWidth(constrainingHeight)
+            }
+            
             cacheObject.setValueForKeyPath(keyPath, result)
         }
         

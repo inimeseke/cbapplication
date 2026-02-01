@@ -523,7 +523,7 @@ export class UITextView extends UIView {
     
     override intrinsicContentHeight(constrainingWidth = 0) {
         
-        const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this._getFontCacheKey()) + "." +
+        const keyPath = ((this.viewHTMLElement.innerHTML || this.text) + "_csf_" + this._getFontCacheKey()) + "." +
             ("" + constrainingWidth).replace(new RegExp("\\.", "g"), "_")
         
         let cacheObject = UITextView._intrinsicHeightCache
@@ -574,7 +574,7 @@ export class UITextView extends UIView {
     
     override intrinsicContentWidth(constrainingHeight = 0) {
         
-        const keyPath = (this.viewHTMLElement.innerHTML + "_csf_" + this._getFontCacheKey()) + "." +
+        const keyPath = ((this.viewHTMLElement.innerHTML || this.text) + "_csf_" + this._getFontCacheKey()) + "." +
             ("" + constrainingHeight).replace(new RegExp("\\.", "g"), "_")
         
         let cacheObject = UITextView._intrinsicWidthCache

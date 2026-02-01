@@ -153,6 +153,16 @@ export interface IUILoadingView extends UIView {
 }
 
 
+/**
+ * A template literal tag to enable CSS highlighting in IDEs.
+ * Example: css` .myClass { color: red; } `
+ */
+export function css(strings: TemplateStringsArray, ...values: any[]): string {
+    // Simply combine the strings and values to return a valid CSS string
+    return strings.reduce((acc, str, i) => acc + str + (values[i] ?? ''), '');
+}
+
+
 export function UIComponentView(target: Function, context: ClassDecoratorContext) {
     console.log("Recording annotation UIComponentView on " + target.name)
     UIObject.recordAnnotation(UIComponentView, target)

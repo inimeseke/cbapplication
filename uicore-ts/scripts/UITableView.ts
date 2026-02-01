@@ -178,7 +178,9 @@ export class UITableView extends UINativeScrollView {
         newIndexes.forEach(index => {
             
             if (this.isRowWithIndexVisible(index)) {
-                this.highlightRowAsNew(this.visibleRowWithIndex(index) as UIView)
+                this.highlightRowAsNew(
+                    this.visibleRowWithIndex(index) as UIView ?? this.viewForRowWithIndex(index) as UIView
+                )
             }
             
         })
@@ -193,17 +195,12 @@ export class UITableView extends UINativeScrollView {
     
     
     invalidateSizeOfRowWithIndex(index: number, animateChange = NO) {
-        
-        if (this._rowPositions[index]) {
+        if (this._rowPositions?.[index]) {
             this._rowPositions[index].isValid = NO
         }
-        
         this._highestValidRowPositionIndex = Math.min(this._highestValidRowPositionIndex, index - 1)
-        
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
-        
         this._shouldAnimateNextLayout = animateChange
-        
     }
     
     
@@ -223,11 +220,8 @@ export class UITableView extends UINativeScrollView {
         }
         
         let previousBottomY = validPositionObject.bottomY
-        
         if (!this._rowPositions.length) {
-            
             this._highestValidRowPositionIndex = -1
-            
         }
         
         for (let i = this._highestValidRowPositionIndex + 1; i <= maxIndex; i++) {
@@ -237,16 +231,15 @@ export class UITableView extends UINativeScrollView {
             const rowPositionObject = this._rowPositions[i]
             
             if (IS((rowPositionObject || nil).isValid)) {
-                
                 height = rowPositionObject.bottomY - rowPositionObject.topY
-                
+            }
+            // Do not calculate heights if all rows have equal heights, and we already have a height
+            else if (this.allRowsHaveEqualHeight && i > 0) {
+                height = this._rowPositions[0].bottomY - this._rowPositions[0].topY
             }
             else {
-                
                 height = this.heightForRowWithIndex(i)
-                
             }
-            
             
             const positionObject: UITableViewReusableViewPositionObject = {
                 bottomY: previousBottomY + height,
@@ -476,14 +469,13 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    visibleRowWithIndex(rowIndex: number | undefined): UIView {
+    visibleRowWithIndex(rowIndex: number | undefined): UIView | undefined {
         for (let i = 0; i < this._visibleRows.length; i++) {
             const row = this._visibleRows[i]
             if (row._UITableViewRowIndex == rowIndex) {
                 return row
             }
         }
-        return nil
     }
     
     
@@ -632,6 +624,11 @@ export class UITableView extends UINativeScrollView {
     }
     
     
+    override setNeedsLayout() {
+        super.setNeedsLayout()
+        this.invalidateSizeOfRowWithIndex(0)
+    }
+    
     private _layoutAllRows(positions = this._rowPositions) {
         
         const bounds = this.bounds
@@ -751,15 +748,10 @@ export class UITableView extends UINativeScrollView {
     
     override intrinsicContentHeight(constrainingWidth = 0) {
         
-        
         let result = 0
-        
         this._calculateAllPositions()
-        
         if (this._rowPositions.length) {
-            
             result = this._rowPositions[this._rowPositions.length - 1].bottomY
-            
         }
         
         return result

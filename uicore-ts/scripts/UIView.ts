@@ -1130,6 +1130,20 @@ export class UIView extends UIObject {
         }
     }
     
+    // If YES, then the view is not counted in intrinsic content size calculation.
+    // This should be used for things like background views that just take the shape of the parent view.
+    hasWeakFrame = NO
+    // Set view as having a weak frame and set the frame.
+    public set weakFrame(rectangle: UIRectangle & { zIndex?: number }) {
+        this.hasWeakFrame = YES
+        this.frame = rectangle
+    }
+    // Set view as having a strong frame and set the frame.
+    public set strongFrame(rectangle: UIRectangle & { zIndex?: number }) {
+        this.hasWeakFrame = NO
+        this.frame = rectangle
+    }
+    
     
     setFrame(rectangle: UIRectangle & { zIndex?: number }, zIndex = 0, performUncheckedLayout = NO) {
         
@@ -3763,7 +3777,7 @@ export class UIView extends UIObject {
         
         const framePoints: UIPoint[] = []
         this.subviews.forEach(subview => {
-            if (subview == this._loadingView) {
+            if (subview == this._loadingView || subview.hasWeakFrame) {
                 return
             }
             subview.layoutIfNeeded()

@@ -917,8 +917,9 @@ export class UIRectangle extends UIObject {
     }
     
     
-    assignedAsFrameOfView(view: UIView) {
+    assignedAsFrameOfView(view: UIView, isWeakFrame = view.hasWeakFrame) {
         view.frame = this
+        view.hasWeakFrame = isWeakFrame
         return this
     }
     

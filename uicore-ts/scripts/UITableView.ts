@@ -197,6 +197,7 @@ export class UITableView extends UINativeScrollView {
     invalidateSizeOfRowWithIndex(index: number, animateChange = NO) {
         if (this._rowPositions?.[index]) {
             this._rowPositions[index].isValid = NO
+            this._rowPositions.slice(index, -1).everyElement.isValid = NO
         }
         this._highestValidRowPositionIndex = Math.min(this._highestValidRowPositionIndex, index - 1)
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
@@ -624,8 +625,8 @@ export class UITableView extends UINativeScrollView {
     }
     
     
-    override setNeedsLayout() {
-        super.setNeedsLayout()
+    override clearIntrinsicSizeCache() {
+        super.clearIntrinsicSizeCache()
         this.invalidateSizeOfRowWithIndex(0)
     }
     

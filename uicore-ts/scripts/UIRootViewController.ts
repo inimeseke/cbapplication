@@ -12,7 +12,9 @@ export interface UIRootViewControllerLazyViewControllerObject<T extends typeof U
     instance: InstanceType<T>;
     class: T;
     shouldShow: () => (Promise<boolean> | boolean);
-    isInitialized: boolean
+    isInitialized: boolean;
+    deleteOnUnload: boolean;
+    deleteInstance: () => void
 }
 
 
@@ -69,38 +71,57 @@ export class UIRootViewController extends UIViewController {
     
     lazyViewControllerObjectWithClass<T extends typeof UIViewController>(
         classObject: T,
-        shouldShow: () => (Promise<boolean> | boolean) = () => YES
+        options: {
+            shouldShow?: () => (Promise<boolean> | boolean),
+            deleteOnUnload?: boolean
+        } = {}
     ): UIRootViewControllerLazyViewControllerObject<T> {
+        const shouldShow = options.shouldShow ?? (() => YES)
+        const deleteOnUnload = options.deleteOnUnload ?? NO
+        
         const result: UIRootViewControllerLazyViewControllerObject<T> = {
             class: classObject,
             instance: nil,
             shouldShow: shouldShow,
-            isInitialized: NO
-        }
-        UIObject.configureWithObject(result, {
-            // @ts-ignore
-            instance: LAZY_VALUE(
-                () => {
-                    result.isInitialized = YES
-                    return new classObject(
-                        new UIView(classObject.name.replace("ViewController", "View"))
-                    )
+            isInitialized: NO,
+            deleteOnUnload: deleteOnUnload,
+            deleteInstance: () => {
+                if (result.isInitialized) {
+                    result.isInitialized = NO
+                    initializeLazyInstance()
                 }
-            )
-        })
+            }
+        }
+        
+        const initializeLazyInstance = () => {
+            UIObject.configureWithObject(result, {
+                // @ts-ignore
+                instance: LAZY_VALUE(
+                    () => {
+                        result.isInitialized = YES
+                        return new classObject(
+                            new UIView(classObject.name.replace("ViewController", "View"))
+                        )
+                    }
+                )
+            })
+        }
+        
+        initializeLazyInstance()
+        
         return result
     }
     
     
     override async handleRoute(route: UIRoute) {
-    
+        
         await super.handleRoute(route)
-    
+        
         UICore.languageService.updateCurrentLanguageKey()
-    
+        
         // Show content view
         await this.setContentViewControllerForRoute(route)
-    
+        
         await this.setDetailsViewControllerForRoute(route)
         
     }
@@ -113,6 +134,17 @@ export class UIRootViewController extends UIViewController {
             ),
             this.contentViewControllers.mainViewController
         )
+        
+        // Delete old view controller if it has deleteOnUnload flag set
+        if (IS(this._contentViewController) && this._contentViewController !== contentViewControllerObject.instance) {
+            const oldViewControllerObject = this.contentViewControllers.allValues.find(
+                value => value.isInitialized && value.instance === this._contentViewController
+            )
+            if (oldViewControllerObject?.deleteOnUnload) {
+                oldViewControllerObject.deleteInstance()
+            }
+        }
+        
         this.contentViewController = contentViewControllerObject.instance
     }
     
@@ -123,12 +155,31 @@ export class UIRootViewController extends UIViewController {
             )
         )
         if (IS(route) && IS(this.detailsViewController) && IS_NOT(detailsViewControllerObject)) {
+            // Delete old details view controller if it has deleteOnUnload flag set
+            const oldViewControllerObject = this.detailsViewControllers.allValues.find(
+                value => value.isInitialized && value.instance === this._detailsViewController
+            )
+            if (oldViewControllerObject?.deleteOnUnload) {
+                oldViewControllerObject.deleteInstance()
+            }
+            
             this.detailsViewController = undefined
             this._detailsDialogView.dismiss()
             this.view.setNeedsLayout()
             return
         }
-        this.detailsViewController = detailsViewControllerObject.instance
+        
+        // Delete old details view controller if it has deleteOnUnload flag set and is being replaced
+        if (IS(this._detailsViewController) && this._detailsViewController !== detailsViewControllerObject?.instance) {
+            const oldViewControllerObject = this.detailsViewControllers.allValues.find(
+                value => value.isInitialized && value.instance === this._detailsViewController
+            )
+            if (oldViewControllerObject?.deleteOnUnload) {
+                oldViewControllerObject.deleteInstance()
+            }
+        }
+        
+        this.detailsViewController = detailsViewControllerObject?.instance
     }
     
     get contentViewController(): UIViewController | undefined {

@@ -16,7 +16,7 @@ import {
     IS_NOT_LIKE_NULL,
     nil,
     NO,
-    RETURNER,
+    RETURNER, UIInitializerObject,
     UIObject,
     YES
 } from "./UIObject"
@@ -330,10 +330,12 @@ export class UIView extends UIObject {
         elementID: string = ("UIView" + UIView.nextIndex),
         viewHTMLElement: HTMLElement & LooseObject | null = null,
         elementType: string | null = null,
-        initViewData?: any
+        preInitConfiguratorObject?: any
     ) {
         
         super()
+        
+        this.configureWithObject(preInitConfiguratorObject)
         
         // Instance variables
         
@@ -522,7 +524,8 @@ export class UIView extends UIObject {
     _initViewHTMLElement(
         elementID: string,
         viewHTMLElement: (HTMLElement & LooseObject) | null,
-        elementType?: string | null
+        elementType?: string | null,
+        
     ) {
         
         if (!IS(elementType)) {
@@ -3670,15 +3673,15 @@ export class UIView extends UIObject {
         )
     }
     
-    private _getIntrinsicSizeCacheKey(constrainingHeight: number, constrainingWidth: number): string {
+    protected _getIntrinsicSizeCacheKey(constrainingHeight: number, constrainingWidth: number): string {
         return `h_${constrainingHeight}__w_${constrainingWidth}`
     }
     
-    private _getCachedIntrinsicSize(cacheKey: string): UIRectangle | undefined {
+    protected _getCachedIntrinsicSize(cacheKey: string): UIRectangle | undefined {
         return this._intrinsicSizesCache[cacheKey]
     }
     
-    private _setCachedIntrinsicSize(cacheKey: string, size: UIRectangle): void {
+    protected _setCachedIntrinsicSize(cacheKey: string, size: UIRectangle): void {
         this._intrinsicSizesCache[cacheKey] = size.copy()
     }
     

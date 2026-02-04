@@ -332,7 +332,7 @@ type NativeGlobal = Date | RegExp | Map<any, any> | Set<any> | WeakMap<any, any>
 // 2. The value type
 export type UIInitializerValue<T> =
 // Handle Functions
-    T extends Function
+    T extends (Function | ((...args: any) => any))
         //@ts-ignore
     ? UIFunctionCall<T> | UIFunctionCall<T>[] | UIFunctionExtender<T> | T
         // Handle Arrays (do not recurse)

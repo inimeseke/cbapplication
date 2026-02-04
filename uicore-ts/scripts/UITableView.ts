@@ -196,7 +196,7 @@ export class UITableView extends UINativeScrollView {
     
     invalidateSizeOfRowWithIndex(index: number, animateChange = NO) {
         if (this._rowPositions?.[index]) {
-            this._rowPositions[index].isValid = NO
+            FIRST_OR_NIL(this._rowPositions[index]).isValid = NO
             this._rowPositions.slice(index, -1).everyElement.isValid = NO
         }
         this._highestValidRowPositionIndex = Math.min(this._highestValidRowPositionIndex, index - 1)
@@ -205,11 +205,35 @@ export class UITableView extends UINativeScrollView {
     }
     
     
+    _rowPositionWithIndex(index: number, positions = this._rowPositions) {
+        if (this.allRowsHaveEqualHeight && index > 0) {
+            const firstPositionObject = positions[0]
+            const rowHeight = firstPositionObject.bottomY - firstPositionObject.topY
+            const result = {
+                bottomY: rowHeight * (index + 1),
+                topY: rowHeight * index,
+                isValid: firstPositionObject.isValid
+            }
+            return result
+        }
+        return positions[index]
+    }
+    
     _calculateAllPositions() {
         this._calculatePositionsUntilIndex(this.numberOfRows() - 1)
     }
     
     _calculatePositionsUntilIndex(maxIndex: number) {
+        
+        if (this.allRowsHaveEqualHeight) {
+            const positionObject: UITableViewReusableViewPositionObject = {
+                bottomY: this.heightForRowWithIndex(0),
+                topY: 0,
+                isValid: YES
+            }
+            this._rowPositions = [positionObject]
+            return
+        }
         
         let validPositionObject = this._rowPositions[this._highestValidRowPositionIndex]
         if (!IS(validPositionObject)) {
@@ -321,12 +345,11 @@ export class UITableView extends UINativeScrollView {
         
         // Variable Heights
         this._calculateAllPositions()
-        const rowPositions = this._rowPositions
         const result = []
         
         for (let i = 0; i < numberOfRows; i++) {
             
-            const position = rowPositions[i]
+            const position = this._rowPositionWithIndex(i)
             if (!position) {
                 break
             }
@@ -639,7 +662,7 @@ export class UITableView extends UINativeScrollView {
                 
                 const frame = bounds.copy()
                 
-                const positionObject = positions[row._UITableViewRowIndex!]
+                const positionObject = this._rowPositionWithIndex(row._UITableViewRowIndex!, positions)
                 frame.min.y = positionObject.topY
                 frame.max.y = positionObject.bottomY
                 row.frame = frame
@@ -751,8 +774,10 @@ export class UITableView extends UINativeScrollView {
         
         let result = 0
         this._calculateAllPositions()
-        if (this._rowPositions.length) {
-            result = this._rowPositions[this._rowPositions.length - 1].bottomY
+        
+        const numberOfRows = this.numberOfRows()
+        if (numberOfRows) {
+            result = this._rowPositionWithIndex(numberOfRows - 1).bottomY
         }
         
         return result

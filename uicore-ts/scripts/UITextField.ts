@@ -12,24 +12,28 @@ export class UITextField extends UITextView {
     
     override _viewHTMLElement!: HTMLInputElement
     
-    constructor(elementID?: string, viewHTMLElement = null, type: string | ValueOf<typeof UITextView.type> = UITextView.type.textField) {
+    constructor(
+        elementID?: string,
+        viewHTMLElement = null,
+        type: string | ValueOf<typeof UITextView.type> = UITextView.type.textField
+    ) {
         
         super(elementID, type, viewHTMLElement)
         
-        this.viewHTMLElement.setAttribute("type", "text")
+        this.textElementView.viewHTMLElement.setAttribute("type", "text")
         this.backgroundColor = UIColor.whiteColor
         this.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
             (sender, event) => sender.focus()
         )
-        this.viewHTMLElement.oninput = (event) => {
+        this.textElementView.viewHTMLElement.oninput = (event) => {
             this.sendControlEventForKey(UITextField.controlEvent.TextChange, event)
         }
-        this.style.webkitUserSelect = "text"
+        this.textElementView.style.webkitUserSelect = "text"
         this.nativeSelectionEnabled = YES
         this.pausesPointerEvents = NO
         this.changesOften = YES
-    
+        
     }
     
     
@@ -50,30 +54,20 @@ export class UITextField extends UITextView {
     
     
     public override set text(text: string) {
-        
-        this.viewHTMLElement.value = text
-        
+        this.textElementView.viewHTMLElement.value = text
     }
     
-    
     public override get text(): string {
-        
-        return this.viewHTMLElement.value
-        
+        return this.textElementView.viewHTMLElement.value
     }
     
     
     public set placeholderText(text: string) {
-        
-        this.viewHTMLElement.placeholder = text
-        
+        this.textElementView.viewHTMLElement.placeholder = text
     }
     
-    
     public get placeholderText(): string {
-        
-        return this.viewHTMLElement.placeholder
-        
+        return this.textElementView.viewHTMLElement.placeholder
     }
     
     
@@ -122,67 +116,17 @@ export class UITextField extends UITextView {
     
     
     public get isSecure(): boolean {
-        
-        const result = (this.viewHTMLElement.type == "password")
-        
+        const result = (this.textElementView.viewHTMLElement.type == "password")
         return result
-        
     }
-    
-    
     
     public set isSecure(secure: boolean) {
-        
-        var type = "text"
-        
+        let type = "text"
         if (secure) {
-            
             type = "password"
-            
         }
-        
-        this.viewHTMLElement.type = type
-        
+        this.textElementView.viewHTMLElement.type = type
     }
-    
-    
-    
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

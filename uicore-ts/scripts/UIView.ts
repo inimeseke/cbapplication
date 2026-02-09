@@ -1152,6 +1152,7 @@ export class UIView extends UIObject {
         
         const frame: (UIRectangle & { zIndex?: number }) = this._frame || new UIRectangle(nil, nil, nil, nil) as any
         
+        rectangle.materialize()
         
         if (zIndex != undefined) {
             rectangle.zIndex = zIndex

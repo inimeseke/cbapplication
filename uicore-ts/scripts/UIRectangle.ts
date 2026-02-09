@@ -9,148 +9,46 @@ export class UIRectangle extends UIObject {
     
     _isBeingUpdated: boolean
     rectanglePointDidChange?: (b: any) => void
+    max: UIPoint
+    min: UIPoint
     
-    // COW: Internal data structure that can be shared
-    private _data: {
-        min: UIPoint
-        max: UIPoint
-        minHeight?: number
-        maxHeight?: number
-        minWidth?: number
-        maxWidth?: number
-        refCount: number
-    }
-    
-    // COW: Flag to indicate this is a lazy copy
-    private _isLazyCopy: boolean
+    // The min and max values are just for storage.
+    // You need to call rectangleByEnforcingMinAndMaxSizes to make use of them.
+    minHeight?: number
+    maxHeight?: number
+    minWidth?: number
+    maxWidth?: number
     
     
     constructor(x: number = 0, y: number = 0, height: number = 0, width: number = 0) {
         
         super()
         
-        this._isLazyCopy = NO
-        this._isBeingUpdated = NO
+        this.min = new UIPoint(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY)
+        this.max = new UIPoint(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY)
         
-        // COW: Create the shared data structure
-        this._data = {
-            min: new UIPoint(x, y),
-            max: new UIPoint(x + width, y + height),
-            refCount: 1
+        this.min.didChange = (point) => {
+            this.rectanglePointDidChange?.(point)
+            this._rectanglePointDidChange()
+        }
+        this.max.didChange = (point) => {
+            this.rectanglePointDidChange?.(point)
+            this._rectanglePointDidChange()
         }
         
-        this._setupPointCallbacks()
+        this._isBeingUpdated = NO
+        
+        this.min = new UIPoint(x, y)
+        this.max = new UIPoint(x + width, y + height)
         
         if (IS_NIL(height)) {
-            this._data.max.y = height
+            this.max.y = height
         }
         
         if (IS_NIL(width)) {
-            this._data.max.x = width
+            this.max.x = width
         }
         
-    }
-    
-    // COW: Setup callbacks for point changes
-    private _setupPointCallbacks() {
-        this._data.min.didChange = (point) => {
-            this.rectanglePointDidChange?.(point)
-            this._rectanglePointDidChange()
-        }
-        this._data.max.didChange = (point) => {
-            this.rectanglePointDidChange?.(point)
-            this._rectanglePointDidChange()
-        }
-    }
-    
-    // COW: Materialize a lazy copy before mutation
-    materialize() {
-        if (this._isLazyCopy || this._data.refCount > 1) {
-            this._data.refCount--
-            
-            const oldData = this._data
-            this._data = {
-                min: oldData.min.copy(),
-                max: oldData.max.copy(),
-                minHeight: oldData.minHeight,
-                maxHeight: oldData.maxHeight,
-                minWidth: oldData.minWidth,
-                maxWidth: oldData.maxWidth,
-                refCount: 1
-            }
-            
-            this._setupPointCallbacks()
-            this._isLazyCopy = NO
-        }
-    }
-    
-    // Copy on write: Lazy copy that shares data
-    // Tested to reduce CPU time from 1.5% to 1% during heavy resizing
-    lazyCopy(): UIRectangle {
-        const result = Object.create(UIRectangle.prototype)
-        result._data = this._data
-        result._data.refCount++
-        result._isLazyCopy = YES
-        result._isBeingUpdated = NO
-        result.rectanglePointDidChange = this.rectanglePointDidChange
-        return result
-    }
-    
-    // COW: Getters and setters that materialize on write
-    get min(): UIPoint {
-        return this._data.min
-    }
-    
-    set min(value: UIPoint) {
-        this.materialize()
-        this._data.min = value
-        this._setupPointCallbacks()
-    }
-    
-    get max(): UIPoint {
-        return this._data.max
-    }
-    
-    set max(value: UIPoint) {
-        this.materialize()
-        this._data.max = value
-        this._setupPointCallbacks()
-    }
-    
-    get minHeight(): number | undefined {
-        return this._data.minHeight
-    }
-    
-    set minHeight(value: number | undefined) {
-        this.materialize()
-        this._data.minHeight = value
-    }
-    
-    get maxHeight(): number | undefined {
-        return this._data.maxHeight
-    }
-    
-    set maxHeight(value: number | undefined) {
-        this.materialize()
-        this._data.maxHeight = value
-    }
-    
-    get minWidth(): number | undefined {
-        return this._data.minWidth
-    }
-    
-    set minWidth(value: number | undefined) {
-        this.materialize()
-        this._data.minWidth = value
-    }
-    
-    get maxWidth(): number | undefined {
-        return this._data.maxWidth
-    }
-    
-    set maxWidth(value: number | undefined) {
-        this.materialize()
-        this._data.maxWidth = value
     }
     
     
@@ -181,8 +79,6 @@ export class UIRectangle extends UIObject {
     }
     
     updateByAddingPoint(point: UIPoint) {
-        
-        this.materialize() // COW: Materialize before mutation
         
         if (!point) {
             point = new UIPoint(0, 0)
@@ -216,7 +112,6 @@ export class UIRectangle extends UIObject {
     }
     
     scale(scale: number) {
-        this.materialize() // COW: Materialize before mutation
         if (IS_NOT_NIL(this.max.y)) {
             this.height = this.height * scale
         }
@@ -233,8 +128,7 @@ export class UIRectangle extends UIObject {
     }
     
     set height(height: number) {
-        this.materialize() // COW: Materialize before mutation
-        this._data.max.y = this.min.y + height
+        this.max.y = this.min.y + height
     }
     
     
@@ -246,8 +140,7 @@ export class UIRectangle extends UIObject {
     }
     
     set width(width: number) {
-        this.materialize() // COW: Materialize before mutation
-        this._data.max.x = this.min.x + width
+        this.max.x = this.min.x + width
     }
     
     
@@ -257,12 +150,11 @@ export class UIRectangle extends UIObject {
     
     set x(x: number) {
         
-        this.materialize() // COW: Materialize before mutation
         this.beginUpdates()
         
         const width = this.width
-        this._data.min.x = x
-        this._data.max.x = this.min.x + width
+        this.min.x = x
+        this.max.x = this.min.x + width
         
         this.finishUpdates()
         
@@ -276,12 +168,11 @@ export class UIRectangle extends UIObject {
     
     set y(y: number) {
         
-        this.materialize() // COW: Materialize before mutation
         this.beginUpdates()
         
         const height = this.height
-        this._data.min.y = y
-        this._data.max.y = this.min.y + height
+        this.min.y = y
+        this.max.y = this.min.y + height
         
         this.finishUpdates()
         
@@ -310,13 +201,11 @@ export class UIRectangle extends UIObject {
     }
     
     set center(center: UIPoint) {
-        this.materialize() // COW: Materialize before mutation
         const offset = this.center.to(center)
         this.offsetByPoint(offset)
     }
     
     offsetByPoint(offset: UIPoint) {
-        this.materialize() // COW: Materialize before mutation
         this.min.add(offset)
         this.max.add(offset)
         
@@ -331,14 +220,13 @@ export class UIRectangle extends UIObject {
     }
     
     rectangleByConcatenatingWithRectangle(rectangle: UIRectangle) {
-        return this.lazyCopy().concatenateWithRectangle(rectangle) // COW: Use lazyCopy
+        return this.copy().concatenateWithRectangle(rectangle)
     }
     
     
     intersectionRectangleWithRectangle(rectangle: UIRectangle): UIRectangle {
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
-        result.materialize() // COW: We're going to modify it
+        const result = this.copy()
         
         result.beginUpdates()
         
@@ -399,8 +287,7 @@ export class UIRectangle extends UIObject {
     
     // add some space around the rectangle
     rectangleWithInsets(left: number, right: number, bottom: number, top: number) {
-        const result = this.lazyCopy() // COW: Use lazyCopy
-        result.materialize() // COW: We're modifying multiple properties
+        const result = this.copy()
         result.min.x = this.min.x + left
         result.max.x = this.max.x - right
         result.min.y = this.min.y + top
@@ -420,7 +307,7 @@ export class UIRectangle extends UIObject {
             centeredOnPosition = nil
         }
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
+        const result = this.copy()
         result.height = height
         
         if (centeredOnPosition != nil) {
@@ -440,7 +327,7 @@ export class UIRectangle extends UIObject {
             centeredOnPosition = nil
         }
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
+        const result = this.copy()
         result.width = width
         
         if (centeredOnPosition != nil) {
@@ -462,7 +349,7 @@ export class UIRectangle extends UIObject {
     
     rectangleWithX(x: number, centeredOnPosition: number = 0) {
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
+        const result = this.copy()
         result.x = x - result.width * centeredOnPosition
         
         return result
@@ -471,7 +358,7 @@ export class UIRectangle extends UIObject {
     
     rectangleWithY(y: number, centeredOnPosition: number = 0) {
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
+        const result = this.copy()
         result.y = y - result.height * centeredOnPosition
         
         return result
@@ -481,7 +368,7 @@ export class UIRectangle extends UIObject {
     
     rectangleByAddingX(x: number) {
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
+        const result = this.copy()
         result.x = this.x + x
         
         return result
@@ -490,7 +377,7 @@ export class UIRectangle extends UIObject {
     
     rectangleByAddingY(y: number) {
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
+        const result = this.copy()
         result.y = this.y + y
         
         return result
@@ -521,8 +408,7 @@ export class UIRectangle extends UIObject {
         heightMultiplier: number
     ) {
         
-        const result = this.lazyCopy() // COW: Use lazyCopy
-        result.materialize() // COW: We're modifying multiple properties
+        const result = this.copy()
         
         const width = result.width
         const height = result.height
@@ -546,7 +432,7 @@ export class UIRectangle extends UIObject {
      */
     rectangleWithMaxWidth(maxWidth: number, centeredOnPosition: number = 0): UIRectangle {
         if (this.width <= maxWidth) {
-            return this.lazyCopy() // COW: Use lazyCopy
+            return this.copy()
         }
         return this.rectangleWithWidth(maxWidth, centeredOnPosition)
     }
@@ -556,7 +442,7 @@ export class UIRectangle extends UIObject {
      */
     rectangleWithMaxHeight(maxHeight: number, centeredOnPosition: number = 0): UIRectangle {
         if (this.height <= maxHeight) {
-            return this.lazyCopy() // COW: Use lazyCopy
+            return this.copy()
         }
         return this.rectangleWithHeight(maxHeight, centeredOnPosition)
     }
@@ -566,7 +452,7 @@ export class UIRectangle extends UIObject {
      */
     rectangleWithMinWidth(minWidth: number, centeredOnPosition: number = 0): UIRectangle {
         if (this.width >= minWidth) {
-            return this.lazyCopy() // COW: Use lazyCopy
+            return this.copy()
         }
         return this.rectangleWithWidth(minWidth, centeredOnPosition)
     }
@@ -576,7 +462,7 @@ export class UIRectangle extends UIObject {
      */
     rectangleWithMinHeight(minHeight: number, centeredOnPosition: number = 0): UIRectangle {
         if (this.height >= minHeight) {
-            return this.lazyCopy() // COW: Use lazyCopy
+            return this.copy()
         }
         return this.rectangleWithHeight(minHeight, centeredOnPosition)
     }
@@ -584,7 +470,7 @@ export class UIRectangle extends UIObject {
     // Returns a new rectangle that is positioned relative to the reference rectangle
     // By default, it makes a copy of this rectangle taht is centered in the target rectangle
     rectangleByCenteringInRectangle(referenceRectangle: UIRectangle, xPosition = 0.5, yPosition = 0.5) {
-        const result = this.lazyCopy() // COW: Use lazyCopy
+        const result = this.copy()
         result.center = referenceRectangle.topLeft
             .pointByAddingX(xPosition * referenceRectangle.width)
             .pointByAddingY(yPosition * referenceRectangle.height)
@@ -860,7 +746,7 @@ export class UIRectangle extends UIObject {
         absoluteHeights: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
     ) {
         const frames: UIRectangle[] = []
-        let currentRectangle = this.lazyCopy() // COW: Use lazyCopy
+        let currentRectangle = this.copy()
         
         if (!(paddings instanceof Array)) {
             paddings = [paddings].arrayByRepeating(views.length - 1)
@@ -905,7 +791,7 @@ export class UIRectangle extends UIObject {
         absoluteWidths: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
     ) {
         const frames: UIRectangle[] = []
-        let currentRectangle = this.lazyCopy() // COW: Use lazyCopy
+        let currentRectangle = this.copy()
         
         if (!(paddings instanceof Array)) {
             paddings = [paddings].arrayByRepeating(views.length - 1)
@@ -952,7 +838,7 @@ export class UIRectangle extends UIObject {
         absoluteHeights: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
     ) {
         const frames: UIRectangle[][] = []
-        let currentRowRectangle = this.lazyCopy() // COW: Use lazyCopy
+        let currentRowRectangle = this.copy()
         
         if (!(paddings instanceof Array)) {
             paddings = [paddings].arrayByRepeating(views.length - 1)
@@ -1274,4 +1160,27 @@ class UIRectangleConditionalBlock {
     }
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

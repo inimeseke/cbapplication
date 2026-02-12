@@ -87,7 +87,7 @@ export class UICore extends UIObject {
             UIView.layoutViewsIfNeeded()
             
             this.rootViewController._triggerLayoutViewSubviews()
-            //UIView.layoutViewsIfNeeded()
+            UIView.layoutViewsIfNeeded()
             
             this.rootViewController.view.broadcastEventInSubtree({
                 

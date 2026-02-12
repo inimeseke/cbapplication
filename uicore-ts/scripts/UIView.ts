@@ -159,7 +159,7 @@ export interface IUILoadingView extends UIView {
  */
 export function css(strings: TemplateStringsArray, ...values: any[]): string {
     // Simply combine the strings and values to return a valid CSS string
-    return strings.reduce((acc, str, i) => acc + str + (values[i] ?? ''), '');
+    return strings.reduce((acc, str, i) => acc + str + (values[i] ?? ""), "")
 }
 
 
@@ -318,6 +318,7 @@ export class UIView extends UIObject {
     }
     
     _frameForVirtualLayouting?: UIRectangle
+    _frameCacheForVirtualLayouting?: UIRectangle
     
     // Change this to no if the view contains pure HTML content that does not
     // use frame logic that can influence the intrinsic size
@@ -524,8 +525,7 @@ export class UIView extends UIObject {
     _initViewHTMLElement(
         elementID: string,
         viewHTMLElement: (HTMLElement & LooseObject) | null,
-        elementType?: string | null,
-        
+        elementType?: string | null
     ) {
         
         if (!IS(elementType)) {
@@ -1136,11 +1136,13 @@ export class UIView extends UIObject {
     // If YES, then the view is not counted in intrinsic content size calculation.
     // This should be used for things like background views that just take the shape of the parent view.
     hasWeakFrame = NO
+    
     // Set view as having a weak frame and set the frame.
     public set weakFrame(rectangle: UIRectangle & { zIndex?: number }) {
         this.hasWeakFrame = YES
         this.frame = rectangle
     }
+    
     // Set view as having a strong frame and set the frame.
     public set strongFrame(rectangle: UIRectangle & { zIndex?: number }) {
         this.hasWeakFrame = NO
@@ -1204,13 +1206,26 @@ export class UIView extends UIObject {
         
         let result: UIRectangle
         if (IS_NOT(_frame)) {
-            result = this._frameCache ?? new UIRectangle(
+            let cachedFrame: UIRectangle | undefined
+            if (!this.isVirtualLayouting) {
+                cachedFrame = this._frameCache
+            }
+            else {
+                cachedFrame = this._frameCacheForVirtualLayouting
+            }
+            result = cachedFrame ?? new UIRectangle(
                 0,
                 0,
                 this._resizeObserverEntry?.contentRect.height ?? this.viewHTMLElement.offsetHeight,
                 this._resizeObserverEntry?.contentRect.width ?? this.viewHTMLElement.offsetWidth
             )
-            this._frameCache = result
+            if (!this.isVirtualLayouting && this.isMemberOfViewTree && this.viewHTMLElement.isConnected) {
+                this._frameCache = result
+            }
+            else if (this.isMemberOfViewTree && this.viewHTMLElement.isConnected) {
+                this._frameCacheForVirtualLayouting = result
+            }
+            
         }
         else {
             let frame: (UIRectangle & { zIndex?: number })
@@ -1249,6 +1264,7 @@ export class UIView extends UIObject {
         
         this._resizeObserverEntry = entry
         this._frameCache = undefined
+        this._frameCacheForVirtualLayouting = undefined
         this.setNeedsLayout()
         
         this.boundsDidChange(new UIRectangle(0, 0, entry.contentRect.height, entry.contentRect.width))
@@ -3688,6 +3704,9 @@ export class UIView extends UIObject {
     
     clearIntrinsicSizeCache(): void {
         this._intrinsicSizesCache = {}
+        
+        this._frameCacheForVirtualLayouting = undefined
+        this._frameCache = undefined
         
         // Optionally clear parent cache if this view affects parent's intrinsic size
         if (this.superview?.usesVirtualLayoutingForIntrinsicSizing) {

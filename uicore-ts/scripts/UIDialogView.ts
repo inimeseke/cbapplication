@@ -8,7 +8,7 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
 export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
-    
+
     _isAUIDialogView = YES
     _view: ViewType = new UIView() as any
     _appearedAnimated?: boolean
@@ -16,6 +16,9 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     _zIndex: number = 100
     isVisible: boolean = NO
     dismissesOnTapOutside = YES
+
+    static _activeDialogCount = 0
+    _fillsViewport = NO
     
     constructor(elementID?: string, viewHTMLElement?: HTMLElement) {
         
@@ -109,7 +112,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     showInView(containerView: UIView, animated: boolean) {
         
-        
+        this._fillsViewport = containerView.rootView == containerView
         animated = (animated && !IS_FIREFOX)
         
         this._appearedAnimated = animated
@@ -117,6 +120,13 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         this.willAppear(animated)
         
         
+        if (this._fillsViewport) {
+            UIDialogView._activeDialogCount++
+            if (UIDialogView._activeDialogCount >= 1) {
+                document.body.style.overflow = "hidden"
+            }
+        }
+
         containerView.addSubview(this)
         this.view.setNeedsLayoutUpToRootView()
         
@@ -150,7 +160,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     showInRootView(animated: boolean) {
         
         this.showInView(UICore.main.rootViewController.view, animated)
-        
+
     }
     
     
@@ -168,34 +178,45 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
             
         }
         
+        const unlockScroll = () => {
+            if (this._fillsViewport) {
+                UIDialogView._activeDialogCount = Math.max(0, UIDialogView._activeDialogCount - 1)
+                if (UIDialogView._activeDialogCount === 0) {
+                    document.body.style.overflow = ""
+                }
+            }
+        }
+
         if (animated) {
-            
+
             UIView.animateViewOrViewsWithDurationDelayAndFunction(
                 this,
                 this.animationDuration,
                 0,
                 undefined,
                 (() => {
-                    
+
                     this.animateDisappearing()
-                    
+
                 }).bind(this),
                 () => {
-                    
+
                     if (this.isVisible == NO) {
-                        
+
                         this.removeFromSuperview()
-                        
+                        unlockScroll()
+
                     }
-                    
+
                 }
             )
-            
+
         }
         else {
-            
+
             this.removeFromSuperview()
-            
+            unlockScroll()
+
         }
         
         this.isVisible = NO
@@ -227,20 +248,27 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         
         //this.frame = this.superview.bounds;
         
-        this.setPosition(0, 0, 0, 0, 0, "100%")
-        this.setPosition(
-            0,
-            0,
-            0,
-            0,
-            FIRST(
-                IF(this.superview?.isKindOfClass(UINativeScrollView))(() => this.superview?.scrollSize.height ?? 0)
-                    .ELSE_IF(this.superview?.isKindOfClass(UIScrollView))(() => this.superview?.scrollSize.height ?? 0)
-                    .ELSE(() => this.superview?.frame.height ?? 0),
-                UIView.pageHeight
-            ) / UIView.pageScale,
-            "100%"
-        )
+        if (this._fillsViewport) {
+            const containerRect = this.superview?.viewHTMLElement?.getBoundingClientRect()
+            const topOffset = containerRect ? -containerRect.top / UIView.pageScale : 0
+            this.setPosition(0, 0, 0, topOffset, window.innerHeight / UIView.pageScale, "100%")
+        }
+        else {
+            this.setPosition(0, 0, 0, 0, 0, "100%")
+            this.setPosition(
+                0,
+                0,
+                0,
+                0,
+                FIRST(
+                    IF(this.superview?.isKindOfClass(UINativeScrollView))(() => this.superview?.scrollSize.height ?? 0)
+                        .ELSE_IF(this.superview?.isKindOfClass(UIScrollView))(() => this.superview?.scrollSize.height ?? 0)
+                        .ELSE(() => this.superview?.frame.height ?? 0),
+                    UIView.pageHeight
+                ) / UIView.pageScale,
+                "100%"
+            )
+        }
         
         const bounds = this.bounds
         

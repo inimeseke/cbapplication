@@ -14,9 +14,35 @@ export class UITextField extends UITextView {
     
     // --- Native Autocomplete (HTML datalist) ---
     
-    private _datalistElement?: HTMLDataListElement
-    private _nativeAutocompleteData: string[] = []
-    public minCharactersForAutocomplete: number = 0
+    _datalistElement?: HTMLDataListElement
+    _nativeAutocompleteData: string[] = []
+    _hasCommittedSelection: boolean = NO
+    
+    /** Minimum characters required before showing autocomplete suggestions */
+    minCharactersForAutocomplete: number = 0
+    
+    /**
+     * When YES, hides the datalist if the current text exactly matches
+     * a single autocomplete option (avoids showing redundant single suggestion).
+     * Default is YES for better UX.
+     */
+    hideAutocompleteOnExactMatch: boolean = YES
+    
+    // --- Validation against autocomplete list ---
+    
+    _validatesAgainstAutocomplete: boolean = NO
+    _isValidAgainstAutocomplete: boolean = YES
+    _validationInvalidBackgroundColor = UIColor.redColor.colorWithAlpha(0.5)
+    _validationInvalidBorderColor = UIColor.colorWithRGBA(200, 0, 0, 0.5)
+    
+    
+    static override controlEvent = Object.assign({}, UITextView.controlEvent, {
+        
+        "TextChange": "TextChange",
+        "ValidationChange": "ValidationChange"
+        
+    })
+    
     
     constructor(
         elementID?: string,
@@ -27,14 +53,30 @@ export class UITextField extends UITextView {
         super(elementID, type, viewHTMLElement)
         
         this.textElementView.viewHTMLElement.setAttribute("type", "text")
-        this.backgroundColor = UIColor.whiteColor
+        this.backgroundColor = UIColor.transparentColor
         this.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
             (sender, event) => sender.focus()
         )
         this.textElementView.viewHTMLElement.oninput = (event) => {
+            this._hasCommittedSelection = NO
             this.sendControlEventForKey(UITextField.controlEvent.TextChange, event)
+            this._validateAgainstAutocompleteIfNeeded()
             this._updateDatalistVisibility()
+        }
+        this.textElementView.viewHTMLElement.onchange = (event) => {
+            // Fires when the user commits a selection from the datalist (enter or click).
+            // Regular typing does not trigger onchange, only committing a value does.
+            if (this._datalistElement && this._nativeAutocompleteData.includes(this.text)) {
+                this._hasCommittedSelection = YES
+                this._updateDatalistVisibility()
+            }
+            // Validate on change (commit) when validation is enabled
+            this._validateAgainstAutocompleteIfNeeded()
+        }
+        this.textElementView.viewHTMLElement.onblur = (event) => {
+            // Final validation when leaving the field
+            this._validateAgainstAutocompleteIfNeeded()
         }
         this.textElementView.style.webkitUserSelect = "text"
         this.nativeSelectionEnabled = YES
@@ -42,13 +84,6 @@ export class UITextField extends UITextView {
         this.changesOften = YES
         
     }
-    
-    
-    static override controlEvent = Object.assign({}, UITextView.controlEvent, {
-        
-        "TextChange": "TextChange"
-        
-    })
     
     
     override get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UITextField> {
@@ -62,6 +97,9 @@ export class UITextField extends UITextView {
     
     public override set text(text: string) {
         this.textElementView.viewHTMLElement.value = text
+        // Re-validate when text is set programmatically
+        this._validateAgainstAutocompleteIfNeeded()
+        this._updateDatalistVisibility()
     }
     
     public override get text(): string {
@@ -136,9 +174,7 @@ export class UITextField extends UITextView {
     }
     
     
-    // --- Native Autocomplete Methods ---
-    
-    
+    // MARK: - Native Autocomplete Methods
     
     /**
      * Sets the data for native browser autocomplete using HTML datalist.
@@ -148,7 +184,9 @@ export class UITextField extends UITextView {
      */
     public set nativeAutocompleteData(data: string[]) {
         this._nativeAutocompleteData = data
-        this.updateDatalist()
+        this._hasCommittedSelection = NO
+        this._updateDatalist()
+        this._validateAgainstAutocompleteIfNeeded()
         this._updateDatalistVisibility()
     }
     
@@ -156,7 +194,155 @@ export class UITextField extends UITextView {
         return this._nativeAutocompleteData
     }
     
-    private updateDatalist() {
+    // MARK: - Validation Methods
+    
+    /**
+     * When enabled, the text field will validate its content against the autocomplete list.
+     * Invalid values will trigger a ValidationChange event and can be checked via isValidAgainstAutocomplete.
+     *
+     * Empty text is always considered valid (use required field validation separately if needed).
+     */
+    public set validatesAgainstAutocomplete(validate: boolean) {
+        if (this._validatesAgainstAutocomplete !== validate) {
+            this._validatesAgainstAutocomplete = validate
+            this._validateAgainstAutocompleteIfNeeded()
+        }
+    }
+    
+    public get validatesAgainstAutocomplete(): boolean {
+        return this._validatesAgainstAutocomplete
+    }
+    
+    /**
+     * Returns YES if the current text value is valid according to autocomplete validation.
+     * Always returns YES if validatesAgainstAutocomplete is disabled.
+     * Empty text is considered valid.
+     */
+    public get isValidAgainstAutocomplete(): boolean {
+        return this._isValidAgainstAutocomplete
+    }
+    
+    /**
+     * Background color to apply when validation fails.
+     * Set to nil to disable background color change on invalid state.
+     */
+    public set validationInvalidBackgroundColor(color: UIColor) {
+        this._validationInvalidBackgroundColor = color
+        this._updateValidationVisualState()
+    }
+    
+    public get validationInvalidBackgroundColor(): UIColor {
+        return this._validationInvalidBackgroundColor
+    }
+    
+    /**
+     * Border color to apply when validation fails.
+     * Set to nil to disable border color change on invalid state.
+     */
+    public set validationInvalidBorderColor(color: UIColor) {
+        this._validationInvalidBorderColor = color
+        this._updateValidationVisualState()
+    }
+    
+    public get validationInvalidBorderColor(): UIColor {
+        return this._validationInvalidBorderColor
+    }
+    
+    /**
+     * Validates the current text against the autocomplete list if validation is enabled.
+     * Updates the _isValidAgainstAutocomplete flag and fires ValidationChange event on state change.
+     */
+    _validateAgainstAutocompleteIfNeeded() {
+        if (!this._validatesAgainstAutocomplete) {
+            this._setValidationState(YES)
+            return
+        }
+        
+        const currentText = this.text
+        
+        // Empty text is considered valid (use separate required validation if needed)
+        if (currentText.length === 0) {
+            this._setValidationState(YES)
+            return
+        }
+        
+        const isValid = this._nativeAutocompleteData.includes(currentText)
+        this._setValidationState(isValid)
+    }
+    
+    _setValidationState(isValid: boolean) {
+        const wasValid = this._isValidAgainstAutocomplete
+        this._isValidAgainstAutocomplete = isValid
+        
+        // Update visual state
+        this._updateValidationVisualState()
+        
+        // Fire event only on state change
+        if (wasValid !== isValid) {
+            this.sendControlEventForKey(UITextField.controlEvent.ValidationChange)
+        }
+    }
+    
+    /**
+     * Updates the visual state of the text field based on validation status.
+     * Override this method to customize validation styling.
+     */
+    _updateValidationVisualState() {
+        const inputElement = this.textElementView.viewHTMLElement
+        
+        if (!this._validatesAgainstAutocomplete || this._isValidAgainstAutocomplete) {
+            // Restore normal state - clear validation-specific styles
+            inputElement.classList.remove("autocomplete-invalid")
+            
+            // Reset to default colors if we had set validation colors
+            if (this._validationInvalidBackgroundColor) {
+                inputElement.style.removeProperty("background-color")
+            }
+            if (this._validationInvalidBorderColor) {
+                inputElement.style.removeProperty("border-color")
+            }
+        } else {
+            // Apply invalid state
+            inputElement.classList.add("autocomplete-invalid")
+            
+            // Apply validation colors if set
+            if (this._validationInvalidBackgroundColor) {
+                inputElement.style.backgroundColor = this._validationInvalidBackgroundColor.stringValue
+            }
+            if (this._validationInvalidBorderColor) {
+                inputElement.style.borderColor = this._validationInvalidBorderColor.stringValue
+            }
+        }
+    }
+    
+    /**
+     * Clears the text field if the current value is not in the autocomplete list.
+     * Useful for enforcing selection from the list only.
+     * @returns YES if the text was cleared (was invalid), NO otherwise
+     */
+    public clearIfInvalid(): boolean {
+        if (this._validatesAgainstAutocomplete && !this._isValidAgainstAutocomplete && this.text.length > 0) {
+            this.text = ""
+            return YES
+        }
+        return NO
+    }
+    
+    /**
+     * Returns a list of autocomplete options that match the current text (case-insensitive).
+     * Useful for implementing custom filtering or showing filtered results elsewhere.
+     */
+    public getMatchingAutocompleteOptions(): string[] {
+        const currentText = this.text
+        if (currentText.length === 0) {
+            return [...this._nativeAutocompleteData]
+        }
+        return this._getFilteredAutocompleteOptions(currentText)
+    }
+    
+    // MARK: - Datalist Management
+    
+    _updateDatalist() {
         // If no data, remove the datalist
         if (this._nativeAutocompleteData.length === 0) {
             if (this._datalistElement) {
@@ -186,18 +372,56 @@ export class UITextField extends UITextView {
         })
     }
     
-    private _updateDatalistVisibility() {
-        if (!this._datalistElement || this.minCharactersForAutocomplete === 0) {
+    _updateDatalistVisibility() {
+        if (!this._datalistElement) {
             return
         }
         
-        const shouldShow = this.text.length >= this.minCharactersForAutocomplete
-        
-        if (shouldShow) {
-            this.textElementView.viewHTMLElement.setAttribute("list", this._datalistElement.id)
-        } else {
+        // After the user has picked a value from the list, hide suggestions until
+        // they start typing again. oninput clears _hasCommittedSelection, so this
+        // gate only holds for exactly as long as the selection stands untouched.
+        if (this._hasCommittedSelection) {
             this.textElementView.viewHTMLElement.removeAttribute("list")
+            return
         }
+        
+        const currentText = this.text
+        
+        // Check minimum character requirement
+        if (this.minCharactersForAutocomplete > 0 &&
+            currentText.length < this.minCharactersForAutocomplete) {
+            this.textElementView.viewHTMLElement.removeAttribute("list")
+            return
+        }
+        
+        // Hide datalist when it would show only a single redundant option
+        if (this.hideAutocompleteOnExactMatch && currentText.length > 0) {
+            // Count how many options would be offered (browser uses starts-with logic)
+            const matchingOptions = this._nativeAutocompleteData.filter(item =>
+                item.toLowerCase().startsWith(currentText.toLowerCase()) ||
+                currentText.toLowerCase().startsWith(item.toLowerCase())
+            )
+            
+            // If only one option matches, it's redundant - hide the datalist
+            if (matchingOptions.length === 1) {
+                this.textElementView.viewHTMLElement.removeAttribute("list")
+                return
+            }
+        }
+        
+        // Show the datalist
+        this.textElementView.viewHTMLElement.setAttribute("list", this._datalistElement.id)
+    }
+    
+    /**
+     * Returns autocomplete options that match the given search text.
+     * Uses case-insensitive substring matching (consistent with browser behavior).
+     */
+    _getFilteredAutocompleteOptions(searchText: string): string[] {
+        const searchLower = searchText.toLowerCase()
+        return this._nativeAutocompleteData.filter(item =>
+            item.toLowerCase().includes(searchLower)
+        )
     }
     
     override wasRemovedFromViewTree() {

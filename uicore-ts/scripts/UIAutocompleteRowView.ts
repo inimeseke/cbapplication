@@ -13,7 +13,6 @@ export interface UIAutocompleteItem<T> {
 export class UIAutocompleteRowView<T> extends UIButton {
     
     _item?: UIAutocompleteItem<T>
-    isKeyboardHighlighted: boolean = NO
     
     constructor(elementID?: string) {
         
@@ -23,6 +22,20 @@ export class UIAutocompleteRowView<T> extends UIButton {
         this.userInteractionEnabled = YES
         this.style.outline = "none"
         this.viewHTMLElement.setAttribute("tabindex", "-1")
+        
+        this.colors = {
+            titleLabel: {
+                normal: UIColor.blackColor,
+                highlighted: UIColor.blackColor,
+                selected: UIColor.whiteColor
+            },
+            background: {
+                normal: UIColor.whiteColor,
+                hovered: UIColor.lightGreyColor,
+                highlighted: UIColor.lightGreyColor,
+                selected: UIColor.greyColor
+            }
+        }
         
     }
     
@@ -37,34 +50,5 @@ export class UIAutocompleteRowView<T> extends UIButton {
     }
     
     
-    override updateContentForNormalState() {
-        
-        super.updateContentForNormalState()
-        
-        this.backgroundColor = this.isKeyboardHighlighted
-                               ? UIColor.lightGreyColor
-                               : UIColor.whiteColor
-        this.titleLabel.textColor = UIColor.blackColor
-        
-    }
-    
-    override updateContentForHoveredState() {
-        
-        super.updateContentForHoveredState()
-        
-        this.backgroundColor = this.isKeyboardHighlighted
-                               ? UIColor.lightGreyColor
-                               : UIColor.whiteColor
-        
-    }
-    
-    override updateContentForHighlightedState() {
-        
-        super.updateContentForHighlightedState()
-        
-        this.backgroundColor = UIColor.lightGreyColor
-        
-    }
-    
-    
 }
+

@@ -44,7 +44,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         
         // Close on blur
         this.controlEventTargetAccumulator.Blur = () => {
-                this.closeDropdown()
+            this.closeDropdown()
         }
         
         // Filter on text change
@@ -174,7 +174,12 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
             )
         }
         
-        this._dropdownView.filteredItems = filtered
+        // If the only remaining result is an exact match for the current text,
+        // the user has already made their selection — no need to show the dropdown.
+        const isExactSingleMatch = filtered.length === 1 &&
+            filtered[0].label.toLowerCase() === filterText
+        
+        this._dropdownView.filteredItems = isExactSingleMatch ? [] : filtered
         
         if (this._isDropdownOpen) {
             this._dropdownView.showAnchoredToView(this)
@@ -287,3 +292,4 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     
     
 }
+

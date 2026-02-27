@@ -77,8 +77,8 @@ export class UIAutocompleteDropdownView<T> extends UIView {
             row.item = item
         }
         
-        // Reflect current keyboard highlight state without touching hovered.
-        row.isKeyboardHighlighted = (index === this._highlightedRowIndex)
+        // Reflect current keyboard highlight state via the native selected flag.
+        row.selected = (index === this._highlightedRowIndex)
         
         // PointerHover fires as the pointer moves over the row.
         // We suppress scroll-into-view since the user is already looking at the row.
@@ -134,20 +134,18 @@ export class UIAutocompleteDropdownView<T> extends UIView {
         const previousIndex = this._highlightedRowIndex
         this._highlightedRowIndex = index
         
-        // Update visual state of previous row.
+        // Clear selected state on previous row.
         const previousRow = this.tableView.visibleRowWithIndex(previousIndex) as
             UIAutocompleteRowView<T> | undefined
         if (IS(previousRow)) {
-            previousRow.isKeyboardHighlighted = NO
-            previousRow.updateContentForCurrentState()
+            previousRow.selected = NO
         }
         
-        // Update visual state of newly highlighted row.
+        // Set selected state on newly highlighted row.
         const currentRow = this.tableView.visibleRowWithIndex(index) as
             UIAutocompleteRowView<T> | undefined
         if (IS(currentRow)) {
-            currentRow.isKeyboardHighlighted = YES
-            currentRow.updateContentForCurrentState()
+            currentRow.selected = YES
             
             if (scrollIntoView) {
                 // Scroll the view if needed
@@ -271,5 +269,6 @@ export class UIAutocompleteDropdownView<T> extends UIView {
     
     
 }
+
 
 

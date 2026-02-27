@@ -33,6 +33,9 @@ export * from "./ClientCheckers"
 export * from "./UICore"
 export * from "./UIRootViewController"
 export * from "./UILoadingView"
+export * from "./UIAutocompleteDropdownView"
+export * from "./UIAutocompleteRowView"
+export * from "./UIAutocompleteTextField"
 
 
 

@@ -725,9 +725,9 @@ const frame = bounds
 
 ### UIRoute
 
-Routes are encoded in the URL hash using the format `#componentName[key:value,key:value]componentName2[key:value]`.
+Routes are encoded in the URL hash using the format `#component_name[key:value,key:value]component_name2[key:value]`.
 
-Each bracket-delimited segment is a **route component** — a view controller name plus a parameter dictionary. UICore listens for `hashchange` events and calls `handleRoute` on the active controller hierarchy automatically.
+Each bracket-delimited segment is a **route component** — a view controller reference (determined by the static `routeComponentName` property on the given UIViewController subclass) plus a parameter dictionary. UICore listens for `hashchange` events and calls `handleRoute` on the active controller hierarchy automatically.
 
 ```typescript
 // Read the current route

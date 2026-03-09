@@ -8,7 +8,7 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
 export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
-
+    
     _isAUIDialogView = YES
     _view: ViewType = new UIView() as any
     _appearedAnimated?: boolean
@@ -16,7 +16,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     _zIndex: number = 100
     isVisible: boolean = NO
     dismissesOnTapOutside = YES
-
+    
     static _activeDialogCount = 0
     _fillsViewport = NO
     
@@ -27,11 +27,11 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         
         this.addTargetForControlEvent(
             UIView.controlEvent.PointerTap,
-            function (this: UIDialogView, sender: UIView, event: Event) {
+            (sender: UIView, event: Event) => {
                 
                 this.didDetectTapOutside(sender, event)
                 
-            }.bind(this)
+            }
         )
         
         this.backgroundColor = UIColor.colorWithRGBA(0, 10, 25).colorWithAlpha(0.75) //CBColor.primaryContentColor.colorWithAlpha(0.75)
@@ -126,7 +126,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 document.body.style.overflow = "hidden"
             }
         }
-
+        
         containerView.addSubview(this)
         this.view.setNeedsLayoutUpToRootView()
         
@@ -160,7 +160,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     showInRootView(animated: boolean) {
         
         this.showInView(UICore.main.rootViewController.view, animated)
-
+        
     }
     
     
@@ -186,37 +186,37 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 }
             }
         }
-
+        
         if (animated) {
-
+            
             UIView.animateViewOrViewsWithDurationDelayAndFunction(
                 this,
                 this.animationDuration,
                 0,
                 undefined,
                 (() => {
-
+                    
                     this.animateDisappearing()
-
+                    
                 }).bind(this),
                 () => {
-
+                    
                     if (this.isVisible == NO) {
-
+                        
                         this.removeFromSuperview()
                         unlockScroll()
-
+                        
                     }
-
+                    
                 }
             )
-
+            
         }
         else {
-
+            
             this.removeFromSuperview()
             unlockScroll()
-
+            
         }
         
         this.isVisible = NO
@@ -262,7 +262,8 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 0,
                 FIRST(
                     IF(this.superview?.isKindOfClass(UINativeScrollView))(() => this.superview?.scrollSize.height ?? 0)
-                        .ELSE_IF(this.superview?.isKindOfClass(UIScrollView))(() => this.superview?.scrollSize.height ?? 0)
+                        .ELSE_IF(this.superview?.isKindOfClass(UIScrollView))(
+                            () => this.superview?.scrollSize.height ?? 0)
                         .ELSE(() => this.superview?.frame.height ?? 0),
                     UIView.pageHeight
                 ) / UIView.pageScale,

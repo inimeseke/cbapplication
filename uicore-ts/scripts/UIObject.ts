@@ -651,7 +651,7 @@ export class UIObject implements Configurable {
     }
     
     
-    get methods(): MethodsOnly<Omit<this, "methods">> {
+    get methods(): Record<string, Function> {
         const thisObject = this as object
         const result = {} as any
         thisObject.forEach((value, key) => {
@@ -662,6 +662,11 @@ export class UIObject implements Configurable {
         return result
     }
     
+    // Returns a proxy that can be used to call methods on the parent prototype chain
+    // @ts-ignore
+    get superProxy(): this & { superProxy: SuperProxy<this> } {
+        return createSuperProxy(Object.getPrototypeOf(Object.getPrototypeOf(this)))
+    }
     
     performFunctionWithSelf<T>(functionToPerform: (self: this) => T): T {
         return functionToPerform(this)
@@ -682,35 +687,27 @@ export class UIObject implements Configurable {
 }
 
 
+interface SuperProxyable {
+    superProxy: SuperProxy<this>
+}
+
+type SuperProxy<T> = T & {
+    superProxy: SuperProxy<T>
+}
+
+function createSuperProxy(proto: any): any {
+    return new Proxy(proto, {
+        get(target, prop) {
+            if (prop === 'superProxy') {
+                return createSuperProxy(Object.getPrototypeOf(target))
+            }
+            return target[prop]
+        }
+    })
+}
+
 export type MethodsOnly<T> =
     Pick<T, { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]>;
 
 export type ValueOf<T> = T[keyof T];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

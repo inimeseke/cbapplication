@@ -1156,6 +1156,10 @@ type ArrayChainMethods<TResult> = {
 
 // 3. Methods available in both states (Control Flow + Transform)
 type SharedChainMethods<TCurrent, TResult> = {
+    // IF opens a nested conditional block. The chain continues through the inner block and
+    // returns to this level after the matching ENDIF.
+    IF(condition: boolean): UIRectangleConditionalChain<TCurrent extends UIRectangle ? UIRectangle : UIRectangle, TResult>;
+    
     // TRANSFORM acts as a standard method, it should not leak intermediate types into TResult
     TRANSFORM<R extends UIRectangle>(fn: (current: TCurrent) => R): UIRectangleConditionalChain<R, TResult>;
     
@@ -1167,8 +1171,10 @@ type SharedChainMethods<TCurrent, TResult> = {
     ELSE(): UIRectangleConditionalChain<UIRectangle, TResult | TCurrent>;
     
     // ENDIF marks the end of the block. Same logic: capture TCurrent into TResult.
-    ENDIF(): TResult | TCurrent;
-    ENDIF<R>(performFunction: (result: TResult | TCurrent) => R): R;
+    // When used inside a nested IF, ENDIF returns a chain rather than a bare value,
+    // allowing the outer chain to continue.
+    ENDIF(): TResult | TCurrent | UIRectangleConditionalChain<any, any>;
+    ENDIF<R>(performFunction: (result: TResult | TCurrent) => R): R | UIRectangleConditionalChain<any, any>;
 };
 
 // 4. The Main Type (No changes needed here, just re-stating for context)
@@ -1178,56 +1184,93 @@ type UIRectangleConditionalChain<TCurrent, TResult = TCurrent> =
     SharedChainMethods<TCurrent, TResult>;
 
 
+interface UIRectangleConditionalFrame {
+    // The result to resume from when this frame's ENDIF is reached
+    resultBeforeIF: any
+    // The result accumulated inside this frame's active branch
+    currentResult: any
+    // The original result at the point of IF (used to reset for ELSE/ELSE_IF branches)
+    originalResult: any
+    // Whether any branch of this frame has already been taken
+    conditionMet: boolean
+}
+
 class UIRectangleConditionalBlock {
-    // The value we are currently chaining on (can be UIRectangle or UIRectangle[])
-    private currentResult: any
-    // The value where the IF block started (needed to reset for ELSE branches)
-    private originalResult: any
-    private conditionMet: boolean
+    
+    // Stack of nested IF frames. The top of the stack is the innermost active IF.
+    private _stack: UIRectangleConditionalFrame[]
     
     constructor(initialResult: UIRectangle, condition: boolean) {
-        this.originalResult = initialResult
-        this.currentResult = initialResult
-        this.conditionMet = condition
+        // Seed the stack with the first IF frame.
+        // resultBeforeIF is nil here because this is the outermost block;
+        // ENDIF on the last frame simply returns currentResult.
+        this._stack = [{
+            resultBeforeIF: null,
+            currentResult: initialResult,
+            originalResult: initialResult,
+            conditionMet: condition,
+        }]
+    }
+    
+    // Convenience getters that operate on the innermost frame.
+    private get _top(): UIRectangleConditionalFrame {
+        return this._stack[this._stack.length - 1]
+    }
+    
+    private get _conditionMet(): boolean {
+        // A branch is only truly active when every enclosing frame is also active.
+        return this._stack.every(frame => frame.conditionMet)
     }
     
     private createProxy(): UIRectangleConditionalChain<any, any> {
         const self = this
         
-        // The target is irrelevant; we delegate everything to self.currentResult
         return new Proxy({}, {
             get(_, prop) {
                 
-                // 1. Control Flow Methods
+                // ── Control Flow ────────────────────────────────────────────────────
+                
+                if (prop === 'IF') {
+                    return (condition: boolean) => {
+                        // Push a new frame.  The new frame's result starts as a copy of
+                        // the current innermost result so that chaining inside the nested
+                        // IF begins from the right value.
+                        self._stack.push({
+                            resultBeforeIF: self._top.currentResult,
+                            currentResult: self._top.currentResult,
+                            originalResult: self._top.currentResult,
+                            conditionMet: condition,
+                        })
+                        return self.createProxy()
+                    }
+                }
                 
                 if (prop === 'TRANSFORM') {
                     return <R extends UIRectangle>(fn: (current: any) => R) => {
-                        if (self.conditionMet) {
-                            const result = fn(self.currentResult)
-                            self.currentResult = result
+                        if (self._conditionMet) {
+                            self._top.currentResult = fn(self._top.currentResult)
                         }
                         return self.createProxy()
                     }
                 }
                 
                 if (prop === 'ELSE_IF') {
-                    return <U>(condition: boolean) => {
-                        // Only enter this branch if no previous branch has run
-                        if (!self.conditionMet) {
-                            self.conditionMet = condition
-                            // Reset the state to the original starting point for this new branch
-                            self.currentResult = self.originalResult
+                    return (condition: boolean) => {
+                        const top = self._top
+                        if (!top.conditionMet) {
+                            top.conditionMet = condition
+                            top.currentResult = top.originalResult
                         }
                         return self.createProxy()
                     }
                 }
                 
                 if (prop === 'ELSE') {
-                    return <U>() => {
-                        if (!self.conditionMet) {
-                            self.conditionMet = true
-                            // Reset the state to the original starting point
-                            self.currentResult = self.originalResult
+                    return () => {
+                        const top = self._top
+                        if (!top.conditionMet) {
+                            top.conditionMet = true
+                            top.currentResult = top.originalResult
                         }
                         return self.createProxy()
                     }
@@ -1237,31 +1280,51 @@ class UIRectangleConditionalBlock {
                     function endif(): any
                     function endif<R>(performFunction: (result: any) => R): R
                     function endif<R>(performFunction?: (result: any) => R): R | any {
-                        return performFunction ? performFunction(self.currentResult) : self.currentResult
+                        
+                        if (self._stack.length === 1) {
+                            // Outermost ENDIF — just return the final value (or transform it).
+                            const result = self._top.currentResult
+                            return performFunction ? performFunction(result) : result
+                        }
+                        
+                        // Pop the innermost frame.
+                        const completedFrame = self._stack.pop()!
+                        
+                        // The value that leaves the IF/ENDIF block:
+                        // if the condition was met, use the result accumulated inside the block;
+                        // otherwise use the value as it was before entering the IF.
+                        const resolvedResult = completedFrame.conditionMet
+                                               ? completedFrame.currentResult
+                                               : completedFrame.resultBeforeIF
+                        
+                        // Optionally transform before handing back to the parent frame.
+                        const finalResult = performFunction ? performFunction(resolvedResult) : resolvedResult
+                        
+                        // Update the parent frame's current result so the chain continues.
+                        self._top.currentResult = finalResult
+                        
+                        return self.createProxy()
                     }
                     return endif
                 }
                 
-                // 2. Forwarding to currentResult (Rectangle or Array)
+                // ── Forward to currentResult (UIRectangle or UIRectangle[]) ─────────
                 
-                const value = self.currentResult[prop]
+                const value = self._top.currentResult[prop]
                 
-                // Case A: It's a function (method call)
+                // Case A: method call
                 if (typeof value === 'function') {
                     return (...args: any[]) => {
-                        if (self.conditionMet) {
-                            // Call the method on the CURRENT object, and update the state
-                            const result = value.apply(self.currentResult, args)
-                            self.currentResult = result
+                        if (self._conditionMet) {
+                            self._top.currentResult = value.apply(self._top.currentResult, args)
                         }
                         return self.createProxy()
                     }
                 }
                 
-                // Case B: It's a property (getter)
-                // Accessing a property acts as a transition (e.g. accessing .lastElement)
-                if (self.conditionMet) {
-                    self.currentResult = value
+                // Case B: property access (e.g. array .lastElement)
+                if (self._conditionMet) {
+                    self._top.currentResult = value
                 }
                 
                 return self.createProxy()

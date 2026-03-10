@@ -9,9 +9,6 @@ import {
 import { CBSocketClient } from "./CBSocketClient"
 
 
-
-
-
 interface CBSocketCallbackHolderMessageDescriptor {
     
     key: string;
@@ -47,8 +44,6 @@ interface CBSocketCallbackHolderStoredResponseObject {
     messageDataHash: string;
     
 }
-
-
 
 
 export class CBSocketCallbackHolder extends UIObject {
@@ -95,9 +90,6 @@ export class CBSocketCallbackHolder extends UIObject {
     _socketClient: CBSocketClient
     
     
-    
-    
-    
     constructor(socketClient: CBSocketClient, previousCallbackHolder?: CBSocketCallbackHolder) {
         
         super()
@@ -113,13 +105,7 @@ export class CBSocketCallbackHolder extends UIObject {
         }
         
         
-        
-        
-        
     }
-    
-    
-    
     
     
     triggerDisconnectHandlers() {
@@ -137,9 +123,6 @@ export class CBSocketCallbackHolder extends UIObject {
     }
     
     
-    
-    
-    
     registerHandler(key: string, handlerFunction: CBSocketMessageHandlerFunction) {
         
         
@@ -150,7 +133,6 @@ export class CBSocketCallbackHolder extends UIObject {
         }
         
         this.handlers[key].push(handlerFunction)
-        
         
         
     }
@@ -167,11 +149,7 @@ export class CBSocketCallbackHolder extends UIObject {
         this.onetimeHandlers[key].push(handlerFunction)
         
         
-        
     }
-    
-    
-    
     
     
     get storedResponseHashesDictionary() {
@@ -193,7 +171,6 @@ export class CBSocketCallbackHolder extends UIObject {
         const hashObject = this.storedResponseHashesDictionary[localStorageKey]
         
         const result = FIRST(hashObject, {} as any)
-        
         
         
         return result
@@ -266,10 +243,9 @@ export class CBSocketCallbackHolder extends UIObject {
     }
     
     
-    
-    
-    
-    private saveStoredResponseHashesDictionary(storedResponseHashesDictionary: { [x: string]: { hash: string; validityDate: number; }; }) {
+    private saveStoredResponseHashesDictionary(storedResponseHashesDictionary: {
+        [x: string]: { hash: string; validityDate: number; };
+    }) {
         
         this.saveInLocalStorage("CBSocketResponseHashesDictionary", storedResponseHashesDictionary)
         
@@ -290,16 +266,12 @@ export class CBSocketCallbackHolder extends UIObject {
     }
     
     
-    
-    
-    
     socketShouldSendMessage(
         key: string,
         message: CBSocketMessage<any>,
         completionPolicy: string,
         completionFunction: CBSocketMessageCompletionFunction
     ) {
-        
         
         
         var result = YES
@@ -316,7 +288,6 @@ export class CBSocketCallbackHolder extends UIObject {
         
         const hashObject = this.storedResponseHashObjectForKey(key, messageDataHash)
         message.storedResponseHash = hashObject.hash
-        
         
         
         if (completionPolicy == CBSocketClient.completionPolicy.first) {
@@ -445,9 +416,6 @@ export class CBSocketCallbackHolder extends UIObject {
     }
     
     
-    
-    
-    
     static defaultMultipleMessagecompletionFunction(responseMessages: any[], callcompletionFunctions: () => void) {
         callcompletionFunctions()
     }
@@ -457,7 +425,6 @@ export class CBSocketCallbackHolder extends UIObject {
         messageToSend: CBSocketMultipleMessage,
         completionFunction: CBSocketMultipleMessagecompletionFunction = CBSocketCallbackHolder.defaultMultipleMessagecompletionFunction
     ) {
-        
         
         
         const key = CBSocketClient.multipleMessageKey
@@ -471,9 +438,6 @@ export class CBSocketCallbackHolder extends UIObject {
         
         
         messageToSend.storedResponseHash = this.storedResponseHashObjectForKey(key, messageDataHash).hash
-        
-        
-        
         
         
         this.messageDescriptors[descriptorKey].push({
@@ -513,7 +477,8 @@ export class CBSocketCallbackHolder extends UIObject {
                     }),
                     function (this: CBSocketCallbackHolder) {
                         
-                        //console.log("Received multiple message response with length of " + responseMessage.length + ".");
+                        //console.log("Received multiple message response with length of " + responseMessage.length +
+                        // ".");
                         
                         // Call all completion functions
                         responseMessage.forEach(function (
@@ -538,9 +503,6 @@ export class CBSocketCallbackHolder extends UIObject {
         
         
     }
-    
-    
-    
     
     
     socketDidReceiveMessageForKey(
@@ -589,7 +551,6 @@ export class CBSocketCallbackHolder extends UIObject {
         }
         
         
-        
         // Temporary response handlers are evaluated here
         if (message.inResponseToIdentifier &&
             (CBSocketClient.responseMessageKey == key || CBSocketClient.multipleMessageKey == key)) {
@@ -606,13 +567,29 @@ export class CBSocketCallbackHolder extends UIObject {
                 
                 delete this.keysForIdentifiers[message.inResponseToIdentifier]
                 
-                delete this.messageDescriptors[descriptorKey]
+                // Do NOT delete the entire descriptorKey bucket here — multiple descriptors
+                // with identical messageData (e.g. two concurrent requests with undefined payload)
+                // share the same bucket. The per-descriptor removeElement() calls below handle
+                // individual cleanup. We only delete the bucket once it is fully empty.
                 
             }
             
             
+            // @ts-ignore
+            if (document.cbsocketclientlogmessages) {
+                console.log(
+                    "Callback holder is handling message. [", descriptorsForKey.firstElement?.key, "] ",
+                    message,
+                    " Descriptors for key is ",
+                    ...descriptorsForKey
+                )
+            }
+            
             // Function to call completion function
-            const callCompletionFunction = (descriptor: CBSocketCallbackHolderMessageDescriptor, storedResponseCondition = NO) => {
+            const callCompletionFunction = (
+                descriptor: CBSocketCallbackHolderMessageDescriptor,
+                storedResponseCondition = NO
+            ) => {
                 
                 var messageData = message.messageData
                 
@@ -702,7 +679,6 @@ export class CBSocketCallbackHolder extends UIObject {
                     }
                     
                     
-                    
                 }
                 else if (descriptor.completionPolicy == CBSocketClient.completionPolicy.allDifferent) {
                     
@@ -783,9 +759,6 @@ export class CBSocketCallbackHolder extends UIObject {
             }.bind(this))
             
             
-            
-            
-            
             // Last message completion policies
             
             const allResponsesReceived = descriptorsForKey.allMatch(function (descriptorObject, index, array) {
@@ -828,44 +801,17 @@ export class CBSocketCallbackHolder extends UIObject {
             }.bind(this))
             
             
+            // Clean up the bucket if all descriptors have been removed
+            if (!message.keepWaitingForResponses && descriptorsForKey.length === 0) {
+                
+                delete this.messageDescriptors[descriptorKey]
+                
+            }
+            
         }
-        
-        
-        
         
         
     }
     
     
-    
-    
-    
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

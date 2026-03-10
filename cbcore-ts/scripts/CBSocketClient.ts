@@ -164,6 +164,10 @@ export class CBSocketClient extends UIObject {
             (message: CBSocketMessage<CBSocketMultipleMessageObject[]>) => {
                 
                 console.log("Received " + message.messageData.length + " messages.")
+                // @ts-ignore
+                if (document.cbsocketclientlogmessages) {
+                    console.log(message.messageData)
+                }
                 this.didReceiveMessageForKey(CBSocketClient.multipleMessageKey, message)
                 
             }
@@ -287,6 +291,15 @@ export class CBSocketClient extends UIObject {
         this._callbackHolder.socketWillSendMultipleMessage(messageObject, completion)
         
         //}
+        
+        // @ts-ignore
+        if (document.cbsocketclientlogmessages) {
+            console.log(
+                "CB socket client is sending multiple messages. [",
+                groupedMessages.everyElement.key.UI_elementValues?.join(", "), "] ",
+                messageObject
+            )
+        }
         
         this.socket.emit(CBSocketClient.multipleMessageKey, messageObject)
         
@@ -436,6 +449,14 @@ export class CBSocketClient extends UIObject {
             )
             
             if (shouldSendMessage) {
+                
+                // @ts-ignore
+                if (document.cbsocketclientlogmessages) {
+                    console.log(
+                        "CB socket client is sending message. [", key, "] ",
+                        messageObject
+                    )
+                }
                 
                 this.socket.emit(key, messageObject)
                 

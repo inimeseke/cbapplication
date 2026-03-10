@@ -1156,25 +1156,24 @@ type ArrayChainMethods<TResult> = {
 
 // 3. Methods available in both states (Control Flow + Transform)
 type SharedChainMethods<TCurrent, TResult> = {
-    // IF opens a nested conditional block. The chain continues through the inner block and
-    // returns to this level after the matching ENDIF.
-    IF(condition: boolean): UIRectangleConditionalChain<TCurrent extends UIRectangle ? UIRectangle : UIRectangle, TResult>;
+    // IF opens a nested conditional block. After the matching ENDIF(), the chain resumes
+    // as a UIRectangle — both at runtime (the proxy forwards to the current rectangle) and
+    // at the type level. Nesting is supported to arbitrary depth.
+    IF(condition: boolean): UIRectangleConditionalChain<UIRectangle, TResult>;
     
-    // TRANSFORM acts as a standard method, it should not leak intermediate types into TResult
+    // TRANSFORM applies an inline function and continues the chain.
     TRANSFORM<R extends UIRectangle>(fn: (current: TCurrent) => R): UIRectangleConditionalChain<R, TResult>;
     
-    // ELSE_IF marks the end of a branch. We MUST capture the current state (TCurrent) and add it to TResult.
-    // The new chain starts with the original UIRectangle state for the next branch.
+    // ELSE_IF / ELSE reset the branch state.
     ELSE_IF(condition: boolean): UIRectangleConditionalChain<UIRectangle, TResult | TCurrent>;
-    
-    // ELSE marks the end of a branch. Same logic as ELSE_IF.
     ELSE(): UIRectangleConditionalChain<UIRectangle, TResult | TCurrent>;
     
-    // ENDIF marks the end of the block. Same logic: capture TCurrent into TResult.
-    // When used inside a nested IF, ENDIF returns a chain rather than a bare value,
-    // allowing the outer chain to continue.
-    ENDIF(): TResult | TCurrent | UIRectangleConditionalChain<any, any>;
-    ENDIF<R>(performFunction: (result: TResult | TCurrent) => R): R | UIRectangleConditionalChain<any, any>;
+    // ENDIF closes this IF block.
+    // No-arg: always typed as UIRectangle so rectangle methods are available immediately
+    // after. At runtime the proxy wraps the current rectangle and forwards all calls.
+    // With transform fn: returns R directly, escaping the chain entirely.
+    ENDIF(): UIRectangle;
+    ENDIF<R>(performFunction: (result: TResult | TCurrent) => R): R;
 };
 
 // 4. The Main Type (No changes needed here, just re-stating for context)
@@ -1282,27 +1281,28 @@ class UIRectangleConditionalBlock {
                     function endif<R>(performFunction?: (result: any) => R): R | any {
                         
                         if (self._stack.length === 1) {
-                            // Outermost ENDIF — just return the final value (or transform it).
+                            // Outermost ENDIF. Return the bare rectangle (or transform it).
+                            // TypeScript types this as UIRectangle, and that is what we return.
                             const result = self._top.currentResult
                             return performFunction ? performFunction(result) : result
                         }
                         
-                        // Pop the innermost frame.
+                        // Pop the innermost (nested) frame.
                         const completedFrame = self._stack.pop()!
                         
-                        // The value that leaves the IF/ENDIF block:
-                        // if the condition was met, use the result accumulated inside the block;
-                        // otherwise use the value as it was before entering the IF.
+                        // If the condition was met use the accumulated result; otherwise
+                        // fall back to the value that existed before entering this IF.
                         const resolvedResult = completedFrame.conditionMet
                                                ? completedFrame.currentResult
                                                : completedFrame.resultBeforeIF
                         
-                        // Optionally transform before handing back to the parent frame.
+                        // Optionally transform, then write back into the parent frame.
                         const finalResult = performFunction ? performFunction(resolvedResult) : resolvedResult
-                        
-                        // Update the parent frame's current result so the chain continues.
                         self._top.currentResult = finalResult
                         
+                        // Return the proxy so the outer chain can continue.
+                        // TypeScript also types this as UIRectangle (the proxy forwards
+                        // all rectangle methods to the current result).
                         return self.createProxy()
                     }
                     return endif

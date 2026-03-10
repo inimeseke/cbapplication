@@ -38,47 +38,47 @@ export class UIViewController extends UIObject {
     }
     
     async handleRoute(route: UIRoute) {
-        
-        
+    
+    
     }
     
     
     async viewWillAppear() {
-        
-        
+    
+    
     }
     
     
     async viewDidAppear() {
-        
-        
+    
+    
     }
     
     
     async viewWillDisappear() {
-        
-        
+    
+    
     }
     
     async viewDidDisappear() {
-        
-        
+    
+    
     }
     
     
     updateViewConstraints() {
-        
-        
+    
+    
     }
     
     updateViewStyles() {
-        
-        
+    
+    
     }
     
     layoutViewSubviews() {
-        
-        
+    
+    
     }
     
     _triggerLayoutViewSubviews() {
@@ -113,8 +113,8 @@ export class UIViewController extends UIObject {
     
     
     viewDidReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
-        
-        
+    
+    
     }
     
     
@@ -160,7 +160,7 @@ export class UIViewController extends UIObject {
     }
     
     willMoveToParentViewController(parentViewController: UIViewController) {
-        
+    
     }
     
     
@@ -176,11 +176,10 @@ export class UIViewController extends UIObject {
         controller.viewWillDisappear()
         if (IS(controller.parentViewController)) {
             
-            const index = this.parentViewController?.childViewControllers.indexOf(this) ?? -1
+            const index = controller.parentViewController?.childViewControllers.indexOf(controller) ?? -1
             if (index > -1) {
-                this.parentViewController?.childViewControllers.splice(index, 1)
-                this.view.removeFromSuperview()
-                this.parentViewController = undefined
+                controller.parentViewController?.childViewControllers.splice(index, 1)
+                controller.parentViewController = undefined
             }
             
         }
@@ -236,21 +235,3 @@ export class UIViewController extends UIObject {
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1827,14 +1827,29 @@ export class UIView extends UIObject {
     }
     
     
+    static _isLayoutViewsIfNeededScheduled = NO
+    
     static scheduleLayoutViewsIfNeeded() {
         
-        UIView.runFunctionBeforeNextFrame(UIView.layoutViewsIfNeeded)
+        UIView._isLayoutViewsIfNeededScheduled = YES
+        UIView.runFunctionBeforeNextFrame(() => {
+            UIView._isLayoutViewsIfNeededScheduled = NO
+            UIView.layoutViewsIfNeeded()
+        })
         
     }
     
     
     static layoutViewsIfNeeded() {
+        
+        if (!UIView._isLayoutViewsIfNeededScheduled) {
+            UIView.scheduleLayoutViewsIfNeeded()
+        }
+        
+        if (!UIView._viewsToLayout.length) {
+            return
+        }
+        
         const maxIterations = 10
         let iteration = 0
         const layoutCounts = new Map<UIView, number>() // Track how many times each view has been laid out
@@ -1899,7 +1914,7 @@ export class UIView extends UIObject {
             }
         }
         
-        if (UIView._viewsToLayout.length == 1) {
+        if (!UIView._isLayoutViewsIfNeededScheduled) {
             UIView.scheduleLayoutViewsIfNeeded()
         }
         
@@ -3989,37 +4004,6 @@ function props(obj: any) {
 const _UIViewPropertyKeys = props(UIView.prototype).concat(new UIView().allKeys)
 const _UIViewControllerPropertyKeys = props(UIViewController.prototype)
     .concat(new UIViewController(nil).allKeys)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

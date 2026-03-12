@@ -142,8 +142,6 @@ export class UITableView extends UINativeScrollView {
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
         
         this.setNeedsLayout()
-        // This is a temporary hack that should not really be necessary
-        this.forEachViewInSubtree(view => view.layoutSubviews())
         
     }
     
@@ -449,8 +447,6 @@ export class UITableView extends UINativeScrollView {
                 // This prevents newly added rows from sitting at y=0 if setNeedsLayout is missed.
                 this._layoutAllRows()
                 this.setNeedsLayout()
-                // This is a temporary hack that should not really be necessary
-                this.forEachViewInSubtree(view => view.layoutSubviews())
             })
         }
     }

@@ -69,7 +69,7 @@ export class UITableView extends UINativeScrollView {
         super(elementID)
         
         this._fullHeightView = new UIView()
-        this._fullHeightView.hidden = YES
+        this._fullHeightView.style.visibility = "hidden"
         this._fullHeightView.userInteractionEnabled = NO
         this.addSubview(this._fullHeightView)
         
@@ -142,6 +142,8 @@ export class UITableView extends UINativeScrollView {
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
         
         this.setNeedsLayout()
+        // This is a temporary hack that should not really be necessary
+        this.forEachViewInSubtree(view => view.layoutSubviews())
         
     }
     
@@ -151,7 +153,7 @@ export class UITableView extends UINativeScrollView {
         this._removeAllReusableRows()
         
         this._rowPositions = []
-        this._highestValidRowPositionIndex = 0
+        this._highestValidRowPositionIndex = -1
         
         this.loadData()
         
@@ -197,7 +199,7 @@ export class UITableView extends UINativeScrollView {
     invalidateSizeOfRowWithIndex(index: number, animateChange = NO) {
         if (this._rowPositions?.[index]) {
             FIRST_OR_NIL(this._rowPositions[index]).isValid = NO
-            this._rowPositions.slice(index, -1).everyElement.isValid = NO
+            this._rowPositions.slice(index).everyElement.isValid = NO
         }
         this._highestValidRowPositionIndex = Math.min(this._highestValidRowPositionIndex, index - 1)
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
@@ -333,8 +335,13 @@ export class UITableView extends UINativeScrollView {
             let firstIndex = Math.floor(firstVisibleY / rowHeight)
             let lastIndex = Math.floor(lastVisibleY / rowHeight)
             
-            firstIndex = Math.max(firstIndex, 0)
-            lastIndex = Math.min(lastIndex, numberOfRows - 1)
+            // Clamp BOTH indexes to [0, numberOfRows-1].
+            // Without the upper clamp on firstIndex, when the viewport extends below the
+            // last row firstIndex can exceed numberOfRows-1 while lastIndex is already
+            // clamped there. firstIndex > lastIndex → empty result → _removeVisibleRows →
+            // browser collapses scrollHeight → scrollTop resets to 0 → rows pile at top.
+            firstIndex = Math.max(0, Math.min(firstIndex, numberOfRows - 1))
+            lastIndex  = Math.max(0, Math.min(lastIndex,  numberOfRows - 1))
             
             const result = []
             for (let i = firstIndex; i <= lastIndex; i++) {
@@ -346,6 +353,14 @@ export class UITableView extends UINativeScrollView {
         // Variable Heights
         this._calculateAllPositions()
         const result = []
+        
+        // Clamp firstVisibleY to the actual content height so that when the viewport
+        // extends below the last row the intersection check still matches the final rows
+        // rather than producing an empty result.
+        const totalContentHeight = IS(this._rowPositions.lastElement)
+                                   ? this._rowPositions.lastElement.bottomY
+                                   : 0
+        firstVisibleY = Math.min(firstVisibleY, totalContentHeight)
         
         for (let i = 0; i < numberOfRows; i++) {
             
@@ -383,7 +398,10 @@ export class UITableView extends UINativeScrollView {
                 row
             )
             row.removeFromSuperview()
-            this._removedReusableViews[row?._UITableViewReusabilityIdentifier]?.push(row)
+            if (!this._removedReusableViews[row._UITableViewReusabilityIdentifier]) {
+                this._removedReusableViews[row._UITableViewReusabilityIdentifier] = []
+            }
+            this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row)
             
             
         })
@@ -410,6 +428,9 @@ export class UITableView extends UINativeScrollView {
     
     
     _markReusableViewAsUnused(row: UIView) {
+        if (!this._removedReusableViews[row._UITableViewReusabilityIdentifier]) {
+            this._removedReusableViews[row._UITableViewReusabilityIdentifier] = []
+        }
         if (!this._removedReusableViews[row._UITableViewReusabilityIdentifier].contains(row)) {
             this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row)
         }
@@ -420,10 +441,16 @@ export class UITableView extends UINativeScrollView {
             this._isDrawVisibleRowsScheduled = YES
             
             UIView.runFunctionBeforeNextFrame(() => {
+                // Reset FIRST so any exception cannot permanently block future scheduling
+                this._isDrawVisibleRowsScheduled = NO
                 this._calculateAllPositions()
                 this._drawVisibleRows()
+                // Assign frames immediately instead of waiting for the next layoutSubviews pass.
+                // This prevents newly added rows from sitting at y=0 if setNeedsLayout is missed.
+                this._layoutAllRows()
                 this.setNeedsLayout()
-                this._isDrawVisibleRowsScheduled = NO
+                // This is a temporary hack that should not really be necessary
+                this.forEachViewInSubtree(view => view.layoutSubviews())
             })
         }
     }
@@ -460,6 +487,9 @@ export class UITableView extends UINativeScrollView {
                     row
                 )
                 
+                if (!this._removedReusableViews[row._UITableViewReusabilityIdentifier]) {
+                    this._removedReusableViews[row._UITableViewReusabilityIdentifier] = []
+                }
                 this._removedReusableViews[row._UITableViewReusabilityIdentifier].push(row)
                 removedViews.push(row)
             }
@@ -470,7 +500,16 @@ export class UITableView extends UINativeScrollView {
         
         this._visibleRows = visibleRows
         
-        // 2. Add new rows that have moved on-screen
+        // 2. Remove off-screen rows from the DOM BEFORE recycling.
+        // This ensures any view popped from _removedReusableViews in step 3 is cleanly
+        // detached (superview = nil) before addSubview is called. Without this,
+        // addSubview short-circuits when superview === this, causing the recycled view
+        // to stay at its old position and never receive a proper layout pass.
+        for (let i = 0; i < removedViews.length; i++) {
+            removedViews[i].removeFromSuperview()
+        }
+        
+        // 3. Add new rows that have moved on-screen
         visibleIndexes.forEach((rowIndex: number) => {
             if (this.isRowWithIndexVisible(rowIndex)) {
                 return
@@ -481,14 +520,6 @@ export class UITableView extends UINativeScrollView {
             this._visibleRows.push(view)
             this.addSubview(view)
         })
-        
-        // 3. Clean up DOM
-        for (let i = 0; i < removedViews.length; i++) {
-            const view = removedViews[i]
-            if (this._visibleRows.indexOf(view) == -1) {
-                view.removeFromSuperview()
-            }
-        }
         
     }
     
@@ -509,6 +540,8 @@ export class UITableView extends UINativeScrollView {
     
     
     reusableViewForIdentifier(identifier: string, rowIndex: number): UITableViewRowView {
+        
+        console.log("reuse pool size:", this._removedReusableViews[identifier]?.length ?? 0)
         
         if (!this._removedReusableViews[identifier]) {
             this._removedReusableViews[identifier] = []
@@ -675,8 +708,21 @@ export class UITableView extends UINativeScrollView {
                 
             })
         
-        this._fullHeightView.frame = bounds.rectangleWithHeight((positions.lastElement ||
-            nil).bottomY).rectangleWithWidth(bounds.width * 0.5)
+        // Use _rowPositionWithIndex rather than positions.lastElement.
+        // When allRowsHaveEqualHeight = YES, _rowPositions contains only a single
+        // entry (row 0). positions.lastElement.bottomY would therefore equal just
+        // ONE row's height (e.g. 50px) instead of the full content height.
+        // _rowPositionWithIndex correctly uses the computed formula for equal-height
+        // tables (numberOfRows × rowHeight) and falls back to positions[N-1] otherwise.
+        // This ensures _fullHeightView maintains the correct scroll height even when
+        // all visible rows have been removed from the DOM (e.g. after crossing the
+        // bottom edge), preventing the browser from clamping scrollTop to 0.
+        const numberOfRows = this.numberOfRows()
+        const fullContentHeight = numberOfRows
+                                  ? this._rowPositionWithIndex(numberOfRows - 1, positions).bottomY
+                                  : 0
+        this._fullHeightView.frame = bounds.rectangleWithHeight(fullContentHeight)
+            .rectangleWithWidth(bounds.width * 0.5)
         
         this._firstLayoutVisibleRows = []
         

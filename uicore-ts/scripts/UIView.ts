@@ -1878,6 +1878,8 @@ export class UIView extends UIObject {
     }
     
     
+    _lastReportedIntrinsicHeight: number = -1
+    
     setNeedsLayout() {
         
         if (this._shouldLayout && UIView._viewsToLayout.contains(this)) {
@@ -1885,11 +1887,17 @@ export class UIView extends UIObject {
         }
         
         this._shouldLayout = YES
-        
-        // Register view for layout before next frame
         UIView._viewsToLayout.push(this)
-        
         this.clearIntrinsicSizeCache()
+        
+        // Auto-propagate if intrinsic height changed
+        if (IS(this.superview) && this.superview.usesVirtualLayoutingForIntrinsicSizing) {
+            const newHeight = this.intrinsicContentHeight(this.bounds.width)
+            if (newHeight !== this._lastReportedIntrinsicHeight) {
+                this._lastReportedIntrinsicHeight = newHeight
+                this.superview.setNeedsLayout()
+            }
+        }
         
         if (UIView._viewsToLayout.length == 1) {
             UIView.scheduleLayoutViewsIfNeeded()
@@ -1976,10 +1984,24 @@ export class UIView extends UIObject {
         
     }
     
+    reportsIntrinsicHeightChangesToSuperview: boolean = YES
+    
     didLayoutSubviews() {
-        
         this.viewController?.viewDidLayoutSubviews()
         
+        if (
+            this.reportsIntrinsicHeightChangesToSuperview &&
+            !this.isVirtualLayouting &&
+            IS(this.superview) &&
+            this.isMemberOfViewTree &&
+            this.superview.usesVirtualLayoutingForIntrinsicSizing
+        ) {
+            const newHeight = this.intrinsicContentHeight(this.bounds.width)
+            if (newHeight !== this._lastReportedIntrinsicHeight) {
+                this._lastReportedIntrinsicHeight = newHeight
+                this.superview.setNeedsLayout()
+            }
+        }
     }
     
     get constraints() {

@@ -23,6 +23,56 @@ declare interface CBDialogViewShower {
 declare const CBCoreInitializerObject: any
 
 
+/**
+ * CBCore — Application session model and library entry point.
+ *
+ * CBCore is a general-purpose library class. It must not contain any
+ * project-specific business logic. To extend it for a specific project,
+ * subclass CBCore and register the subclass as the singleton before any
+ * other code accesses `CBCore.sharedInstance`.
+ *
+ * ## Extension pattern
+ *
+ * 1. Subclass CBCore in your project:
+ *
+ *    ```typescript
+ *    class MyAppCore extends CBCore {
+ *
+ *        // Additional session-level state goes here.
+ *        mySessionData: MySessionData | undefined = undefined
+ *
+ *        // Override didSetUserProfile to fetch session data before the
+ *        // userDidLogIn broadcast fires. Call super only after your data
+ *        // is ready so that every listener receives a fully populated core.
+ *        override async didSetUserProfile() {
+ *            if (IS(this.userProfile)) {
+ *                this.mySessionData = await fetchMySessionData()
+ *            }
+ *            else {
+ *                this.mySessionData = undefined
+ *            }
+ *            super.didSetUserProfile()
+ *        }
+ *
+ *        // Expose a typed singleton so callers never need CBCore.sharedInstance.
+ *        static override get sharedInstance(): MyAppCore {
+ *            return CBCore.sharedInstance as MyAppCore
+ *        }
+ *
+ *    }
+ *    ```
+ *
+ * 2. Register the subclass at app startup, before UICore is initialised:
+ *
+ *    ```typescript
+ *    CBCore.setSharedInstance(new MyAppCore())
+ *    CBCore.initIfNeededWithViewCore(new UICore(...))
+ *    ```
+ *
+ * 3. From that point on, every call to `CBCore.sharedInstance` — including
+ *    calls made internally by the library — returns the MyAppCore instance.
+ *    Project code should call `MyAppCore.sharedInstance` for the typed version.
+ */
 export class CBCore extends UIObject {
     
     private static _sharedInstance: CBCore
@@ -57,17 +107,12 @@ export class CBCore extends UIObject {
                 return
             }
             
-            //console.log("" + event.key + " changed to " + event.newValue + " from " + event.oldValue);
-            
-            
             if (event.key == "CBLanguageKey") {
                 this.didSetLanguageKey()
             }
             
         }.bind(this))
         
-        
-        //this.checkIfUserIsAuthenticated();
         
         this.didSetLanguageKey()
         
@@ -82,11 +127,51 @@ export class CBCore extends UIObject {
     }
     
     
+    /**
+     * Returns the shared singleton instance.
+     *
+     * If `setSharedInstance` was called before this getter was first accessed,
+     * that instance is returned. Otherwise a default `CBCore` is created.
+     * Library-internal code always goes through this getter, so registering a
+     * subclass via `setSharedInstance` is sufficient to replace the singleton
+     * for the entire session.
+     */
     static get sharedInstance() {
         if (!CBCore._sharedInstance) {
             CBCore._sharedInstance = new CBCore()
         }
         return CBCore._sharedInstance
+    }
+    
+    
+    /**
+     * Registers a subclass instance as the application singleton.
+     *
+     * Call this once at app startup, before `CBCore.sharedInstance` or
+     * `CBCore.initIfNeededWithViewCore` are first accessed. Calling it after
+     * the singleton has already been created has no effect and will throw in
+     * development to catch accidental misuse.
+     *
+     * ```typescript
+     * // App entry point — must be the very first thing that runs.
+     * CBCore.setSharedInstance(new MyAppCore())
+     * CBCore.initIfNeededWithViewCore(new UICore("root", RootViewController))
+     * ```
+     */
+    static setSharedInstance(instance: CBCore) {
+        
+        if (CBCore._sharedInstance) {
+            /// #if DEV
+            throw new Error(
+                "CBCore.setSharedInstance must be called before sharedInstance is first accessed. " +
+                "Move the call to the very top of your app entry point."
+            )
+            /// #endif
+            return
+        }
+        
+        CBCore._sharedInstance = instance
+        
     }
     
     
@@ -179,6 +264,29 @@ export class CBCore extends UIObject {
         this.didSetUserProfile()
     }
     
+    /**
+     * Called whenever `userProfile` is assigned.
+     *
+     * The default implementation derives `isUserLoggedIn` from the profile
+     * and triggers the login/logout broadcast via `didSetIsUserLoggedIn`.
+     *
+     * Subclasses may override this to fetch additional session data before
+     * the broadcast fires. The override must be `async` and must call
+     * `super.didSetUserProfile()` after it has finished populating any
+     * extra state, so that all broadcast listeners receive a complete core:
+     *
+     * ```typescript
+     * override async didSetUserProfile() {
+     *     if (IS(this.userProfile)) {
+     *         this.companyStatus = (await SocketClient.CurrentUserStatusInCompany()).result
+     *     }
+     *     else {
+     *         this.companyStatus = undefined
+     *     }
+     *     super.didSetUserProfile()   // broadcast fires here
+     * }
+     * ```
+     */
     didSetUserProfile() {
         this.isUserLoggedIn = IS(this.userProfile)
     }
@@ -248,23 +356,4 @@ export class CBCore extends UIObject {
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

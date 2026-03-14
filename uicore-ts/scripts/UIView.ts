@@ -296,6 +296,26 @@ export class UIView extends UIObject {
     private _resizeObserverEntry?: ResizeObserverEntry
     protected _intrinsicSizesCache: Record<string, UIRectangle> = {}
     
+    /** When set, this view reads and writes its intrinsic size cache entries from the
+     *  static shared map keyed by this identifier rather than from its own per-instance
+     *  cache.  All views that share the same identifier share the same cached sizes, so
+     *  only the first measurement in a group is ever computed.
+     *
+     *  Invalidate with UIView.invalidateSharedIntrinsicSizeCache(identifier). */
+    sharedIntrinsicSizeCacheIdentifier?: string
+    
+    /** Static shared intrinsic size cache, keyed by sharedIntrinsicSizeCacheIdentifier.
+     *  Each bucket mirrors the per-instance _intrinsicSizesCache format. */
+    static _sharedIntrinsicSizeCaches: Map<string, Record<string, UIRectangle>> = new Map()
+    
+    static invalidateSharedIntrinsicSizeCache(identifier: string): void {
+        UIView._sharedIntrinsicSizeCaches.delete(identifier)
+    }
+    
+    static invalidateAllSharedIntrinsicSizeCaches(): void {
+        UIView._sharedIntrinsicSizeCaches.clear()
+    }
+    
     private static _virtualLayoutingDepth = 0
     
     static get isVirtualLayouting(): boolean {
@@ -1831,6 +1851,10 @@ export class UIView extends UIObject {
     
     static scheduleLayoutViewsIfNeeded() {
         
+        if (UIView._isLayoutViewsIfNeededScheduled) {
+            return
+        }
+        
         UIView._isLayoutViewsIfNeededScheduled = YES
         UIView.runFunctionBeforeNextFrame(() => {
             UIView._isLayoutViewsIfNeededScheduled = NO
@@ -1893,7 +1917,7 @@ export class UIView extends UIObject {
     }
     
     
-    _lastReportedIntrinsicHeight: number = -1
+    // _lastReportedIntrinsicHeight: number = -1
     
     setNeedsLayout() {
         
@@ -1905,14 +1929,14 @@ export class UIView extends UIObject {
         UIView._viewsToLayout.push(this)
         this.clearIntrinsicSizeCache()
         
-        // Auto-propagate if intrinsic height changed
-        if (IS(this.superview) && this.superview.usesVirtualLayoutingForIntrinsicSizing) {
-            const newHeight = this.intrinsicContentHeight(this.bounds.width)
-            if (newHeight !== this._lastReportedIntrinsicHeight) {
-                this._lastReportedIntrinsicHeight = newHeight
-                this.superview.setNeedsLayout()
-            }
-        }
+        // // Auto-propagate if intrinsic height changed
+        // if (IS(this.superview) && this.superview.usesVirtualLayoutingForIntrinsicSizing) {
+        //     const newHeight = this.intrinsicContentHeight(this.bounds.width)
+        //     if (newHeight !== this._lastReportedIntrinsicHeight) {
+        //         this._lastReportedIntrinsicHeight = newHeight
+        //         this.superview.setNeedsLayout()
+        //     }
+        // }
         
         if (!UIView._isLayoutViewsIfNeededScheduled) {
             UIView.scheduleLayoutViewsIfNeeded()
@@ -1999,24 +2023,24 @@ export class UIView extends UIObject {
         
     }
     
-    reportsIntrinsicHeightChangesToSuperview: boolean = YES
+    // reportsIntrinsicHeightChangesToSuperview: boolean = YES
     
     didLayoutSubviews() {
         this.viewController?.viewDidLayoutSubviews()
         
-        if (
-            this.reportsIntrinsicHeightChangesToSuperview &&
-            !this.isVirtualLayouting &&
-            IS(this.superview) &&
-            this.isMemberOfViewTree &&
-            this.superview.usesVirtualLayoutingForIntrinsicSizing
-        ) {
-            const newHeight = this.intrinsicContentHeight(this.bounds.width)
-            if (newHeight !== this._lastReportedIntrinsicHeight) {
-                this._lastReportedIntrinsicHeight = newHeight
-                this.superview.setNeedsLayout()
-            }
-        }
+        // if (
+        //     this.reportsIntrinsicHeightChangesToSuperview &&
+        //     !this.isVirtualLayouting &&
+        //     IS(this.superview) &&
+        //     this.isMemberOfViewTree &&
+        //     this.superview.usesVirtualLayoutingForIntrinsicSizing
+        // ) {
+        //     const newHeight = this.intrinsicContentHeight(this.bounds.width)
+        //     if (newHeight !== this._lastReportedIntrinsicHeight) {
+        //         this._lastReportedIntrinsicHeight = newHeight
+        //         this.superview.setNeedsLayout()
+        //     }
+        // }
     }
     
     get constraints() {
@@ -2296,6 +2320,30 @@ export class UIView extends UIObject {
     wasAddedToViewTree() {
         
         UIView.resizeObserver.observe(this.viewHTMLElement)
+        
+        /// #if DEV
+        try {
+            const descriptors = this.propertyDescriptors
+            
+            const bestDescriptor =
+                descriptors.find(descriptor => !descriptor.name.startsWith("subviews.")) ??
+                descriptors.firstElement
+            
+            if (IS(bestDescriptor)) {
+                const ownerName = (bestDescriptor.object as any).constructor?.name ?? ""
+                this.viewHTMLElement.setAttribute(
+                    "_path",
+                    ownerName + "." + bestDescriptor.name + "{" + this.class.name + "}"
+                )
+            }
+            
+        }
+        catch (exception) {
+            
+            // Nothing here
+            
+        }
+        /// #endif
         
     }
     
@@ -3732,23 +3780,63 @@ export class UIView extends UIObject {
     }
     
     protected _getCachedIntrinsicSize(cacheKey: string): UIRectangle | undefined {
+        if (this.sharedIntrinsicSizeCacheIdentifier) {
+            return UIView._sharedIntrinsicSizeCaches.get(this.sharedIntrinsicSizeCacheIdentifier)?.[cacheKey]
+        }
         return this._intrinsicSizesCache[cacheKey]
     }
     
     protected _setCachedIntrinsicSize(cacheKey: string, size: UIRectangle): void {
+        if (this.sharedIntrinsicSizeCacheIdentifier) {
+            let bucket = UIView._sharedIntrinsicSizeCaches.get(
+                this.sharedIntrinsicSizeCacheIdentifier
+            )
+            if (!bucket) {
+                bucket = {}
+                UIView._sharedIntrinsicSizeCaches.set(this.sharedIntrinsicSizeCacheIdentifier, bucket)
+            }
+            bucket[cacheKey] = size.copy()
+            return
+        }
         this._intrinsicSizesCache[cacheKey] = size.copy()
     }
     
+    // clearIntrinsicSizeCache(): void {
+    //     this._intrinsicSizesCache = {}
+    //
+    //     this._frameCacheForVirtualLayouting = undefined
+    //     this._frameCache = undefined
+    //
+    //     // Optionally clear parent cache if this view affects parent's intrinsic size
+    //     if (this.superview?.usesVirtualLayoutingForIntrinsicSizing) {
+    //         this.superview.clearIntrinsicSizeCache()
+    //     }
+    // }
+    
     clearIntrinsicSizeCache(): void {
-        this._intrinsicSizesCache = {}
         
+        const hadCachedSize = this.sharedIntrinsicSizeCacheIdentifier
+                              ? UIView._sharedIntrinsicSizeCaches.has(this.sharedIntrinsicSizeCacheIdentifier)
+                              : Object.keys(this._intrinsicSizesCache).length > 0
+        
+        if (this.sharedIntrinsicSizeCacheIdentifier) {
+            UIView._sharedIntrinsicSizeCaches.delete(this.sharedIntrinsicSizeCacheIdentifier)
+        }
+        else {
+            this._intrinsicSizesCache = {}
+        }
         this._frameCacheForVirtualLayouting = undefined
         this._frameCache = undefined
         
-        // Optionally clear parent cache if this view affects parent's intrinsic size
         if (this.superview?.usesVirtualLayoutingForIntrinsicSizing) {
             this.superview.clearIntrinsicSizeCache()
+            
+            // If we had cached sizes, a parent was measuring us and needs to re-layout
+            if (hadCachedSize && !this.isVirtualLayouting) {
+                this.superview.setNeedsLayout()
+            }
         }
+        
     }
     
     intrinsicContentSizeWithConstraints(constrainingHeight: number = 0, constrainingWidth: number = 0) {
@@ -3840,7 +3928,9 @@ export class UIView extends UIObject {
             if (subview == this._loadingView || subview.hasWeakFrame) {
                 return
             }
-            subview.layoutIfNeeded()
+            if (subview.usesVirtualLayoutingForIntrinsicSizing) {
+                subview.layoutIfNeeded()
+            }
             framePoints.push(subview.frame.min)
             framePoints.push(subview.frame.max)
         })
@@ -4004,9 +4094,4 @@ function props(obj: any) {
 const _UIViewPropertyKeys = props(UIView.prototype).concat(new UIView().allKeys)
 const _UIViewControllerPropertyKeys = props(UIViewController.prototype)
     .concat(new UIViewController(nil).allKeys)
-
-
-
-
-
 

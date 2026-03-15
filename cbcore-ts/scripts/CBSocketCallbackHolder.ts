@@ -34,6 +34,8 @@ interface CBSocketCallbackHolderMessageDescriptor {
     completionPolicy: string;
     completionFunction: CBSocketMessageCompletionFunction;
     
+    _timeoutId?: ReturnType<typeof setTimeout>;
+    
 }
 
 
@@ -110,15 +112,16 @@ export class CBSocketCallbackHolder extends UIObject {
     
     triggerDisconnectHandlers() {
         
-        this.messageDescriptors.forEach(function (descriptor: CBSocketCallbackHolderMessageDescriptor, key: string) {
+        this.messageDescriptors.forEach(function (this: CBSocketCallbackHolder, descriptor: CBSocketCallbackHolderMessageDescriptor, key: string) {
             
-            if (descriptor.mainResponseReceived) {
+            if (!descriptor.mainResponseReceived) {
                 
+                this._cancelTimeoutForDescriptor(descriptor)
                 descriptor.completionFunction(CBSocketClient.disconnectionMessage, nil)
                 
             }
             
-        })
+        }.bind(this))
         
     }
     
@@ -148,6 +151,71 @@ export class CBSocketCallbackHolder extends UIObject {
         
         this.onetimeHandlers[key].push(handlerFunction)
         
+        
+    }
+    
+    
+    _scheduleTimeoutForDescriptor(descriptor: CBSocketCallbackHolderMessageDescriptor) {
+        
+        const timeoutMs = this._socketClient.requestTimeoutMs
+        
+        if (!timeoutMs) {
+            
+            return
+            
+        }
+        
+        descriptor._timeoutId = setTimeout(() => {
+            
+            if (descriptor.mainResponseReceived) {
+                
+                return
+                
+            }
+            
+            console.warn(
+                `CBSocketCallbackHolder: request "${descriptor.key}" timed out after ${timeoutMs} ms`
+            )
+            
+            descriptor.mainResponseReceived = YES
+            
+            descriptor.completionFunction(CBSocketClient.timeoutMessage, nil)
+            
+            const descriptorKey = this.keysForIdentifiers[descriptor.message.identifier]
+            
+            if (descriptorKey) {
+                
+                const descriptorsForKey = this.messageDescriptors[descriptorKey]
+                
+                if (descriptorsForKey) {
+                    
+                    descriptorsForKey.removeElement(descriptor)
+                    
+                    if (descriptorsForKey.length === 0) {
+                        
+                        delete this.messageDescriptors[descriptorKey]
+                        
+                    }
+                    
+                }
+                
+                delete this.keysForIdentifiers[descriptor.message.identifier]
+                
+            }
+            
+        }, timeoutMs)
+        
+    }
+    
+    
+    _cancelTimeoutForDescriptor(descriptor: CBSocketCallbackHolderMessageDescriptor) {
+        
+        if (descriptor._timeoutId !== undefined) {
+            
+            clearTimeout(descriptor._timeoutId)
+            descriptor._timeoutId = undefined
+            
+        }
         
     }
     
@@ -384,6 +452,9 @@ export class CBSocketCallbackHolder extends UIObject {
                 
             })
             
+            const pushedDescriptor = this.messageDescriptors[descriptorKey].lastElement
+            this._scheduleTimeoutForDescriptor(pushedDescriptor)
+            
             this.keysForIdentifiers[message.identifier] = descriptorKey
             
         }
@@ -590,6 +661,8 @@ export class CBSocketCallbackHolder extends UIObject {
                 descriptor: CBSocketCallbackHolderMessageDescriptor,
                 storedResponseCondition = NO
             ) => {
+                
+                this._cancelTimeoutForDescriptor(descriptor)
                 
                 var messageData = message.messageData
                 

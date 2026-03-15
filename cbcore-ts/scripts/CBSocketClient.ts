@@ -94,6 +94,23 @@ export class CBSocketClient extends UIObject {
     }
     
     
+    static timeoutMessage: CBSocketClientErrorMessage = {
+        
+        _isCBSocketErrorMessage: YES,
+        
+        messageData: "Request timed out"
+        
+    }
+    
+    
+    /**
+     * How long (in milliseconds) to wait for a server response before treating
+     * the request as failed. Set to 0 to disable timeouts entirely.
+     * Default: 30 000 ms (30 seconds).
+     */
+    requestTimeoutMs: number = 30_000
+    
+    
     constructor(core: CBCore) {
         
         super()
@@ -687,35 +704,4 @@ export const SocketClient: SocketClientInterface = new Proxy({ "name": "SocketCl
     }
     
 }) as any
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

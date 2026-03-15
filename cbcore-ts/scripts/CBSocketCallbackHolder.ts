@@ -1,6 +1,7 @@
 import objectHash from "object-hash"
 import { FIRST, IS, IS_NOT, nil, NO, UIObject, YES } from "../../uicore-ts"
 import {
+    CBSocketKeepalivePayload,
     CBSocketMessage,
     CBSocketMessageCompletionFunction,
     CBSocketMessageHandlerFunction, CBSocketMessageSendResponseFunction, CBSocketMultipleMessage,
@@ -18,7 +19,6 @@ interface CBSocketCallbackHolderMessageDescriptor {
         keepWaitingForResponses?: boolean;
     }
     
-    
     sentAtTime: number;
     
     //completionTriggered: boolean;
@@ -35,6 +35,18 @@ interface CBSocketCallbackHolderMessageDescriptor {
     completionFunction: CBSocketMessageCompletionFunction;
     
     _timeoutId?: ReturnType<typeof setTimeout>;
+
+    /**
+     * Called when a keepalive frame arrives for this descriptor's request.
+     * Registered via CBSocketRequestPromise.didReceiveKeepalive().
+     */
+    keepaliveHandler?: (payload: CBSocketKeepalivePayload) => void;
+
+    /**
+     * When true the defaultKeepaliveHandler on CBSocketClient is NOT called
+     * for this descriptor — only keepaliveHandler fires.
+     */
+    keepaliveHandlerOverridesDefault: boolean;
     
 }
 
@@ -96,7 +108,6 @@ export class CBSocketCallbackHolder extends UIObject {
         
         super()
         
-        
         this._socketClient = socketClient
         
         if (IS(previousCallbackHolder)) {
@@ -128,7 +139,6 @@ export class CBSocketCallbackHolder extends UIObject {
     
     registerHandler(key: string, handlerFunction: CBSocketMessageHandlerFunction) {
         
-        
         if (!this.handlers[key]) {
             
             this.handlers[key] = []
@@ -137,11 +147,9 @@ export class CBSocketCallbackHolder extends UIObject {
         
         this.handlers[key].push(handlerFunction)
         
-        
     }
     
     registerOnetimeHandler(key: string, handlerFunction: CBSocketMessageHandlerFunction) {
-        
         
         if (!this.onetimeHandlers[key]) {
             
@@ -150,7 +158,6 @@ export class CBSocketCallbackHolder extends UIObject {
         }
         
         this.onetimeHandlers[key].push(handlerFunction)
-        
         
     }
     
@@ -218,7 +225,20 @@ export class CBSocketCallbackHolder extends UIObject {
         }
         
     }
-    
+
+
+    /**
+     * Resets the timeout for a descriptor by cancelling the current timer and
+     * scheduling a fresh one. Called whenever a keepalive frame arrives so the
+     * request gets a full new window to complete.
+     */
+    _resetTimeoutForDescriptor(descriptor: CBSocketCallbackHolderMessageDescriptor) {
+
+        this._cancelTimeoutForDescriptor(descriptor)
+        this._scheduleTimeoutForDescriptor(descriptor)
+
+    }
+
     
     get storedResponseHashesDictionary() {
         
@@ -239,7 +259,6 @@ export class CBSocketCallbackHolder extends UIObject {
         const hashObject = this.storedResponseHashesDictionary[localStorageKey]
         
         const result = FIRST(hashObject, {} as any)
-        
         
         return result
         
@@ -270,7 +289,6 @@ export class CBSocketCallbackHolder extends UIObject {
         responseDataHash: string
     ) {
         
-        
         if (!responseMessage.canBeStoredAsResponse ||
             (IS_NOT(responseMessage.messageData) && IS_NOT(responseMessage.messageDataHash))) {
             
@@ -278,9 +296,7 @@ export class CBSocketCallbackHolder extends UIObject {
             
         }
         
-        
         const localStorageKey = this.keyForRequestKeyAndRequestDataHash(requestKey, requestDataHash)
-        
         
         var validityDate: number
         
@@ -305,7 +321,6 @@ export class CBSocketCallbackHolder extends UIObject {
             
         })
         
-        
         this.saveStoredResponseHashesDictionary(storedResponseHashesDictionary)
         
     }
@@ -321,7 +336,6 @@ export class CBSocketCallbackHolder extends UIObject {
     
     saveInLocalStorage(key: string, object: any) {
         
-        
         const stringToSave = JSON.stringify(object)
         
         if (stringToSave != localStorage[key]) {
@@ -329,7 +343,6 @@ export class CBSocketCallbackHolder extends UIObject {
             localStorage[key] = stringToSave
             
         }
-        
         
     }
     
@@ -341,18 +354,15 @@ export class CBSocketCallbackHolder extends UIObject {
         completionFunction: CBSocketMessageCompletionFunction
     ) {
         
-        
         var result = YES
         
         var triggerStoredResponseImmediately = NO
-        
         
         const messageDataHash = objectHash(message.messageData || nil)
         
         const descriptorKey = "socketMessageDescriptor_" + key + messageDataHash
         
         this.messageDescriptors[descriptorKey] = (this.messageDescriptors[descriptorKey] || [])
-        
         
         const hashObject = this.storedResponseHashObjectForKey(key, messageDataHash)
         message.storedResponseHash = hashObject.hash
@@ -440,15 +450,16 @@ export class CBSocketCallbackHolder extends UIObject {
                 
                 //completionTriggered: NO,
                 
-                
                 messageDataHash: messageDataHash,
                 
                 mainResponseReceived: NO,
                 anyMainResponseReceived: NO,
                 
-                
                 completionPolicy: completionPolicy,
-                completionFunction: completionFunction
+                completionFunction: completionFunction,
+
+                keepaliveHandler: undefined,
+                keepaliveHandlerOverridesDefault: NO
                 
             })
             
@@ -497,9 +508,7 @@ export class CBSocketCallbackHolder extends UIObject {
         completionFunction: CBSocketMultipleMessagecompletionFunction = CBSocketCallbackHolder.defaultMultipleMessagecompletionFunction
     ) {
         
-        
         const key = CBSocketClient.multipleMessageKey
-        
         
         const messageDataHash = objectHash(messageToSend.messageData || nil)
         
@@ -507,9 +516,7 @@ export class CBSocketCallbackHolder extends UIObject {
         
         this.messageDescriptors[descriptorKey] = (this.messageDescriptors[descriptorKey] || [])
         
-        
         messageToSend.storedResponseHash = this.storedResponseHashObjectForKey(key, messageDataHash).hash
-        
         
         this.messageDescriptors[descriptorKey].push({
             
@@ -526,12 +533,10 @@ export class CBSocketCallbackHolder extends UIObject {
             
             //completionTriggered: NO,
             
-            
             messageDataHash: messageDataHash,
             
             mainResponseReceived: NO,
             anyMainResponseReceived: NO,
-            
             
             completionPolicy: CBSocketClient.completionPolicy.directOnly,
             completionFunction: function (
@@ -566,7 +571,10 @@ export class CBSocketCallbackHolder extends UIObject {
                     }.bind(this)
                 )
                 
-            }.bind(this)
+            }.bind(this),
+
+            keepaliveHandler: undefined,
+            keepaliveHandlerOverridesDefault: NO
             
         })
         
@@ -581,7 +589,6 @@ export class CBSocketCallbackHolder extends UIObject {
         message: CBSocketMessage<any>,
         sendResponseFunction: CBSocketMessageSendResponseFunction
     ) {
-        
         
         if (!this.isValid) {
             
@@ -629,7 +636,40 @@ export class CBSocketCallbackHolder extends UIObject {
             // Find descriptors for the key of the message that is being responded to
             const descriptorKey = this.keysForIdentifiers[message.inResponseToIdentifier]
             const descriptorsForKey = (this.messageDescriptors[descriptorKey] || [])
-            
+
+
+            // --- Keepalive fast path ---
+            // A keepalive frame must not flow through the normal completion machinery.
+            // Handle it here and return early so nothing else fires.
+            if (message.isKeepalive) {
+
+                const payload: CBSocketKeepalivePayload = message.messageData || {}
+
+                descriptorsForKey.forEach((descriptor) => {
+
+                    if (descriptor.message.identifier !== message.inResponseToIdentifier) {
+                        return
+                    }
+
+                    // Reset the client-side timeout so the request gets a full new window
+                    this._resetTimeoutForDescriptor(descriptor)
+
+                    // Fire the default handler unless the per-call handler overrides it
+                    if (!descriptor.keepaliveHandlerOverridesDefault) {
+                        this._socketClient.defaultKeepaliveHandler?.(payload)
+                    }
+
+                    // Fire the per-call handler if one was registered
+                    descriptor.keepaliveHandler?.(payload)
+
+                })
+
+                return
+
+            }
+            // --- End keepalive fast path ---
+
+
             // Find response data hash to check for differences
             const responseDataHash = message.messageDataHash
             

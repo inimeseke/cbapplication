@@ -1,8 +1,5 @@
 
 
-
-
-
 export type CBReferenceID = string;
 
 
@@ -20,9 +17,6 @@ export interface LanguagesData {
         [key: string]: string;
     };
 }
-
-
-
 
 
 export interface CBFinancialAmount {
@@ -64,11 +58,6 @@ export interface CBDropdownDataItem<T> {
     dropdownCode: string;
     
 }
-
-
-
-
-
 
 
 export interface CBFileAccessor {
@@ -159,7 +148,7 @@ export interface CBSubscription {
     
     isIndefinite: boolean;
     
-    subscriptionKind: number;// alternatiiv oleks string/objectId, mis viitaks tüübi objektile eraldi tabelis
+    subscriptionKind: number;
     createdAt: Date;
     updatedAt: Date;
     
@@ -201,14 +190,26 @@ export type SocketClientNoMessageFunction<ResultType> = (
 ) => Promise<SocketClientResult<ResultType>>;
 
 
-
-
-
 export interface CBSocketMultipleMessageObject<MessageDataType = any> {
     
     key: string;
     message: CBSocketMessage<MessageDataType>;
     
+}
+
+
+/**
+ * Payload delivered to keepalive handlers on the client.
+ * All fields are optional — a bare keepalive with no payload is valid and
+ * simply resets the client's timeout window.
+ */
+export interface CBSocketKeepalivePayload {
+    /** Human-readable status message, e.g. "Processing items". */
+    message?: string
+    /** Completion estimate, 0-100. */
+    percentComplete?: number
+    /** Any additional fields the handler author may need. */
+    [key: string]: any
 }
 
 
@@ -237,6 +238,13 @@ export interface CBSocketMessage<MessageDataType = any> {
     // This tells the client that the response is valid for at least this long in ms
     responseValidityDuration?: number;
     
+    /**
+     * When true this frame is a keepalive pulse, not a real response.
+     * The client resets its timeout and fires keepalive handlers; the normal
+     * completion machinery is bypassed entirely.
+     */
+    isKeepalive?: boolean;
+    
 }
 
 
@@ -256,6 +264,7 @@ export type CBSocketMessageCompletionFunction = (
     responseMessage: any,
     respondWithMessage: CBSocketMessageSendResponseFunction
 ) => void;
+
 export type CBSocketMessageHandlerFunction<ResponseMessageType = any> = (
     message: any,
     respondWithMessage: CBSocketMessageSendResponseFunction<ResponseMessageType>
@@ -282,6 +291,17 @@ export interface CBSocketMessageSendResponseFunction<ResponseMessageType = any> 
     
     sendIntermediateResponse(updateMessage: any, completion?: CBSocketMessageCompletionFunction): void;
     
+    /**
+     * Sends a keepalive frame to the client immediately and resets the
+     * server-side auto-keepalive interval timer.
+     * No-ops silently if the final response has already been sent.
+     *
+     * Call this at natural yield points (after each await) during long-running
+     * handlers to keep the client timeout window alive and optionally deliver
+     * progress information.
+     */
+    sendKeepalive(payload?: CBSocketKeepalivePayload): void;
+    
     // This tells the client to use the stored response if responseHash matches and also enables storing of responses
     // in the client in the first place. Returns true if the hash matched.
     confirmStoredResponseHash(responseHash: string, completion?: CBSocketMessageCompletionFunction): boolean;
@@ -293,7 +313,6 @@ export interface CBSocketMessageSendResponseFunction<ResponseMessageType = any> 
     key: string;
     
 }
-
 
 
 // Socket handshake messages
@@ -319,9 +338,6 @@ export interface CBSocketHandshakeResponseMessage {
 }
 
 
-
-
-
 export type TypeWithoutKey<Type, Key> = Pick<Type, Exclude<keyof Type, Key>>;
 
 export type TypeWithoutID<Type> = TypeWithoutKey<Type, "_id">;
@@ -337,9 +353,3 @@ export type RecursivePartial<T> = {
         T[P] extends object ? RecursivePartial<T[P]> :
             T[P];
 };
-
-
-
-
-
-

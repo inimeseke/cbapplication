@@ -35,13 +35,13 @@ interface CBSocketCallbackHolderMessageDescriptor {
     completionFunction: CBSocketMessageCompletionFunction;
     
     _timeoutId?: ReturnType<typeof setTimeout>;
-
+    
     /**
      * Called when a keepalive frame arrives for this descriptor's request.
      * Registered via CBSocketRequestPromise.didReceiveKeepalive().
      */
     keepaliveHandler?: (payload: CBSocketKeepalivePayload) => void;
-
+    
     /**
      * When true the defaultKeepaliveHandler on CBSocketClient is NOT called
      * for this descriptor — only keepaliveHandler fires.
@@ -123,16 +123,20 @@ export class CBSocketCallbackHolder extends UIObject {
     
     triggerDisconnectHandlers() {
         
-        this.messageDescriptors.forEach(function (this: CBSocketCallbackHolder, descriptor: CBSocketCallbackHolderMessageDescriptor, key: string) {
-            
-            if (!descriptor.mainResponseReceived) {
+        this.messageDescriptors.forEach(
+            function (this: CBSocketCallbackHolder, descriptor: CBSocketCallbackHolderMessageDescriptor, key: string) {
                 
-                this._cancelTimeoutForDescriptor(descriptor)
-                descriptor.completionFunction(CBSocketClient.disconnectionMessage, nil)
+                if (!descriptor.mainResponseReceived) {
+                    
+                    this._cancelTimeoutForDescriptor(descriptor)
+                    
+                    if (typeof descriptor?.completionFunction == "function") {
+                        descriptor.completionFunction.(CBSocketClient.disconnectionMessage, nil)
+                    }
+                    
+                }
                 
-            }
-            
-        }.bind(this))
+            }.bind(this))
         
     }
     
@@ -225,20 +229,20 @@ export class CBSocketCallbackHolder extends UIObject {
         }
         
     }
-
-
+    
+    
     /**
      * Resets the timeout for a descriptor by cancelling the current timer and
      * scheduling a fresh one. Called whenever a keepalive frame arrives so the
      * request gets a full new window to complete.
      */
     _resetTimeoutForDescriptor(descriptor: CBSocketCallbackHolderMessageDescriptor) {
-
+        
         this._cancelTimeoutForDescriptor(descriptor)
         this._scheduleTimeoutForDescriptor(descriptor)
-
+        
     }
-
+    
     
     get storedResponseHashesDictionary() {
         
@@ -457,7 +461,7 @@ export class CBSocketCallbackHolder extends UIObject {
                 
                 completionPolicy: completionPolicy,
                 completionFunction: completionFunction,
-
+                
                 keepaliveHandler: undefined,
                 keepaliveHandlerOverridesDefault: NO
                 
@@ -572,7 +576,7 @@ export class CBSocketCallbackHolder extends UIObject {
                 )
                 
             }.bind(this),
-
+            
             keepaliveHandler: undefined,
             keepaliveHandlerOverridesDefault: NO
             
@@ -636,40 +640,40 @@ export class CBSocketCallbackHolder extends UIObject {
             // Find descriptors for the key of the message that is being responded to
             const descriptorKey = this.keysForIdentifiers[message.inResponseToIdentifier]
             const descriptorsForKey = (this.messageDescriptors[descriptorKey] || [])
-
-
+            
+            
             // --- Keepalive fast path ---
             // A keepalive frame must not flow through the normal completion machinery.
             // Handle it here and return early so nothing else fires.
             if (message.isKeepalive) {
-
+                
                 const payload: CBSocketKeepalivePayload = message.messageData || {}
-
+                
                 descriptorsForKey.forEach((descriptor) => {
-
+                    
                     if (descriptor.message.identifier !== message.inResponseToIdentifier) {
                         return
                     }
-
+                    
                     // Reset the client-side timeout so the request gets a full new window
                     this._resetTimeoutForDescriptor(descriptor)
-
+                    
                     // Fire the default handler unless the per-call handler overrides it
                     if (!descriptor.keepaliveHandlerOverridesDefault) {
                         this._socketClient.defaultKeepaliveHandler?.(payload)
                     }
-
+                    
                     // Fire the per-call handler if one was registered
                     descriptor.keepaliveHandler?.(payload)
-
+                    
                 })
-
+                
                 return
-
+                
             }
             // --- End keepalive fast path ---
-
-
+            
+            
             // Find response data hash to check for differences
             const responseDataHash = message.messageDataHash
             

@@ -2317,11 +2317,16 @@ export class UIView extends UIObject {
         this.superview = superview
     }
     
-    wasAddedToViewTree() {
-        
-        UIView.resizeObserver.observe(this.viewHTMLElement)
-        
-        /// #if DEV
+    // Write the _path attribute on the viewHTMLElement when a view is added to the view tree
+    // to make it easier to debug in the element inspector
+    static annotatePathOnViewHTMLElements = NO
+    // Write the _path attribute on the viewHTMLElements in all views in the tree to make it easier to debug in
+    // the element inspector
+    _annotatePathOnViewHTMLElementsInSubtree() {
+        this.forEachViewInSubtree(view => view._annotatePathOnViewHTMLElement())
+    }
+    // Write the _path attribute on the viewHTMLElement to make it easier to debug in the element inspector
+    _annotatePathOnViewHTMLElement() {
         try {
             const descriptors = this.propertyDescriptors
             
@@ -2343,10 +2348,20 @@ export class UIView extends UIObject {
             // Nothing here
             
         }
+    }
+    
+    
+    wasAddedToViewTree() {
+        
+        UIView.resizeObserver.observe(this.viewHTMLElement)
+        
+        /// #if DEV
+        if (UIView.annotatePathOnViewHTMLElements) {
+            this._annotatePathOnViewHTMLElement()
+        }
         /// #endif
         
     }
-    
     
     wasRemovedFromViewTree() {
         

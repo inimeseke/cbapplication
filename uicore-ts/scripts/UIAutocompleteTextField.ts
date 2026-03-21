@@ -1,5 +1,3 @@
-// noinspection JSConstantReassignment
-
 import { UIAutocompleteDropdownView } from "./UIAutocompleteDropdownView"
 import { UIAutocompleteItem } from "./UIAutocompleteRowView"
 import { IS, IS_NOT, NO, YES } from "./UIObject"
@@ -57,7 +55,8 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         })
         
         // Keyboard navigation: down arrow
-        this.textElementView.addTargetForControlEvent(UIView.controlEvent.DownArrowDown, () => {
+        this.textElementView.addTargetForControlEvent(UIView.controlEvent.DownArrowDown, (sender, event) => {
+            event.preventDefault()
             if (!this._isDropdownOpen) {
                 this.openDropdown()
                 return
@@ -69,7 +68,8 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         })
         
         // Keyboard navigation: up arrow
-        this.textElementView.addTargetForControlEvent(UIView.controlEvent.UpArrowDown, () => {
+        this.textElementView.addTargetForControlEvent(UIView.controlEvent.UpArrowDown, (sender, event) => {
+            event.preventDefault()
             if (this._dropdownView.highlightedRowIndex > 0) {
                 this._dropdownView.highlightedRowIndex = this._dropdownView.highlightedRowIndex - 1
             }
@@ -181,6 +181,10 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         
         this._dropdownView.filteredItems = isExactSingleMatch ? [] : filtered
         
+        if (this._dropdownView.filteredItems.length > 0) {
+            this._dropdownView.highlightedRowIndex = 0
+        }
+        
         if (this._isDropdownOpen) {
             this._dropdownView.showAnchoredToView(this)
         }
@@ -199,9 +203,6 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         this._isDropdownOpen = YES
         this.updateFilteredItems()
         this._dropdownView.showAnchoredToView(this)
-        if (this._dropdownView.filteredItems?.length) {
-            this._dropdownView.highlightedRowIndex = 0
-        }
         
     }
     

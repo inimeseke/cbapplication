@@ -1184,14 +1184,16 @@ type UIRectangleConditionalChain<TCurrent, TResult = TCurrent> =
 
 
 interface UIRectangleConditionalFrame {
-    // The result to resume from when this frame's ENDIF is reached
+    // The result to resume from when this frame's ENDIF is reached (if no branch matched)
     resultBeforeIF: any
-    // The result accumulated inside this frame's active branch
+    // The result accumulated inside the active branch of this frame
     currentResult: any
-    // The original result at the point of IF (used to reset for ELSE/ELSE_IF branches)
+    // The result at the point of IF — used to reset currentResult when entering each new branch
     originalResult: any
-    // Whether any branch of this frame has already been taken
-    conditionMet: boolean
+    // Whether any branch of this frame has already been taken (latches to true, never resets)
+    anyConditionMet: boolean
+    // Whether the current branch is the one that was taken (flips per ELSE_IF / ELSE)
+    currentBranchActive: boolean
 }
 
 class UIRectangleConditionalBlock {
@@ -1201,24 +1203,26 @@ class UIRectangleConditionalBlock {
     
     constructor(initialResult: UIRectangle, condition: boolean) {
         // Seed the stack with the first IF frame.
-        // resultBeforeIF is nil here because this is the outermost block;
+        // resultBeforeIF is null here because this is the outermost block;
         // ENDIF on the last frame simply returns currentResult.
         this._stack = [{
             resultBeforeIF: null,
             currentResult: initialResult,
             originalResult: initialResult,
-            conditionMet: condition,
+            anyConditionMet: condition,
+            currentBranchActive: condition,
         }]
     }
     
-    // Convenience getters that operate on the innermost frame.
+    // Convenience getter that operates on the innermost frame.
     private get _top(): UIRectangleConditionalFrame {
         return this._stack[this._stack.length - 1]
     }
     
-    private get _conditionMet(): boolean {
-        // A branch is only truly active when every enclosing frame is also active.
-        return this._stack.every(frame => frame.conditionMet)
+    // A method body should only execute when every frame in the stack has its
+    // current branch active (handles nested IFs correctly).
+    private get _shouldExecute(): boolean {
+        return this._stack.every(frame => frame.currentBranchActive)
     }
     
     private createProxy(): UIRectangleConditionalChain<any, any> {
@@ -1231,14 +1235,15 @@ class UIRectangleConditionalBlock {
                 
                 if (prop === 'IF') {
                     return (condition: boolean) => {
-                        // Push a new frame.  The new frame's result starts as a copy of
+                        // Push a new frame. The new frame's result starts as a copy of
                         // the current innermost result so that chaining inside the nested
                         // IF begins from the right value.
                         self._stack.push({
                             resultBeforeIF: self._top.currentResult,
                             currentResult: self._top.currentResult,
                             originalResult: self._top.currentResult,
-                            conditionMet: condition,
+                            anyConditionMet: condition,
+                            currentBranchActive: condition,
                         })
                         return self.createProxy()
                     }
@@ -1246,7 +1251,7 @@ class UIRectangleConditionalBlock {
                 
                 if (prop === 'TRANSFORM') {
                     return <R extends UIRectangle>(fn: (current: any) => R) => {
-                        if (self._conditionMet) {
+                        if (self._shouldExecute) {
                             self._top.currentResult = fn(self._top.currentResult)
                         }
                         return self.createProxy()
@@ -1256,8 +1261,12 @@ class UIRectangleConditionalBlock {
                 if (prop === 'ELSE_IF') {
                     return (condition: boolean) => {
                         const top = self._top
-                        if (!top.conditionMet) {
-                            top.conditionMet = condition
+                        // Only consider this branch if no prior branch has been taken.
+                        // Always deactivate the current branch first, then activate only
+                        // if this condition is true and nothing has matched yet.
+                        top.currentBranchActive = !top.anyConditionMet && condition
+                        if (top.currentBranchActive) {
+                            top.anyConditionMet = true
                             top.currentResult = top.originalResult
                         }
                         return self.createProxy()
@@ -1267,8 +1276,9 @@ class UIRectangleConditionalBlock {
                 if (prop === 'ELSE') {
                     return () => {
                         const top = self._top
-                        if (!top.conditionMet) {
-                            top.conditionMet = true
+                        top.currentBranchActive = !top.anyConditionMet
+                        if (top.currentBranchActive) {
+                            top.anyConditionMet = true
                             top.currentResult = top.originalResult
                         }
                         return self.createProxy()
@@ -1282,7 +1292,6 @@ class UIRectangleConditionalBlock {
                         
                         if (self._stack.length === 1) {
                             // Outermost ENDIF. Return the bare rectangle (or transform it).
-                            // TypeScript types this as UIRectangle, and that is what we return.
                             const result = self._top.currentResult
                             return performFunction ? performFunction(result) : result
                         }
@@ -1290,9 +1299,9 @@ class UIRectangleConditionalBlock {
                         // Pop the innermost (nested) frame.
                         const completedFrame = self._stack.pop()!
                         
-                        // If the condition was met use the accumulated result; otherwise
+                        // If any branch was taken use its accumulated result; otherwise
                         // fall back to the value that existed before entering this IF.
-                        const resolvedResult = completedFrame.conditionMet
+                        const resolvedResult = completedFrame.anyConditionMet
                                                ? completedFrame.currentResult
                                                : completedFrame.resultBeforeIF
                         
@@ -1301,8 +1310,6 @@ class UIRectangleConditionalBlock {
                         self._top.currentResult = finalResult
                         
                         // Return the proxy so the outer chain can continue.
-                        // TypeScript also types this as UIRectangle (the proxy forwards
-                        // all rectangle methods to the current result).
                         return self.createProxy()
                     }
                     return endif
@@ -1315,7 +1322,7 @@ class UIRectangleConditionalBlock {
                 // Case A: method call
                 if (typeof value === 'function') {
                     return (...args: any[]) => {
-                        if (self._conditionMet) {
+                        if (self._shouldExecute) {
                             self._top.currentResult = value.apply(self._top.currentResult, args)
                         }
                         return self.createProxy()
@@ -1323,7 +1330,7 @@ class UIRectangleConditionalBlock {
                 }
                 
                 // Case B: property access (e.g. array .lastElement)
-                if (self._conditionMet) {
+                if (self._shouldExecute) {
                     self._top.currentResult = value
                 }
                 

@@ -131,7 +131,7 @@ export class CBSocketCallbackHolder extends UIObject {
                     this._cancelTimeoutForDescriptor(descriptor)
                     
                     if (typeof descriptor?.completionFunction == "function") {
-                        descriptor.completionFunction.(CBSocketClient.disconnectionMessage, nil)
+                        descriptor.completionFunction(CBSocketClient.disconnectionMessage, nil)
                     }
                     
                 }

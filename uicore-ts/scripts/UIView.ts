@@ -125,6 +125,12 @@ type Mutable<T> = {
     -readonly [P in keyof T]: T[P]
 };
 
+type ColorStyleProxy = {
+    [K in keyof CSSStyleDeclaration as K extends string
+                                       ? (Lowercase<K> extends `${string}color${string}` ? K : never)
+                                       : never]?: UIColor
+}
+
 export type UIViewAddControlEventTargetObject<T extends { controlEvent: Record<string, any> }> = Mutable<{
     
     -readonly [K in keyof T["controlEvent"]]: ((
@@ -182,6 +188,7 @@ export class UIView extends UIObject {
     _frame?: UIRectangle & { zIndex?: number }
     _frameCache?: UIRectangle
     _backgroundColor: UIColor = UIColor.transparentColor
+    _colorStyleProxy?: ColorStyleProxy
     
     _viewHTMLElement!: HTMLElement & LooseObject
     
@@ -1450,7 +1457,7 @@ export class UIView extends UIObject {
         
         this.setStyleProperty("borderRadius", radius)
         
-        this.setStyleProperty("borderColor", color.stringValue)
+        this.colorStyleProxy.borderColor = color
         
         this.setStyleProperty("borderWidth", width)
         
@@ -1500,7 +1507,39 @@ export class UIView extends UIObject {
     
     set backgroundColor(backgroundColor: UIColor) {
         this._backgroundColor = backgroundColor
-        this.style.backgroundColor = backgroundColor.stringValue
+        this.colorStyleProxy.backgroundColor = backgroundColor
+    }
+    
+    get colorStyleProxy(): ColorStyleProxy {
+        if (!this._colorStyleProxy) {
+            const element = this._viewHTMLElement
+            this._colorStyleProxy = new Proxy(element.style, {
+                set: (target, property, value: UIColor) => {
+                    
+                    const registrationKey = `${this._UIViewIndex}_${property as string}`
+                    
+                    const previousColor = UIColor._registrationMap.get(registrationKey)
+                    if (previousColor) {
+                        previousColor._elementRef = undefined
+                        previousColor._styleProperty = undefined
+                    }
+                    
+                    value._elementRef = element
+                    value._styleProperty = property as string
+                    
+                    if (value.semanticKey) {
+                        UIColor._liveColors.push(new WeakRef(value))
+                    }
+                    
+                    UIColor._registrationMap.set(registrationKey, value)
+                    
+                    Reflect.set(target, property, value.stringValue)
+                    return true
+                    
+                }
+            }) as unknown as ColorStyleProxy
+        }
+        return this._colorStyleProxy
     }
     
     
@@ -2366,6 +2405,16 @@ export class UIView extends UIObject {
     wasRemovedFromViewTree() {
         
         UIView.resizeObserver.unobserve(this.viewHTMLElement)
+        
+        // Clean up all color registrations for this view so the liveColorMap
+        // and registrationMap don't retain entries for destroyed views.
+        for (const [key, color] of UIColor._registrationMap) {
+            if (key.startsWith(`${this._UIViewIndex}_`)) {
+                color._elementRef = undefined
+                color._styleProperty = undefined
+                UIColor._registrationMap.delete(key)
+            }
+        }
         
     }
     

@@ -128,6 +128,34 @@ export class UITextField extends UITextView {
     }
     
     
+    /**
+     * Controls whether the browser is allowed to autofill this field.
+     * Defaults to YES. Set to NO for sensitive fields such as passwords
+     * in registration or reset flows where autofill is undesirable.
+     */
+    public get autocompleteEnabled(): boolean {
+        const value = this.textElementView.viewHTMLElement.getAttribute("autocomplete")
+        return value === null || value === "" || value === "on"
+    }
+    
+    public set autocompleteEnabled(enabled: boolean) {
+        if (enabled) {
+            this.textElementView.viewHTMLElement.removeAttribute("autocomplete")
+        }
+        else {
+            const type = this.textElementView.viewHTMLElement.type
+            if (type === "password") {
+                // "new-password" prevents autofill; appending "one-time-code" suppresses
+                // Chrome's offer to save the password after submission
+                this.textElementView.viewHTMLElement.setAttribute("autocomplete", "new-password one-time-code")
+            }
+            else {
+                this.textElementView.viewHTMLElement.setAttribute("autocomplete", "off")
+            }
+        }
+    }
+    
+    
     override didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
         
         super.didReceiveBroadcastEvent(event)

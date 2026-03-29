@@ -11,12 +11,51 @@ export interface UIColorDescriptor {
 }
 
 
+/**
+ * Extend this interface via declaration merging in UIColor subclass files
+ * to register valid semantic key strings for autocomplete and type safety.
+ *
+ * Example (in BSColor.ts):
+ *   declare module "./UIColor" {
+ *       interface UIColorSemanticKeys {
+ *           primary: never
+ *           success: never
+ *       }
+ *   }
+ */
+export interface UIColorSemanticKeys {}
+
+export type UIColorSemanticKey = keyof UIColorSemanticKeys
+
+
 export class UIColor extends UIObject {
     
     
-    constructor(public stringValue: string) {
+    // --- Semantic color registry ---
+    
+    static _liveColors: WeakRef<UIColor>[] = []
+    static _registrationMap = new Map<string, UIColor>()
+    static _cssSubscriptions = new Map<UIColorSemanticKey, Set<() => void>>()
+    
+    
+    // --- Instance fields ---
+    
+    stringValue: string
+    semanticKey?: UIColorSemanticKey
+    _semanticClass?: typeof UIColor
+    _elementRef?: HTMLElement
+    _styleProperty?: string
+    
+    
+    constructor(stringValue: string, semanticKey?: UIColorSemanticKey) {
         
         super()
+        
+        this.stringValue = stringValue
+        this.semanticKey = semanticKey
+        if (semanticKey) {
+            this._semanticClass = this.constructor as typeof UIColor
+        }
         
     }
     
@@ -24,6 +63,109 @@ export class UIColor extends UIObject {
     override toString() {
         return this.stringValue
     }
+    
+    
+    // --- Semantic apply ---
+    
+    /**
+     * Re-resolves this instance's stringValue from its class's static getter
+     * matching the semanticKey, then writes the new value directly to the DOM
+     * via the stored element reference and style property.
+     * No-op if this instance has no semanticKey.
+     */
+    apply() {
+        
+        if (!this.semanticKey) { return }
+        
+        const colorClass = this._semanticClass ?? this.constructor as typeof UIColor
+        const newColor = (colorClass as any)[this.semanticKey] as UIColor | undefined
+        
+        if (!newColor) { return }
+        
+        this.stringValue = newColor.stringValue
+        
+        const element = this._elementRef
+        
+        if (!element || !this._styleProperty) { return }
+        
+        (element.style as any)[this._styleProperty] = this.stringValue
+        
+    }
+    
+    
+    /**
+     * Assigns a semantic key and the class that owns it to this color instance.
+     * Intended for derived colors that should participate in theme switching,
+     * e.g. `BSColor._primaryBase.colorWithAlpha(0.5).withSemanticKey("primaryShadow", BSColor)`.
+     * Returns `this` for fluent chaining.
+     */
+    withSemanticKey(semanticKey: UIColorSemanticKey, semanticClass: typeof UIColor): this {
+        this.semanticKey = semanticKey
+        this._semanticClass = semanticClass
+        return this
+    }
+    
+    
+    /**
+     * Iterates all live registered UIColor instances, calls apply() on each,
+     * compacts dead WeakRefs in the same pass, then fires any CSS subscriptions
+     * whose semantic key was affected.
+     */
+    static applySemanticColors() {
+        
+        const affectedKeys = new Set<UIColorSemanticKey>()
+        
+        const live: WeakRef<UIColor>[] = []
+        
+        for (const ref of UIColor._liveColors) {
+            
+            const color = ref.deref()
+            
+            if (!color) {
+                continue
+            }
+            
+            live.push(ref)
+            
+            if (color.semanticKey) {
+                affectedKeys.add(color.semanticKey)
+            }
+            
+            color.apply()
+            
+        }
+        
+        UIColor._liveColors = live
+        
+        for (const key of affectedKeys) {
+            UIColor._cssSubscriptions.get(key)?.forEach(callback => callback())
+        }
+        
+    }
+    
+    
+    /**
+     * Registers a callback to be fired when applySemanticColors() affects
+     * the given semantic key. Intended for injected CSS blocks that cannot
+     * be tracked via the colorStyleProxy.
+     */
+    static subscribe(semanticKey: UIColorSemanticKey, callback: () => void) {
+        
+        if (!UIColor._cssSubscriptions.has(semanticKey)) {
+            UIColor._cssSubscriptions.set(semanticKey, new Set())
+        }
+        
+        UIColor._cssSubscriptions.get(semanticKey)!.add(callback)
+        
+    }
+    
+    
+    static unsubscribe(semanticKey: UIColorSemanticKey, callback: () => void) {
+        UIColor._cssSubscriptions.get(semanticKey)?.delete(callback)
+    }
+    
+    
+    // --- Named colors ---
     
     static get redColor() {
         return new UIColor("red")
@@ -243,22 +385,15 @@ export class UIColor extends UIObject {
     
     static rgbToDescriptor(colorString: string) {
         
-        
         if (colorString.startsWith("rgba(")) {
-            
             colorString = colorString.slice(5, colorString.length - 1)
-            
         }
         
         if (colorString.startsWith("rgb(")) {
-            
             colorString = colorString.slice(4, colorString.length - 1) + ", 0"
-            
         }
         
-        
         const components = colorString.split(",")
-        
         
         const result = {
             "red": Number(components[0]),
@@ -267,9 +402,7 @@ export class UIColor extends UIObject {
             "alpha": Number(components[3])
         }
         
-        
         return result
-        
         
     }
     
@@ -281,19 +414,13 @@ export class UIColor extends UIObject {
         const colorHEXFromName = UIColor.nameToHex(this.stringValue)
         
         if (this.stringValue.startsWith("rgb")) {
-            
             descriptor = UIColor.rgbToDescriptor(this.stringValue)
-            
         }
         else if (colorHEXFromName) {
-            
             descriptor = UIColor.hexToDescriptor(colorHEXFromName)
-            
         }
         else {
-            
             descriptor = UIColor.hexToDescriptor(this.stringValue)
-            
         }
         
         return descriptor
@@ -303,66 +430,53 @@ export class UIColor extends UIObject {
     
     colorWithRed(red: number) {
         
-        
         const descriptor = this.colorDescriptor
         
-        const result = new UIColor("rgba(" + red + "," + descriptor.green + "," + descriptor.blue + "," +
-            descriptor.alpha + ")")
-        
-        return result
+        return new UIColor(
+            "rgba(" + red + "," + descriptor.green + "," + descriptor.blue + "," + descriptor.alpha + ")"
+        )
         
     }
     
     colorWithGreen(green: number) {
         
-        
         const descriptor = this.colorDescriptor
         
-        const result = new UIColor("rgba(" + descriptor.red + "," + green + "," + descriptor.blue + "," +
-            descriptor.alpha + ")")
-        
-        return result
+        return new UIColor(
+            "rgba(" + descriptor.red + "," + green + "," + descriptor.blue + "," + descriptor.alpha + ")"
+        )
         
     }
     
     colorWithBlue(blue: number) {
         
-        
         const descriptor = this.colorDescriptor
         
-        const result = new UIColor("rgba(" + descriptor.red + "," + descriptor.green + "," + blue + "," +
-            descriptor.alpha + ")")
-        
-        return result
+        return new UIColor(
+            "rgba(" + descriptor.red + "," + descriptor.green + "," + blue + "," + descriptor.alpha + ")"
+        )
         
     }
-    
     
     colorWithAlpha(alpha: number) {
         
-        
         const descriptor = this.colorDescriptor
         
-        const result = new UIColor("rgba(" + descriptor.red + "," + descriptor.green + "," + descriptor.blue + "," +
-            alpha + ")")
-        
-        return result
+        return new UIColor(
+            "rgba(" + descriptor.red + "," + descriptor.green + "," + descriptor.blue + "," + alpha + ")"
+        )
         
     }
     
-    
     static colorWithRGBA(red: number, green: number, blue: number, alpha: number = 1) {
-        
         
         const result = new UIColor("rgba(" + red + "," + green + "," + blue + "," + alpha + ")")
         
         return result
         
-        
     }
     
     static colorWithDescriptor(descriptor: UIColorDescriptor) {
-        
         
         const result = new UIColor("rgba(" + descriptor.red.toFixed(0) + "," + descriptor.green.toFixed(0) + "," +
             descriptor.blue.toFixed(0) + "," + this.defaultAlphaToOne(descriptor.alpha) + ")")
@@ -388,25 +502,10 @@ export class UIColor extends UIObject {
         descriptor.green = descriptor.green * multiplier
         descriptor.blue = descriptor.blue * multiplier
         
-        const result = UIColor.colorWithDescriptor(descriptor)
-        
-        return result
+        return UIColor.colorWithDescriptor(descriptor)
         
     }
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 

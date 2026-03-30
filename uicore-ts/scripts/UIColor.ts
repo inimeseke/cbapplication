@@ -11,21 +11,7 @@ export interface UIColorDescriptor {
 }
 
 
-/**
- * Extend this interface via declaration merging in UIColor subclass files
- * to register valid semantic key strings for autocomplete and type safety.
- *
- * Example (in BSColor.ts):
- *   declare module "./UIColor" {
- *       interface UIColorSemanticKeys {
- *           primary: never
- *           success: never
- *       }
- *   }
- */
-export interface UIColorSemanticKeys {}
-
-export type UIColorSemanticKey = keyof UIColorSemanticKeys
+export type UIColorSemanticKey = string
 
 
 export class UIColor extends UIObject {
@@ -141,6 +127,18 @@ export class UIColor extends UIObject {
             UIColor._cssSubscriptions.get(key)?.forEach(callback => callback())
         }
         
+    }
+    
+    
+    /**
+     * Updates the backing field for a semantic color and re-applies all live
+     * semantic colors. The backing field is always `_` + semanticKey, e.g.
+     * `BSColor.updateSemanticColor("primary", "#ff0000")` sets `BSColor._primary`.
+     * Called as a static method on the subclass that owns the color.
+     */
+    static updateSemanticColor(semanticKey: UIColorSemanticKey, value: string) {
+        (this as any)["_" + semanticKey] = value
+        UIColor.applySemanticColors()
     }
     
     
@@ -379,8 +377,6 @@ export class UIColor extends UIObject {
         
         return result
         
-        //return 'rgb(' + r + ',' + g + ',' + b + ')';
-        
     }
     
     static rgbToDescriptor(colorString: string) {
@@ -478,10 +474,12 @@ export class UIColor extends UIObject {
     
     static colorWithDescriptor(descriptor: UIColorDescriptor) {
         
-        const result = new UIColor("rgba(" + descriptor.red.toFixed(0) + "," + descriptor.green.toFixed(0) + "," +
-            descriptor.blue.toFixed(0) + "," + this.defaultAlphaToOne(descriptor.alpha) + ")")
+        const red = Math.min(255, Math.max(0, descriptor.red)).toFixed(0)
+        const green = Math.min(255, Math.max(0, descriptor.green)).toFixed(0)
+        const blue = Math.min(255, Math.max(0, descriptor.blue)).toFixed(0)
+        const alpha = this.defaultAlphaToOne(descriptor.alpha)
         
-        return result
+        return new UIColor("rgba(" + red + "," + green + "," + blue + "," + alpha + ")")
         
     }
     

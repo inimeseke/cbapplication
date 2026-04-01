@@ -189,6 +189,12 @@ export class UIView extends UIObject {
     _frameCache?: UIRectangle
     _backgroundColor: UIColor = UIColor.transparentColor
     _colorStyleProxy?: ColorStyleProxy
+    _liveCSSValues: Map<string, { keys: string[], producer: () => string }> = new Map()
+    _liveCSSCallback: () => void = () => {
+        for (const [property, { producer }] of this._liveCSSValues) {
+            (this.style as any)[property] = producer()
+        }
+    }
     
     _viewHTMLElement!: HTMLElement & LooseObject
     
@@ -977,9 +983,14 @@ export class UIView extends UIObject {
     
     
     static injectCSS(cssText: string, id?: string) {
-        // Prevent duplicate injection if an ID is supplied
-        if (id && document.getElementById(id)) {
-            return
+        if (id) {
+            const existing = document.getElementById(id) as HTMLStyleElement | null
+            if (existing) {
+                if (existing.textContent !== cssText) {
+                    existing.textContent = cssText
+                }
+                return
+            }
         }
         
         const style = document.createElement("style")
@@ -1540,6 +1551,34 @@ export class UIView extends UIObject {
             }) as unknown as ColorStyleProxy
         }
         return this._colorStyleProxy
+    }
+    
+    
+    /**
+     * Registers a producer function that generates a composite CSS string value
+     * (e.g. a gradient or box-shadow with embedded colors) and re-runs it
+     * automatically whenever any of the given semantic keys are updated via
+     * applySemanticColors(). Replaces any previous registration for the same
+     * CSS property. The initial value is written immediately.
+     */
+    registerLiveCSSValue(property: string, keys: string[], producer: () => string) {
+        
+        const previous = this._liveCSSValues.get(property)
+        
+        if (previous) {
+            for (const key of previous.keys) {
+                UIColor.unsubscribe(key, this._liveCSSCallback)
+            }
+        }
+        
+        this._liveCSSValues.set(property, { keys, producer })
+        
+        for (const key of keys) {
+            UIColor.subscribe(key, this._liveCSSCallback)
+        }
+        
+        ;(this.style as any)[property] = producer()
+        
     }
     
     
@@ -2415,6 +2454,14 @@ export class UIView extends UIObject {
                 UIColor._registrationMap.delete(key)
             }
         }
+        
+        // Unsubscribe all live CSS value producers.
+        for (const { keys } of this._liveCSSValues.values()) {
+            for (const key of keys) {
+                UIColor.unsubscribe(key, this._liveCSSCallback)
+            }
+        }
+        this._liveCSSValues.clear()
         
     }
     

@@ -34,10 +34,21 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
             this.commitSelection(item)
         }
         
+        let textBeforeFocus = this.text
+        let itemBeforeFocus = this.selectedItem
         // Open dropdown on focus
         this.controlEventTargetAccumulator.Focus = () => {
+            textBeforeFocus = this.text
+            itemBeforeFocus = this.selectedItem
+            this.text = ""
             this.openDropdown()
             this.textElementView.viewHTMLElement.select()
+            const matchIndex = this._dropdownView.filteredItems.findIndex(
+                item => item.label === textBeforeFocus
+            )
+            if (matchIndex !== -1) {
+                this._dropdownView.highlightedRowIndex = matchIndex
+            }
         }
         
         // Close on blur
@@ -90,6 +101,12 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         this.addTargetForControlEvent(UIView.controlEvent.EscDown, () => {
             if (this._isDropdownOpen) {
                 this.closeDropdown()
+                if (this.strictSelection) {
+                    this.commitSelection(itemBeforeFocus as any)
+                }
+                else {
+                    this.text = textBeforeFocus
+                }
             }
         })
         
@@ -123,6 +140,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     
     commitSelection(item: UIAutocompleteItem<T>) {
         
+        this.blur()
         this._selectedItem = item
         this.text = item.label
         this.closeDropdown()
@@ -255,8 +273,6 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         return this._autocompleteItems.some(item => item.label === currentText)
         
     }
-    
-    
     
     
     /**

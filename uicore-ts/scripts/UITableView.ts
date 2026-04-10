@@ -187,7 +187,10 @@ export class UITableView extends UINativeScrollView {
                 }
                 else if (event.altKey) {
                     const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
-                    const next = Math.min((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) + pageSize, rowCount - 1)
+                    const next = Math.min(
+                        (this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) + pageSize,
+                        rowCount - 1
+                    )
                     this._setKeyboardFocus(next, this._keyboardFocusedCellIndex)
                 }
                 else if (this._keyboardFocusedRowIndex === -1) {
@@ -207,7 +210,8 @@ export class UITableView extends UINativeScrollView {
                 }
                 else if (event.altKey) {
                     const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
-                    const prev = Math.max((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) - pageSize, -1)
+                    const prev = Math.max(
+                        (this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) - pageSize, -1)
                     this._setKeyboardFocus(prev, this._keyboardFocusedCellIndex)
                 }
                 else if (this._keyboardFocusedRowIndex === 0) {
@@ -251,7 +255,10 @@ export class UITableView extends UINativeScrollView {
                 event.preventDefault()
                 if (this._keyboardFocusedRowIndex !== undefined) {
                     const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
-                    const next = Math.min((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) + pageSize, rowCount - 1)
+                    const next = Math.min(
+                        (this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) + pageSize,
+                        rowCount - 1
+                    )
                     this._setKeyboardFocus(next, this._keyboardFocusedCellIndex)
                 }
             }
@@ -259,7 +266,8 @@ export class UITableView extends UINativeScrollView {
                 event.preventDefault()
                 if (this._keyboardFocusedRowIndex !== undefined) {
                     const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
-                    const prev = Math.max((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) - pageSize, -1)
+                    const prev = Math.max(
+                        (this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) - pageSize, -1)
                     this._setKeyboardFocus(prev, this._keyboardFocusedCellIndex)
                 }
             }
@@ -1034,6 +1042,7 @@ export class UITableView extends UINativeScrollView {
         this._keyboardListenerElement.tabIndex = 0
         
     }
+    
     override setFrame(rectangle: UIRectangle, zIndex?: number, performUncheckedLayout?: boolean) {
         
         const frame = this.frame
@@ -1130,6 +1139,27 @@ export class UITableView extends UINativeScrollView {
             }
         )
         
+    }
+    
+    // UITableView has usesVirtualLayoutingForIntrinsicSizing = NO and is always
+    // given a fixed viewport frame by its parent — so frame.height never changes
+    // between layout passes. The base didLayoutSubviews compares frame.height and
+    // therefore never propagates upward, even when row positions have changed and
+    // intrinsicContentHeight now returns a different value.
+    // We override here to track the intrinsic content height instead, so that
+    // parents (e.g. CBDataView) get their cache invalidated and re-layout whenever
+    // the total row stack height changes.
+    override didLayoutSubviews() {
+        this.viewController?.viewDidLayoutSubviews()
+        
+        if (!this.isVirtualLayouting && IS(this.superview) && this.isMemberOfViewTree) {
+            const currentContentHeight = this.intrinsicContentHeight()
+            if (currentContentHeight !== this._lastReportedHeight) {
+                this._lastReportedHeight = currentContentHeight
+                this.clearIntrinsicSizeCache()
+                this.superview.setNeedsLayout()
+            }
+        }
     }
     
     

@@ -1995,7 +1995,7 @@ export class UIView extends UIObject {
     }
     
     
-    // _lastReportedIntrinsicHeight: number = -1
+    _lastReportedHeight: number = -1
     
     setNeedsLayout() {
         
@@ -2101,24 +2101,28 @@ export class UIView extends UIObject {
         
     }
     
-    // reportsIntrinsicHeightChangesToSuperview: boolean = YES
-    
     didLayoutSubviews() {
         this.viewController?.viewDidLayoutSubviews()
         
-        // if (
-        //     this.reportsIntrinsicHeightChangesToSuperview &&
-        //     !this.isVirtualLayouting &&
-        //     IS(this.superview) &&
-        //     this.isMemberOfViewTree &&
-        //     this.superview.usesVirtualLayoutingForIntrinsicSizing
-        // ) {
-        //     const newHeight = this.intrinsicContentHeight(this.bounds.width)
-        //     if (newHeight !== this._lastReportedIntrinsicHeight) {
-        //         this._lastReportedIntrinsicHeight = newHeight
-        //         this.superview.setNeedsLayout()
-        //     }
-        // }
+        // After every real layout pass, check whether this view's rendered height
+        // changed. If it did, the superview's cached intrinsic measurement of us is
+        // stale. Calling setNeedsLayout on it clears its intrinsic size cache (via
+        // the existing setNeedsLayout → clearIntrinsicSizeCache chain) and schedules
+        // a re-layout so it can re-measure with the new height. That re-layout will
+        // in turn call didLayoutSubviews on the superview, propagating the signal
+        // upward one level at a time until the height stabilises — without any
+        // explicit upward walk here.
+        //
+        // We read frame.height directly: it is already committed to _frame after a
+        // real layout pass, so this is a free field read with zero reflow or
+        // recomputation cost.
+        if (!this.isVirtualLayouting && IS(this.superview) && this.isMemberOfViewTree) {
+            const currentHeight = this.frame.height
+            if (currentHeight !== this._lastReportedHeight) {
+                this._lastReportedHeight = currentHeight
+                this.superview.setNeedsLayout()
+            }
+        }
     }
     
     get constraints() {

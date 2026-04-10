@@ -67,6 +67,24 @@ export class UITableView extends UINativeScrollView {
     // Viewport scrolling properties
     _intersectionObserver?: IntersectionObserver
     
+    // -------------------------------------------------------------------------
+    // Keyboard navigation state
+    // -------------------------------------------------------------------------
+    
+    /** Row index with -1 meaning the header row. undefined means no focus. */
+    _keyboardFocusedRowIndex: number | undefined = undefined
+    /** Cell index within the focused row. */
+    _keyboardFocusedCellIndex: number = 0
+    /** Total number of data columns (excludes left/right side cells). Set by CBDataView. */
+    _columnCount: number = 0
+    /** Called by UITableView when the focused row/cell changes. CBDataView overrides this. */
+    keyboardFocusDidChange?: (rowIndex: number | undefined, cellIndex: number) => void
+    /** Fired when Enter is pressed on a focused cell. Passes rowIndex and cellIndex. */
+    keyboardDidActivateCell?: (rowIndex: number, cellIndex: number) => void
+    
+    _keydownHandler?: (event: KeyboardEvent) => void
+    _keyboardListenersAttached = false
+    
     
     get _reusableViews(): UITableViewReusableViewsContainerObject {
         
@@ -106,7 +124,266 @@ export class UITableView extends UINativeScrollView {
         this.scrollsX = NO
         
         this._setupViewportScrollAndResizeHandlersIfNeeded()
+        this._setupGridAccessibility()
+        this._setupKeyboardNavigation()
         
+    }
+    
+    
+    // -------------------------------------------------------------------------
+    // ARIA / Accessibility setup
+    // -------------------------------------------------------------------------
+    
+    /**
+     * The element that receives tabIndex, ARIA grid role, and all keyboard/pointer
+     * listeners. Defaults to the table's own element. CBDataView overrides this
+     * to a container that wraps both the header and the table, so the focus ring
+     * encompasses both.
+     */
+    _keyboardListenerElement: HTMLElement = this.viewHTMLElement
+    
+    _setupGridAccessibility() {
+        const el = this._keyboardListenerElement
+        el.setAttribute("role", "grid")
+        el.setAttribute("aria-rowcount", "0")
+        el.setAttribute("aria-colcount", "0")
+        el.tabIndex = 0
+    }
+    
+    /** Called by CBDataView after descriptors change. */
+    setColumnCount(count: number) {
+        this._columnCount = count
+        this._keyboardListenerElement.setAttribute("aria-colcount", String(count))
+    }
+    
+    /** Called by CBDataView after data loads. */
+    setRowCount(count: number) {
+        this._keyboardListenerElement.setAttribute("aria-rowcount", String(count))
+    }
+    
+    
+    // -------------------------------------------------------------------------
+    // Keyboard navigation
+    // -------------------------------------------------------------------------
+    
+    _setupKeyboardNavigation() {
+        
+        this._keydownHandler = (event: KeyboardEvent) => {
+            
+            if (!this.isMemberOfViewTree) {
+                return
+            }
+            
+            const rowCount = this.numberOfRows()
+            const hasHeader = this._keyboardFocusedRowIndex !== undefined
+            
+            if (event.key === "ArrowDown") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex === undefined) {
+                    this._setKeyboardFocus(0, this._keyboardFocusedCellIndex)
+                }
+                else if (event.metaKey || event.ctrlKey) {
+                    this._setKeyboardFocus(rowCount - 1, this._keyboardFocusedCellIndex)
+                }
+                else if (event.altKey) {
+                    const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
+                    const next = Math.min((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) + pageSize, rowCount - 1)
+                    this._setKeyboardFocus(next, this._keyboardFocusedCellIndex)
+                }
+                else if (this._keyboardFocusedRowIndex === -1) {
+                    this._setKeyboardFocus(0, this._keyboardFocusedCellIndex)
+                }
+                else if (this._keyboardFocusedRowIndex < rowCount - 1) {
+                    this._setKeyboardFocus(this._keyboardFocusedRowIndex + 1, this._keyboardFocusedCellIndex)
+                }
+            }
+            else if (event.key === "ArrowUp") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex === undefined) {
+                    this._setKeyboardFocus(rowCount - 1, this._keyboardFocusedCellIndex)
+                }
+                else if (event.metaKey || event.ctrlKey) {
+                    this._setKeyboardFocus(-1, this._keyboardFocusedCellIndex)
+                }
+                else if (event.altKey) {
+                    const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
+                    const prev = Math.max((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) - pageSize, -1)
+                    this._setKeyboardFocus(prev, this._keyboardFocusedCellIndex)
+                }
+                else if (this._keyboardFocusedRowIndex === 0) {
+                    this._setKeyboardFocus(-1, this._keyboardFocusedCellIndex)
+                }
+                else if (this._keyboardFocusedRowIndex > 0) {
+                    this._setKeyboardFocus(this._keyboardFocusedRowIndex - 1, this._keyboardFocusedCellIndex)
+                }
+            }
+            else if (event.key === "ArrowRight") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex !== undefined && this._columnCount > 0) {
+                    const nextCell = event.metaKey || event.ctrlKey
+                                     ? this._columnCount - 1
+                                     : Math.min(this._keyboardFocusedCellIndex + 1, this._columnCount - 1)
+                    this._setKeyboardFocus(this._keyboardFocusedRowIndex, nextCell)
+                }
+            }
+            else if (event.key === "ArrowLeft") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex !== undefined && this._columnCount > 0) {
+                    const prevCell = event.metaKey || event.ctrlKey
+                                     ? 0
+                                     : Math.max(this._keyboardFocusedCellIndex - 1, 0)
+                    this._setKeyboardFocus(this._keyboardFocusedRowIndex, prevCell)
+                }
+            }
+            else if (event.key === "Home") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex !== undefined) {
+                    this._setKeyboardFocus(this._keyboardFocusedRowIndex, 0)
+                }
+            }
+            else if (event.key === "End") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex !== undefined && this._columnCount > 0) {
+                    this._setKeyboardFocus(this._keyboardFocusedRowIndex, this._columnCount - 1)
+                }
+            }
+            else if (event.key === "PageDown") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex !== undefined) {
+                    const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
+                    const next = Math.min((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) + pageSize, rowCount - 1)
+                    this._setKeyboardFocus(next, this._keyboardFocusedCellIndex)
+                }
+            }
+            else if (event.key === "PageUp") {
+                event.preventDefault()
+                if (this._keyboardFocusedRowIndex !== undefined) {
+                    const pageSize = Math.max(1, Math.floor(this.bounds.height / (this._heightForAnyRow() || 50)))
+                    const prev = Math.max((this._keyboardFocusedRowIndex < 0 ? 0 : this._keyboardFocusedRowIndex) - pageSize, -1)
+                    this._setKeyboardFocus(prev, this._keyboardFocusedCellIndex)
+                }
+            }
+            else if (event.key === "Enter" || event.key === " ") {
+                if (this._keyboardFocusedRowIndex !== undefined && this._keyboardFocusedRowIndex >= 0) {
+                    event.preventDefault()
+                    this.keyboardDidActivateCell?.(this._keyboardFocusedRowIndex, this._keyboardFocusedCellIndex)
+                }
+            }
+            else if (event.key === "Escape") {
+                // Release focus from the table — move to next focusable element
+                this._clearKeyboardFocus()
+                this._keyboardListenerElement.blur()
+            }
+            
+        }
+        
+        // Listeners are attached in wasAddedToViewTree to guarantee they land
+        // on the final stable viewHTMLElement after the framework has fully
+        // initialised the view.
+        
+    }
+    
+    /**
+     * Move keyboard focus to a specific row and cell.
+     * rowIndex = -1 means the header row.
+     */
+    _setKeyboardFocus(rowIndex: number, cellIndex: number) {
+        
+        const previousRowIndex = this._keyboardFocusedRowIndex
+        const previousCellIndex = this._keyboardFocusedCellIndex
+        
+        // When moving to a different data row, land on the first button cell by default
+        if (rowIndex >= 0 && rowIndex !== previousRowIndex) {
+            const row = this.visibleRowWithIndex(rowIndex) as any
+            if (row && typeof row.firstButtonCellIndex === "function") {
+                cellIndex = row.firstButtonCellIndex()
+            }
+        }
+        
+        this._keyboardFocusedRowIndex = rowIndex
+        this._keyboardFocusedCellIndex = cellIndex
+        
+        // Clear highlight from old position
+        if (previousRowIndex !== undefined && previousRowIndex !== rowIndex) {
+            this._clearKeyboardFocusOnRow(previousRowIndex)
+        }
+        else if (previousRowIndex === rowIndex && previousCellIndex !== cellIndex) {
+            this._clearKeyboardFocusOnRow(rowIndex)
+        }
+        
+        // Scroll the focused row into view if it is a data row
+        if (rowIndex >= 0) {
+            this._scrollRowIntoView(rowIndex)
+        }
+        
+        // Apply highlight to new position
+        this._applyKeyboardFocusToVisibleRows()
+        
+        // Notify observers (CBDataView uses this to sync header highlight)
+        this.keyboardFocusDidChange?.(rowIndex, cellIndex)
+        
+    }
+    
+    _clearKeyboardFocus() {
+        const previous = this._keyboardFocusedRowIndex
+        this._keyboardFocusedRowIndex = undefined
+        if (previous !== undefined) {
+            this._clearKeyboardFocusOnRow(previous)
+        }
+        this.keyboardFocusDidChange?.(undefined, this._keyboardFocusedCellIndex)
+    }
+    
+    _clearKeyboardFocusOnRow(rowIndex: number) {
+        if (rowIndex === -1) {
+            // Header — notify via callback; CBDataView handles the header view
+            this.keyboardFocusDidChange?.(-1, -1)
+            return
+        }
+        const row = this.visibleRowWithIndex(rowIndex) as any
+        if (row && typeof row.setKeyboardFocusedCellIndex === "function") {
+            row.setKeyboardFocusedCellIndex(undefined)
+        }
+    }
+    
+    _applyKeyboardFocusToVisibleRows(clearAll = false) {
+        this._visibleRows.forEach((row: any) => {
+            if (typeof row.setKeyboardFocusedCellIndex !== "function") {
+                return
+            }
+            if (clearAll || row._UITableViewRowIndex !== this._keyboardFocusedRowIndex) {
+                row.setKeyboardFocusedCellIndex(undefined)
+            }
+            else {
+                row.setKeyboardFocusedCellIndex(this._keyboardFocusedCellIndex)
+            }
+        })
+    }
+    
+    _scrollRowIntoView(rowIndex: number) {
+        const position = this._rowPositionWithIndex(rowIndex)
+        if (!position) {
+            return
+        }
+        const offsetY = this.contentOffset.y
+        const visibleHeight = this.bounds.height
+        if (position.topY < offsetY) {
+            const duration = this.animationDuration
+            this.animationDuration = 0
+            this.contentOffset = this.contentOffset.pointWithY(position.topY)
+            this.animationDuration = duration
+        }
+        else if (position.bottomY > offsetY + visibleHeight) {
+            const duration = this.animationDuration
+            this.animationDuration = 0
+            this.contentOffset = this.contentOffset.pointWithY(position.bottomY - visibleHeight)
+            this.animationDuration = duration
+        }
+    }
+    
+    /** Expose so CBDataView can call it after loading data. */
+    focusRowAtIndex(rowIndex: number, cellIndex: number = 0) {
+        this._setKeyboardFocus(rowIndex, cellIndex)
+        this._keyboardListenerElement.focus({ preventScroll: true })
     }
     
     
@@ -161,6 +438,16 @@ export class UITableView extends UINativeScrollView {
             this._intersectionObserver.disconnect()
             this._intersectionObserver = undefined
         }
+    }
+    
+    override wasRemovedFromViewTree() {
+        super.wasRemovedFromViewTree()
+        this._cleanupViewportScrollListeners()
+        if (this._keydownHandler) {
+            this.viewHTMLElement.removeEventListener("keydown", this._keydownHandler)
+        }
+        // Reset so listeners are re-attached if added back to the tree
+        this._keyboardListenersAttached = false
     }
     
     
@@ -539,6 +826,12 @@ export class UITableView extends UINativeScrollView {
             const view: UITableViewRowView = this.viewForRowWithIndex(rowIndex)
             this._visibleRows.push(view)
             this.addSubview(view)
+            
+            // Ensure the row and all its children stay out of the natural tab order
+            view.tabIndex = -1
+            view.forEachViewInSubtree(subview => {
+                subview.tabIndex = -1
+            })
         })
         
         // 3. Clean up DOM
@@ -548,6 +841,9 @@ export class UITableView extends UINativeScrollView {
                 row.removeFromSuperview()
             }
         })
+        
+        // 4. Re-apply keyboard focus highlight after rows are re-rendered
+        this._applyKeyboardFocusToVisibleRows()
         
     }
     
@@ -686,13 +982,58 @@ export class UITableView extends UINativeScrollView {
         // Ensure listeners are set up
         this._setupViewportScrollAndResizeHandlersIfNeeded()
         
+        // Attach keyboard and pointer listeners now that the element is stable
+        // in the DOM. Guarded so repeated wasAddedToViewTree calls (e.g. after
+        // navigation returns) don't stack duplicate listeners.
+        if (!this._keyboardListenersAttached) {
+            this._keyboardListenersAttached = true
+            const el = this._keyboardListenerElement
+            
+            el.addEventListener("keydown", this._keydownHandler!)
+            
+            el.addEventListener("pointerdown", (event: PointerEvent) => {
+                let target = event.target as HTMLElement | null
+                while (target && target !== el) {
+                    const viewObject = (target as any).UIViewObject as UITableViewRowView | undefined
+                    if (viewObject?._UITableViewRowIndex !== undefined) {
+                        el.focus({ preventScroll: true })
+                        this._setKeyboardFocus(viewObject._UITableViewRowIndex, this._keyboardFocusedCellIndex)
+                        return
+                    }
+                    target = target.parentElement
+                }
+                el.focus({ preventScroll: true })
+            })
+            
+            el.addEventListener("focus", () => {
+                if (this._keyboardFocusedRowIndex === undefined && this.numberOfRows() > 0) {
+                    this._setKeyboardFocus(0, this._keyboardFocusedCellIndex)
+                }
+                else if (this._keyboardFocusedRowIndex !== undefined) {
+                    this._applyKeyboardFocusToVisibleRows()
+                }
+            })
+            
+            el.addEventListener("blur", (event: FocusEvent) => {
+                if (!el.contains(event.relatedTarget as Node)) {
+                    this._applyKeyboardFocusToVisibleRows(true)
+                }
+            })
+        }
+        
+        // Remove all subviews from the browser's natural tab order.
+        // The container (_keyboardListenerElement) is the single tab stop.
+        // Internal navigation is handled exclusively via arrow keys.
+        this.forEachViewInSubtree(view => {
+            if (view !== this) {
+                view.tabIndex = -1
+            }
+        })
+        // Re-assert tabIndex=0 on the listener element — wasAddedToViewTree fires
+        // on every tree insertion including navigation returns.
+        this._keyboardListenerElement.tabIndex = 0
+        
     }
-    
-    override wasRemovedFromViewTree() {
-        super.wasRemovedFromViewTree()
-        this._cleanupViewportScrollListeners()
-    }
-    
     override setFrame(rectangle: UIRectangle, zIndex?: number, performUncheckedLayout?: boolean) {
         
         const frame = this.frame
@@ -744,6 +1085,9 @@ export class UITableView extends UINativeScrollView {
                 
                 row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px"
                 row.style.left = "" + this.sidePadding.integerValue + "px"
+                
+                // Set aria-rowindex (1-based per ARIA spec)
+                row.viewHTMLElement.setAttribute("aria-rowindex", String((row._UITableViewRowIndex ?? 0) + 1))
                 
                 // This is to reorder the elements in the DOM
                 this.viewHTMLElement.appendChild(row.viewHTMLElement)

@@ -4074,7 +4074,7 @@ export class UIView extends UIObject {
             this.startVirtualLayout()
             let resultFrame: UIRectangle
             try {
-                this.frame = this.frame.rectangleWithHeight(constrainingHeight)
+                this.frame = this.frame.rectangleWithHeight(constrainingHeight).rectangleWithWidth(0)
                 this.layoutIfNeeded()
                 resultFrame = this._intrinsicFrameFromSubviewFrames()
             }

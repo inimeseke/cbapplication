@@ -897,12 +897,14 @@ export class UIRectangle extends UIObject {
      * @param views - Array of views to distribute
      * @param paddings - Padding between views (single value or array of values)
      * @param absoluteWidths - Optional fixed widths for views (overrides intrinsic width)
+     * @param centeredOnPosition - Horizontal alignment of the row within this rectangle: 0 = left (default), 0.5 = center, 1 = right
      * @returns Array of rectangles representing the frame for each view
      */
     framesByDistributingViewsAsRow(
         views: UIView[],
         paddings: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = 0,
-        absoluteWidths: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil
+        absoluteWidths: SizeNumberOrFunctionOrView | SizeNumberOrFunctionOrView[] = nil,
+        centeredOnPosition = 0
     ) {
         const frames: UIRectangle[] = []
         let currentRectangle = this.lazyCopy() // COW: Use lazyCopy
@@ -926,12 +928,19 @@ export class UIRectangle extends UIObject {
                 frame.width = absoluteWidths[i] as number
             }
             
-            views[i].frame = frame
             frames.push(frame)
             
             const padding = (paddings[i] || 0) as number
             currentRectangle = frame.rectangleForNextColumn(padding)
         }
+        
+        if (centeredOnPosition !== 0 && frames.length > 0) {
+            const rowWidth = frames.lastElement.max.x - frames.firstElement.x
+            const offset = (this.width - rowWidth) * centeredOnPosition - (frames.firstElement.x - this.x)
+            frames.forEach(frame => { frame.x += offset })
+        }
+        
+        frames.forEach((frame, index) => views[index].frame = frame)
         
         return frames
     }

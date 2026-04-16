@@ -14,6 +14,13 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     _strictSelection: boolean = NO
     _isValid: boolean = YES
     
+    /**
+     * When YES, the filter text is split on whitespace and all words must appear
+     * in the item label (AND logic). When NO (default), the full filter string is
+     * matched as a single substring.
+     */
+    usesMultiWordAndSearch: boolean = NO
+    
     
     static override controlEvent = Object.assign({}, UITextField.controlEvent, {
         "SelectionDidChange": "SelectionDidChange"
@@ -177,25 +184,51 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     
     // MARK: - Filtering
     
+    /**
+     * Splits the given lowercase-trimmed filter text into individual words when
+     * usesMultiWordAndSearch is YES, or returns it as a single-element array otherwise.
+     * Returns an empty array when the input is empty.
+     */
+    _filterWordsFromText(filterText: string): string[] {
+        if (filterText.length === 0) {
+            return []
+        }
+        if (this.usesMultiWordAndSearch) {
+            return filterText.split(/\s+/).filter(word => word.length > 0)
+        }
+        return [filterText]
+    }
+    
+    
+    /**
+     * Returns true when the given label (already lowercased) satisfies all filter
+     * words — i.e. every word appears somewhere in the label.
+     */
+    _labelMatchesFilterWords(label: string, filterWords: string[]): boolean {
+        return filterWords.every(word => label.includes(word))
+    }
+    
+    
     updateFilteredItems() {
         
-        const filterText = this.text.toLowerCase().trim()
+        const rawFilterText = this.text.toLowerCase().trim()
+        const filterWords = this._filterWordsFromText(rawFilterText)
         
         let filtered: UIAutocompleteItem<T>[]
         
-        if (filterText.length === 0) {
+        if (filterWords.length === 0) {
             filtered = this._autocompleteItems
         }
         else {
             filtered = this._autocompleteItems.filter(item =>
-                item.label.toLowerCase().includes(filterText)
+                this._labelMatchesFilterWords(item.label.toLowerCase(), filterWords)
             )
         }
         
         // If the only remaining result is an exact match for the current text,
         // the user has already made their selection — no need to show the dropdown.
         const isExactSingleMatch = filtered.length === 1 &&
-            filtered[0].label.toLowerCase() === filterText
+            filtered[0].label.toLowerCase() === rawFilterText
         
         this._dropdownView.filteredItems = isExactSingleMatch ? [] : filtered
         

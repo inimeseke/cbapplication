@@ -416,9 +416,13 @@ export class UITextView extends UIView {
                 (" (" + this.notificationAmount + ")").bold() + "</span>"
         }
         
-        if (this.textElementView.viewHTMLElement.innerHTML != this.textPrefix + text + this.textSuffix + notificationText) {
+        const displayText = this.thousandsSeparator !== null
+                            ? UITextView.applyThousandsSeparatorToNumericalString(text, this.thousandsSeparator)
+                            : text
+        
+        if (this.textElementView.viewHTMLElement.innerHTML != this.textPrefix + displayText + this.textSuffix + notificationText) {
             this.textElementView.viewHTMLElement.innerHTML = this.textPrefix + FIRST(
-                text, "") + this.textSuffix + notificationText
+                displayText, "") + this.textSuffix + notificationText
         }
         
         if (this.changesOften) {
@@ -433,6 +437,45 @@ export class UITextView extends UIView {
         this.clearIntrinsicSizeCache()
         
         this.setNeedsLayout()
+    }
+    
+    
+    /**
+     * Formats a raw number string by inserting `separator` every three digits
+     * in the integer part. Handles negative numbers and decimals (machine locale
+     * "." as decimal point). Non-numeric strings are returned unchanged.
+     */
+    static applyThousandsSeparatorToNumericalString(value: string, separator: string): string {
+        const trimmed = (value || "").trim()
+        if (trimmed === "") {
+            return value
+        }
+        
+        // Split on the decimal point (machine locale uses ".")
+        const parts = trimmed.split(".")
+        const integerPart = parts[0]
+        const decimalPart = parts.length > 1 ? parts[1] : null
+        
+        // Only format if the integer part consists solely of digits (optionally
+        // prefixed with a minus sign). Non-numeric strings pass through as-is.
+        if (!/^-?\d+$/.test(integerPart)) {
+            return value
+        }
+        
+        const isNegative = integerPart.startsWith("-")
+        const digits = isNegative ? integerPart.slice(1) : integerPart
+        
+        let formatted = ""
+        const offset = digits.length % 3
+        for (let index = 0; index < digits.length; index++) {
+            if (index > 0 && (index - offset) % 3 === 0) {
+                formatted += separator
+            }
+            formatted += digits[index]
+        }
+        
+        const result = (isNegative ? "-" : "") + formatted
+        return decimalPart !== null ? result + "." + decimalPart : result
     }
     
     override set innerHTML(innerHTML: string) {
@@ -584,6 +627,16 @@ export class UITextView extends UIView {
     textPrefix = ""
     textSuffix = ""
     _notificationAmount = 0
+    
+    _thousandsSeparator: string | null = null
+    
+    get thousandsSeparator(): string | null {
+        return this._thousandsSeparator
+    }
+    
+    set thousandsSeparator(value: string | null) {
+        this._thousandsSeparator = value
+    }
     
     //#endregion
     

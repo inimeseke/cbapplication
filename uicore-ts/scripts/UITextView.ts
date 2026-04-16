@@ -166,6 +166,16 @@ export class UITextView extends UIView {
         super.willMoveToSuperview(superview)
     }
     
+    override documentFontsDidLoad() {
+        super.documentFontsDidLoad()
+        this._invalidateFontCache()
+        this.invalidateMeasurementStrategy()
+        this._intrinsicHeightCache = new UIObject() as any
+        this._intrinsicWidthCache = new UIObject() as any
+        UITextView._intrinsicHeightCache = new UIObject() as any
+        UITextView._intrinsicWidthCache = new UIObject() as any
+    }
+    
     override layoutSubviews() {
         super.layoutSubviews()
         
@@ -213,6 +223,8 @@ export class UITextView extends UIView {
         const fontSizeStr = computed.fontSize
         const fontSize = parseFloat(fontSizeStr)
         
+        console.log(computed.letterSpacing)
+        
         if (!fontSize || isNaN(fontSize)) {
             return null
         }
@@ -239,7 +251,9 @@ export class UITextView extends UIView {
             paddingLeft: parseFloat(computed.paddingLeft) || 0,
             paddingRight: parseFloat(computed.paddingRight) || 0,
             paddingTop: parseFloat(computed.paddingTop) || 0,
-            paddingBottom: parseFloat(computed.paddingBottom) || 0
+            paddingBottom: parseFloat(computed.paddingBottom) || 0,
+            letterSpacing: parseFloat(computed.letterSpacing) || 0,
+            textTransform: computed.textTransform || "none"
         }
         
         return this._cachedMeasurementStyles
@@ -272,7 +286,21 @@ export class UITextView extends UIView {
         
         const hasComplexHTML = /<(?!\/?(b|i|em|strong|span|br)\b)[^>]+>/i.test(content)
         
-        return !hasComplexHTML
+        if (hasComplexHTML) {
+            return false
+        }
+        
+        // Canvas measureText silently falls back to the system font when the
+        // custom font hasn't been loaded into the canvas font system yet, even
+        // if getComputedStyle already reports the correct font family. Guard
+        // against this by checking the font is confirmed available before
+        // trusting canvas-based measurement.
+        const styles = this._getMeasurementStyles()
+        if (styles && !document.fonts.check(styles.font)) {
+            return false
+        }
+        
+        return true
     }
     
     //#endregion

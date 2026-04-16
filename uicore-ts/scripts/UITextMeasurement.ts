@@ -9,6 +9,8 @@ export interface TextMeasurementStyle {
     paddingRight: number;
     paddingTop: number;
     paddingBottom: number;
+    letterSpacing: number;
+    textTransform: string;
 }
 
 export class UITextMeasurement {
@@ -158,6 +160,8 @@ export class UITextMeasurement {
         measureEl.style.lineHeight = styles.lineHeight + 'px';
         measureEl.style.whiteSpace = styles.whiteSpace;
         measureEl.style.padding = `${styles.paddingTop}px ${styles.paddingRight}px ${styles.paddingBottom}px ${styles.paddingLeft}px`;
+        measureEl.style.letterSpacing = styles.letterSpacing ? styles.letterSpacing + 'px' : '';
+        measureEl.style.textTransform = styles.textTransform || '';
         
         // Set constraints
         if (constrainingWidth) {
@@ -231,7 +235,9 @@ export class UITextMeasurement {
             paddingLeft: parseFloat(computed.paddingLeft) || 0,
             paddingRight: parseFloat(computed.paddingRight) || 0,
             paddingTop: parseFloat(computed.paddingTop) || 0,
-            paddingBottom: parseFloat(computed.paddingBottom) || 0
+            paddingBottom: parseFloat(computed.paddingBottom) || 0,
+            letterSpacing: parseFloat(computed.letterSpacing) || 0,
+            textTransform: computed.textTransform || 'none'
         };
         
         this.globalStyleCache.set(cacheKey, styles);
@@ -241,6 +247,15 @@ export class UITextMeasurement {
     /**
      * Parse line height from computed style
      */
+    private static applyTextTransform(text: string, transform: string): string {
+        switch (transform) {
+            case 'uppercase': return text.toUpperCase();
+            case 'lowercase': return text.toLowerCase();
+            case 'capitalize': return text.replace(/\b\w/g, c => c.toUpperCase());
+            default: return text;
+        }
+    }
+    
     private static parseLineHeight(lineHeight: string, fontSize: number): number {
         if (lineHeight === 'normal') {
             return fontSize * 1.2;
@@ -261,10 +276,30 @@ export class UITextMeasurement {
     /**
      * Measure text width using Canvas API
      */
-    static measureTextWidth(text: string, font: string): number {
+        // Tracks fonts we have already requested loading for, to avoid redundant calls.
+    private static _fontsLoadingSet = new Set<string>()
+    
+    static measureTextWidth(text: string, font: string, letterSpacing: number = 0): number {
         const ctx = this.getContext();
         ctx.font = font;
-        return ctx.measureText(text).width;
+        // After assigning ctx.font, the browser normalises it. If the result
+        // doesn't contain the requested family the font hasn't been loaded into
+        // the canvas font system yet and measureText will use the fallback.
+        // Request an explicit load so the documentFontsDidLoad re-layout will
+        // have the correct font, and return NaN to signal the caller to fall
+        // back to a layout-triggered retry rather than caching a wrong value.
+        if (!ctx.font.includes(font.split(",")[0].split(" ").pop()!.trim())) {
+            if (!this._fontsLoadingSet.has(font)) {
+                this._fontsLoadingSet.add(font)
+                document.fonts.load(font).then(() => {
+                    this._fontsLoadingSet.delete(font)
+                })
+            }
+            return NaN;
+        }
+        const baseWidth = ctx.measureText(text).width;
+        // Canvas measureText does not apply letter-spacing; add it manually.
+        return baseWidth + letterSpacing * text.length;
     }
     
     /**
@@ -275,7 +310,7 @@ export class UITextMeasurement {
         maxWidth: number,
         font: string,
         whiteSpace: string
-    ): string[] {
+    ): string[] | null {
         // No wrapping needed
         if (whiteSpace === 'nowrap' || whiteSpace === 'pre') {
             return [text];
@@ -283,6 +318,10 @@ export class UITextMeasurement {
         
         const ctx = this.getContext();
         ctx.font = font;
+        // If the font fell back, signal the caller to not cache the result.
+        if (!ctx.font.includes(font.split(",")[0].split(" ").pop()!.trim())) {
+            return null;
+        }
         
         const lines: string[] = [];
         const paragraphs = text.split('\n');
@@ -435,31 +474,48 @@ export class UITextMeasurement {
         let width: number;
         let height: number;
         
+        // Apply text-transform before measuring, matching what the browser renders
+        const transformedText = this.applyTextTransform(text, styles.textTransform);
+        
         if (styles.whiteSpace === 'nowrap' || styles.whiteSpace === 'pre' || !constrainingWidth) {
             // Single line or no width constraint
-            width = this.measureTextWidth(text, styles.font) + styles.paddingLeft + styles.paddingRight;
+            width = this.measureTextWidth(transformedText, styles.font, styles.letterSpacing) + styles.paddingLeft + styles.paddingRight;
             height = styles.lineHeight + styles.paddingTop + styles.paddingBottom;
         } else {
             // Multi-line text
-            const lines = this.wrapText(text, availableWidth, styles.font, styles.whiteSpace);
+            const lines = this.wrapText(transformedText, availableWidth, styles.font, styles.whiteSpace);
+            
+            // null means the font wasn't loaded into the canvas yet
+            if (!lines) {
+                return { width: NaN, height: NaN };
+            }
             
             // Find the widest line
             width = Math.max(
-                ...lines.map(line => this.measureTextWidth(line, styles.font))
+                ...lines.map(line => this.measureTextWidth(line, styles.font, styles.letterSpacing))
             ) + styles.paddingLeft + styles.paddingRight;
             
             height = (lines.length * styles.lineHeight) + styles.paddingTop + styles.paddingBottom;
         }
         
+        // NaN means the canvas font wasn't loaded yet. Propagate NaN upward so
+        // the caller knows not to cache this result. The documentFontsDidLoad
+        // hook will trigger a re-layout once the font is available.
         return { width, height };
     }
     
     /**
-     * Clear all caches (call when fonts change or for cleanup)
+     * Clear all caches (call when fonts change or for cleanup).
+     * Also resets the canvas context so the next measureText call forces the
+     * browser to re-resolve the font string against the now-loaded FontFace set.
+     * Without this, ctx.font may silently fall back to the system font even
+     * though getComputedStyle already reports the correct custom font.
      */
     static clearCaches(): void {
         this.globalStyleCache.clear();
         this.elementToCacheKey = new WeakMap();
+        this.context = null;
+        this.canvas = null;
     }
     
     /**

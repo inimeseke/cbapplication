@@ -22,6 +22,7 @@ import {
 } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
+import { UITextMeasurement } from "./UITextMeasurement"
 import { UIViewController } from "./UIViewController"
 
 
@@ -247,6 +248,34 @@ export class UIView extends UIObject {
     static _pageScale = 1
     _scale: number = 1
     isInternalScaling: boolean = YES
+    // When the page's fonts finish loading the browser's glyph metrics change,
+    // making all previously cached text measurements stale. We hook the native
+    // FontFaceSet.ready promise once at class-load time. When it fires we:
+    //   1. Clear all UITextMeasurement style caches (stale fallback-font metrics)
+    //   2. Clear every view's intrinsic size cache and frame cache
+    //   3. Force a full re-layout, mirroring what the window resize handler does
+    // document.fonts.ready resolves once all fonts have loaded, but the browser
+    // may not yet have applied the new glyphs to rendered elements at that point.
+    // A requestAnimationFrame defers the cache-bust and re-layout by one paint
+    // cycle, ensuring getComputedStyle and the canvas measurer see real metrics.
+    static _fontReadyHook = (() => {
+        document.fonts.ready.then(() => {
+            requestAnimationFrame(() => {
+                UITextMeasurement.clearCaches()
+                const rootView = UICore.main?.rootViewController?.view
+                if (!rootView) { return }
+                rootView.forEachViewInSubtree(view => {
+                    view.clearIntrinsicSizeCache()
+                    view._frameCache = undefined
+                    view.documentFontsDidLoad()
+                    view.setNeedsLayout()
+                })
+                UIView.layoutViewsIfNeeded()
+            })
+        })
+        return YES
+    })()
+    
     static resizeObserver = new ResizeObserver((entries, observer) => {
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i]
@@ -2442,6 +2471,12 @@ export class UIView extends UIObject {
             this._annotatePathOnViewHTMLElement()
         }
         /// #endif
+        
+    }
+    
+    documentFontsDidLoad() {
+        
+        // Override in subclasses to respond to the page fonts finishing loading.
         
     }
     

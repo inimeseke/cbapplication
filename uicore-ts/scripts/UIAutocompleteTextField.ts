@@ -209,6 +209,89 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     }
     
     
+    /**
+     * Returns true when the character immediately before `position` in `label`
+     * is a word separator (or the position is at the start of the string).
+     * Used to give a bonus to matches that start at a word boundary.
+     */
+    _isWordBoundary(label: string, position: number): boolean {
+        if (position === 0) {
+            return YES
+        }
+        const charBefore = label[position - 1]
+        return " -/\\|._,;:()[]".includes(charBefore)
+    }
+    
+    
+    /**
+     * Scores a label against the filter words. Lower score = better match.
+     *
+     * Scoring factors (in priority order):
+     *   1. Non-sequential penalty — words must appear in typed order to avoid
+     *      a large penalty that pushes them below all sequential matches.
+     *   2. Per-word boundary score — for each filter word, a mid-word match
+     *      scores worse than a word-boundary match. The sum across all words
+     *      determines the boundary tier.
+     *   3. Position of the first matched word — within the same boundary tier,
+     *      earlier appearances rank higher.
+     *   4. Total label length — shorter labels are more specific (tiebreaker).
+     *
+     * Example: query "põ pu"
+     *   "Põhjavee puhastusvahendid"   → "põ" at boundary(0), "pu" at boundary(9) → low boundary score
+     *   "põrandapuhastusvahendid"     → "põ" at boundary(0), "pu" mid-word(7)    → higher boundary score
+     *   → "Põhjavee puhastusvahendid" ranks first.
+     */
+    _scoreLabel(label: string, filterWords: string[]): number {
+        
+        if (filterWords.length === 0) {
+            return label.length
+        }
+        
+        // --- Sequential check ---
+        // Scan left-to-right; if all words appear in order record the positions.
+        let cursor = 0
+        let isSequential = YES
+        const sequentialPositions: number[] = []
+        for (const word of filterWords) {
+            const position = label.indexOf(word, cursor)
+            if (position === -1) {
+                isSequential = NO
+                break
+            }
+            sequentialPositions.push(position)
+            cursor = position + word.length
+        }
+        
+        // --- Boundary score ---
+        // For each filter word find its best (leftmost) match and check whether
+        // it lands on a word boundary. Non-boundary matches incur a per-word
+        // penalty of 1, so the boundary score is 0..filterWords.length.
+        let boundaryScore = 0
+        for (const word of filterWords) {
+            const position = label.indexOf(word)
+            if (position !== -1 && !this._isWordBoundary(label, position)) {
+                boundaryScore += 1
+            }
+        }
+        
+        // Position of the first word's earliest match.
+        const firstMatchPosition = label.indexOf(filterWords[0])
+        
+        // Compose score — each tier must not overflow into the next:
+        //   Non-sequential penalty : 10 000 000  (dominates everything)
+        //   Boundary score         :     10 000  (per word, max ~10 words → 100 000 max, safe)
+        //   First-match position   :        100  (labels rarely exceed 200 chars)
+        //   Label length           :          1  (tiebreaker)
+        const sequentialPenalty = isSequential ? 0 : 10_000_000
+        
+        return sequentialPenalty +
+            boundaryScore * 10_000 +
+            firstMatchPosition * 100 +
+            label.length
+        
+    }
+    
+    
     updateFilteredItems() {
         
         const rawFilterText = this.text.toLowerCase().trim()
@@ -220,9 +303,11 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
             filtered = this._autocompleteItems
         }
         else {
-            filtered = this._autocompleteItems.filter(item =>
-                this._labelMatchesFilterWords(item.label.toLowerCase(), filterWords)
-            )
+            filtered = this._autocompleteItems
+                .filter(item => this._labelMatchesFilterWords(item.label.toLowerCase(), filterWords))
+                .map((item, originalIndex) => ({ item, originalIndex, score: this._scoreLabel(item.label.toLowerCase(), filterWords) }))
+                .sort((a, b) => a.score - b.score || a.originalIndex - b.originalIndex)
+                .map(({ item }) => item)
         }
         
         // If the only remaining result is an exact match for the current text,
@@ -230,6 +315,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         const isExactSingleMatch = filtered.length === 1 &&
             filtered[0].label.toLowerCase() === rawFilterText
         
+        this._dropdownView.filterWords = filterWords
         this._dropdownView.filteredItems = isExactSingleMatch ? [] : filtered
         
         if (this._dropdownView.filteredItems.length > 0) {
@@ -252,6 +338,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         }
         
         this._isDropdownOpen = YES
+        this._dropdownView.filterWords = []
         this.updateFilteredItems()
         this._dropdownView.showAnchoredToView(this)
         

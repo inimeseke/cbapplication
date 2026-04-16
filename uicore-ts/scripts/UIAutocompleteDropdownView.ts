@@ -14,6 +14,7 @@ export class UIAutocompleteDropdownView<T> extends UIView {
     _fullHeightView: UIView
     
     _filteredItems: UIAutocompleteItem<T>[] = []
+    _filterWords: string[] = []
     _highlightedRowIndex: number = -1
     _rowHeight: number = 36
     _maxVisibleRows: number = 8
@@ -76,6 +77,8 @@ export class UIAutocompleteDropdownView<T> extends UIView {
         if (IS(item)) {
             row.item = item
         }
+        
+        row.filterWords = this._filterWords
         
         // Reflect current keyboard highlight state via the native selected flag.
         row.selected = (index === this._highlightedRowIndex)
@@ -191,6 +194,16 @@ export class UIAutocompleteDropdownView<T> extends UIView {
     
     get filteredItems(): UIAutocompleteItem<T>[] {
         return this._filteredItems
+    }
+    
+    
+    set filterWords(words: string[]) {
+        this._filterWords = words
+        this.tableView.reloadData()
+    }
+    
+    get filterWords(): string[] {
+        return this._filterWords
     }
     
     

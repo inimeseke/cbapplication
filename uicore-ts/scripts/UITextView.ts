@@ -176,6 +176,7 @@ export class UITextView extends UIView {
         UITextView._intrinsicWidthCache = new UIObject() as any
     }
     
+    
     override layoutSubviews() {
         super.layoutSubviews()
         
@@ -222,8 +223,6 @@ export class UITextView extends UIView {
         const computed = window.getComputedStyle(this.textElementView.viewHTMLElement)
         const fontSizeStr = computed.fontSize
         const fontSize = parseFloat(fontSizeStr)
-        
-        console.log(computed.letterSpacing)
         
         if (!fontSize || isNaN(fontSize)) {
             return null
@@ -728,7 +727,7 @@ export class UITextView extends UIView {
                 if (styles) {
                     const size = UITextMeasurement.calculateTextSize(
                         this.textElementView.viewHTMLElement,
-                        this.text || this.textElementView.innerHTML,
+                        ((this.text || this.textElementView.innerHTML || "") + "").replace(/<br\s*\/?>/gi, "\n"),
                         constrainingWidth || undefined,
                         undefined,
                         styles
@@ -781,7 +780,7 @@ export class UITextView extends UIView {
                 if (styles) {
                     const size = UITextMeasurement.calculateTextSize(
                         this.textElementView.viewHTMLElement,
-                        this.text || this.textElementView.innerHTML,
+                        ((this.text || this.textElementView.innerHTML || "") + "").replace(/<br\s*\/?>/gi, "\n"),
                         undefined,
                         constrainingHeight || undefined,
                         styles

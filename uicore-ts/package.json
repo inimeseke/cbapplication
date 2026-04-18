@@ -31,6 +31,14 @@
     "url": "https://github.com/inimeseke/UICore-TS/issues"
   },
   "homepage": "https://github.com/inimeseke/UICore-TS",
+  "peerDependencies": {
+    "@chenglou/pretext": "^0.0.5"
+  },
+  "peerDependenciesMeta": {
+    "@chenglou/pretext": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",

@@ -174,6 +174,11 @@ export class UITableView extends UINativeScrollView {
                 return
             }
             
+            const target = event.target as HTMLElement
+            if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+                return
+            }
+            
             const rowCount = this.numberOfRows()
             const hasHeader = this._keyboardFocusedRowIndex !== undefined
             
@@ -1000,15 +1005,19 @@ export class UITableView extends UINativeScrollView {
             el.addEventListener("keydown", this._keydownHandler!)
             
             el.addEventListener("pointerdown", (event: PointerEvent) => {
-                let target = event.target as HTMLElement | null
-                while (target && target !== el) {
-                    const viewObject = (target as any).UIViewObject as UITableViewRowView | undefined
+                const target = event.target as HTMLElement | null
+                if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") {
+                    return
+                }
+                let walkedTarget = target
+                while (walkedTarget && walkedTarget !== el) {
+                    const viewObject = (walkedTarget as any).UIViewObject as UITableViewRowView | undefined
                     if (viewObject?._UITableViewRowIndex !== undefined) {
                         el.focus({ preventScroll: true })
                         this._setKeyboardFocus(viewObject._UITableViewRowIndex, this._keyboardFocusedCellIndex)
                         return
                     }
-                    target = target.parentElement
+                    walkedTarget = walkedTarget.parentElement
                 }
                 el.focus({ preventScroll: true })
             })
@@ -1082,26 +1091,36 @@ export class UITableView extends UINativeScrollView {
         
         const bounds = this.bounds
         
-        this._visibleRows.sort((rowA, rowB) => rowA._UITableViewRowIndex! - rowB._UITableViewRowIndex!)
-            .forEach(row => {
-                
-                const frame = bounds.copy()
-                
-                const positionObject = this._rowPositionWithIndex(row._UITableViewRowIndex!, positions)
-                frame.min.y = positionObject.topY
-                frame.max.y = positionObject.bottomY
-                row.frame = frame
-                
-                row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px"
-                row.style.left = "" + this.sidePadding.integerValue + "px"
-                
-                // Set aria-rowindex (1-based per ARIA spec)
-                row.viewHTMLElement.setAttribute("aria-rowindex", String((row._UITableViewRowIndex ?? 0) + 1))
-                
-                // This is to reorder the elements in the DOM
-                this.viewHTMLElement.appendChild(row.viewHTMLElement)
-                
-            })
+        const sortedRows = this._visibleRows.sort(
+            (rowA, rowB) => rowA._UITableViewRowIndex! - rowB._UITableViewRowIndex!
+        )
+        
+        sortedRows.forEach((row, i) => {
+            
+            const frame = bounds.copy()
+            
+            const positionObject = this._rowPositionWithIndex(row._UITableViewRowIndex!, positions)
+            frame.min.y = positionObject.topY
+            frame.max.y = positionObject.bottomY
+            row.frame = frame
+            
+            row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px"
+            row.style.left = "" + this.sidePadding.integerValue + "px"
+            
+            // Set aria-rowindex (1-based per ARIA spec)
+            row.viewHTMLElement.setAttribute("aria-rowindex", String((row._UITableViewRowIndex ?? 0) + 1))
+            
+            // Insert before the correct next sibling so DOM order always matches
+            // row index order. The nextSibling check makes this a no-op when the
+            // element is already in the right position, avoiding unnecessary DOM
+            // mutations and the focus loss that appendChild causes.
+            const nextSiblingElement = sortedRows[i + 1]?.viewHTMLElement
+                ?? this._fullHeightView.viewHTMLElement
+            if (row.viewHTMLElement.nextSibling !== nextSiblingElement) {
+                this.viewHTMLElement.insertBefore(row.viewHTMLElement, nextSiblingElement)
+            }
+            
+        })
         
         // Use _rowPositionWithIndex rather than positions.lastElement.
         // When allRowsHaveEqualHeight = YES, _rowPositions contains only a single

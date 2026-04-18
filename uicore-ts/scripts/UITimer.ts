@@ -12,29 +12,32 @@ export class UITimer {
     
     constructor(public interval: number, public repeats: boolean, public target: Function) {
         
-        this.schedule()
+        this._schedule()
         
     }
     
     
-    schedule() {
-    
-        const callback = () => {
-            if (this.repeats == NO) {
-                this.invalidate()
-            }
-            this.target()
+    _schedule() {
+        
+        if (this.repeats) {
+            this._intervalID = window.setInterval(() => {
+                this.target()
+            }, this.interval * 1000)
         }
-    
-        this._intervalID = window.setInterval(callback, this.interval * 1000)
-    
+        else {
+            this._intervalID = window.setTimeout(() => {
+                this.isValid = NO
+                this.target()
+            }, this.interval * 1000)
+        }
+        
     }
     
     
     reschedule() {
         
         this.invalidate()
-        this.schedule()
+        this._schedule()
         
     }
     
@@ -43,9 +46,6 @@ export class UITimer {
         if (this.repeats == NO) {
             this.invalidate()
         }
-        else {
-            this.reschedule()
-        }
         this.target()
     }
     
@@ -53,40 +53,18 @@ export class UITimer {
         
         if (this.isValid) {
             
-            clearInterval(this._intervalID)
+            if (this.repeats) {
+                clearInterval(this._intervalID)
+            }
+            else {
+                clearTimeout(this._intervalID)
+            }
             
             this.isValid = NO
             
         }
         
-        
     }
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

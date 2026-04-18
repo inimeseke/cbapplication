@@ -327,8 +327,8 @@ export class UIButton extends UIBaseButton {
             this.titleLabel.style.right = this.contentPadding + "px"
             // this.titleLabel.style.marginLeft = ""
             // this.titleLabel.style.right = this.contentPadding
-            this.titleLabel.style.top = "50%"
-            this.titleLabel.style.transform = "translateY(-50%)"
+            this.titleLabel.style.bottom = "0px"
+            this.titleLabel.style.top = "0px"
             this.titleLabel.frame = new UIRectangle(nil, nil, nil, nil)
             
             if (this.usesAutomaticTitleFontSize) {
@@ -372,8 +372,8 @@ export class UIButton extends UIBaseButton {
             
             this.titleLabel.style.left = imageFrame.max.x + this.contentPadding + "px"
             this.titleLabel.style.right = this.contentPadding + "px"
-            this.titleLabel.style.top = "50%"
-            this.titleLabel.style.transform = "translateY(-50%)"
+            this.titleLabel.style.bottom = "0px"
+            this.titleLabel.style.top = "0px"
             
             if (this.usesAutomaticTitleFontSize) {
                 

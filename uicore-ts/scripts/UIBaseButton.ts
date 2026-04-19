@@ -17,15 +17,15 @@ export class UIBaseButton extends UIView {
     
     
     constructor(elementID?: string, elementType?: string) {
-    
+        
         super(elementID, undefined, elementType)
-    
+        
         // Instance variables
-    
-    
+        
+        
         this._isPointerInside = NO
-    
-    
+        
+        
         const setHovered = () => {
             this.hovered = YES
         }
@@ -40,8 +40,8 @@ export class UIBaseButton extends UIView {
         this.addTargetForControlEvents([
             UIView.controlEvent.PointerLeave, UIView.controlEvent.PointerCancel, UIView.controlEvent.MultipleTouches
         ], setNotHovered)
-    
-    
+        
+        
         let highlightingTime: number
         const setHighlighted = () => {
             this.highlighted = YES
@@ -82,18 +82,18 @@ export class UIBaseButton extends UIView {
         this.addTargetForControlEvent(
             UIView.controlEvent.Focus,
             (sender: UIView, event: Event) => {
-        
+                
                 this.focused = YES
-        
+                
             }
         )
         
         this.addTargetForControlEvent(
             UIView.controlEvent.Blur,
             (sender: UIView, event: Event) => {
-        
+                
                 this.focused = NO
-        
+                
             }
         )
         
@@ -112,13 +112,13 @@ export class UIBaseButton extends UIView {
         this.addTargetForControlEvents([
             UIView.controlEvent.EnterDown, UIView.controlEvent.PointerUpInside
         ], () => {
-    
+            
             if (this.isToggleable) {
-        
+                
                 this.toggleSelectedState()
-        
+                
             }
-    
+            
         })
         
     }
@@ -167,7 +167,7 @@ export class UIBaseButton extends UIView {
     
     
     updateContentForCurrentState() {
-    
+        
         let updateFunction: Function = this.updateContentForNormalState
         if (this.selected && this.highlighted) {
             updateFunction = this.updateContentForSelectedAndHighlightedState
@@ -195,8 +195,8 @@ export class UIBaseButton extends UIView {
     }
     
     updateContentForNormalState() {
-        
-        
+    
+    
     }
     
     updateContentForHoveredState() {
@@ -212,13 +212,13 @@ export class UIBaseButton extends UIView {
     }
     
     updateContentForHighlightedState() {
-        
-        
+    
+    
     }
     
     updateContentForSelectedState() {
-        
-        
+    
+    
     }
     
     updateContentForSelectedAndHighlightedState() {
@@ -271,12 +271,16 @@ export class UIBaseButton extends UIView {
         if (event.name == UIView.broadcastEventName.PageDidScroll || event.name ==
             UIView.broadcastEventName.AddedToViewTree) {
             
-            this.hovered = NO
+            const wasHovered = this._hovered
+            const wasHighlighted = this._highlighted
             
-            this.highlighted = NO
-    
-            this.updateContentForCurrentState()
-    
+            this._hovered = NO
+            this._highlighted = NO
+            
+            if (wasHovered || wasHighlighted) {
+                this.updateContentForCurrentState()
+            }
+            
         }
         
         
@@ -408,96 +412,3 @@ export class UIBaseButton extends UIView {
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

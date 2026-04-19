@@ -188,7 +188,7 @@ export class UIView extends UIObject {
     _enabled: boolean = YES
     _frame?: UIRectangle & { zIndex?: number }
     _frameCache?: UIRectangle
-    _backgroundColor: UIColor = UIColor.transparentColor
+    _backgroundColor: UIColor = nil
     _colorStyleProxy?: ColorStyleProxy
     _liveCSSValues: Map<string, { keys: string[], producer: () => string }> = new Map()
     _liveCSSCallback: () => void = () => {
@@ -1546,6 +1546,21 @@ export class UIView extends UIObject {
     }
     
     set backgroundColor(backgroundColor: UIColor) {
+        const previous = this._backgroundColor
+        if (previous === backgroundColor) {
+            return
+        }
+        if (
+            previous?.semanticKey &&
+            previous.semanticKey === backgroundColor?.semanticKey &&
+            previous._semanticClass === backgroundColor?._semanticClass
+        ) {
+            return
+        }
+        if (!previous?.semanticKey && !backgroundColor?.semanticKey &&
+            previous?.stringValue === backgroundColor?.stringValue) {
+            return
+        }
         this._backgroundColor = backgroundColor
         this.colorStyleProxy.backgroundColor = backgroundColor
     }

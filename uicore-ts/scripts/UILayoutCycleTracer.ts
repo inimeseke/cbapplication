@@ -64,13 +64,15 @@ export class UILayoutCycleTracer {
         return UILayoutCycleTracer._isEnabled
     }
     
-    static enable() {
+    
+    static enable(reportThreshold: number = 1) {
         // Maximise the V8 stack trace depth so long chains are fully visible.
         // The default is 10 which truncates most interesting call stacks.
         ;(Error as any).stackTraceLimit = 100
+        UILayoutCycleTracer.reportThreshold = reportThreshold
         UILayoutCycleTracer._isEnabled = true
         console.log(
-            "%c[UILayoutCycleTracer] Layout cycle tracing ENABLED (Error.stackTraceLimit = 100)",
+            `%c[UILayoutCycleTracer] Layout cycle tracing ENABLED (threshold=${reportThreshold}, Error.stackTraceLimit=100)`,
             "color: #4CAF50; font-weight: bold"
         )
     }
@@ -102,7 +104,7 @@ export class UILayoutCycleTracer {
     static willBeginIteration(iteration: number) {
         if (!UILayoutCycleTracer._isEnabled) { return }
         UILayoutCycleTracer._currentIteration = iteration
-        if (iteration > 0) {
+        if (iteration > 0 && UILayoutCycleTracer._totalReportsThisPass > 0) {
             console.warn(
                 `%c[UILayoutCycleTracer] Layout pass iteration ${iteration + 1} — views were re-queued during the previous iteration`,
                 "color: #FF9800; font-weight: bold"
@@ -165,7 +167,7 @@ export class UILayoutCycleTracer {
         if (!UILayoutCycleTracer._isEnabled) { return }
         UILayoutCycleTracer._isPassActive = false
         
-        if (iterationCount > 1) {
+        if (iterationCount > 1 && UILayoutCycleTracer._totalReportsThisPass > 0) {
             console.warn(
                 `%c[UILayoutCycleTracer] Layout pass completed in ${iterationCount} iteration(s). ` +
                 `${UILayoutCycleTracer._totalReportsThisPass} cycle event(s) recorded.`,

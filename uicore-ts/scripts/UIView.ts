@@ -263,7 +263,9 @@ export class UIView extends UIObject {
             requestAnimationFrame(() => {
                 UITextMeasurement.clearCaches()
                 const rootView = UICore.main?.rootViewController?.view
-                if (!rootView) { return }
+                if (!rootView) {
+                    return
+                }
                 rootView.forEachViewInSubtree(view => {
                     view.clearIntrinsicSizeCache()
                     view._frameCache = undefined
@@ -2461,6 +2463,7 @@ export class UIView extends UIObject {
     _annotatePathOnViewHTMLElementsInSubtree() {
         this.forEachViewInSubtree(view => view._annotatePathOnViewHTMLElement())
     }
+    
     // Write the _path attribute on the viewHTMLElement to make it easier to debug in the element inspector
     _annotatePathOnViewHTMLElement() {
         try {
@@ -3549,6 +3552,13 @@ export class UIView extends UIObject {
             return YES
         }
         
+        function eventKeyIsSpace(event: { keyCode: number }) {
+            if (event.keyCode !== 32) {
+                return NO
+            }
+            return YES
+        }
+        
         function eventKeyIsTab(event: { keyCode: number }) {
             if (event.keyCode !== 9) {
                 return NO
@@ -3598,8 +3608,12 @@ export class UIView extends UIObject {
         
         const onKeyDown = (event: KeyboardEvent) => {
             
-            if (eventKeyIsEnter(event)) {
+            if (eventKeyIsEnter(event) || eventKeyIsSpace(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.EnterDown, event)
+                if (eventKeyIsSpace(
+                    event) && this._controlEventTargets.EnterDown && this._controlEventTargets.EnterDown.length) {
+                    pauseEvent(event, YES)
+                }
             }
             
             if (eventKeyIsEsc(event)) {

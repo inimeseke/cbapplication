@@ -43,11 +43,17 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         
         let textBeforeFocus = this.text
         let itemBeforeFocus = this.selectedItem
-        // Open dropdown on focus
+        
+        // Open dropdown on focus.
+        // If a selection is already committed we keep the confirmed text visible
+        // and do not clear it — this covers Tab-into-field after a prior selection,
+        // as well as returning focus after commitSelection.
         this.controlEventTargetAccumulator.Focus = () => {
             textBeforeFocus = this.text
             itemBeforeFocus = this.selectedItem
-            this.text = ""
+            if (!this._selectedItem) {
+                this.text = ""
+            }
             this.openDropdown()
             this.textElementView.viewHTMLElement.select()
             const matchIndex = this._dropdownView.filteredItems.findIndex(
@@ -104,6 +110,20 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
             }
         })
         
+        // Tab: commit highlighted item if dropdown is open, then let focus move
+        // naturally to the next item in the managed sequence.
+        this.addTargetForControlEvent(UIView.controlEvent.TabDown, (sender, event) => {
+            if (this._isDropdownOpen) {
+                const highlightedItem = this._dropdownView.highlightedItem
+                if (IS(highlightedItem)) {
+                    this.commitSelection(highlightedItem)
+                }
+                else {
+                    this.closeDropdown()
+                }
+            }
+        })
+        
         // Escape: dismiss dropdown
         this.addTargetForControlEvent(UIView.controlEvent.EscDown, () => {
             if (this._isDropdownOpen) {
@@ -147,7 +167,9 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     
     commitSelection(item: UIAutocompleteItem<T>) {
         
-        this.blur()
+        // Set the selection state and close the dropdown without blurring.
+        // Keeping focus on this view means the next Tab press is handled by
+        // our TabDown handler rather than being picked up natively by the browser.
         this._selectedItem = item
         this.text = item.label
         this.closeDropdown()
@@ -429,4 +451,3 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     
     
 }
-

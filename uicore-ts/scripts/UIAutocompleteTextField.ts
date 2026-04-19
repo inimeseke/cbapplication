@@ -13,6 +13,13 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     _isDropdownOpen: boolean = NO
     _strictSelection: boolean = NO
     _isValid: boolean = YES
+    // Set to YES only when the user has explicitly interacted with the dropdown
+    // (typed text or navigated with arrow keys). Prevents Tab-to-focus from
+    // auto-committing the first item.
+    _userHasNavigatedDropdown: boolean = NO
+    // Set to YES while we are programmatically clearing the text field on focus
+    // so the TextChange handler does not treat it as a user-initiated change.
+    _isProgrammaticTextChange: boolean = NO
     
     /**
      * When YES, the filter text is split on whitespace and all words must appear
@@ -51,8 +58,11 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         this.controlEventTargetAccumulator.Focus = () => {
             textBeforeFocus = this.text
             itemBeforeFocus = this.selectedItem
+            this._userHasNavigatedDropdown = NO
             if (!this._selectedItem) {
+                this._isProgrammaticTextChange = YES
                 this.text = ""
+                this._isProgrammaticTextChange = NO
             }
             this.openDropdown()
             this.textElementView.viewHTMLElement.select()
@@ -72,6 +82,9 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         // Filter on text change
         this.addTargetForControlEvent(UITextField.controlEvent.TextChange, () => {
             this._selectedItem = undefined
+            if (!this._isProgrammaticTextChange) {
+                this._userHasNavigatedDropdown = this.text.length > 0
+            }
             this.updateFilteredItems()
             if (!this._isDropdownOpen) {
                 this.openDropdown()
@@ -85,6 +98,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
                 this.openDropdown()
                 return
             }
+            this._userHasNavigatedDropdown = YES
             const maxIndex = this._dropdownView.filteredItems.length - 1
             if (this._dropdownView.highlightedRowIndex < maxIndex) {
                 this._dropdownView.highlightedRowIndex = this._dropdownView.highlightedRowIndex + 1
@@ -94,6 +108,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         // Keyboard navigation: up arrow
         this.textElementView.addTargetForControlEvent(UIView.controlEvent.UpArrowDown, (sender, event) => {
             event.preventDefault()
+            this._userHasNavigatedDropdown = YES
             if (this._dropdownView.highlightedRowIndex > 0) {
                 this._dropdownView.highlightedRowIndex = this._dropdownView.highlightedRowIndex - 1
             }
@@ -110,12 +125,13 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
             }
         })
         
-        // Tab: commit highlighted item if dropdown is open, then let focus move
-        // naturally to the next item in the managed sequence.
+        // Tab: commit highlighted item only if the user has explicitly interacted
+        // with the dropdown (typed or used arrow keys). This prevents tabbing
+        // through the form from silently committing the first suggestion.
         this.addTargetForControlEvent(UIView.controlEvent.TabDown, (sender, event) => {
             if (this._isDropdownOpen) {
                 const highlightedItem = this._dropdownView.highlightedItem
-                if (IS(highlightedItem)) {
+                if (IS(highlightedItem) && this._userHasNavigatedDropdown) {
                     this.commitSelection(highlightedItem)
                 }
                 else {

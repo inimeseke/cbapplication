@@ -1981,11 +1981,16 @@ export class UIView extends UIObject {
             return
         }
         
+        window.UILayoutCycleTracer?.willBeginLayoutPass()
+        
         const maxIterations = 10
         let iteration = 0
         const layoutCounts = new Map<UIView, number>() // Track how many times each view has been laid out
         
         while (UIView._viewsToLayout.length > 0 && iteration < maxIterations) {
+            
+            window.UILayoutCycleTracer?.willBeginIteration(iteration)
+            
             const viewsToProcess = UIView._viewsToLayout
             UIView._viewsToLayout = []
             
@@ -2014,10 +2019,13 @@ export class UIView extends UIObject {
                 const view = sortedViews[i]
                 view.layoutIfNeeded()
                 layoutCounts.set(view, (layoutCounts.get(view) || 0) + 1)
+                window.UILayoutCycleTracer?.didLayoutView(view)
             }
             
             iteration++
         }
+        
+        window.UILayoutCycleTracer?.didFinishLayoutPass(iteration)
         
         // console.log(iteration + " iterations to finish layout")
         
@@ -2035,6 +2043,8 @@ export class UIView extends UIObject {
         this._shouldLayout = YES
         UIView._viewsToLayout.push(this)
         this.clearIntrinsicSizeCache()
+        
+        window.UILayoutCycleTracer?.viewDidCallSetNeedsLayout(this)
         
         // // Auto-propagate if intrinsic height changed
         // if (IS(this.superview) && this.superview.usesVirtualLayoutingForIntrinsicSizing) {

@@ -419,23 +419,23 @@ export class UITextView extends UIView {
                             ? UITextView.applyThousandsSeparatorToNumericalString(text, this.thousandsSeparator)
                             : text
         
-        if (this.textElementView.viewHTMLElement.innerHTML != this.textPrefix + displayText + this.textSuffix + notificationText) {
-            this.textElementView.viewHTMLElement.innerHTML = this.textPrefix + FIRST(
-                displayText, "") + this.textSuffix + notificationText
+        const newInnerHTML = this.textPrefix + FIRST(displayText, "") + this.textSuffix + notificationText
+        
+        if (this.textElementView.viewHTMLElement.innerHTML !== newInnerHTML) {
+            this.textElementView.viewHTMLElement.innerHTML = newInnerHTML
+            
+            if (this.changesOften) {
+                this._intrinsicHeightCache = new UIObject() as any
+                this._intrinsicWidthCache = new UIObject() as any
+            }
+            
+            this._useFastMeasurement = undefined
+            this._intrinsicSizesCache = {}
+            this.invalidateMeasurementStrategy()
+            this._invalidateMeasurementStyles()
+            this.clearIntrinsicSizeCache()
+            this.setNeedsLayout()
         }
-        
-        if (this.changesOften) {
-            this._intrinsicHeightCache = new UIObject() as any
-            this._intrinsicWidthCache = new UIObject() as any
-        }
-        
-        this._useFastMeasurement = undefined
-        this._intrinsicSizesCache = {}
-        this.invalidateMeasurementStrategy()
-        this._invalidateMeasurementStyles()
-        this.clearIntrinsicSizeCache()
-        
-        this.setNeedsLayout()
     }
     
     

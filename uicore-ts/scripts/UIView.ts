@@ -5,6 +5,7 @@ import { UICore } from "./UICore"
 import "./UICoreExtensions"
 import type { UIDialogView } from "./UIDialogView"
 import { UILocalizedTextObject } from "./UIInterfaces"
+import { UILayoutCycleTracer } from "./UILayoutCycleTracer"
 import {
     FIRST,
     FIRST_OR_NIL,
@@ -195,6 +196,22 @@ export class UIView extends UIObject {
         for (const [property, { producer }] of this._liveCSSValues) {
             (this.style as any)[property] = producer()
         }
+    }
+    
+    _overlayView?: UIView
+    get overlayView(): UIView | undefined {
+        return this._overlayView
+    }
+    
+    set overlayView(view: UIView) {
+        if (IS(view)) {
+            this.addSubview(view)
+        }
+        else {
+            this._overlayView?.removeFromSuperview()
+        }
+        this._overlayView = view
+        
     }
     
     _viewHTMLElement!: HTMLElement & LooseObject
@@ -389,6 +406,15 @@ export class UIView extends UIObject {
     usesVirtualLayoutingForIntrinsicSizing = YES
     
     _contentInsets = { top: 0, left: 0, bottom: 0, right: 0 }
+    
+    get contentInsets() {
+        return this._contentInsets
+    }
+    
+    set contentInsets(insets: { left: number, right: number, bottom: number, top: number }) {
+        this._contentInsets = insets
+        this.setNeedsLayout()
+    }
     
     
     constructor(
@@ -1223,6 +1249,10 @@ export class UIView extends UIObject {
         
         const frame: (UIRectangle & { zIndex?: number }) = this._frame || new UIRectangle(nil, nil, nil, nil) as any
         
+        if (!rectangle) {
+            return
+        }
+        
         rectangle.materialize()
         
         if (zIndex != undefined) {
@@ -1256,7 +1286,9 @@ export class UIView extends UIObject {
             )
         }
         
-        if (frame.height != rectangle.height || frame.width != rectangle.width || performUncheckedLayout) {
+        const haveBoundsChanged = (frame.height.integerValue != rectangle.height.integerValue) ||
+            (frame.width.integerValue != rectangle.width.integerValue)
+        if (haveBoundsChanged || performUncheckedLayout) {
             this.setNeedsLayout()
             this.boundsDidChange(this.bounds)
         }
@@ -1909,7 +1941,7 @@ export class UIView extends UIObject {
             
         }
         
-        let parentUIView = nil
+        let parentUIView: UIView = nil
         
         if (parentElement.UIView) {
             parentUIView = parentElement.UIView
@@ -2020,6 +2052,7 @@ export class UIView extends UIObject {
                 // Skip if this view has been laid out too many times (cycle detection)
                 if (layoutCount >= 5) {
                     console.warn("View layout cycle detected:", view)
+                    UILayoutCycleTracer.printViewReport(view)
                     continue
                 }
                 
@@ -2098,6 +2131,10 @@ export class UIView extends UIObject {
         
         try {
             
+            if (this.bounds.width < 0) {
+                return
+            }
+            
             this.layoutSubviews()
             
         }
@@ -2109,6 +2146,7 @@ export class UIView extends UIObject {
         
     }
     
+    
     layoutSubviews() {
         
         this.willLayoutSubviews()
@@ -2118,7 +2156,7 @@ export class UIView extends UIObject {
         }
         
         // Autolayout
-        if (this.constraints.length) {
+        if (this.constraints?.length) {
             this._updateLayoutFunction = UIView.performAutoLayout(this.viewHTMLElement, null, this.constraints)
         }
         this._updateLayoutFunction?.()
@@ -2127,7 +2165,7 @@ export class UIView extends UIObject {
         
         this.applyClassesAndStyles()
         
-        for (let i = 0; i < this.subviews.length; i++) {
+        for (let i = 0; i < this.subviews?.length; i++) {
             
             const subview = this.subviews[i]
             subview.calculateAndSetViewFrame()
@@ -2139,6 +2177,10 @@ export class UIView extends UIObject {
         // }
         
         this.didLayoutSubviews()
+        
+        if (this._overlayView) {
+            this._overlayView.weakFrame = this.bounds
+        }
         
     }
     
@@ -2172,8 +2214,8 @@ export class UIView extends UIObject {
         // We read frame.height directly: it is already committed to _frame after a
         // real layout pass, so this is a free field read with zero reflow or
         // recomputation cost.
+        const currentHeight = this.frame.height.integerValue
         if (!this.isVirtualLayouting && IS(this.superview) && this.isMemberOfViewTree) {
-            const currentHeight = this.frame.height
             if (currentHeight !== this._lastReportedHeight) {
                 this._lastReportedHeight = currentHeight
                 this.superview.setNeedsLayout()
@@ -4030,6 +4072,9 @@ export class UIView extends UIObject {
     
     intrinsicContentSizeWithConstraints(constrainingHeight: number = 0, constrainingWidth: number = 0) {
         
+        constrainingWidth = Math.max(constrainingWidth, 0)
+        constrainingHeight = Math.max(constrainingHeight, 0)
+        
         const cacheKey = this._getIntrinsicSizeCacheKey(constrainingHeight, constrainingWidth)
         const cachedResult = this._getCachedIntrinsicSize(cacheKey)
         if (cachedResult) {
@@ -4054,8 +4099,8 @@ export class UIView extends UIObject {
         const height = this.style.height
         const width = this.style.width
         
-        this.style.height = "" + constrainingHeight
-        this.style.width = "" + constrainingWidth
+        this.style.height = "" + constrainingHeight + "px"
+        this.style.width = "" + constrainingWidth + "px"
         
         
         const left = this.style.left
@@ -4138,6 +4183,8 @@ export class UIView extends UIObject {
     
     intrinsicContentWidth(constrainingHeight: number = 0): number {
         
+        constrainingHeight = Math.max(constrainingHeight, 0)
+        
         const cacheKey = this._getIntrinsicSizeCacheKey(constrainingHeight, 0)
         const cached = this._getCachedIntrinsicSize(cacheKey)
         if (cached) {
@@ -4167,6 +4214,8 @@ export class UIView extends UIObject {
     
     
     intrinsicContentHeight(constrainingWidth: number = 0): number {
+        
+        constrainingWidth = Math.max(constrainingWidth, 0)
         
         const cacheKey = this._getIntrinsicSizeCacheKey(0, constrainingWidth)
         const cached = this._getCachedIntrinsicSize(cacheKey)

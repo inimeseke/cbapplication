@@ -283,7 +283,7 @@ export class UITextView extends UIView {
             return false
         }
         
-        const hasComplexHTML = /<(?!\/?(b|i|em|strong|span|br)\b)[^>]+>/i.test(content)
+        const hasComplexHTML = /<(?!\/?(b|i|em|strong|span)\b)[^>]+>/i.test(content)
         
         if (hasComplexHTML) {
             return false
@@ -704,6 +704,8 @@ export class UITextView extends UIView {
     
     override intrinsicContentHeight(constrainingWidth = 0) {
         
+        constrainingWidth = Math.max(constrainingWidth.integerValue, 0)
+        
         const keyPath = ((this.textElementView.viewHTMLElement.innerHTML || this.text) + "_csf_" + this._getFontCacheKey()) + "." +
             ("" + constrainingWidth).replace(new RegExp("\\.", "g"), "_")
         
@@ -727,7 +729,7 @@ export class UITextView extends UIView {
                 if (styles) {
                     const size = UITextMeasurement.calculateTextSize(
                         this.textElementView.viewHTMLElement,
-                        ((this.text || this.textElementView.innerHTML || "") + "").replace(/<br\s*\/?>/gi, "\n"),
+                        ((this.text || this.textElementView.innerHTML || "") + ""),
                         constrainingWidth || undefined,
                         undefined,
                         styles
@@ -756,6 +758,8 @@ export class UITextView extends UIView {
     }
     
     override intrinsicContentWidth(constrainingHeight = 0) {
+        
+        constrainingHeight = Math.max(constrainingHeight.integerValue, 0)
         
         const keyPath = ((this.textElementView.viewHTMLElement.innerHTML || this.text) + "_csf_" + this._getFontCacheKey()) + "." +
             ("" + constrainingHeight).replace(new RegExp("\\.", "g"), "_")
@@ -830,8 +834,8 @@ export class UITextView extends UIView {
         const height = this._textElementView.style.height
         const width = this._textElementView.style.width
         
-        this._textElementView.style.height = "" + constrainingHeight
-        this._textElementView.style.width = "" + constrainingWidth
+        this._textElementView.style.height = "" + constrainingHeight + "px"
+        this._textElementView.style.width = "" + constrainingWidth + "px"
         
         const left = this._textElementView.style.left
         const right = this._textElementView.style.right

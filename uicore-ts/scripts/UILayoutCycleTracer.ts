@@ -19,6 +19,9 @@
  * including:
  *   - Which view was re-queued
  *   - Its full superview chain
+ *   - A state snapshot (isVirtualLayouting, frame size, bounds size, class name)
+ *   - The full history of all previous cycle events for the same view this pass,
+ *     so the entire oscillation pattern is visible in one place
  *   - The call stack at the point of the re-queue (setNeedsLayout call)
  *   - How many times the view has been laid out in this pass
  *
@@ -28,12 +31,34 @@
  *   view is laid out, and UILayoutCycleTracer.viewDidCallSetNeedsLayout(view)
  *   from setNeedsLayout() while a pass is active.
  */
+
+interface UILayoutCycleViewSnapshot {
+    isVirtualLayouting: boolean
+    frameWidth: number
+    frameHeight: number
+    boundsWidth: number
+    boundsHeight: number
+    className: string
+    elementID: string
+}
+
+interface UILayoutCycleEvent {
+    // Which occurrence this is for this view within the current pass (1-based)
+    occurrenceIndex: number
+    iteration: number
+    layoutCountAtTime: number
+    callerFunction: string
+    snapshot: UILayoutCycleViewSnapshot
+    cleanStack: string
+}
+
 export class UILayoutCycleTracer {
     
     static _isEnabled: boolean = false
     static _isPassActive: boolean = false
     static _layoutCountsThisPass: Map<any, number> = new Map()
-    static _setNeedsLayoutCallsThisPass: Map<any, { count: number; stacks: string[] }> = new Map()
+    // Full event history per view, accumulated across the entire pass
+    static _eventsThisPass: Map<any, UILayoutCycleEvent[]> = new Map()
     static _currentIteration: number = 0
     static _totalReportsThisPass: number = 0
     
@@ -93,7 +118,7 @@ export class UILayoutCycleTracer {
         if (!UILayoutCycleTracer._isEnabled) { return }
         UILayoutCycleTracer._isPassActive = true
         UILayoutCycleTracer._layoutCountsThisPass = new Map()
-        UILayoutCycleTracer._setNeedsLayoutCallsThisPass = new Map()
+        UILayoutCycleTracer._eventsThisPass = new Map()
         UILayoutCycleTracer._currentIteration = 0
         UILayoutCycleTracer._totalReportsThisPass = 0
     }
@@ -147,17 +172,23 @@ export class UILayoutCycleTracer {
         
         const rawStack = new Error().stack ?? "(stack unavailable)"
         const cleanStack = UILayoutCycleTracer._cleanStack(rawStack)
+        const snapshot = UILayoutCycleTracer._snapshotView(view)
+        const callerFunction = UILayoutCycleTracer._extractCallerFunctionName(cleanStack)
         
-        const existing = UILayoutCycleTracer._setNeedsLayoutCallsThisPass.get(view)
-        if (existing) {
-            existing.count++
-            existing.stacks.push(cleanStack)
+        // Accumulate this event into the per-view history
+        const existingHistory = UILayoutCycleTracer._eventsThisPass.get(view) ?? []
+        const newEvent: UILayoutCycleEvent = {
+            occurrenceIndex: existingHistory.length + 1,
+            iteration: UILayoutCycleTracer._currentIteration,
+            layoutCountAtTime: layoutCount,
+            callerFunction,
+            snapshot,
+            cleanStack,
         }
-        else {
-            UILayoutCycleTracer._setNeedsLayoutCallsThisPass.set(view, { count: 1, stacks: [cleanStack] })
-        }
+        existingHistory.push(newEvent)
+        UILayoutCycleTracer._eventsThisPass.set(view, existingHistory)
         
-        UILayoutCycleTracer._reportCycle(view, layoutCount, cleanStack)
+        UILayoutCycleTracer._reportCycle(view, existingHistory)
     }
     
     /**
@@ -200,6 +231,49 @@ export class UILayoutCycleTracer {
         return lines.slice(firstAppFrameIndex).join("\n")
     }
     
+    /**
+     * Extracts the name of the first application function from a cleaned stack string.
+     * Returns something like "UIButton.layoutSubviews" or "CellView.layoutSubviews".
+     */
+    static _extractCallerFunctionName(cleanStack: string): string {
+        const firstLine = cleanStack.split("\n")[0]?.trim() ?? ""
+        // V8 format: "  at ClassName.methodName (file:line:col)"
+        // or:        "  at functionName (file:line:col)"
+        const match = firstLine.match(/at\s+([\w.<>$]+)\s+\(/)
+        if (match) {
+            return match[1]
+        }
+        // Fallback: return whatever is on the first line, truncated
+        return firstLine.substring(0, 80) || "(unknown)"
+    }
+    
+    /**
+     * Captures a diagnostic snapshot of a view's current layout state.
+     * Safe to call at any point — gracefully handles nil/missing properties.
+     */
+    static _snapshotView(view: any): UILayoutCycleViewSnapshot {
+        const frame = view?.frame
+        const bounds = view?.bounds
+        return {
+            isVirtualLayouting: view?.isVirtualLayouting ?? false,
+            frameWidth: frame?.width ?? -1,
+            frameHeight: frame?.height ?? -1,
+            boundsWidth: bounds?.width ?? -1,
+            boundsHeight: bounds?.height ?? -1,
+            className: view?.constructor?.name ?? "UnknownView",
+            elementID: view?.elementID ?? view?._UIViewIndex ?? "?",
+        }
+    }
+    
+    static _formatSnapshotInline(snapshot: UILayoutCycleViewSnapshot): string {
+        const virtualTag = snapshot.isVirtualLayouting ? "🔮 VIRTUAL" : "📐 real"
+        return (
+            `${virtualTag}  ` +
+            `frame ${snapshot.frameWidth.toFixed(1)}×${snapshot.frameHeight.toFixed(1)}  ` +
+            `bounds ${snapshot.boundsWidth.toFixed(1)}×${snapshot.boundsHeight.toFixed(1)}`
+        )
+    }
+    
     static _viewIdentifier(view: any): string {
         const className = view?.constructor?.name ?? "UnknownView"
         const elementID = view?.elementID ?? view?._UIViewIndex ?? "?"
@@ -211,27 +285,142 @@ export class UILayoutCycleTracer {
         let current = view
         let depth = 0
         while (current && depth < 20) {
-            parts.push(UILayoutCycleTracer._viewIdentifier(current))
+            const snapshot = UILayoutCycleTracer._snapshotView(current)
+            const virtualTag = snapshot.isVirtualLayouting ? "[VIRTUAL]" : "[real]"
+            parts.push(
+                `${UILayoutCycleTracer._viewIdentifier(current)} ${virtualTag} ` +
+                `frame=${snapshot.frameWidth.toFixed(0)}×${snapshot.frameHeight.toFixed(0)} ` +
+                `bounds=${snapshot.boundsWidth.toFixed(0)}×${snapshot.boundsHeight.toFixed(0)}`
+            )
             current = current.superview
             depth++
         }
-        return parts.join(" → ")
+        return parts.join("\n  → ")
     }
     
-    static _reportCycle(view: any, layoutCountThisPass: number, cleanStack: string) {
+    /**
+     * Prints a single event row inside the history section.
+     * Past events are collapsed sub-groups (stack accessible but not noisy).
+     * The current event is expanded so it's immediately visible.
+     */
+    static _printHistoryEvent(event: UILayoutCycleEvent, isCurrent: boolean) {
+        const label = isCurrent ? "🆕 NOW" : `#${event.occurrenceIndex}`
+        const iterationLabel = `iter ${event.iteration + 1}`
+        const snapshotInline = UILayoutCycleTracer._formatSnapshotInline(event.snapshot)
+        const title = `  ${label}  ${event.callerFunction}()  [${iterationLabel}]  ${snapshotInline}`
+        const titleStyle = isCurrent
+                           ? "color: #F44336; font-weight: bold"
+                           : "color: #888; font-weight: normal"
+        
+        if (isCurrent) {
+            console.group(`%c${title}`, titleStyle)
+        }
+        else {
+            console.groupCollapsed(`%c${title}`, titleStyle)
+        }
+        
+        console.log(`%c  layoutCount at time: ${event.layoutCountAtTime}`, "color: #aaa")
+        console.log("%c  Stack:", "font-weight: bold")
+        event.cleanStack.split("\n").forEach(frame => console.log("    " + frame.trim()))
+        console.groupEnd()
+    }
+    
+    static _reportCycle(view: any, history: UILayoutCycleEvent[]) {
+        const currentEvent = history[history.length - 1]
         const identifier = UILayoutCycleTracer._viewIdentifier(view)
         const chain = UILayoutCycleTracer._superviewChain(view)
+        const virtualLabel = currentEvent.snapshot.isVirtualLayouting ? "VIRTUAL" : "real"
         
         console.groupCollapsed(
-            `%c[UILayoutCycleTracer] ⚠️ Layout cycle: ${identifier} re-queued after being laid out ${layoutCountThisPass}x in iteration ${UILayoutCycleTracer._currentIteration + 1}`,
+            `%c[UILayoutCycleTracer] ⚠️ Cycle #${history.length}: ${identifier}  ` +
+            `from ${currentEvent.callerFunction}()  ` +
+            `[${virtualLabel}, ${currentEvent.snapshot.frameWidth.toFixed(0)}×${currentEvent.snapshot.frameHeight.toFixed(0)}]  ` +
+            `laid out ${currentEvent.layoutCountAtTime}x  iter ${currentEvent.iteration + 1}`,
             "color: #F44336; font-weight: bold"
         )
-        console.log("%cView:", "font-weight: bold", view)
-        console.log("%cSuperview chain:", "font-weight: bold", chain)
-        console.log("%cLayout count this pass:", "font-weight: bold", layoutCountThisPass)
-        console.log("%cIteration:", "font-weight: bold", UILayoutCycleTracer._currentIteration + 1)
-        console.log("%cCall stack (noise frames stripped):", "font-weight: bold")
-        cleanStack.split("\n").forEach(frame => console.log("  " + frame.trim()))
+        
+        // ── History ────────────────────────────────────────────────────────────
+        // Always expanded — this is the primary diagnostic value.
+        console.group(
+            `%c📜 Full history for this view this pass  (${history.length} event${history.length === 1 ? "" : "s"})`,
+            "font-weight: bold; color: #FF9800"
+        )
+        for (let i = 0; i < history.length; i++) {
+            UILayoutCycleTracer._printHistoryEvent(history[i], i === history.length - 1)
+        }
+        console.groupEnd()
+        
+        // ── Superview chain ────────────────────────────────────────────────────
+        console.groupCollapsed(
+            "%c🔗 Superview chain (innermost → root)",
+            "font-weight: bold; color: #9C27B0"
+        )
+        console.log("  " + chain)
+        console.groupEnd()
+        
+        // ── Raw view ───────────────────────────────────────────────────────────
+        console.log("%c🖼 Raw view object:", "font-weight: bold", view)
+        
+        console.groupEnd()
+    }
+    
+    /**
+     * Manually prints a full diagnostic report for any view on demand.
+     * Call from the browser console: layoutReport(someView)
+     *
+     * Shows:
+     *   - Current state snapshot (isVirtualLayouting, frame, bounds)
+     *   - Superview chain with state at each level
+     *   - Full cycle history for this view from the most recent pass, if any
+     *   - The raw view object for live inspection
+     */
+    static printViewReport(view: any) {
+        if (!view) {
+            console.warn("[UILayoutCycleTracer] printViewReport: no view provided")
+            return
+        }
+        
+        const identifier = UILayoutCycleTracer._viewIdentifier(view)
+        const snapshot = UILayoutCycleTracer._snapshotView(view)
+        const chain = UILayoutCycleTracer._superviewChain(view)
+        const history = UILayoutCycleTracer._eventsThisPass.get(view)
+        
+        console.group(
+            `%c[UILayoutCycleTracer] 🔍 Manual report: ${identifier}`,
+            "color: #2196F3; font-weight: bold"
+        )
+        
+        // ── Current state ──────────────────────────────────────────────────────
+        console.group("%c📸 Current state", "font-weight: bold; color: #2196F3")
+        console.log(UILayoutCycleTracer._formatSnapshotInline(snapshot))
+        console.groupEnd()
+        
+        // ── Cycle history ──────────────────────────────────────────────────────
+        if (history && history.length > 0) {
+            console.group(
+                `%c📜 Cycle history from last pass  (${history.length} event${history.length === 1 ? "" : "s"})`,
+                "font-weight: bold; color: #FF9800"
+            )
+            for (let i = 0; i < history.length; i++) {
+                UILayoutCycleTracer._printHistoryEvent(history[i], i === history.length - 1)
+            }
+            console.groupEnd()
+        }
+        else {
+            console.log("%c📜 No cycle history recorded for this view in the last pass", "color: #4CAF50")
+        }
+        
+        // ── Superview chain ────────────────────────────────────────────────────
+        console.groupCollapsed(
+            "%c🔗 Superview chain (innermost → root)",
+            "font-weight: bold; color: #9C27B0"
+        )
+        console.log("  " + chain)
+        console.groupEnd()
+        
+        // ── Raw view ───────────────────────────────────────────────────────────
+        console.log("%c🖼 Raw view object:", "font-weight: bold", view)
+        
         console.groupEnd()
     }
     
@@ -239,9 +428,16 @@ export class UILayoutCycleTracer {
 
 window.UILayoutCycleTracer = UILayoutCycleTracer
 
+/**
+ * Global convenience function available in the browser console.
+ * Usage: layoutReport(someView)
+ */
+window.layoutReport = (view: any) => UILayoutCycleTracer.printViewReport(view)
+
 declare global {
     interface Window {
         UILayoutCycleTracer?: typeof UILayoutCycleTracer
+        layoutReport: (view: any) => void
     }
 }
 

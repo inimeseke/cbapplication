@@ -897,7 +897,8 @@ export class UIRectangle extends UIObject {
      * @param views - Array of views to distribute
      * @param paddings - Padding between views (single value or array of values)
      * @param absoluteWidths - Optional fixed widths for views (overrides intrinsic width)
-     * @param centeredOnPosition - Horizontal alignment of the row within this rectangle: 0 = left (default), 0.5 = center, 1 = right
+     * @param centeredOnPosition - Horizontal alignment of the row within this rectangle: 0 = left (default), 0.5 =
+     *     center, 1 = right
      * @returns Array of rectangles representing the frame for each view
      */
     framesByDistributingViewsAsRow(
@@ -1301,8 +1302,14 @@ class UIRectangleConditionalBlock {
                         
                         if (self._stack.length === 1) {
                             // Outermost ENDIF. Return the bare rectangle (or transform it).
-                            const result = self._top.currentResult
-                            return performFunction ? performFunction(result) : result
+                            const top = self._top
+                            const result = top.currentResult
+                            if (performFunction && top.anyConditionMet) {
+                                return performFunction(result)
+                            }
+                            else {
+                                return result
+                            }
                         }
                         
                         // Pop the innermost (nested) frame.

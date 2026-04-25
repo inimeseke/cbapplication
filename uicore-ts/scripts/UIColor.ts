@@ -505,5 +505,42 @@ export class UIColor extends UIObject {
     }
     
     
+    /**
+     * Returns the perceptual lightness (L*) of this color in the range [0, 1],
+     * using the CIELAB formula. 0 = absolute black, 1 = absolute white.
+     * Unlike raw relative luminance, this scale is perceptually uniform —
+     * 0.5 is the genuine visual midpoint between black and white.
+     */
+    get perceivedLightness(): number {
+        
+        const descriptor = this.colorDescriptor
+        
+        const linearise = (channel: number) => {
+            const normalised = channel / 255
+            if (normalised <= 0.04045) {
+                return normalised / 12.92
+            }
+            return Math.pow((normalised + 0.055) / 1.055, 2.4)
+        }
+        
+        const luminance = 0.2126 * linearise(descriptor.red)
+            + 0.7152 * linearise(descriptor.green)
+            + 0.0722 * linearise(descriptor.blue)
+        
+        const epsilon = Math.pow(6 / 29, 3)  // ~0.00886
+        
+        const f = luminance > epsilon
+                  ? Math.pow(luminance, 1 / 3)
+                  : (Math.pow(29 / 6, 2) / 3) * luminance + 4 / 29
+        
+        return (116 * f - 16) / 100
+        
+    }
+    
+    get isLight(): boolean {
+        return this.perceivedLightness >= 0.5
+    }
+    
+    
 }
 

@@ -5,6 +5,13 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 export class UIBaseButton extends UIView {
     
+    static override controlEvent = Object.assign({}, UIView.controlEvent, {
+        "PrimaryActionTriggered": "PrimaryActionTriggered"
+    } as const)
+    
+    override controlEvent = UIBaseButton.controlEvent
+    
+    
     _selected: boolean = NO
     _highlighted: boolean = NO
     
@@ -70,11 +77,21 @@ export class UIBaseButton extends UIView {
         ], setNotHighlighted)
         this.addTargetForControlEvent(UIView.controlEvent.PointerUp, setNotHighlightedWithMinimumDuration)
         
-        // Handle enter key press
+        // Enter and Space both activate the button — fire PrimaryActionTriggered
         this.addTargetForControlEvent(UIView.controlEvent.EnterDown, () => {
             
             setHighlighted()
             setNotHighlightedWithMinimumDuration()
+            this.sendControlEventForKey(UIBaseButton.controlEvent.PrimaryActionTriggered, nil)
+            
+        })
+        
+        this.addTargetForControlEvent(UIView.controlEvent.SpaceDown, (sender, event) => {
+            
+            event.preventDefault()
+            setHighlighted()
+            setNotHighlightedWithMinimumDuration()
+            this.sendControlEventForKey(UIBaseButton.controlEvent.PrimaryActionTriggered, nil)
             
         })
         
@@ -110,7 +127,7 @@ export class UIBaseButton extends UIView {
         
         
         this.addTargetForControlEvents([
-            UIView.controlEvent.EnterDown, UIView.controlEvent.PointerUpInside
+            UIBaseButton.controlEvent.PrimaryActionTriggered, UIView.controlEvent.PointerUpInside
         ], () => {
             
             if (this.isToggleable) {
@@ -331,6 +348,10 @@ export class UIBaseButton extends UIView {
         else {
             
             super.sendControlEventForKey(eventKey, nativeEvent)
+            
+            if (eventKey == UIView.controlEvent.PointerUpInside) {
+                super.sendControlEventForKey(UIBaseButton.controlEvent.PrimaryActionTriggered, nativeEvent)
+            }
             
         }
         

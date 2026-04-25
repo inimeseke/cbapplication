@@ -17,9 +17,6 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
     // (typed text or navigated with arrow keys). Prevents Tab-to-focus from
     // auto-committing the first item.
     _userHasNavigatedDropdown: boolean = NO
-    // Set to YES while we are programmatically clearing the text field on focus
-    // so the TextChange handler does not treat it as a user-initiated change.
-    _isProgrammaticTextChange: boolean = NO
     
     /**
      * When YES, the filter text is split on whitespace and all words must appear
@@ -59,11 +56,6 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
             textBeforeFocus = this.text
             itemBeforeFocus = this.selectedItem
             this._userHasNavigatedDropdown = NO
-            if (!this._selectedItem) {
-                this._isProgrammaticTextChange = YES
-                this.text = ""
-                this._isProgrammaticTextChange = NO
-            }
             this.openDropdown()
             this.textElementView.viewHTMLElement.select()
             const matchIndex = this._dropdownView.filteredItems.findIndex(
@@ -82,9 +74,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         // Filter on text change
         this.addTargetForControlEvent(UITextField.controlEvent.TextChange, () => {
             this._selectedItem = undefined
-            if (!this._isProgrammaticTextChange) {
-                this._userHasNavigatedDropdown = this.text.length > 0
-            }
+            this._userHasNavigatedDropdown = this.text.length > 0
             this.updateFilteredItems()
             if (!this._isDropdownOpen) {
                 this.openDropdown()
@@ -128,14 +118,15 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         // Tab: commit highlighted item only if the user has explicitly interacted
         // with the dropdown (typed or used arrow keys). This prevents tabbing
         // through the form from silently committing the first suggestion.
+        // When the user has not navigated, we do NOT consume the event — the
+        // dropdown will close via the Blur handler and RHPageFocusManager will
+        // handle the Tab navigation normally.
         this.addTargetForControlEvent(UIView.controlEvent.TabDown, (sender, event) => {
-            if (this._isDropdownOpen) {
+            if (this._isDropdownOpen && this._userHasNavigatedDropdown) {
                 const highlightedItem = this._dropdownView.highlightedItem
-                if (IS(highlightedItem) && this._userHasNavigatedDropdown) {
+                if (IS(highlightedItem)) {
+                    event.preventDefault()
                     this.commitSelection(highlightedItem)
-                }
-                else {
-                    this.closeDropdown()
                 }
             }
         })

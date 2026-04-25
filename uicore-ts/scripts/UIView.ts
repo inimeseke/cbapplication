@@ -3652,21 +3652,20 @@ export class UIView extends UIObject {
         
         const onKeyDown = (event: KeyboardEvent) => {
             
-            if (eventKeyIsEnter(event) || eventKeyIsSpace(event)) {
+            if (eventKeyIsEnter(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.EnterDown, event)
-                if (eventKeyIsSpace(
-                    event) && this._controlEventTargets.EnterDown && this._controlEventTargets.EnterDown.length) {
-                    pauseEvent(event, YES)
-                }
+            }
+            
+            if (eventKeyIsSpace(event)) {
+                this.sendControlEventForKey(UIView.controlEvent.SpaceDown, event)
             }
             
             if (eventKeyIsEsc(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.EscDown, event)
             }
             
-            if (eventKeyIsTab(event) && this._controlEventTargets.TabDown && this._controlEventTargets.TabDown.length) {
+            if (eventKeyIsTab(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.TabDown, event)
-                pauseEvent(event, YES)
             }
             
             if (eventKeyIsLeft(event)) {
@@ -3683,6 +3682,10 @@ export class UIView extends UIObject {
             
             if (eventKeyIsUp(event)) {
                 this.sendControlEventForKey(UIView.controlEvent.UpArrowDown, event)
+            }
+            
+            if (event.defaultPrevented) {
+                pauseEvent(event, YES)
             }
             
         }
@@ -3767,6 +3770,7 @@ export class UIView extends UIObject {
         "PointerHover": "PointerHover",
         "EnterDown": "EnterDown",
         "EnterUp": "EnterUp",
+        "SpaceDown": "SpaceDown",
         "EscDown": "EscDown",
         "TabDown": "TabDown",
         "LeftArrowDown": "LeftArrowDown",

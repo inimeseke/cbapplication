@@ -227,6 +227,8 @@ export class UIView extends UIObject {
                                                          // "PointerLeave": Function[]; "PointerEnter": Function[];
                                                          // "PointerUpInside": Function[]; "PointerUp": Function[];
                                                          // "PointerHover": Function[]; };
+    _broadcastEventTargets: { [eventName: string]: ((event: UIViewBroadcastEvent) => void)[] } = {}
+    _ongoingControlEventHandlers: { _controlEventKey: string }[] = []
     _frameTransform: string
     viewController?: UIViewController
     _updateLayoutFunction?: Function
@@ -3816,7 +3818,10 @@ export class UIView extends UIObject {
         eventKeys.forEach(key => this.addTargetForControlEvent(key, targetFunction))
     }
     
-    addTargetForControlEvent(eventKey: string, targetFunction: (sender: UIView, event: Event) => void) {
+    addTargetForControlEvent(
+        eventKey: string,
+        targetFunction: (sender: UIView, event: Event, callbackControl: { allowConcurrentCalls: () => void }) => any | Promise<any>
+    ) {
         
         let targets = this._controlEventTargets[eventKey]
         
@@ -3826,8 +3831,39 @@ export class UIView extends UIObject {
             this._controlEventTargets[eventKey] = targets
         }
         
-        if (targets.indexOf(targetFunction) == -1) {
-            targets.push(targetFunction)
+        const isAsync = targetFunction.constructor.name === "AsyncFunction"
+        
+        if (!isAsync) {
+            if (targets.indexOf(targetFunction) == -1) {
+                targets.push(targetFunction)
+            }
+            return
+        }
+        
+        const wrapper = (sender: UIView, event: Event) => {
+            const isBlocked = this._ongoingControlEventHandlers.some(
+                handle => handle._controlEventKey === eventKey
+            )
+            if (isBlocked) {
+                return
+            }
+            
+            const handle: { _controlEventKey: string } = { _controlEventKey: eventKey }
+            this._ongoingControlEventHandlers.push(handle)
+            
+            const promise = (targetFunction as Function)(sender, event, {
+                allowConcurrentCalls: () => {
+                    this._ongoingControlEventHandlers.removeElement(handle)
+                }
+            }) as Promise<any>
+            
+            promise.finally(() => {
+                this._ongoingControlEventHandlers.removeElement(handle)
+            })
+        }
+        
+        if (targets.indexOf(wrapper) == -1) {
+            targets.push(wrapper)
         }
         
     }
@@ -3845,6 +3881,41 @@ export class UIView extends UIObject {
     
     removeTargetForControlEvents(eventKeys: string[], targetFunction: (sender: UIView, event: Event) => void) {
         eventKeys.forEach(key => this.removeTargetForControlEvent(key, targetFunction))
+    }
+    
+    
+    performFunctionAfterBroadcastEvent(
+        event: string | string[],
+        targetFunction: (event: UIViewBroadcastEvent) => void
+    ): void {
+        const eventNames = Array.isArray(event) ? event : [event]
+        eventNames.forEach(name => {
+            let targets = this._broadcastEventTargets[name]
+            if (!targets) {
+                targets = []
+                this._broadcastEventTargets[name] = targets
+            }
+            if (targets.indexOf(targetFunction) == -1) {
+                targets.push(targetFunction)
+            }
+        })
+    }
+    
+    removePerformFunctionAfterBroadcastEvent(
+        event: string | string[],
+        targetFunction: (event: UIViewBroadcastEvent) => void
+    ): void {
+        const eventNames = Array.isArray(event) ? event : [event]
+        eventNames.forEach(name => {
+            const targets = this._broadcastEventTargets[name]
+            if (!targets) {
+                return
+            }
+            const index = targets.indexOf(targetFunction)
+            if (index != -1) {
+                targets.splice(index, 1)
+            }
+        })
     }
     
     
@@ -3881,6 +3952,15 @@ export class UIView extends UIObject {
     
     
     didReceiveBroadcastEvent(event: UIViewBroadcastEvent) {
+        
+        const broadcastTargets = this._broadcastEventTargets[event.name]
+        if (broadcastTargets) {
+            const targets = broadcastTargets.copy()
+            this._broadcastEventTargets[event.name] = []
+            for (let i = 0; i < targets.length; i++) {
+                targets[i](event)
+            }
+        }
         
         if (event.name == UIView.broadcastEventName.PageDidScroll) {
             this._isPointerValid = NO

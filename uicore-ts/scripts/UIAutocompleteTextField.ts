@@ -395,6 +395,7 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
                 else {
                     this.text = ""
                     this._selectedItem = undefined
+                    this.sendControlEventForKey(UITextField.controlEvent.TextChange)
                 }
             }
         }

@@ -15,7 +15,7 @@ export class UILinkButton extends UILink {
         this.addSubview(this.button)
     
         this.style.position = "absolute"
-        this.button.controlEventTargetAccumulator.EnterDown.PointerUpInside = () => window.location = this.target as any
+        this.button.controlEventTargetAccumulator.PrimaryActionTriggered = () => window.location = this.target as any
     
     }
     

@@ -1,6 +1,6 @@
 import { UIColor } from "./UIColor"
 import { IS, nil, NO, YES } from "./UIObject"
-import { UIView, UIViewBroadcastEvent } from "./UIView"
+import { UIView, UIViewAddControlEventTargetObject, UIViewBroadcastEvent } from "./UIView"
 
 
 export class UIBaseButton extends UIView {
@@ -10,6 +10,10 @@ export class UIBaseButton extends UIView {
     } as const)
     
     override controlEvent = UIBaseButton.controlEvent
+    
+    override get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UIBaseButton> {
+        return super.controlEventTargetAccumulator as any
+    }
     
     
     _selected: boolean = NO
@@ -77,12 +81,13 @@ export class UIBaseButton extends UIView {
         ], setNotHighlighted)
         this.addTargetForControlEvent(UIView.controlEvent.PointerUp, setNotHighlightedWithMinimumDuration)
         
-        // Enter and Space both activate the button — fire PrimaryActionTriggered
+        // Enter and Space both activate the button.
+        // Fire PointerUpInside (which cascades to PrimaryActionTriggered via sendControlEventForKey).
         this.addTargetForControlEvent(UIView.controlEvent.EnterDown, () => {
             
             setHighlighted()
             setNotHighlightedWithMinimumDuration()
-            this.sendControlEventForKey(UIBaseButton.controlEvent.PrimaryActionTriggered, nil)
+            this.sendControlEventForKey(UIView.controlEvent.PointerUpInside, nil)
             
         })
         
@@ -91,7 +96,7 @@ export class UIBaseButton extends UIView {
             event.preventDefault()
             setHighlighted()
             setNotHighlightedWithMinimumDuration()
-            this.sendControlEventForKey(UIBaseButton.controlEvent.PrimaryActionTriggered, nil)
+            this.sendControlEventForKey(UIView.controlEvent.PointerUpInside, nil)
             
         })
         

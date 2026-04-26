@@ -1,5 +1,6 @@
 import { UIButton, UIButtonColorSpecifier } from "./UIButton"
 import { UILink } from "./UILink"
+import { UIView, UIViewAddControlEventTargetObject } from "./UIView"
 
 
 export class UILinkButton extends UILink {
@@ -7,16 +8,30 @@ export class UILinkButton extends UILink {
     button: UIButton
     
     constructor(elementID?: string, elementType?: string, titleType?: string) {
-    
+        
         super(elementID)
-    
+        
         // Instance variables
         this.button = new UIButton(this.elementID + "Button", elementType, titleType)
         this.addSubview(this.button)
-    
+        
         this.style.position = "absolute"
-        this.button.controlEventTargetAccumulator.PrimaryActionTriggered = () => window.location = this.target as any
+        this.button.controlEventTargetAccumulator.PrimaryActionTriggered = (sender: UIView, event: Event) => {
+            window.location = this.target as any
+            this.sendControlEventForKey(UIButton.controlEvent.PrimaryActionTriggered, event)
+        }
+        
+    }
     
+    
+    static override controlEvent = Object.assign({}, UILink.controlEvent, {
+        "PrimaryActionTriggered": "PrimaryActionTriggered"
+    } as const)
+    
+    override controlEvent = UILinkButton.controlEvent
+    
+    override get controlEventTargetAccumulator(): UIViewAddControlEventTargetObject<typeof UILinkButton> {
+        return super.controlEventTargetAccumulator as any
     }
     
     
@@ -65,96 +80,3 @@ export class UILinkButton extends UILink {
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -184,9 +184,13 @@ export class UITooltip {
         // The browser reports the minimum width that fits the content without
         // exceeding the same constraint used in pass 1 — giving us the width
         // of the longest wrapped line rather than the full single-line width.
+        // scrollWidth is used instead of getBoundingClientRect().width because
+        // the label's parent UIView has no explicit width set at this point;
+        // getBoundingClientRect() would return a value constrained by the
+        // collapsed parent, resulting in near-zero width and extreme height.
         label.style.maxWidth = `${this.maxWidth}px`
         label.style.width = "fit-content"
-        const naturalWidth = label.getBoundingClientRect().width
+        const naturalWidth = label.scrollWidth
         
         if (wasDetached) {
             document.body.removeChild(label)
@@ -229,6 +233,8 @@ export class UITooltip {
         left = Math.max(margin, left)
         top = Math.max(margin, top)
         
+        // The element lives directly under document.body (no transformed ancestor),
+        // so position: fixed + translate3d produced by setFrame() is viewport-relative.
         this.contentView.setFrame(
             this.contentView.frame
                 .rectangleWithX(Math.round(left))
@@ -247,7 +253,13 @@ export class UITooltip {
         }
         this._isInitialized = true
         
-        this.contentView.addedAsSubviewToView(UICore.main.rootViewController.view)
+        // Attach directly to document.body rather than as a UIView subview.
+        // The framework writes all positions via translate3d transforms. Any ancestor
+        // that carries a transform becomes the containing block for position:fixed
+        // descendants, breaking viewport-relative placement. By appending the raw
+        // element to document.body we guarantee no transformed ancestor exists,
+        // so position:fixed + left/top always refer to the viewport.
+        document.body.appendChild(this.contentView.viewHTMLElement)
         
         window.addEventListener("mousemove", (event: MouseEvent) => {
             this._mouseX = event.clientX

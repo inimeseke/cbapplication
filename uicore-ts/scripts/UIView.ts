@@ -6,6 +6,7 @@ import "./UICoreExtensions"
 import type { UIDialogView } from "./UIDialogView"
 import { UILocalizedTextObject } from "./UIInterfaces"
 import { UILayoutCycleTracer } from "./UILayoutCycleTracer"
+import { UILayoutDebugger } from "./UILayoutDebugger"
 import {
     FIRST,
     FIRST_OR_NIL,
@@ -2033,6 +2034,7 @@ export class UIView extends UIObject {
         }
         
         window.UILayoutCycleTracer?.willBeginLayoutPass()
+        window.UILayoutDebugger?.willBeginLayoutPass(UIView._viewsToLayout)
         
         const maxIterations = 10
         let iteration = 0
@@ -2041,6 +2043,7 @@ export class UIView extends UIObject {
         while (UIView._viewsToLayout.length > 0 && iteration < maxIterations) {
             
             window.UILayoutCycleTracer?.willBeginIteration(iteration)
+            window.UILayoutDebugger?.willBeginIteration(iteration)
             
             const viewsToProcess = UIView._viewsToLayout
             UIView._viewsToLayout = []
@@ -2069,15 +2072,21 @@ export class UIView extends UIObject {
             
             for (let i = 0; i < sortedViews.length; i++) {
                 const view = sortedViews[i]
+                window.UILayoutDebugger?.willLayoutView(view)
+                if (window.UILayoutDebugger?._shouldHitBreakpoint(view)) {
+                    const breakpointOnThisLine = "Add a breakpoint on this line to step through layout."
+                }
                 view.layoutIfNeeded()
                 layoutCounts.set(view, (layoutCounts.get(view) || 0) + 1)
                 window.UILayoutCycleTracer?.didLayoutView(view)
+                window.UILayoutDebugger?.didLayoutView(view)
             }
             
             iteration++
         }
         
         window.UILayoutCycleTracer?.didFinishLayoutPass(iteration)
+        window.UILayoutDebugger?.didFinishLayoutPass(iteration)
         
         // console.log(iteration + " iterations to finish layout")
         
@@ -2097,6 +2106,7 @@ export class UIView extends UIObject {
         this.clearIntrinsicSizeCache()
         
         window.UILayoutCycleTracer?.viewDidCallSetNeedsLayout(this)
+        window.UILayoutDebugger?.viewDidCallSetNeedsLayout(this)
         
         // // Auto-propagate if intrinsic height changed
         // if (IS(this.superview) && this.superview.usesVirtualLayoutingForIntrinsicSizing) {
@@ -2167,12 +2177,14 @@ export class UIView extends UIObject {
         
         this.applyClassesAndStyles()
         
+        window.UILayoutDebugger?.willSetSubviewFrames(this)
         for (let i = 0; i < this.subviews?.length; i++) {
             
             const subview = this.subviews[i]
             subview.calculateAndSetViewFrame()
             
         }
+        window.UILayoutDebugger?.didSetSubviewFrames(this)
         
         // if (this._loadingView && this._loadingView.superview == this) {
         //     this._loadingView.setFrame(this.bounds)
@@ -4111,9 +4123,11 @@ export class UIView extends UIObject {
                 UIView._sharedIntrinsicSizeCaches.set(this.sharedIntrinsicSizeCacheIdentifier, bucket)
             }
             bucket[cacheKey] = size.copy()
+            window.UILayoutDebugger?.didSetCachedIntrinsicSize(this, cacheKey, size)
             return
         }
         this._intrinsicSizesCache[cacheKey] = size.copy()
+        window.UILayoutDebugger?.didSetCachedIntrinsicSize(this, cacheKey, size)
     }
     
     // clearIntrinsicSizeCache(): void {

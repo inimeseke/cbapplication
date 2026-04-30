@@ -187,6 +187,9 @@ export class UIViewController extends UIObject {
         if (IS(controller.view)) {
             controller.view.removeFromSuperview()
         }
+        else {
+            var asd = 1
+        }
         controller.viewDidDisappear()
         
     }
@@ -197,8 +200,12 @@ export class UIViewController extends UIObject {
         controller = FIRST_OR_NIL(controller)
         containerView = FIRST_OR_NIL(containerView)
         controller.viewWillAppear()
-        this.addChildViewController(controller)
-        containerView.addSubview(controller.view)
+        if (!this.hasChildViewController(controller)) {
+            controller.willMoveToParentViewController(this)
+            this.childViewControllers.push(controller)
+            containerView.addSubview(controller.view)
+            controller.didMoveToParentViewController(this)
+        }
         
         controller.handleRouteRecursively(UIRoute.currentRoute)
         

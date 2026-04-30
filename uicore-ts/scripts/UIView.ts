@@ -2143,7 +2143,7 @@ export class UIView extends UIObject {
         
         try {
             
-            if (this.bounds.width < 0) {
+            if (this.bounds.width < 0 || (!this.isVirtualLayouting && !this.isMemberOfViewTree)) {
                 return
             }
             
@@ -4373,6 +4373,66 @@ export class UIView extends UIObject {
         }
         
         return nil
+        
+    }
+    
+    
+    /**
+     * ⚠️  NUCLEAR OPTION — DO NOT CALL IN NORMAL CODE  ⚠️
+     *
+     * Performs a full-scorched-earth cache purge across the entire view subtree rooted
+     * at `this`, then drives an immediate synchronous layout pass, as if the app had
+     * just cold-started.
+     *
+     * What gets destroyed:
+     *   • Every per-instance intrinsic-size cache entry (`_intrinsicSizesCache`)
+     *   • Every shared intrinsic-size cache bucket (`UIView._sharedIntrinsicSizeCaches`)
+     *   • Every frame cache (`_frameCache`) and virtual-layout frame cache
+     *     (`_frameCacheForVirtualLayouting`) on every view in the subtree
+     *   • Every UITextMeasurement style cache (canvas glyph metrics,
+     *     computed-style snapshots, etc.)
+     *
+     * After the purge every view in the subtree is unconditionally marked dirty via
+     * `setNeedsLayout()`, then `UIView.layoutViewsIfNeeded()` is called immediately
+     * to flush the queue rather than waiting for the next rAF tick.
+     *
+     * Legitimate uses (exhaustive list):
+     *   - Recovery from a confirmed cache-corruption bug while a proper fix ships
+     *   - Test harness reset between isolated rendering assertions
+     *   - Post-hot-module-replacement refresh in development tooling
+     *
+     * Do NOT use this to fix a layout glitch you don't understand.
+     * Fix the root cause instead.  If you find yourself calling this in production
+     * code for any reason other than the above, that is a bug — file it.
+     *
+     * Complexity: O(n) where n = total views in the subtree.
+     * All shared caches are wiped globally, not just for the subtree.
+     */
+    performForcedSubtreeLayout(): void {
+        
+        // 1. Nuke all text measurement caches globally — these are shared across
+        //    the entire document and cannot be scoped to a subtree.
+        UITextMeasurement.clearCaches()
+        
+        // 2. Wipe all shared intrinsic-size cache buckets globally.  These are
+        //    keyed by sharedIntrinsicSizeCacheIdentifier and may be shared across
+        //    views outside this subtree, but stale global state is worse than a
+        //    cold remeasure of an unrelated view.
+        UIView.invalidateAllSharedIntrinsicSizeCaches()
+        
+        // 3. Walk every view in the subtree and obliterate all per-instance caches,
+        //    then unconditionally schedule it for layout.
+        this.forEachViewInSubtree(view => {
+            view._intrinsicSizesCache = {}
+            view._frameCache = undefined
+            view._frameCacheForVirtualLayouting = undefined
+            view.setNeedsLayout()
+        })
+        
+        // 4. Drive the layout queue right now, synchronously — don't wait for the
+        //    scheduled rAF tick.  Callers of this method expect the tree to be
+        //    fully laid out by the time the call returns.
+        UIView.layoutViewsIfNeeded()
         
     }
     

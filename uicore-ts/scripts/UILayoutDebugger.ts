@@ -85,6 +85,23 @@ interface UILayoutDebugCacheSnapshot {
     entries: Record<string, { width: number; height: number }>
     isShared: boolean
     sharedKey?: string
+    /** Whether _frameCache was populated at snapshot time. */
+    hasFrameCache: boolean
+    /** Snapshot of _frameCache if populated; null if absent. */
+    frameCache: UILayoutDebugFrame | null
+    /** Whether _frameCacheForVirtualLayouting was populated at snapshot time. */
+    hasVirtualFrameCache: boolean
+    /** Snapshot of _frameCacheForVirtualLayouting if populated; null if absent. */
+    virtualFrameCache: UILayoutDebugFrame | null
+}
+
+/**
+ * Global UITextMeasurement cache sizes at a snapshot instant.
+ * These are not per-view — they're attached to the snapshot as a whole.
+ */
+interface UILayoutDebugTextMeasurementSnapshot {
+    preparedCacheSize: number
+    styleCacheSize: number
 }
 
 interface UILayoutDebugSubviewRecord {
@@ -140,6 +157,8 @@ interface UILayoutDebugStateSnapshot {
     label: string
     takenAt: number                          // Date.now()
     views: Map<number, UILayoutDebugViewState>
+    /** Global UITextMeasurement cache sizes at the instant this snapshot was taken. */
+    textMeasurement: UILayoutDebugTextMeasurementSnapshot
 }
 
 interface UILayoutDebugViewState {
@@ -252,6 +271,14 @@ export class UILayoutDebugger {
     
     static _compareMode: boolean = false
     static _frameFilter: "all" | "changed" | "unchanged" = "all"
+    
+    /**
+     * When true, frame comparisons ignore origin (x/y) and only consider size
+     * (width/height) — i.e. they diff bounds rather than frames.
+     * A position-only move does not trigger a layout recompute of content, so
+     * bounds mode surfaces only the changes that actually matter for sizing.
+     */
+    static _boundsBasedDiff: boolean = false
     static _compareTraceIndex: number = 1    // which trace is shown in right pane
     static _compareStepIndex: number = -1
     
@@ -259,6 +286,13 @@ export class UILayoutDebugger {
     // viewIndex. When both trees render from the same map, toggling one node
     // collapses/expands the same node in both panes simultaneously.
     static _sharedExpandState: Map<number, boolean> = new Map()
+    
+    // Expand state for the single-column pass inspector. Kept persistent so
+    // the live inspector can sync from it.
+    static _singleExpandState: Map<number, boolean> = new Map()
+    
+    // Expand state for the live inspector panel.
+    static _liveExpandState: Map<number, boolean> = new Map()
     
     
     // ── Public API ───────────────────────────────────────────────────────────
@@ -340,6 +374,7 @@ export class UILayoutDebugger {
         const clamped = Math.max(0, Math.min(traceIndex, UILayoutDebugger._traces.length - 1))
         UILayoutDebugger._replayTraceIndex = clamped
         UILayoutDebugger._replayStepIndex = -1
+        UILayoutDebugger._singleExpandState = new Map()
         UILayoutDebugger._renderOverlay()
     }
     
@@ -375,7 +410,6 @@ export class UILayoutDebugger {
         UILayoutDebugger._currentIteration = 0
         UILayoutDebugger._layoutCountsThisPass = new Map()
         UILayoutDebugger._liveViewRegistry = new Map()
-        UILayoutDebugger._triggerMap = new Map()
         UILayoutDebugger._pendingStep = null
         UILayoutDebugger._pendingSubviewsBefore = new Map()
     }
@@ -466,6 +500,8 @@ export class UILayoutDebugger {
             subviewRecords: [],
             trigger: UILayoutDebugger._triggerMap.get(viewIdx) ?? null,
         }
+        // Consume the trigger so it doesn't linger across future passes.
+        UILayoutDebugger._triggerMap.delete(viewIdx)
         
         // Capture subview frames *before* layout. The post-layout capture
         // happens in didSetSubviewFrames() which is called from layoutSubviews().
@@ -589,14 +625,133 @@ export class UILayoutDebugger {
         UILayoutDebugger._renderOverlay()
     }
     
+    /**
+     * ☢  Stale Layout Report
+     *
+     * The single authoritative way to discover missing cache invalidations.
+     *
+     * What this does, in order:
+     *   1. Snapshots every view's frame and intrinsic cache right now (the
+     *      "before" state — potentially stale/incorrect).
+     *   2. Calls performForcedSubtreeLayout() on the root view, which nukes all
+     *      caches and forces a complete cold remeasure of the entire tree.
+     *   3. Snapshots again ("after" state — ground truth).
+     *   4. Diffs the two snapshots.  Any view that changed between before and
+     *      after had stale state that was never correctly invalidated.
+     *   5. For each changed view, cross-references the cache writes from the
+     *      forced pass so you can see exactly which call path recomputed the
+     *      correct value — working backwards from that to find the missing
+     *      invalidation site.
+     *
+     * The result is shown in the ☢ Stale panel to the right of the pass
+     * inspector.  Views corrected by the forced pass are also tinted amber in
+     * the pass inspector tree on the subsequent pass.
+     *
+     * Limitations:
+     *   - Calls performForcedSubtreeLayout(), which is itself a nuclear option.
+     *     The tree will be left in its corrected state — not the buggy state.
+     *     Use this at the point where the bug is visible, not before.
+     *   - The forced layout will generate a new trace (the remeasure pass).
+     *     The ☢ panel cross-references its cache writes automatically.
+     *   - Only intrinsic-size cache corrections are cross-referenced. Frame
+     *     corrections are shown as diffs but do not yet have a write-stack.
+     */
+    static captureStaleLayoutReport() {
+        if (!UILayoutDebugger._isEnabled) { return }
+        const rootView = UILayoutDebugger._lastKnownRootView
+        if (!rootView) {
+            console.warn(
+                "[UILayoutDebugger] captureStaleLayoutReport: no root view found yet — " +
+                "trigger a layout pass first."
+            )
+            return
+        }
+        
+        // Step 1 — snapshot before.
+        // We pin rootView here and pass it directly to a targeted walk rather than
+        // going through _lastKnownRootView, because performForcedSubtreeLayout
+        // drives layoutViewsIfNeeded synchronously, which fires didFinishLayoutPass,
+        // which may update _lastKnownRootView to a detached view that was temporarily
+        // inserted into document.body for intrinsic-size measurement.  If that
+        // happened the "after" snapshot would walk from a completely different root
+        // than "before", causing spurious diffs for every view in the real tree.
+        const before = UILayoutDebugger._captureStateSnapshotFromRoot(rootView, "Before (potentially stale)")
+        
+        // Step 2 — nuclear reset
+        rootView.performForcedSubtreeLayout?.()
+        
+        // Step 3 — snapshot after (ground truth), using the same pinned root.
+        const after = UILayoutDebugger._captureStateSnapshotFromRoot(rootView, "After (forced cold remeasure)")
+        
+        // Step 4 — diff
+        const diffs = UILayoutDebugger._diffSnapshots(before, after)
+            .filter(d => d.kind !== "unchanged")
+        
+        // Step 5 — collect cache writes from the forced pass (the trace that was
+        // just recorded by performForcedSubtreeLayout), keyed by viewIndex.
+        const forcedPassCacheChanges = new Map<number, UILayoutDebugCacheChangeEvent[]>()
+        const forcedTrace = UILayoutDebugger._traces[0] ?? null  // newest = the forced pass
+        const forcedPassIndex = forcedTrace?.passIndex ?? -1
+        if (forcedTrace) {
+            for (const ev of forcedTrace.cacheChanges) {
+                let bucket = forcedPassCacheChanges.get(ev.viewIndex)
+                if (!bucket) {
+                    bucket = []
+                    forcedPassCacheChanges.set(ev.viewIndex, bucket)
+                }
+                bucket.push(ev)
+            }
+        }
+        
+        UILayoutDebugger._staleReportResult = { before, after, diffs, forcedPassCacheChanges, passIndex: forcedPassIndex }
+        UILayoutDebugger._staleReportMode = true
+        UILayoutDebugger._renderOverlay()
+        
+        const correctedCount = diffs.length
+        console.log(
+            `%c[UILayoutDebugger] Stale layout report: ${correctedCount} view(s) had stale state corrected by forced layout.`,
+            "color: #ffaa55; font-weight: bold"
+        )
+    }
+    
+    static clearStaleReport() {
+        UILayoutDebugger._staleReportResult = null
+        UILayoutDebugger._staleReportMode = false
+        UILayoutDebugger._renderOverlay()
+    }
+    
+    static toggleLiveInspector() {
+        UILayoutDebugger._liveInspectorMode = !UILayoutDebugger._liveInspectorMode
+        UILayoutDebugger._renderOverlay()
+    }
+    
     static _captureStateSnapshot(label: string): UILayoutDebugStateSnapshot | null {
         const rootView = UILayoutDebugger._lastKnownRootView
         if (!rootView) { return null }
-        
+        return UILayoutDebugger._captureStateSnapshotFromRoot(rootView, label)
+    }
+    
+    /**
+     * Like _captureStateSnapshot but walks from an explicit root rather than
+     * _lastKnownRootView. Use this whenever the root must be pinned across a
+     * call that may update _lastKnownRootView (e.g. captureStaleLayoutReport,
+     * which drives a layout pass internally).
+     */
+    static _captureStateSnapshotFromRoot(rootView: any, label: string): UILayoutDebugStateSnapshot {
         const views = new Map<number, UILayoutDebugViewState>()
         UILayoutDebugger._walkViewTree(rootView, views, new Set())
         
-        return { label, takenAt: Date.now(), views }
+        // Read UITextMeasurement global cache sizes. Both maps are private, but
+        // accessible via the class reference on window if exposed, or via the
+        // module-level import. We reach them defensively so the debugger never
+        // throws if the import shape changes.
+        const tm: any = (window as any).UITextMeasurement
+        const textMeasurement: UILayoutDebugTextMeasurementSnapshot = {
+            preparedCacheSize: tm?._preparedCache?.size ?? -1,
+            styleCacheSize:    tm?.globalStyleCache?.size ?? -1,
+        }
+        
+        return { label, takenAt: Date.now(), views, textMeasurement }
     }
     
     static _walkViewTree(
@@ -671,6 +826,10 @@ export class UILayoutDebugger {
     static _framesEqual(a: UILayoutDebugFrame | null, b: UILayoutDebugFrame | null): boolean {
         if (!a && !b) { return true }
         if (!a || !b) { return false }
+        if (UILayoutDebugger._boundsBasedDiff) {
+            // Bounds mode: ignore origin, compare size only.
+            return a.width === b.width && a.height === b.height
+        }
         return a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height
     }
     
@@ -682,6 +841,16 @@ export class UILayoutDebugger {
             const ae = a.entries[key]
             const be = b.entries[key]
             if (!be || ae.width !== be.width || ae.height !== be.height) { return false }
+        }
+        if (a.hasFrameCache !== b.hasFrameCache) { return false }
+        if (a.hasFrameCache && b.hasFrameCache) {
+            const af = a.frameCache, bf = b.frameCache
+            if (!af || !bf || af.top !== bf.top || af.left !== bf.left || af.width !== bf.width || af.height !== bf.height) { return false }
+        }
+        if (a.hasVirtualFrameCache !== b.hasVirtualFrameCache) { return false }
+        if (a.hasVirtualFrameCache && b.hasVirtualFrameCache) {
+            const av = a.virtualFrameCache, bv = b.virtualFrameCache
+            if (!av || !bv || av.top !== bv.top || av.left !== bv.left || av.width !== bv.width || av.height !== bv.height) { return false }
         }
         return true
     }
@@ -740,11 +909,28 @@ export class UILayoutDebugger {
     static _cleanStack(rawStack: string): string {
         const lines = rawStack.split("\n")
         let firstAppFrameIndex = 1 // skip the "Error" header on line 0
+        
         for (let i = 1; i < lines.length; i++) {
             const trimmed = lines[i].trim()
-            const isNoise = UILayoutDebugger._noiseFramePrefixes.some(prefix =>
-                trimmed.includes(prefix)
-            )
+            
+            // V8 frame: "at ClassName.methodName (file:line:col)"
+            // or:       "at methodName (file:line:col)"
+            // or:       "at file:line:col"
+            // Extract just the function/method name for noise matching.
+            const atMatch = trimmed.match(/^at\s+([\w.<>$\s]+?)\s*(?:\(|$)/)
+            const frameName = atMatch ? atMatch[1].trim() : trimmed
+            
+            // The method name is the part after the last dot (if any).
+            const methodName = frameName.includes(".")
+                               ? frameName.slice(frameName.lastIndexOf(".") + 1)
+                               : frameName
+            
+            const isNoise = UILayoutDebugger._noiseFramePrefixes.some(prefix => {
+                // Match against the full qualified name OR just the method name,
+                // so "setNeedsLayout" catches UITextField.setNeedsLayout too.
+                return frameName === prefix || methodName === prefix || frameName.endsWith("." + prefix)
+            })
+            
             if (!isNoise) {
                 firstAppFrameIndex = i
                 break
@@ -756,8 +942,8 @@ export class UILayoutDebugger {
     static _extractCallerFunctionName(cleanStack: string): string {
         const firstLine = cleanStack.split("\n")[0]?.trim() ?? ""
         // V8: "at ClassName.methodName (file:line:col)"
-        const match = firstLine.match(/at\s+([\w.<>$]+)\s+\(/)
-        if (match) { return match[1] }
+        const atMatch = firstLine.match(/^at\s+([\w.<>$\s]+?)\s*(?:\(|$)/)
+        if (atMatch) { return atMatch[1].trim() }
         return firstLine.substring(0, 80) || "(unknown)"
     }
     
@@ -789,11 +975,26 @@ export class UILayoutDebugger {
             const r = rawEntries[key]
             entries[key] = { width: r?.width ?? 0, height: r?.height ?? 0 }
         }
+        
+        // Frame caches — these are per-instance UIRectangle | undefined fields.
+        const rawFrameCache = view._frameCache
+        const rawVirtualFrameCache = view._frameCacheForVirtualLayouting
+        const frameCache: UILayoutDebugFrame | null = rawFrameCache
+                                                      ? { top: rawFrameCache.top ?? rawFrameCache.y ?? 0, left: rawFrameCache.left ?? rawFrameCache.x ?? 0, width: rawFrameCache.width ?? 0, height: rawFrameCache.height ?? 0 }
+                                                      : null
+        const virtualFrameCache: UILayoutDebugFrame | null = rawVirtualFrameCache
+                                                             ? { top: rawVirtualFrameCache.top ?? rawVirtualFrameCache.y ?? 0, left: rawVirtualFrameCache.left ?? rawVirtualFrameCache.x ?? 0, width: rawVirtualFrameCache.width ?? 0, height: rawVirtualFrameCache.height ?? 0 }
+                                                             : null
+        
         return {
             entryCount: Object.keys(entries).length,
             entries,
             isShared,
             sharedKey,
+            hasFrameCache: rawFrameCache !== undefined,
+            frameCache,
+            hasVirtualFrameCache: rawVirtualFrameCache !== undefined,
+            virtualFrameCache,
         }
     }
     
@@ -830,14 +1031,56 @@ export class UILayoutDebugger {
     static _baseline: UILayoutDebugStateSnapshot | null = null
     static _diffSnapshot: UILayoutDebugStateSnapshot | null = null
     static _diffMode: boolean = false
+    static _liveInspectorMode: boolean = false
+    
+    // ── Stale layout report state ─────────────────────────────────────────────
+    
+    /** Result of the last captureStaleLayoutReport() run. */
+    static _staleReportResult: {
+        before: UILayoutDebugStateSnapshot
+        after: UILayoutDebugStateSnapshot
+        diffs: UILayoutDebugViewDiff[]
+        /** viewIndex → cacheChanges from the forced-layout pass, for cross-referencing */
+        forcedPassCacheChanges: Map<number, UILayoutDebugCacheChangeEvent[]>
+        passIndex: number
+    } | null = null
+    
+    /** Whether the stale report side-panel is open. */
+    static _staleReportMode: boolean = false
     
     // Persists across passes so captureBaseline() works between passes.
     static _lastKnownRootView: any = null
+    
+    /**
+     * Finds the first trace (chronologically) recorded after baselineTakenAt
+     * that contains a step for the given viewIndex. Returns {traceIndex, stepIndex}
+     * into _traces, or null if none found.
+     */
+    static _findCausingTrace(
+        viewIndex: number,
+        baselineTakenAt: number,
+    ): { traceIndex: number; stepIndex: number; passIndex: number } | null {
+        // _traces is newest-first, so iterate in reverse for chronological order
+        for (let ti = UILayoutDebugger._traces.length - 1; ti >= 0; ti--) {
+            const trace = UILayoutDebugger._traces[ti]
+            // We don't store a timestamp on traces, but passIndex is monotonically
+            // increasing. The baseline was taken at a wall-clock time; the closest
+            // proxy is to find traces whose passIndex is greater than any pass that
+            // completed before the baseline. Since we can't correlate exactly, we
+            // just find the first trace (oldest) that touched the view and show it.
+            const si = trace.steps.findIndex(s => s.viewIndex === viewIndex)
+            if (si >= 0) {
+                return { traceIndex: ti, stepIndex: si, passIndex: trace.passIndex }
+            }
+        }
+        return null
+    }
     
     // ── Overlay UI ───────────────────────────────────────────────────────────
     
     static _overlayRoot: HTMLElement | null = null
     static _overlayVisible: boolean = true
+    static _helpMode: boolean = false
     
     static _ensureOverlay() {
         if (UILayoutDebugger._overlayRoot) { return }
@@ -877,7 +1120,12 @@ export class UILayoutDebugger {
         if (!root) { return }
         
         const cmp = UILayoutDebugger._compareMode
-        root.style.width = cmp ? "1140px" : "570px"
+        const diff = UILayoutDebugger._diffMode && !!UILayoutDebugger._baseline && !!UILayoutDebugger._diffSnapshot
+        const live = UILayoutDebugger._liveInspectorMode && !!UILayoutDebugger._lastKnownRootView
+        const stale = UILayoutDebugger._staleReportMode && !!UILayoutDebugger._staleReportResult
+        const passWidth = cmp ? 1140 : 570
+        const extraWidth = (diff ? 320 : 0) + (live ? 320 : 0) + (stale ? 360 : 0)
+        root.style.width = (passWidth + extraWidth) + "px"
         root.innerHTML = ""
         
         // ── Header ──────────────────────────────────────────────────────────
@@ -895,6 +1143,16 @@ export class UILayoutDebugger {
         
         const title = UILayoutDebugger._el("span", ["flex: 1", "font-weight: bold", "font-size: 11px", "color: #c8d8ff"])
         title.textContent = "⚙ UILayoutDebugger"
+        
+        const helpBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle(
+            UILayoutDebugger._helpMode ? "#ffcc88" : "#9090a8"
+        ))
+        helpBtn.textContent = "ⓘ"
+        helpBtn.title = "Show help"
+        helpBtn.onclick = () => {
+            UILayoutDebugger._helpMode = !UILayoutDebugger._helpMode
+            UILayoutDebugger._renderOverlay()
+        }
         
         const bpBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle(
             UILayoutDebugger._breakpointsEnabled ? "#ffaa33" : "#9090a8"
@@ -964,7 +1222,7 @@ export class UILayoutDebugger {
         closeBtn.title = "Disable UILayoutDebugger"
         closeBtn.onclick = () => UILayoutDebugger.disable()
         
-        headerRow1.append(title, bpBtn, cmpBtn, filterBtn, clearBtn, toggleBtn, closeBtn)
+        headerRow1.append(title, helpBtn, bpBtn, cmpBtn, filterBtn, clearBtn, toggleBtn, closeBtn)
         
         // ── Header row 2: baseline / diff and future feature buttons ─────────
         const headerRow2 = UILayoutDebugger._el("div", [
@@ -1005,7 +1263,56 @@ export class UILayoutDebugger {
         diffBtn.disabled = !hasBaseline
         diffBtn.onclick = () => UILayoutDebugger.captureAndDiff()
         
-        headerRow2.append(baselineBtn, diffBtn)
+        const liveBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle(
+            live ? "#88ff99" : "#9090a8"
+        ))
+        liveBtn.textContent = live ? "👁 Live ON" : "👁 Live"
+        liveBtn.title = "Show live view tree with current frames and cache state"
+        liveBtn.onclick = () => UILayoutDebugger.toggleLiveInspector()
+        
+        const hasStaleResult = !!UILayoutDebugger._staleReportResult
+        const staleBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle(
+            stale ? "#ffaa55" : hasStaleResult ? "#a06030" : "#9090a8"
+        ))
+        staleBtn.textContent = stale ? "☢ Stale ON" : "☢ Stale"
+        staleBtn.title = hasStaleResult
+                         ? "Stale layout report available — click to toggle the panel, or re-run to refresh"
+                         : "Run a forced full-tree remeasure and show which views had stale/missing invalidations"
+        staleBtn.onclick = () => {
+            if (stale) {
+                // Panel already open — toggle it off
+                UILayoutDebugger._staleReportMode = false
+                UILayoutDebugger._renderOverlay()
+            }
+            else if (hasStaleResult) {
+                // Result exists but panel is closed — reopen it
+                UILayoutDebugger._staleReportMode = true
+                UILayoutDebugger._renderOverlay()
+            }
+            else {
+                UILayoutDebugger.captureStaleLayoutReport()
+            }
+        }
+        
+        // Long-press / right-click to re-run even when a result already exists
+        staleBtn.oncontextmenu = (e) => {
+            e.preventDefault()
+            UILayoutDebugger.captureStaleLayoutReport()
+        }
+        
+        const boundsToggleBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle(
+            UILayoutDebugger._boundsBasedDiff ? "#c8d8ff" : "#9090a8"
+        ))
+        boundsToggleBtn.textContent = UILayoutDebugger._boundsBasedDiff ? "⬚ Bounds" : "⬚ Frame"
+        boundsToggleBtn.title = UILayoutDebugger._boundsBasedDiff
+                                ? "Diffing by bounds (size only — origin ignored). Click to switch to frame diffing (position + size)."
+                                : "Diffing by frame (position + size). Click to switch to bounds diffing (size only — position changes are ignored)."
+        boundsToggleBtn.onclick = () => {
+            UILayoutDebugger._boundsBasedDiff = !UILayoutDebugger._boundsBasedDiff
+            UILayoutDebugger._renderOverlay()
+        }
+        
+        headerRow2.append(baselineBtn, diffBtn, liveBtn, staleBtn, boundsToggleBtn)
         
         // ── Wrap both rows in the header container ────────────────────────────
         const header = UILayoutDebugger._el("div", ["flex-shrink: 0"])
@@ -1014,17 +1321,14 @@ export class UILayoutDebugger {
         
         if (!UILayoutDebugger._overlayVisible) { return }
         
-        // ── Diff mode ────────────────────────────────────────────────────────
-        if (UILayoutDebugger._diffMode && UILayoutDebugger._baseline && UILayoutDebugger._diffSnapshot) {
-            root.appendChild(UILayoutDebugger._renderDiffPanel(
-                UILayoutDebugger._baseline,
-                UILayoutDebugger._diffSnapshot,
-            ))
+        // ── Help panel ───────────────────────────────────────────────────────
+        if (UILayoutDebugger._helpMode) {
+            root.appendChild(UILayoutDebugger._renderHelpPanel())
             return
         }
         
         // ── Baseline captured but no diff yet ────────────────────────────────
-        if (UILayoutDebugger._baseline && !UILayoutDebugger._diffMode) {
+        if (UILayoutDebugger._baseline && !diff) {
             const msg = UILayoutDebugger._el("div", [
                 "padding: 8px 12px",
                 "color: #ffcc88",
@@ -1037,67 +1341,122 @@ export class UILayoutDebugger {
             root.appendChild(msg)
         }
         
-        if (UILayoutDebugger._traces.length === 0) {
+        if (UILayoutDebugger._traces.length === 0 && !diff) {
             const msg = UILayoutDebugger._el("div", ["padding: 10px 12px", "color: #9090a8", "font-size: 10px"])
             msg.textContent = "No layout pass recorded yet. Trigger a layout to begin."
             root.appendChild(msg)
             return
         }
         
-        if (cmp) {
-            // ── Two-column compare layout ────────────────────────────────────
-            const cols = UILayoutDebugger._el("div", [
+        // ── Main body: pass inspector + optional diff panel ──────────────────
+        const body = UILayoutDebugger._el("div", [
+            "display: flex",
+            "flex: 1",
+            "overflow: hidden",
+            "min-height: 0",
+        ])
+        root.appendChild(body)
+        
+        // ── Pass inspector (single or compare columns) ────────────────────────
+        if (UILayoutDebugger._traces.length > 0) {
+            const passSection = UILayoutDebugger._el("div", [
                 "display: flex",
                 "flex: 1",
                 "overflow: hidden",
                 "min-height: 0",
             ])
             
-            const divider = UILayoutDebugger._el("div", [
-                "width: 1px",
-                "background: rgba(255,255,255,0.10)",
-                "flex-shrink: 0",
-            ])
+            if (cmp) {
+                let leftTreeEl: HTMLElement | null = null
+                let rightTreeEl: HTMLElement | null = null
+                
+                const leftCol = UILayoutDebugger._renderPassColumn(
+                    UILayoutDebugger._replayTraceIndex,
+                    UILayoutDebugger._replayStepIndex,
+                    (si) => { UILayoutDebugger._replayStepIndex = si; UILayoutDebugger._renderOverlay() },
+                    (ti) => { UILayoutDebugger._replayTraceIndex = ti; UILayoutDebugger._replayStepIndex = -1; UILayoutDebugger._renderOverlay() },
+                    UILayoutDebugger._sharedExpandState,
+                    (el) => { leftTreeEl = el },
+                    () => rightTreeEl,
+                )
+                const colDivider = UILayoutDebugger._el("div", [
+                    "width: 1px", "background: rgba(255,255,255,0.10)", "flex-shrink: 0",
+                ])
+                const rightCol = UILayoutDebugger._renderPassColumn(
+                    UILayoutDebugger._compareTraceIndex,
+                    UILayoutDebugger._compareStepIndex,
+                    (si) => { UILayoutDebugger._compareStepIndex = si; UILayoutDebugger._renderOverlay() },
+                    (ti) => { UILayoutDebugger._compareTraceIndex = ti; UILayoutDebugger._compareStepIndex = -1; UILayoutDebugger._renderOverlay() },
+                    UILayoutDebugger._sharedExpandState,
+                    (el) => { rightTreeEl = el },
+                    () => leftTreeEl,
+                )
+                passSection.append(leftCol, colDivider, rightCol)
+            }
+            else {
+                const col = UILayoutDebugger._renderPassColumn(
+                    UILayoutDebugger._replayTraceIndex,
+                    UILayoutDebugger._replayStepIndex,
+                    (si) => { UILayoutDebugger._replayStepIndex = si; UILayoutDebugger._renderOverlay() },
+                    (ti) => { UILayoutDebugger._replayTraceIndex = ti; UILayoutDebugger._replayStepIndex = -1; UILayoutDebugger._renderOverlay() },
+                    UILayoutDebugger._singleExpandState,
+                    () => {},
+                    () => null,
+                )
+                col.style.flex = "1"
+                passSection.appendChild(col)
+            }
             
-            let leftTreeEl: HTMLElement | null = null
-            let rightTreeEl: HTMLElement | null = null
-            
-            const leftCol = UILayoutDebugger._renderPassColumn(
-                UILayoutDebugger._replayTraceIndex,
-                UILayoutDebugger._replayStepIndex,
-                (si) => { UILayoutDebugger._replayStepIndex = si; UILayoutDebugger._renderOverlay() },
-                (ti) => { UILayoutDebugger._replayTraceIndex = ti; UILayoutDebugger._replayStepIndex = -1; UILayoutDebugger._renderOverlay() },
-                UILayoutDebugger._sharedExpandState,
-                (el) => { leftTreeEl = el },
-                () => rightTreeEl,
-            )
-            
-            const rightCol = UILayoutDebugger._renderPassColumn(
-                UILayoutDebugger._compareTraceIndex,
-                UILayoutDebugger._compareStepIndex,
-                (si) => { UILayoutDebugger._compareStepIndex = si; UILayoutDebugger._renderOverlay() },
-                (ti) => { UILayoutDebugger._compareTraceIndex = ti; UILayoutDebugger._compareStepIndex = -1; UILayoutDebugger._renderOverlay() },
-                UILayoutDebugger._sharedExpandState,
-                (el) => { rightTreeEl = el },
-                () => leftTreeEl,
-            )
-            
-            cols.append(leftCol, divider, rightCol)
-            root.appendChild(cols)
+            body.appendChild(passSection)
         }
-        else {
-            // ── Single pass layout ───────────────────────────────────────────
-            const col = UILayoutDebugger._renderPassColumn(
-                UILayoutDebugger._replayTraceIndex,
-                UILayoutDebugger._replayStepIndex,
-                (si) => { UILayoutDebugger._replayStepIndex = si; UILayoutDebugger._renderOverlay() },
-                (ti) => { UILayoutDebugger._replayTraceIndex = ti; UILayoutDebugger._replayStepIndex = -1; UILayoutDebugger._renderOverlay() },
-                null,
-                () => {},
-                () => null,
+        
+        // ── Diff panel ────────────────────────────────────────────────────────
+        if (diff) {
+            const divider = UILayoutDebugger._el("div", [
+                "width: 1px", "background: rgba(255,255,255,0.10)", "flex-shrink: 0",
+            ])
+            const diffPanel = UILayoutDebugger._renderDiffPanel(
+                UILayoutDebugger._baseline!,
+                UILayoutDebugger._diffSnapshot!,
+                (viewIndex) => {
+                    for (let ti = 0; ti < UILayoutDebugger._traces.length; ti++) {
+                        const trace = UILayoutDebugger._traces[ti]
+                        const si = trace.steps.findIndex(s => s.viewIndex === viewIndex)
+                        if (si >= 0) {
+                            UILayoutDebugger._replayTraceIndex = ti
+                            UILayoutDebugger._replayStepIndex = si
+                            UILayoutDebugger._renderOverlay()
+                            return
+                        }
+                    }
+                },
+                UILayoutDebugger._baseline!.takenAt,
             )
-            col.style.flex = "1"
-            root.appendChild(col)
+            diffPanel.style.width = "320px"
+            diffPanel.style.flexShrink = "0"
+            body.append(divider, diffPanel)
+        }
+        
+        // ── Live inspector panel ──────────────────────────────────────────────
+        if (live) {
+            const divider = UILayoutDebugger._el("div", [
+                "width: 1px", "background: rgba(255,255,255,0.10)", "flex-shrink: 0",
+            ])
+            const livePanel = UILayoutDebugger._renderLiveInspectorPanel()
+            livePanel.style.width = "320px"
+            livePanel.style.flexShrink = "0"
+            body.append(divider, livePanel)
+        }
+        
+        // ── Stale layout report panel ─────────────────────────────────────────
+        if (stale) {
+            const divider = UILayoutDebugger._el("div", [
+                "width: 1px", "background: rgba(255,255,255,0.10)", "flex-shrink: 0",
+            ])
+            const stalePanel = UILayoutDebugger._renderStaleReportPanel(UILayoutDebugger._staleReportResult!)
+            stalePanel.style.width = "360px"
+            stalePanel.style.flexShrink = "0"
+            body.append(divider, stalePanel)
         }
     }
     
@@ -1176,9 +1535,12 @@ export class UILayoutDebugger {
         const activeViewIndex = activeStep?.viewIndex ?? -1
         
         // countMap still uses all steps for heat colouring (unfiltered).
+        // stepMap stores the last step per viewIndex for frame/cache delta display.
         const countMap = new Map<number, number>()
+        const stepMap = new Map<number, UILayoutDebugStep>()
         for (const step of trace.steps) {
             countMap.set(step.viewIndex, (countMap.get(step.viewIndex) ?? 0) + 1)
+            stepMap.set(step.viewIndex, step)
         }
         
         // ── Step controls ─────────────────────────────────────────────────────
@@ -1248,7 +1610,7 @@ export class UILayoutDebugger {
             let activeRow: HTMLElement | null = null
             for (const treeRoot of trace.roots) {
                 const result = UILayoutDebugger._renderTreeNode(
-                    treeRoot, treeContainer, countMap, activeViewIndex, expandState
+                    treeRoot, treeContainer, countMap, activeViewIndex, expandState, stepMap
                 )
                 if (result) { activeRow = result }
             }
@@ -1387,9 +1749,743 @@ export class UILayoutDebugger {
         return col
     }
     
+    static _renderStaleReportPanel(result: NonNullable<typeof UILayoutDebugger._staleReportResult>): HTMLElement {
+        const panel = UILayoutDebugger._el("div", [
+            "display: flex",
+            "flex-direction: column",
+            "flex: 1",
+            "min-height: 0",
+            "overflow: hidden",
+        ])
+        
+        // ── Header bar ────────────────────────────────────────────────────────
+        const bar = UILayoutDebugger._el("div", [
+            "padding: 5px 10px",
+            "border-bottom: 1px solid rgba(255,255,255,0.08)",
+            "display: flex",
+            "align-items: center",
+            "gap: 6px",
+            "flex-shrink: 0",
+            "font-size: 10px",
+        ])
+        
+        const barTitle = UILayoutDebugger._el("span", ["color: #ffaa55", "flex: 1", "font-weight: bold"])
+        barTitle.textContent = "☢ Stale Layout Report"
+        
+        const rerunBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle("#ffaa55"))
+        rerunBtn.textContent = "↺ Re-run"
+        rerunBtn.title = "Re-run performForcedSubtreeLayout and refresh the report"
+        rerunBtn.onclick = () => UILayoutDebugger.captureStaleLayoutReport()
+        
+        const closeBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle("#9090a8"))
+        closeBtn.textContent = "✕"
+        closeBtn.title = "Close stale report panel"
+        closeBtn.onclick = () => {
+            UILayoutDebugger._staleReportMode = false
+            UILayoutDebugger._renderOverlay()
+        }
+        
+        bar.append(barTitle, rerunBtn, closeBtn)
+        panel.appendChild(bar)
+        
+        // ── Summary bar ───────────────────────────────────────────────────────
+        const { diffs, forcedPassCacheChanges, passIndex } = result
+        
+        const counts = { frame: 0, cache: 0, both: 0, appeared: 0, disappeared: 0 }
+        for (const d of diffs) {
+            if (d.kind === "frame") { counts.frame++ }
+            else if (d.kind === "cache") { counts.cache++ }
+            else if (d.kind === "both") { counts.both++ }
+            else if (d.kind === "appeared") { counts.appeared++ }
+            else if (d.kind === "disappeared") { counts.disappeared++ }
+        }
+        const totalCorrected = diffs.length
+        
+        const summaryBar = UILayoutDebugger._el("div", [
+            "padding: 5px 10px",
+            "border-bottom: 1px solid rgba(255,255,255,0.08)",
+            "display: flex",
+            "gap: 8px",
+            "align-items: center",
+            "flex-shrink: 0",
+            "font-size: 10px",
+            "flex-wrap: wrap",
+        ])
+        
+        if (totalCorrected === 0) {
+            const clean = UILayoutDebugger._el("span", ["color: #88ff99", "font-weight: bold"])
+            clean.textContent = "✓ No stale state detected — all views were already correct."
+            summaryBar.appendChild(clean)
+        }
+        else {
+            const total = UILayoutDebugger._el("span", ["color: #ffaa55", "font-weight: bold"])
+            total.textContent = `${totalCorrected} stale view${totalCorrected !== 1 ? "s" : ""} corrected`
+            summaryBar.appendChild(total)
+            
+            const summaryItems: [string, number, string][] = [
+                ["frame+cache", counts.both,        "#ffaa55"],
+                ["frame",       counts.frame,       "#7bc8ff"],
+                ["cache",       counts.cache,       "#ffcc88"],
+                ["appeared",    counts.appeared,    "#88ff99"],
+                ["disappeared", counts.disappeared, "#ff8888"],
+            ]
+            for (const [label, count, color] of summaryItems) {
+                if (count === 0) { continue }
+                const chip = UILayoutDebugger._el("span", [`color: ${color}`])
+                chip.textContent = `${count} ${label}`
+                summaryBar.appendChild(chip)
+            }
+        }
+        
+        const passTag = UILayoutDebugger._el("span", ["color: #5a5a70", "margin-left: auto", "white-space: nowrap", "flex-shrink: 0"])
+        passTag.textContent = passIndex >= 0 ? `forced pass #${passIndex}` : ""
+        summaryBar.appendChild(passTag)
+        panel.appendChild(summaryBar)
+        
+        // ── UITextMeasurement global cache summary ────────────────────────────
+        const tmBefore = result.before.textMeasurement
+        const tmAfter  = result.after.textMeasurement
+        const tmPreparedCleared = tmBefore.preparedCacheSize > 0 && tmAfter.preparedCacheSize === 0
+        const tmStyleCleared    = tmBefore.styleCacheSize > 0 && tmAfter.styleCacheSize === 0
+        const tmKnown = tmBefore.preparedCacheSize >= 0
+        
+        if (tmKnown) {
+            const tmBar = UILayoutDebugger._el("div", [
+                "padding: 4px 10px",
+                "border-bottom: 1px solid rgba(255,255,255,0.08)",
+                "display: flex",
+                "gap: 10px",
+                "flex-shrink: 0",
+                "font-size: 9px",
+                "color: #7060a0",
+                "flex-wrap: wrap",
+            ])
+            const tmLabel = UILayoutDebugger._el("span", ["color: #7060a0", "font-weight: bold", "flex-shrink: 0"])
+            tmLabel.textContent = "UITextMeasurement (global):"
+            tmBar.appendChild(tmLabel)
+            
+            const prepChip = UILayoutDebugger._el("span", [
+                "color: " + (tmPreparedCleared ? "#ffaa55" : "#5a5a70"),
+            ])
+            prepChip.textContent = `preparedCache ${tmBefore.preparedCacheSize} → ${tmAfter.preparedCacheSize}` +
+                (tmPreparedCleared ? " ✓ cleared" : "")
+            tmBar.appendChild(prepChip)
+            
+            const styleChip = UILayoutDebugger._el("span", [
+                "color: " + (tmStyleCleared ? "#ffaa55" : "#5a5a70"),
+            ])
+            styleChip.textContent = `styleCache ${tmBefore.styleCacheSize} → ${tmAfter.styleCacheSize}` +
+                (tmStyleCleared ? " ✓ cleared" : "")
+            tmBar.appendChild(styleChip)
+            
+            panel.appendChild(tmBar)
+        }
+        
+        // ── Filter tabs ───────────────────────────────────────────────────────
+        type StaleFilter = "all" | "frame" | "cache"
+        let staleFilter: StaleFilter = totalCorrected > 0 ? "all" : "all"
+        
+        const tabBar = UILayoutDebugger._el("div", [
+            "display: flex",
+            "border-bottom: 1px solid rgba(255,255,255,0.08)",
+            "flex-shrink: 0",
+            "font-size: 10px",
+        ])
+        
+        const list = UILayoutDebugger._el("div", [
+            "overflow-y: auto",
+            "flex: 1",
+            "padding: 4px 0",
+        ])
+        
+        const renderList = (filter: StaleFilter) => {
+            list.innerHTML = ""
+            
+            if (diffs.length === 0) {
+                const msg = UILayoutDebugger._el("div", ["padding: 10px 12px", "color: #88ff99", "font-size: 10px"])
+                msg.textContent = "✓ Nothing was corrected — no missing invalidations detected."
+                list.appendChild(msg)
+                return
+            }
+            
+            const visible = filter === "all"
+                            ? diffs
+                            : filter === "frame"
+                              ? diffs.filter(d => d.kind === "frame" || d.kind === "both")
+                              : diffs.filter(d => d.kind === "cache" || d.kind === "both")
+            
+            if (visible.length === 0) {
+                const msg = UILayoutDebugger._el("div", ["padding: 8px 12px", "color: #5a5a70", "font-size: 10px"])
+                msg.textContent = "No items."
+                list.appendChild(msg)
+                return
+            }
+            
+            for (const d of visible) {
+                const cacheWrites = forcedPassCacheChanges.get(d.viewIndex) ?? []
+                
+                const row = UILayoutDebugger._el("div", [
+                    "padding: 5px 10px",
+                    "border-bottom: 1px solid rgba(255,255,255,0.05)",
+                    "font-size: 10px",
+                ])
+                
+                // ── Top line: kind tag + class + elementID ────────────────────
+                const topLine = UILayoutDebugger._el("div", ["display: flex", "gap: 6px", "align-items: baseline", "margin-bottom: 2px"])
+                
+                const kindColors: Record<UILayoutDebugDiffKind, string> = {
+                    appeared: "#88ff99", disappeared: "#ff8888",
+                    both: "#ffaa55", frame: "#7bc8ff", cache: "#ffcc88", unchanged: "#5a5a70",
+                }
+                const kindTag = UILayoutDebugger._el("span", [
+                    `color: ${kindColors[d.kind]}`,
+                    "flex-shrink: 0",
+                    "font-size: 9px",
+                    "font-weight: bold",
+                    "min-width: 70px",
+                ])
+                kindTag.textContent = d.kind.toUpperCase()
+                
+                const cls = UILayoutDebugger._el("span", ["color: #ffcc88", "font-weight: bold"])
+                cls.textContent = d.className
+                
+                const eid = UILayoutDebugger._el("span", ["color: #6a6a80"])
+                eid.textContent = ` #${d.elementID}`
+                
+                // Jump to the forced pass in the pass inspector
+                const jumpBtn = UILayoutDebugger._el("span", [
+                    "color: #59599b",
+                    "margin-left: auto",
+                    "font-size: 9px",
+                    "cursor: pointer",
+                    "flex-shrink: 0",
+                ])
+                jumpBtn.textContent = `pass #${passIndex} ↗`
+                jumpBtn.title = "Jump to this view in the forced-layout pass"
+                jumpBtn.onclick = () => {
+                    const trace = UILayoutDebugger._traces.find(t => t.passIndex === passIndex)
+                    if (!trace) { return }
+                    const ti = UILayoutDebugger._traces.indexOf(trace)
+                    const si = trace.steps.findIndex(s => s.viewIndex === d.viewIndex)
+                    if (si < 0) { return }
+                    UILayoutDebugger._replayTraceIndex = ti
+                    UILayoutDebugger._replayStepIndex = si
+                    UILayoutDebugger._renderOverlay()
+                }
+                
+                topLine.append(kindTag, cls, eid, jumpBtn)
+                row.appendChild(topLine)
+                
+                // ── Frame correction ──────────────────────────────────────────
+                if (d.kind === "frame" || d.kind === "both") {
+                    const frameLine = UILayoutDebugger._el("div", ["padding-left: 76px", "color: #b0b0c8", "font-size: 9px", "margin-bottom: 1px"])
+                    frameLine.textContent = "frame: " + UILayoutDebugger._formatFrameDiff(d.baselineFrame, d.currentFrame)
+                    row.appendChild(frameLine)
+                }
+                
+                // ── Cache correction + write cross-reference ──────────────────
+                if (d.kind === "cache" || d.kind === "both") {
+                    const cacheLine = UILayoutDebugger._el("div", ["padding-left: 76px", "color: #a0a090", "font-size: 9px", "margin-bottom: 1px"])
+                    cacheLine.textContent = "cache: " + UILayoutDebugger._formatCacheDiff(d.baselineCache, d.currentCache)
+                    row.appendChild(cacheLine)
+                    
+                    // Cross-reference: which call paths recomputed the correct value?
+                    if (cacheWrites.length > 0) {
+                        const xrefHeader = UILayoutDebugger._el("div", [
+                            "padding-left: 76px",
+                            "color: #7060a0",
+                            "font-size: 9px",
+                            "margin-top: 3px",
+                            "margin-bottom: 1px",
+                            "font-weight: bold",
+                        ])
+                        xrefHeader.textContent = `↳ recomputed by (${cacheWrites.length} write${cacheWrites.length !== 1 ? "s" : ""} in forced pass):`
+                        row.appendChild(xrefHeader)
+                        
+                        for (const ev of cacheWrites) {
+                            const writeRow = UILayoutDebugger._el("div", [
+                                "padding-left: 84px",
+                                "display: flex",
+                                "gap: 5px",
+                                "align-items: baseline",
+                                "font-size: 9px",
+                            ])
+                            
+                            const keyMatch = ev.cacheKey.match(/h_(\d+(?:\.\d+)?)__w_(\d+(?:\.\d+)?)/)
+                            const keyLabel = keyMatch
+                                             ? (keyMatch[1] !== "0" && keyMatch[2] !== "0"
+                                                ? `h≤${keyMatch[1]} w≤${keyMatch[2]}`
+                                                : keyMatch[2] !== "0" ? `w≤${keyMatch[2]}` : `h≤${keyMatch[1]}`)
+                                             : ev.cacheKey
+                            
+                            const keySpan = UILayoutDebugger._el("span", ["color: #6060808", "flex-shrink: 0"])
+                            keySpan.textContent = keyLabel
+                            
+                            const valSpan = UILayoutDebugger._el("span", ["color: #88ddff", "flex-shrink: 0"])
+                            valSpan.textContent = `→ ${ev.newValue.width.toFixed(0)}×${ev.newValue.height.toFixed(0)}`
+                            
+                            const callerSpan = UILayoutDebugger._el("span", ["color: #7070a8", "cursor: pointer"])
+                            callerSpan.textContent = ev.callerFunction + "()"
+                            callerSpan.title = ev.cleanStack
+                            
+                            let stackOpen = false
+                            const stackEl = UILayoutDebugger._el("div", [
+                                "display: none",
+                                "margin-top: 2px",
+                                "padding: 3px 6px",
+                                "background: rgba(255,255,255,0.04)",
+                                "border-radius: 3px",
+                                "color: #6060808",
+                                "font-size: 9px",
+                                "white-space: pre",
+                                "overflow-x: auto",
+                            ])
+                            stackEl.textContent = ev.cleanStack
+                            callerSpan.onclick = () => {
+                                stackOpen = !stackOpen
+                                stackEl.style.display = stackOpen ? "block" : "none"
+                            }
+                            
+                            writeRow.append(keySpan, valSpan, callerSpan)
+                            row.appendChild(writeRow)
+                            row.appendChild(stackEl)
+                        }
+                    }
+                }
+                
+                list.appendChild(row)
+            }
+        }
+        
+        const filterTabs: [string, StaleFilter, number, string][] = [
+            ["All",   "all",   diffs.length,              "#ffaa55"],
+            ["Frame", "frame", counts.frame + counts.both, "#7bc8ff"],
+            ["Cache", "cache", counts.cache + counts.both, "#ffcc88"],
+        ]
+        
+        const buildTabs = () => {
+            tabBar.innerHTML = ""
+            for (const [label, filter, count, color] of filterTabs) {
+                if (count === 0 && filter !== "all") { continue }
+                const tab = UILayoutDebugger._el("div", [
+                    "padding: 4px 8px",
+                    "cursor: pointer",
+                    "border-bottom: 2px solid " + (staleFilter === filter ? color : "transparent"),
+                    `color: ${staleFilter === filter ? color : "#6a6a80"}`,
+                    "white-space: nowrap",
+                    "font-size: 10px",
+                ])
+                tab.textContent = `${label} (${count})`
+                tab.onclick = () => {
+                    staleFilter = filter
+                    buildTabs()
+                    renderList(staleFilter)
+                }
+                tabBar.appendChild(tab)
+            }
+        }
+        
+        buildTabs()
+        panel.appendChild(tabBar)
+        panel.appendChild(list)
+        renderList(staleFilter)
+        
+        return panel
+    }
+    
+    
+    static _renderHelpPanel(): HTMLElement {
+        const panel = UILayoutDebugger._el("div", [
+            "overflow-y: auto",
+            "flex: 1",
+            "padding: 14px 16px",
+            "font-size: 11px",
+            "line-height: 1.6",
+            "color: #c0c0d8",
+        ])
+        
+        const section = (heading: string, body: string) => {
+            const h = UILayoutDebugger._el("div", [
+                "font-weight: bold",
+                "color: #c8d8ff",
+                "margin-top: 14px",
+                "margin-bottom: 4px",
+                "font-size: 11px",
+                "border-bottom: 1px solid rgba(255,255,255,0.08)",
+                "padding-bottom: 3px",
+            ])
+            h.textContent = heading
+            const b = UILayoutDebugger._el("div", ["color: #a0a0b8", "white-space: pre-wrap"])
+            b.textContent = body
+            panel.appendChild(h)
+            panel.appendChild(b)
+        }
+        
+        const kv = (key: string, value: string) => {
+            const row = UILayoutDebugger._el("div", ["display: flex", "gap: 8px", "margin-bottom: 4px"])
+            const k = UILayoutDebugger._el("span", [
+                "color: #ffcc88",
+                "font-weight: bold",
+                "flex-shrink: 0",
+                "min-width: 110px",
+            ])
+            k.textContent = key
+            const v = UILayoutDebugger._el("span", ["color: #a0a0b8"])
+            v.textContent = value
+            row.append(k, v)
+            panel.appendChild(row)
+        }
+        
+        // ── Concepts ─────────────────────────────────────────────────────────
+        
+        section("Core concepts", "")
+        
+        kv("Pass",
+            "One full run of layoutViewsIfNeeded(). The scheduler collects every " +
+            "view that called setNeedsLayout() and works through them all. A single " +
+            "user action typically triggers one pass.")
+        
+        kv("Iteration",
+            "One loop of the while-loop inside a pass. Laying out a view can call " +
+            "setNeedsLayout() on another view, adding it to the queue mid-pass. " +
+            "The loop repeats until the queue is empty. Most passes have 1 iteration; " +
+            "more than 1 signals that layout is triggering further layout.")
+        
+        kv("Step",
+            "One view being laid out within a pass — one call to layoutIfNeeded(). " +
+            "A pass with 8 steps means 8 views had their layout computed. Steps are " +
+            "the atomic unit you step through in the scrubber.")
+        
+        kv("Trigger",
+            "The call stack at the moment setNeedsLayout() was called on a view. " +
+            "Tells you what caused the view to enter the layout queue.")
+        
+        kv("Heat colour",
+            "Green = laid out once. Orange = laid out twice (possible unnecessary work). " +
+            "Red = laid out 3+ times (likely a layout cycle or redundant invalidation).")
+        
+        // ── Pass inspector ────────────────────────────────────────────────────
+        
+        section("Pass inspector", "")
+        
+        kv("Pass picker",
+            "Selects which recorded pass to inspect. The most recent pass is shown " +
+            "first. Up to 20 passes are stored.")
+        
+        kv("◀ ▶ scrubber",
+            "Steps through the views laid out in the selected pass one at a time. " +
+            "The active view is highlighted in the tree and its frame diff, intrinsic " +
+            "cache diff, trigger stack, and subview changes are shown above.")
+        
+        kv("Frame filter",
+            "All: show every step. Changed: only steps where the frame actually moved " +
+            "or resized. Unchanged: only no-ops. The counter shows n/total when filtered.")
+        
+        kv("Compare ⧉",
+            "Splits the panel into two columns, each showing an independent pass. " +
+            "The tree expands and collapses in sync between both columns.")
+        
+        kv("Cache writes",
+            "Collapsible section at the bottom of each column. Every write to a " +
+            "view's intrinsic size cache during that pass is listed, with the value " +
+            "written and the caller that triggered the measurement.")
+        
+        // ── Baseline / diff ───────────────────────────────────────────────────
+        
+        section("Baseline & diff", "")
+        
+        kv("📍 Baseline",
+            "Captures a flat snapshot of every view's frame and intrinsic cache right " +
+            "now. Requires at least one layout pass to have run so the root view is " +
+            "known. Click again to recapture.")
+        
+        kv("⊕ Diff",
+            "Captures a second snapshot and shows what changed since the baseline. " +
+            "Changes are sorted: appeared, disappeared, frame+cache, frame-only, " +
+            "cache-only. Click any row to jump to the pass that caused that change.")
+        
+        kv("pass #N tag",
+            "Shown on each diff row. Indicates the first recorded pass (by pass " +
+            "number) in which that view was laid out after the baseline was taken.")
+        
+        kv("⬚ Frame / Bounds",
+            "Toggles how frame comparisons are made across all diff panels. " +
+            "Frame mode (default): a view is considered changed if its position or " +
+            "size changed. Bounds mode: only size changes are counted — origin (x/y) " +
+            "is ignored. Use bounds mode when you care only about content-affecting " +
+            "size changes and want to suppress noise from views that merely moved.")
+        
+        // ── Stale layout report ───────────────────────────────────────────────
+        
+        section("Stale layout report  ☢", "")
+        
+        kv("☢ Stale",
+            "The primary tool for finding missing cache invalidations. Click once to " +
+            "snapshot the current tree state, then immediately call " +
+            "performForcedSubtreeLayout() for a complete cold remeasure, then diff the " +
+            "two snapshots. Any view that changed was holding stale/incorrect state — " +
+            "its invalidation was missed somewhere.")
+        
+        kv("Corrected views",
+            "Each row in the ☢ panel is a view the forced pass corrected. The kind " +
+            "tag shows whether the frame, intrinsic cache, or both were stale.")
+        
+        kv("↳ recomputed by",
+            "For cache corrections, the exact call path(s) that recomputed the correct " +
+            "value during the forced pass are listed below each row, with expandable " +
+            "stack traces. Work backwards from that call site to find where the " +
+            "corresponding invalidation should have been triggered but wasn't.")
+        
+        kv("pass #N ↗",
+            "Each row has a jump link to the forced-layout pass in the pass inspector " +
+            "so you can step through the remeasure for that view in full detail.")
+        
+        kv("Re-run",
+            "Right-click the ☢ Stale button (or use ↺ Re-run in the panel) to re-run " +
+            "the report without closing and reopening. Useful after you've applied a fix " +
+            "and want to verify the stale count drops to zero.")
+        
+        kv("When to use it",
+            "Reproduce the bug, then immediately click ☢ Stale before triggering any " +
+            "other layout. The tree must be in its incorrect state at the moment you " +
+            "click. The forced layout will correct it, which is visible in the UI after " +
+            "the report runs.")
+        
+        // ── Live inspector ────────────────────────────────────────────────────
+        
+        section("Live inspector  👁", "")
+        
+        kv("👁 Live",
+            "Shows the current view tree as it exists right now — not a recorded " +
+            "snapshot. Frames and cache entries reflect the live DOM state. " +
+            "Use ↺ Refresh to re-read after triggering layout manually.")
+        
+        // ── Breakpoints ───────────────────────────────────────────────────────
+        
+        section("Breakpoint mode  ⏸", "")
+        
+        kv("⏸ BP",
+            "When enabled, a sentinel line executes before every layoutIfNeeded() " +
+            "call. Set a browser debugger breakpoint on that line to pause before " +
+            "each step with the full live JS stack in scope.")
+        
+        kv("Finding the line",
+            "In Chrome DevTools Sources, press Cmd+Opt+F (Mac) or Ctrl+Shift+F " +
+            "(Windows) and search for: breakpointOnThisLine")
+        
+        // ── Console API ───────────────────────────────────────────────────────
+        
+        section("Console API", "All methods are on the global UILayoutDebugger object.")
+        
+        kv("UILayoutDebugger.enable()",              "Start or stop recording and show/hide the overlay.")
+        kv("UILayoutDebugger.disable()",             "Stop recording and hide the overlay.")
+        kv("UILayoutDebugger.enableBreakpoints()",   "Turn on breakpoint step-through mode.")
+        kv("UILayoutDebugger.captureBaseline()",     "Snapshot current state as baseline.")
+        kv("UILayoutDebugger.captureAndDiff()",      "Snapshot and diff against baseline.")
+        kv("UILayoutDebugger.captureStaleLayoutReport()", "Snapshot → forced remeasure → diff. Primary cache-staleness diagnostic.")
+        kv("UILayoutDebugger.clearStaleReport()",    "Clear the stale report result and close the panel.")
+        kv("UILayoutDebugger.clearTraces()",         "Discard all recorded passes and reset the counter.")
+        kv("UILayoutDebugger.goToStep(n)",           "Jump to step n (0-based) in the current pass.")
+        kv("UILayoutDebugger.toggleLiveInspector()", "Show or hide the live view tree panel.")
+        kv("UILayoutDebugger._boundsBasedDiff = true", "Switch all frame diffs to size-only (bounds) mode from the console.")
+        
+        return panel
+    }
+    
+    static _renderLiveInspectorPanel(): HTMLElement {
+        const panel = UILayoutDebugger._el("div", [
+            "display: flex",
+            "flex-direction: column",
+            "flex: 1",
+            "min-height: 0",
+            "overflow: hidden",
+        ])
+        
+        // ── Header bar ────────────────────────────────────────────────────────
+        const bar = UILayoutDebugger._el("div", [
+            "padding: 5px 10px",
+            "border-bottom: 1px solid rgba(255,255,255,0.08)",
+            "display: flex",
+            "align-items: center",
+            "gap: 6px",
+            "flex-shrink: 0",
+            "font-size: 10px",
+        ])
+        
+        const barTitle = UILayoutDebugger._el("span", ["color: #a0a0b8", "flex: 1", "font-weight: bold"])
+        barTitle.textContent = "👁 Live View Tree"
+        
+        const refreshBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle("#9090a8"))
+        refreshBtn.textContent = "↺ Refresh"
+        refreshBtn.title = "Re-capture current state"
+        refreshBtn.onclick = () => UILayoutDebugger._renderOverlay()
+        
+        const syncBtn = UILayoutDebugger._el("button", UILayoutDebugger._btnStyle("#9090a8"))
+        syncBtn.textContent = "⇄ Sync"
+        syncBtn.title = "Sync collapse/expand state from pass inspector. Views not in the pass inspector are kept collapsed."
+        syncBtn.onclick = () => {
+            // Read the active pass expand state
+            const source = UILayoutDebugger._compareMode
+                           ? UILayoutDebugger._sharedExpandState
+                           : UILayoutDebugger._singleExpandState
+            
+            // Build a set of all viewIndices that appear in any recorded trace step
+            const tracedViews = new Set<number>()
+            for (const trace of UILayoutDebugger._traces) {
+                for (const step of trace.steps) { tracedViews.add(step.viewIndex) }
+            }
+            
+            // Copy source state; any viewIndex not in source and not in traced
+            // views defaults to collapsed
+            const newState = new Map<number, boolean>()
+            for (const [idx, expanded] of source) {
+                newState.set(idx, expanded)
+            }
+            // For views present in the live tree but absent from pass inspector
+            // state, collapse them unless they appear in a trace
+            UILayoutDebugger._walkViewTree(
+                UILayoutDebugger._lastKnownRootView,
+                new Map(),  // discard — we only need the side effect of visiting indices
+                new Set(),
+            )
+            // Actually walk to collect all live view indices
+            const liveIndices = new Set<number>()
+            const collectIndices = (view: any, visited: Set<number>) => {
+                const idx: number = view?._UIViewIndex ?? -1
+                if (idx < 0 || visited.has(idx)) { return }
+                visited.add(idx)
+                liveIndices.add(idx)
+                for (const sv of view?.subviews ?? []) { collectIndices(sv, visited) }
+            }
+            collectIndices(UILayoutDebugger._lastKnownRootView, new Set())
+            
+            for (const idx of liveIndices) {
+                if (!newState.has(idx)) {
+                    // Not in pass expand state: expand only if it appears in a trace
+                    newState.set(idx, tracedViews.has(idx))
+                }
+            }
+            
+            UILayoutDebugger._liveExpandState = newState
+            UILayoutDebugger._renderOverlay()
+        }
+        
+        bar.append(barTitle, refreshBtn, syncBtn)
+        panel.appendChild(bar)
+        
+        const root = UILayoutDebugger._lastKnownRootView
+        if (!root) {
+            const msg = UILayoutDebugger._el("div", ["padding: 10px 12px", "color: #6a6a80", "font-size: 10px"])
+            msg.textContent = "No root view found yet — trigger a layout pass first."
+            panel.appendChild(msg)
+            return panel
+        }
+        
+        // ── Tree ──────────────────────────────────────────────────────────────
+        const treeContainer = UILayoutDebugger._el("div", [
+            "overflow-y: auto",
+            "flex: 1",
+            "padding: 4px 0",
+            "position: relative",
+        ])
+        
+        UILayoutDebugger._renderLiveNode(
+            root, treeContainer, 0, new Set(), UILayoutDebugger._liveExpandState
+        )
+        panel.appendChild(treeContainer)
+        return panel
+    }
+    
+    static _renderLiveNode(
+        view: any,
+        container: HTMLElement,
+        depth: number,
+        visited: Set<number>,
+        expandState: Map<number, boolean>,
+    ) {
+        const idx: number = view?._UIViewIndex ?? -1
+        if (idx < 0 || visited.has(idx)) { return }
+        visited.add(idx)
+        
+        const frame = UILayoutDebugger._captureFrame(view)
+        const cache = UILayoutDebugger._captureCache(view)
+        const className: string = view?.constructor?.name ?? "UnknownView"
+        const elementID: string = view?.elementID ?? String(idx)
+        const subviews: any[] = view?.subviews ?? []
+        const hasChildren = subviews.length > 0
+        
+        // Default to expanded if not in state map yet
+        if (!expandState.has(idx)) { expandState.set(idx, true) }
+        let expanded = expandState.get(idx)!
+        
+        const row = UILayoutDebugger._el("div", [
+            "display: flex",
+            "align-items: baseline",
+            "padding: 1px 10px 1px " + (10 + depth * 12) + "px",
+            "cursor: " + (hasChildren ? "pointer" : "default"),
+            "border-radius: 3px",
+            "margin: 0 4px",
+        ])
+        
+        const chevron = UILayoutDebugger._el("span", [
+            "display: inline-block", "width: 10px", "flex-shrink: 0",
+            "color: #7070a0", "font-size: 8px", "margin-right: 2px", "text-align: center",
+        ])
+        chevron.textContent = !hasChildren ? "" : expanded ? "▾" : "▸"
+        
+        const dot = UILayoutDebugger._el("span", [
+            "display: inline-block", "width: 7px", "height: 7px",
+            "border-radius: 50%", "margin-right: 5px", "flex-shrink: 0",
+            "background: #4a4a5a",
+        ])
+        
+        const classSpan = UILayoutDebugger._el("span", ["color: #9090a8"])
+        classSpan.textContent = className
+        
+        const eidSpan = UILayoutDebugger._el("span", ["color: #6a6a80", "margin-left: 4px"])
+        eidSpan.textContent = `#${elementID}`
+        
+        const frameSpan = UILayoutDebugger._el("span", ["color: #55556a", "margin-left: 4px", "font-size: 9px"])
+        frameSpan.textContent = frame
+                                ? `${frame.left.toFixed(0)},${frame.top.toFixed(0)}  ${frame.width.toFixed(0)}×${frame.height.toFixed(0)}`
+                                : ""
+        
+        row.append(chevron, dot, classSpan, eidSpan, frameSpan)
+        
+        row.title = [
+            `${className} #${elementID}`,
+            frame
+            ? `frame: ${frame.left.toFixed(1)},${frame.top.toFixed(1)}  ${frame.width.toFixed(1)}×${frame.height.toFixed(1)}`
+            : "frame: (none)",
+            "cache: " + UILayoutDebugger._formatCacheSnapshot(cache),
+        ].join("\n")
+        
+        container.appendChild(row)
+        
+        if (!hasChildren) { return }
+        
+        const childContainer = UILayoutDebugger._el("div", [
+            "display: " + (expanded ? "block" : "none"),
+        ])
+        container.appendChild(childContainer)
+        
+        for (const sv of subviews) {
+            UILayoutDebugger._renderLiveNode(sv, childContainer, depth + 1, visited, expandState)
+        }
+        
+        row.onclick = () => {
+            expanded = !expanded
+            expandState.set(idx, expanded)
+            childContainer.style.display = expanded ? "block" : "none"
+            chevron.textContent = expanded ? "▾" : "▸"
+        }
+    }
+    
     static _renderDiffPanel(
         baseline: UILayoutDebugStateSnapshot,
         current: UILayoutDebugStateSnapshot,
+        onNavigate: (viewIndex: number) => void,
+        baselineTakenAt: number,
     ): HTMLElement {
         const panel = UILayoutDebugger._el("div", [
             "display: flex",
@@ -1477,11 +2573,25 @@ export class UILayoutDebugger {
                     appeared: "#88ff99", disappeared: "#ff8888",
                     both: "#ffaa55", frame: "#7bc8ff", cache: "#ffcc88", unchanged: "#5a5a70",
                 }
+                
+                // Find which pass first changed this view after the baseline
+                const causingTrace = d.kind !== "disappeared"
+                                     ? UILayoutDebugger._findCausingTrace(d.viewIndex, baselineTakenAt)
+                                     : null
+                const hasTrace = !!causingTrace
+                
                 const row = UILayoutDebugger._el("div", [
                     "padding: 3px 10px",
                     "border-bottom: 1px solid rgba(255,255,255,0.04)",
                     "font-size: 10px",
+                    hasTrace ? "cursor: pointer" : "cursor: default",
                 ])
+                if (hasTrace) {
+                    row.title = `Click to jump to pass #${causingTrace!.passIndex} in the pass inspector`
+                    row.onmouseenter = () => { row.style.background = "rgba(255,255,255,0.06)" }
+                    row.onmouseleave = () => { row.style.background = "" }
+                    row.onclick = () => onNavigate(d.viewIndex)
+                }
                 
                 const topLine = UILayoutDebugger._el("div", ["display: flex", "gap: 6px", "align-items: baseline"])
                 
@@ -1500,7 +2610,19 @@ export class UILayoutDebugger {
                 const eid = UILayoutDebugger._el("span", ["color: #6a6a80"])
                 eid.textContent = `#${d.elementID}`
                 
-                topLine.append(kindTag, cls, eid)
+                if (causingTrace) {
+                    const passTag = UILayoutDebugger._el("span", [
+                        "color: #59599b",
+                        "margin-left: auto",
+                        "font-size: 9px",
+                        "flex-shrink: 0",
+                    ])
+                    passTag.textContent = `pass #${causingTrace.passIndex}`
+                    topLine.append(kindTag, cls, eid, passTag)
+                }
+                else {
+                    topLine.append(kindTag, cls, eid)
+                }
                 row.appendChild(topLine)
                 
                 if (d.kind !== "appeared" && d.kind !== "disappeared") {
@@ -1730,6 +2852,7 @@ export class UILayoutDebugger {
         countMap: Map<number, number>,
         activeViewIndex: number,
         expandState: Map<number, boolean> | null,
+        stepMap: Map<number, UILayoutDebugStep>,
     ): HTMLElement | null {
         const count = countMap.get(node.viewIndex) ?? 0
         const isActive = node.viewIndex === activeViewIndex && activeViewIndex >= 0
@@ -1813,6 +2936,33 @@ export class UILayoutDebugger {
         ])
         frameSpan.textContent = frameStr
         
+        // For touched nodes, show what changed in this pass inline
+        const step = stepMap.get(node.viewIndex)
+        const frameChanged = step
+                             ? !UILayoutDebugger._framesEqual(step.frameBefore, step.frameAfter)
+                             : false
+        const cacheChanged = step
+                             ? !UILayoutDebugger._cachesEqual(step.cacheBefore, step.cacheAfter)
+                             : false
+        
+        const deltaSpan = UILayoutDebugger._el("span", [
+            "margin-left: 5px",
+            "font-size: 9px",
+            "flex-shrink: 0",
+        ])
+        if (frameChanged && cacheChanged) {
+            deltaSpan.style.color = "#ffaa55"
+            deltaSpan.textContent = "frame+cache"
+        }
+        else if (frameChanged) {
+            deltaSpan.style.color = "#7bc8ff"
+            deltaSpan.textContent = UILayoutDebugger._formatFrameDiff(step!.frameBefore, step!.frameAfter)
+        }
+        else if (cacheChanged) {
+            deltaSpan.style.color = "#ffcc88"
+            deltaSpan.textContent = "cache changed"
+        }
+        
         if (count > 0) {
             const countBadge = UILayoutDebugger._el("span", [
                 "margin-left: 5px",
@@ -1824,7 +2974,12 @@ export class UILayoutDebugger {
                 "font-weight: bold",
             ])
             countBadge.textContent = String(count) + "×"
-            row.append(chevron, dot, className, eid, frameSpan, countBadge)
+            if (frameChanged || cacheChanged) {
+                row.append(chevron, dot, className, eid, frameSpan, deltaSpan, countBadge)
+            }
+            else {
+                row.append(chevron, dot, className, eid, frameSpan, countBadge)
+            }
         }
         else {
             row.append(chevron, dot, className, eid, frameSpan)
@@ -1832,7 +2987,7 @@ export class UILayoutDebugger {
         
         // Tooltip on hover
         const cacheStr = UILayoutDebugger._formatCacheSnapshot(node.cacheAfterPass)
-        row.title = [
+        const tooltipLines = [
             node.className + " #" + node.elementID,
             "viewIndex: " + node.viewIndex,
             node.frame
@@ -1840,7 +2995,14 @@ export class UILayoutDebugger {
             : "frame: (none)",
             "laid out: " + count + "×",
             "intrinsic cache (post-pass): " + cacheStr,
-        ].join("\n")
+        ]
+        if (step && frameChanged) {
+            tooltipLines.push("frame Δ: " + UILayoutDebugger._formatFrameDiff(step.frameBefore, step.frameAfter))
+        }
+        if (step && cacheChanged) {
+            tooltipLines.push("cache Δ: " + UILayoutDebugger._formatCacheDiff(step.cacheBefore, step.cacheAfter))
+        }
+        row.title = tooltipLines.join("\n")
         
         container.appendChild(row)
         
@@ -1856,7 +3018,7 @@ export class UILayoutDebugger {
         
         for (const child of node.children) {
             const result = UILayoutDebugger._renderTreeNode(
-                child, childContainer, countMap, activeViewIndex, expandState
+                child, childContainer, countMap, activeViewIndex, expandState, stepMap
             )
             if (result) { activeRow = result }
         }
@@ -1887,32 +3049,52 @@ export class UILayoutDebugger {
         after: UILayoutDebugFrame | null
     ): string {
         if (!before && !after) { return "(no frame data)" }
-        if (!before) { return `→ ${UILayoutDebugger._formatFrame(after)}` }
-        if (!after) { return `${UILayoutDebugger._formatFrame(before)} → (none)` }
-        const changed =
-            before.left !== after.left || before.top !== after.top ||
-            before.width !== after.width || before.height !== after.height
-        if (!changed) {
-            return `= ${UILayoutDebugger._formatFrame(after)}`
+        const bounds = UILayoutDebugger._boundsBasedDiff
+        const fmt = (f: UILayoutDebugFrame | null) => {
+            if (!f) { return "(none)" }
+            return bounds
+                   ? `${f.width.toFixed(0)}×${f.height.toFixed(0)}`
+                   : UILayoutDebugger._formatFrame(f)
         }
-        return `${UILayoutDebugger._formatFrame(before)}  →  ${UILayoutDebugger._formatFrame(after)}`
+        if (!before) { return `→ ${fmt(after)}` }
+        if (!after)  { return `${fmt(before)} → (none)` }
+        const changed = bounds
+                        ? (before.width !== after.width || before.height !== after.height)
+                        : (before.left !== after.left || before.top !== after.top ||
+                before.width !== after.width || before.height !== after.height)
+        if (!changed) {
+            return `= ${fmt(after)}`
+        }
+        return `${fmt(before)}  →  ${fmt(after)}`
     }
     
     static _formatCacheSnapshot(c: UILayoutDebugCacheSnapshot | null): string {
         if (!c) { return "(none)" }
-        if (c.entryCount === 0) { return "empty" }
-        const lines = Object.entries(c.entries).map(([key, val]) => {
-            // key format: h_0__w_500 → "w=500: 320×48"
-            const match = key.match(/h_(\d+(?:\.\d+)?)__w_(\d+(?:\.\d+)?)/)
-            const label = match
-                          ? (match[1] !== "0" && match[2] !== "0"
-                             ? `h≤${match[1]} w≤${match[2]}`
-                             : match[2] !== "0" ? `w≤${match[2]}` : `h≤${match[1]}`)
-                          : key
-            return `  ${label}: ${val.width.toFixed(0)}×${val.height.toFixed(0)}`
-        })
-        const prefix = c.isShared ? `shared(${c.sharedKey}) ` : ""
-        return `${prefix}${c.entryCount} entr${c.entryCount === 1 ? "y" : "ies"}\n${lines.join("\n")}`
+        const lines: string[] = []
+        if (c.entryCount === 0) {
+            lines.push("intrinsic: empty")
+        }
+        else {
+            const intrinsicLines = Object.entries(c.entries).map(([key, val]) => {
+                const match = key.match(/h_(\d+(?:\.\d+)?)__w_(\d+(?:\.\d+)?)/)
+                const label = match
+                              ? (match[1] !== "0" && match[2] !== "0"
+                                 ? `h≤${match[1]} w≤${match[2]}`
+                                 : match[2] !== "0" ? `w≤${match[2]}` : `h≤${match[1]}`)
+                              : key
+                return `  ${label}: ${val.width.toFixed(0)}×${val.height.toFixed(0)}`
+            })
+            const prefix = c.isShared ? `shared(${c.sharedKey}) ` : ""
+            lines.push(`${prefix}${c.entryCount} entr${c.entryCount === 1 ? "y" : "ies"}`)
+            lines.push(...intrinsicLines)
+        }
+        lines.push(c.hasFrameCache
+                   ? `frameCache: ${UILayoutDebugger._formatFrame(c.frameCache)}`
+                   : "frameCache: (empty)")
+        lines.push(c.hasVirtualFrameCache
+                   ? `virtualFrameCache: ${UILayoutDebugger._formatFrame(c.virtualFrameCache)}`
+                   : "virtualFrameCache: (empty)")
+        return lines.join("\n")
     }
     
     static _formatCacheDiff(
@@ -1922,7 +3104,7 @@ export class UILayoutDebugger {
         if (!before && !after) { return "(no cache data)" }
         const bCount = before?.entryCount ?? 0
         const aCount = after?.entryCount ?? 0
-        if (bCount === 0 && aCount === 0) { return "empty → empty" }
+        if (bCount === 0 && aCount === 0 && !before?.hasFrameCache && !after?.hasFrameCache && !before?.hasVirtualFrameCache && !after?.hasVirtualFrameCache) { return "empty → empty" }
         
         const lines: string[] = []
         const allKeys = new Set([
@@ -1951,6 +3133,48 @@ export class UILayoutDebugger {
                 lines.push(`  = ${label}: ${a.width.toFixed(0)}×${a.height.toFixed(0)}`)
             }
         }
+        
+        // Frame cache diff
+        const bHasF = before?.hasFrameCache ?? false
+        const aHasF = after?.hasFrameCache ?? false
+        if (bHasF || aHasF) {
+            if (bHasF && !aHasF) {
+                lines.push(`  - frameCache: ${UILayoutDebugger._formatFrame(before!.frameCache)}`)
+            }
+            else if (!bHasF && aHasF) {
+                lines.push(`  + frameCache: ${UILayoutDebugger._formatFrame(after!.frameCache)}`)
+            }
+            else {
+                const bf = before!.frameCache, af = after!.frameCache
+                const changed = !bf || !af || bf.top !== af.top || bf.left !== af.left || bf.width !== af.width || bf.height !== af.height
+                lines.push(changed
+                           ? `  ~ frameCache: ${UILayoutDebugger._formatFrame(bf)} → ${UILayoutDebugger._formatFrame(af)}`
+                           : `  = frameCache: ${UILayoutDebugger._formatFrame(af)}`)
+            }
+        }
+        else {
+            lines.push("  = frameCache: (empty)")
+        }
+        
+        // Virtual frame cache diff
+        const bHasV = before?.hasVirtualFrameCache ?? false
+        const aHasV = after?.hasVirtualFrameCache ?? false
+        if (bHasV || aHasV) {
+            if (bHasV && !aHasV) {
+                lines.push(`  - virtualFrameCache: ${UILayoutDebugger._formatFrame(before!.virtualFrameCache)}`)
+            }
+            else if (!bHasV && aHasV) {
+                lines.push(`  + virtualFrameCache: ${UILayoutDebugger._formatFrame(after!.virtualFrameCache)}`)
+            }
+            else {
+                const bv = before!.virtualFrameCache, av = after!.virtualFrameCache
+                const changed = !bv || !av || bv.top !== av.top || bv.left !== av.left || bv.width !== av.width || bv.height !== av.height
+                lines.push(changed
+                           ? `  ~ virtualFrameCache: ${UILayoutDebugger._formatFrame(bv)} → ${UILayoutDebugger._formatFrame(av)}`
+                           : `  = virtualFrameCache: ${UILayoutDebugger._formatFrame(av)}`)
+            }
+        }
+        
         const header = bCount === aCount
                        ? `${aCount} entr${aCount === 1 ? "y" : "ies"}`
                        : `${bCount} → ${aCount} entries`

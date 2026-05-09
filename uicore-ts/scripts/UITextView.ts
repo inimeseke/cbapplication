@@ -12,6 +12,22 @@ export class UITextView extends UIView {
     
     static defaultTextColor = UIColor.blackColor
     static notificationTextColor = UIColor.redColor
+    static attentionRequiredColor = new UIColor("#f59e0b")
+    
+    /**
+     * Override this to customise the attention indicator HTML that is appended
+     * to a label's text when `attentionRequired` is `true`.
+     *
+     * The default renders an amber `●` dot:
+     * ```
+     * UITextView.renderAttentionIndicator = () =>
+     *     `<span style="color: #f59e0b; margin-left: 4px;">●</span>`
+     * ```
+     * Call sites never need to change — only this one function needs to be
+     * replaced at app startup to restyle every attention indicator globally.
+     */
+    static renderAttentionIndicator: () => string = () =>
+        "<span style=\"color: " + UITextView.attentionRequiredColor.stringValue + "; margin-left: 4px;\">●</span>"
     
     // Global caches for all UILabels
     static _intrinsicHeightCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
@@ -283,6 +299,10 @@ export class UITextView extends UIView {
             return false
         }
         
+        if (this._attentionRequired) {
+            return false
+        }
+        
         const hasComplexHTML = /<(?!\/?(b|i|em|strong|span)\b)[^>]+>/i.test(content)
         
         if (hasComplexHTML) {
@@ -401,6 +421,24 @@ export class UITextView extends UIView {
     
     //#endregion
     
+    //#region Getters & Setters - Attention Required
+    
+    get attentionRequired() {
+        return this._attentionRequired
+    }
+    
+    set attentionRequired(attentionRequired: boolean) {
+        if (this._attentionRequired == attentionRequired) {
+            return
+        }
+        
+        this._attentionRequired = attentionRequired
+        this.text = this.text
+        this.setNeedsLayoutUpToRootView()
+    }
+    
+    //#endregion
+    
     //#region Getters & Setters - Text Content
     
     get text() {
@@ -415,11 +453,16 @@ export class UITextView extends UIView {
                 (" (" + this.notificationAmount + ")").bold() + "</span>"
         }
         
+        var attentionDot = ""
+        if (this._attentionRequired) {
+            attentionDot = UITextView.renderAttentionIndicator()
+        }
+        
         const displayText = this.thousandsSeparator !== null
                             ? UITextView.applyThousandsSeparatorToNumericalString(text, this.thousandsSeparator)
                             : text
         
-        const newInnerHTML = this.textPrefix + FIRST(displayText, "") + this.textSuffix + notificationText
+        const newInnerHTML = this.textPrefix + FIRST(displayText, "") + this.textSuffix + notificationText + attentionDot
         
         if (this.textElementView.viewHTMLElement.innerHTML !== newInnerHTML) {
             this.textElementView.viewHTMLElement.innerHTML = newInnerHTML
@@ -626,6 +669,7 @@ export class UITextView extends UIView {
     textPrefix = ""
     textSuffix = ""
     _notificationAmount = 0
+    _attentionRequired = false
     
     _thousandsSeparator: string | null = null
     

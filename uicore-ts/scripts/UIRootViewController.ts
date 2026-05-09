@@ -14,6 +14,7 @@ export interface UIRootViewControllerLazyViewControllerObject<T extends typeof U
     shouldShow: () => (Promise<boolean> | boolean);
     isInitialized: boolean;
     deleteOnUnload: boolean;
+    deleteOnLogout: boolean;
     deleteInstance: () => void
 }
 
@@ -73,11 +74,13 @@ export class UIRootViewController extends UIViewController {
         classObject: T,
         options: {
             shouldShow?: () => (Promise<boolean> | boolean),
-            deleteOnUnload?: boolean
+            deleteOnUnload?: boolean,
+            deleteOnLogout?: boolean
         } = {}
     ): UIRootViewControllerLazyViewControllerObject<T> {
         const shouldShow = options.shouldShow ?? (() => YES)
         const deleteOnUnload = options.deleteOnUnload ?? NO
+        const deleteOnLogout = options.deleteOnLogout ?? NO
         
         const result: UIRootViewControllerLazyViewControllerObject<T> = {
             class: classObject,
@@ -85,6 +88,7 @@ export class UIRootViewController extends UIViewController {
             shouldShow: shouldShow,
             isInitialized: NO,
             deleteOnUnload: deleteOnUnload,
+            deleteOnLogout: deleteOnLogout,
             deleteInstance: () => {
                 if (result.isInitialized) {
                     result.isInitialized = NO

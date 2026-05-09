@@ -80,7 +80,7 @@ export class UIRootViewController extends UIViewController {
     ): UIRootViewControllerLazyViewControllerObject<T> {
         const shouldShow = options.shouldShow ?? (() => YES)
         const deleteOnUnload = options.deleteOnUnload ?? NO
-        const deleteOnLogout = options.deleteOnLogout ?? NO
+        const deleteOnLogout = options.deleteOnLogout ?? YES
         
         const result: UIRootViewControllerLazyViewControllerObject<T> = {
             class: classObject,

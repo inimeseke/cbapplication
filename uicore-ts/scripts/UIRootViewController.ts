@@ -92,6 +92,15 @@ export class UIRootViewController extends UIViewController {
             deleteInstance: () => {
                 if (result.isInitialized) {
                     result.isInitialized = NO
+                    // Remove the view's DOM element before resetting the lazy value.
+                    // UIView reuses existing elements by ID, so if the element remains
+                    // in the DOM the next construction would attach a new controller
+                    // to the same stale element, causing duplicate subviews.
+                    const existingView = result.instance?.view
+                    if (existingView) {
+                        existingView.removeFromSuperview()
+                        existingView.viewHTMLElement.remove()
+                    }
                     initializeLazyInstance()
                 }
             }
@@ -348,10 +357,14 @@ export class UIRootViewController extends UIViewController {
             
             contentView.style.transform = "translateX(" + 0 + "px)"
             
+            const detailsWidth = Math.min(
+                this.detailsViewController.view.intrinsicContentWidth() || contentView.bounds.width,
+                contentView.bounds.width
+            )
             this.detailsViewController.view.frame = this.backgroundView.frame.rectangleWithInset(
                 paddingLength
             ).rectangleWithWidth(
-                contentView.bounds.width,
+                detailsWidth,
                 0.5
             ).rectangleWithHeight(
                 Math.max(

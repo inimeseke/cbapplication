@@ -221,22 +221,34 @@ export class CBCore extends UIObject {
         }
         else if (previousValue != isUserLoggedIn) {
             
-            this.performFunctionWithDelay(0.01, function (this: CBCore) {
-                
-                UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed([
-                    "settings"
-                ]).apply()
-                
-                this.broadcastMessageInRootViewTree({
-                    name: CBCore.broadcastEventName.userDidLogOut,
-                    parameters: nil
-                })
-                
-                this.updateLinkTargets()
-                
-            }.bind(this))
+            this.didLogOut()
             
         }
+        
+    }
+    
+    /**
+     * Called when the user transitions from logged-in to logged-out.
+     * The default implementation clears the route and broadcasts `userDidLogOut`.
+     * Subclasses may override this to suppress the route change when they intend
+     * to navigate somewhere specific immediately after logout.
+     */
+    didLogOut() {
+        
+        this.performFunctionWithDelay(0.01, function (this: CBCore) {
+            
+            UIRoute.currentRoute.routeByRemovingComponentsOtherThanOnesNamed([
+                "settings"
+            ]).apply()
+            
+            this.broadcastMessageInRootViewTree({
+                name: CBCore.broadcastEventName.userDidLogOut,
+                parameters: nil
+            })
+            
+            this.updateLinkTargets()
+            
+        }.bind(this))
         
     }
     
@@ -253,7 +265,7 @@ export class CBCore extends UIObject {
     }
     
     
-    private _userProfile: CBUserProfile
+    _userProfile: CBUserProfile
     
     get userProfile() {
         return this._userProfile
@@ -356,4 +368,3 @@ export class CBCore extends UIObject {
     
     
 }
-

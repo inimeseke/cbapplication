@@ -199,19 +199,17 @@ export class UIViewController extends UIObject {
         
         controller = FIRST_OR_NIL(controller)
         containerView = FIRST_OR_NIL(containerView)
-        controller.viewWillAppear()
+        
         if (!this.hasChildViewController(controller)) {
+            controller.viewWillAppear()
             controller.willMoveToParentViewController(this)
             this.childViewControllers.push(controller)
             containerView.addSubview(controller.view)
             controller.didMoveToParentViewController(this)
+            controller.handleRouteRecursively(UIRoute.currentRoute)
+            controller.didMoveToParentViewController(this)
+            controller.viewDidAppear()
         }
-        
-        controller.handleRouteRecursively(UIRoute.currentRoute)
-        
-        controller.didMoveToParentViewController(this)
-        controller.viewDidAppear()
-        
         
     }
     

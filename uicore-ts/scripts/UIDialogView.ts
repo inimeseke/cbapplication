@@ -277,8 +277,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         
         //this.view.centerInContainer();
         
-        this.view.style.position = "relative"
-        
         this.view.style.zIndex = "" + this.zIndex
         
         this.view.setNeedsLayout()
@@ -296,26 +294,3 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -26,8 +26,10 @@ export class UITextView extends UIView {
      * Call sites never need to change — only this one function needs to be
      * replaced at app startup to restyle every attention indicator globally.
      */
-    static renderAttentionIndicator: () => string = () =>
+    static attentionIndicatorHTMLString: () => string = () =>
         "<span style=\"color: " + UITextView.attentionRequiredColor.stringValue + "; margin-left: 4px;\">●</span>"
+    
+    attentionIndicatorHTMLString: () => string = UITextView.attentionIndicatorHTMLString
     
     // Global caches for all UILabels
     static _intrinsicHeightCache: { [x: string]: { [x: string]: number; }; } & UIObject = new UIObject() as any
@@ -455,7 +457,7 @@ export class UITextView extends UIView {
         
         var attentionDot = ""
         if (this._attentionRequired) {
-            attentionDot = UITextView.renderAttentionIndicator()
+            attentionDot = this.attentionIndicatorHTMLString()
         }
         
         const displayText = this.thousandsSeparator !== null

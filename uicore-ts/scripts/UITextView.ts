@@ -318,9 +318,12 @@ export class UITextView extends UIView {
             // against this by checking the font is confirmed available before
             // trusting canvas-based measurement.
             const styles = this._getMeasurementStyles()
-            const documentHasFont = document.fonts.check(styles?.font ?? "")
+            if (!styles?.font) {
+                return YES
+            }
+            const documentHasFont = document.fonts.check(styles.font)
             // noinspection RedundantIfStatementJS
-            if (styles && !documentHasFont) {
+            if (!documentHasFont) {
                 return NO
             }
             

@@ -15,6 +15,9 @@ export interface UIRootViewControllerLazyViewControllerObject<T extends typeof U
     isInitialized: boolean;
     deleteOnUnload: boolean;
     deleteOnLogout: boolean;
+    /** Only applicable when the VC is registered in detailsViewControllers.
+     *  When YES, pressing Escape will dismiss the details dialog. */
+    dismissesOnEscape: boolean;
     deleteInstance: () => void
 }
 
@@ -49,9 +52,9 @@ export class UIRootViewController extends UIViewController {
     _detailsDialogView: UIDialogView = new UIDialogView(this.view.elementID + "DetailsDialogView")
         .configuredWithObject({
             dismiss: EXTEND(() => {
-                    const route = UIRoute.currentRoute
+                    let route = UIRoute.currentRoute
                     this.detailsViewControllers.allValues.forEach(
-                        value => route.routeByRemovingComponentNamed(value.class.routeComponentName)
+                        value => route = route.routeByRemovingComponentNamed(value.class.routeComponentName)
                     )
                     route.apply()
                 }
@@ -75,12 +78,16 @@ export class UIRootViewController extends UIViewController {
         options: {
             shouldShow?: () => (Promise<boolean> | boolean),
             deleteOnUnload?: boolean,
-            deleteOnLogout?: boolean
+            deleteOnLogout?: boolean,
+            /** Only applicable when the VC is registered in detailsViewControllers.
+             *  When YES, pressing Escape will dismiss the details dialog. */
+            dismissesOnEscape?: boolean
         } = {}
     ): UIRootViewControllerLazyViewControllerObject<T> {
         const shouldShow = options.shouldShow ?? (() => YES)
         const deleteOnUnload = options.deleteOnUnload ?? NO
         const deleteOnLogout = options.deleteOnLogout ?? YES
+        const dismissesOnEscape = options.dismissesOnEscape ?? NO
         
         const result: UIRootViewControllerLazyViewControllerObject<T> = {
             class: classObject,
@@ -89,6 +96,7 @@ export class UIRootViewController extends UIViewController {
             isInitialized: NO,
             deleteOnUnload: deleteOnUnload,
             deleteOnLogout: deleteOnLogout,
+            dismissesOnEscape: dismissesOnEscape,
             deleteInstance: () => {
                 if (result.isInitialized) {
                     result.isInitialized = NO

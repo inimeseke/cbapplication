@@ -16,7 +16,7 @@ export class UITextView extends UIView {
     
     /**
      * Override this to customise the attention indicator HTML that is appended
-     * to a label's text when `attentionRequired` is `true`.
+     * to a label's text when `attentionRequired` is `YES`.
      *
      * The default renders an amber `●` dot:
      * ```
@@ -291,37 +291,47 @@ export class UITextView extends UIView {
     }
     
     private _shouldUseFastMeasurement(): boolean {
-        const content = this.text || this.textElementView.innerHTML
-        
-        if (this._innerHTMLKey || this._localizedTextObject) {
-            return false
+        try {
+            const content = this.text || this.textElementView.innerHTML
+            
+            if (this._innerHTMLKey || this._localizedTextObject) {
+                return NO
+            }
+            
+            if (this.notificationAmount > 0) {
+                return NO
+            }
+            
+            if (this._attentionRequired) {
+                return NO
+            }
+            
+            const hasComplexHTML = /<(?!\/?(b|i|em|strong|span)\b)[^>]+>/i.test(content)
+            
+            if (hasComplexHTML) {
+                return NO
+            }
+            
+            // Canvas measureText silently falls back to the system font when the
+            // custom font hasn't been loaded into the canvas font system yet, even
+            // if getComputedStyle already reports the correct font family. Guard
+            // against this by checking the font is confirmed available before
+            // trusting canvas-based measurement.
+            const styles = this._getMeasurementStyles()
+            const documentHasFont = document.fonts.check(styles?.font ?? "")
+            // noinspection RedundantIfStatementJS
+            if (styles && !documentHasFont) {
+                return NO
+            }
+            
+            return YES
         }
-        
-        if (this.notificationAmount > 0) {
-            return false
+        catch (exception) {
+            
+            console.error(exception)
+            return NO
+            
         }
-        
-        if (this._attentionRequired) {
-            return false
-        }
-        
-        const hasComplexHTML = /<(?!\/?(b|i|em|strong|span)\b)[^>]+>/i.test(content)
-        
-        if (hasComplexHTML) {
-            return false
-        }
-        
-        // Canvas measureText silently falls back to the system font when the
-        // custom font hasn't been loaded into the canvas font system yet, even
-        // if getComputedStyle already reports the correct font family. Guard
-        // against this by checking the font is confirmed available before
-        // trusting canvas-based measurement.
-        const styles = this._getMeasurementStyles()
-        if (styles && !document.fonts.check(styles.font)) {
-            return false
-        }
-        
-        return true
     }
     
     //#endregion
@@ -671,7 +681,7 @@ export class UITextView extends UIView {
     textPrefix = ""
     textSuffix = ""
     _notificationAmount = 0
-    _attentionRequired = false
+    _attentionRequired = NO
     
     _thousandsSeparator: string | null = null
     

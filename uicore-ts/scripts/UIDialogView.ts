@@ -22,8 +22,9 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     constructor(elementID?: string, viewHTMLElement?: HTMLElement) {
         
-        
         super(elementID, viewHTMLElement)
+        
+        this.addSubview(this.view)
         
         this.addTargetForControlEvent(
             UIView.controlEvent.PointerTap,

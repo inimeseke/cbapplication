@@ -1991,17 +1991,7 @@ export class UIView extends UIObject {
     
     static runFunctionBeforeNextFrame(step: () => void) {
         
-        if (IS_SAFARI) {
-            
-            // This creates a microtask
-            Promise.resolve().then(step)
-            
-        }
-        else {
-            
-            window.requestAnimationFrame(step)
-            
-        }
+        window.requestAnimationFrame(step)
         
     }
     

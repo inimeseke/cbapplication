@@ -1,6 +1,6 @@
 import { UIButton } from "./UIButton"
 import { UINativeScrollView } from "./UINativeScrollView"
-import { FIRST_OR_NIL, IF, IS, IS_DEFINED, MAKE_ID, nil, NO, YES } from "./UIObject"
+import { EXTEND, FIRST_OR_NIL, IF, IS, IS_DEFINED, MAKE_ID, nil, NO, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
@@ -901,8 +901,22 @@ export class UITableView extends UINativeScrollView {
             view = this.newReusableViewForIdentifier(identifier, this._rowIDIndex) as UITableViewRowView
             this._rowIDIndex = this._rowIDIndex + 1
             
-            view._UITableViewReusabilityIdentifier = identifier
-            view._UITableViewRowIndex = rowIndex
+            view.configureWithObject({
+                _UITableViewReusabilityIdentifier: identifier,
+                _UITableViewRowIndex: rowIndex,
+                
+                // Extend clearIntrinsicSizeCache so that when the row (or any of its
+                // subviews) invalidates its own size cache, the table is notified to
+                // re-measure that specific row index. EXTEND preserves the original
+                // implementation and appends this behaviour after it.
+                clearIntrinsicSizeCache: EXTEND(() => {
+                    const currentRowIndex = view._UITableViewRowIndex
+                    if (IS_DEFINED(currentRowIndex) && view.isMemberOfViewTree) {
+                        this.invalidateSizeOfRowWithIndex(currentRowIndex)
+                        this.setNeedsLayout()
+                    }
+                })
+            })
             
             Object.assign(view, this._persistedData[rowIndex] || this.defaultRowPersistenceDataItem())
             

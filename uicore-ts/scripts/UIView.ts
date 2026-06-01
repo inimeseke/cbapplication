@@ -2013,6 +2013,58 @@ export class UIView extends UIObject {
     }
     
     
+    /**
+     * Persistent layout-cycle tracking map, shared across all iterations within a
+     * single layout pass. Lifted out of the local scope so that
+     * `resetLayoutCycleTracking()` can clear it in response to intentional events
+     * (data changes, window resize) that would otherwise trip the cycle guard.
+     */
+    static _layoutCounts: Map<UIView, number> = new Map()
+    
+    /**
+     * Maximum number of while-loop iterations allowed in a single layout pass
+     * before the pass is forcibly terminated. Each iteration processes all views
+     * that were queued since the previous iteration. Raise this if deep view
+     * hierarchies with many cascading height changes legitimately need more rounds.
+     * Default: 10.
+     */
+    static layoutPassMaxIterations: number = 10
+    
+    /**
+     * Maximum number of times a single view may be laid out within one layout pass
+     * before it is considered a cycle and skipped with a warning. Raise this if a
+     * view legitimately re-queues itself many times due to cascading content changes.
+     * Default: 5.
+     */
+    static layoutCycleThreshold: number = 5
+    
+    /**
+     * Resets layout-cycle tracking for all views globally. Call this when an
+     * intentional external event (window resize, theme change, etc.) triggers a
+     * full re-layout so that no view is incorrectly blocked by the cycle detector.
+     */
+    static resetLayoutCycleTrackingForAllViews(): void {
+        UIView._layoutCounts.clear()
+    }
+    
+    /**
+     * Resets layout-cycle tracking for this view, pardoning it from its
+     * accumulated layout count. Call this when this view's data changes
+     * and it legitimately needs to be laid out again within the current pass.
+     */
+    resetLayoutCycleTracking(): void {
+        UIView._layoutCounts.delete(this)
+    }
+    
+    /**
+     * Resets layout-cycle tracking for this view and every view in its subtree.
+     * Call this when a container's contents change (e.g. rows reloaded, child
+     * views swapped) and the whole subtree legitimately needs re-layout.
+     */
+    resetLayoutCycleTrackingForSubtree(): void {
+        this.forEachViewInSubtree(subtreeView => UIView._layoutCounts.delete(subtreeView))
+    }
+    
     static layoutViewsIfNeeded() {
         
         if (!UIView._viewsToLayout.length) {
@@ -2022,9 +2074,12 @@ export class UIView extends UIObject {
         window.UILayoutCycleTracer?.willBeginLayoutPass()
         window.UILayoutDebugger?.willBeginLayoutPass(UIView._viewsToLayout)
         
-        const maxIterations = 10
+        // Reset per-pass cycle counts at the start of each new pass so views from
+        // a previous pass do not carry stale counts into this one.
+        UIView._layoutCounts.clear()
+        
+        const maxIterations = UIView.layoutPassMaxIterations
         let iteration = 0
-        const layoutCounts = new Map<UIView, number>() // Track how many times each view has been laid out
         
         while (UIView._viewsToLayout.length > 0 && iteration < maxIterations) {
             
@@ -2038,10 +2093,10 @@ export class UIView extends UIObject {
             
             for (let i = 0; i < viewsToProcess.length; i++) {
                 const view = viewsToProcess[i]
-                const layoutCount = layoutCounts.get(view) || 0
+                const layoutCount = UIView._layoutCounts.get(view) || 0
                 
                 // Skip if this view has been laid out too many times (cycle detection)
-                if (layoutCount >= 5) {
+                if (layoutCount >= UIView.layoutCycleThreshold) {
                     console.warn("View layout cycle detected:", view)
                     UILayoutCycleTracer.printViewReport(view)
                     continue
@@ -2063,7 +2118,7 @@ export class UIView extends UIObject {
                     const breakpointOnThisLine = "Add a breakpoint on this line to step through layout."
                 }
                 view.layoutIfNeeded()
-                layoutCounts.set(view, (layoutCounts.get(view) || 0) + 1)
+                UIView._layoutCounts.set(view, (UIView._layoutCounts.get(view) || 0) + 1)
                 window.UILayoutCycleTracer?.didLayoutView(view)
                 window.UILayoutDebugger?.didLayoutView(view)
             }
@@ -2074,6 +2129,11 @@ export class UIView extends UIObject {
         window.UILayoutCycleTracer?.didFinishLayoutPass(iteration)
         window.UILayoutDebugger?.didFinishLayoutPass(iteration)
         
+        // Clear counts after the pass so they do not bleed into the next
+        // layoutViewsIfNeeded() call (e.g. the rAF-scheduled tick that follows
+        // a synchronous resize-driven pass).
+        UIView._layoutCounts.clear()
+        
         // console.log(iteration + " iterations to finish layout")
         
     }
@@ -2083,13 +2143,18 @@ export class UIView extends UIObject {
     
     setNeedsLayout() {
         
+        this.clearIntrinsicSizeCache()
+        
+        if (this.isVirtualLayouting) {
+            return
+        }
+        
         if (this._shouldLayout && UIView._viewsToLayout.contains(this)) {
             return
         }
         
         this._shouldLayout = YES
         UIView._viewsToLayout.push(this)
-        this.clearIntrinsicSizeCache()
         
         window.UILayoutCycleTracer?.viewDidCallSetNeedsLayout(this)
         window.UILayoutDebugger?.viewDidCallSetNeedsLayout(this)

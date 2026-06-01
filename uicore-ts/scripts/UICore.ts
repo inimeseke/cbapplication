@@ -76,6 +76,8 @@ export class UICore extends UIObject {
         
         const windowDidResize = () => {
             
+            UIView.resetLayoutCycleTrackingForAllViews()
+            
             this.rootViewController.view.forEachViewInSubtree((view) => {
                 
                 view._frameCache = undefined

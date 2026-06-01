@@ -2015,10 +2015,6 @@ export class UIView extends UIObject {
     
     static layoutViewsIfNeeded() {
         
-        if (!UIView._isLayoutViewsIfNeededScheduled) {
-            UIView.scheduleLayoutViewsIfNeeded()
-        }
-        
         if (!UIView._viewsToLayout.length) {
             return
         }

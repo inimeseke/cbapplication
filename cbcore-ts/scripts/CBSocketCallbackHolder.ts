@@ -244,6 +244,35 @@ export class CBSocketCallbackHolder extends UIObject {
     }
     
     
+    /**
+     * Starts the timeout for the descriptor associated with the given identifier.
+     * Called by CBSocketClient immediately after socket.emit() so the timer only
+     * runs while the server is actually reachable. If the server disconnects before
+     * responding, triggerDisconnectHandlers() covers cleanup without needing a timer.
+     */
+    scheduleTimeoutForIdentifierIfNeeded(identifier: string) {
+        
+        const descriptorKey = this.keysForIdentifiers[identifier]
+        
+        if (!descriptorKey) {
+            return
+        }
+        
+        const descriptors = this.messageDescriptors[descriptorKey]
+        
+        if (!descriptors) {
+            return
+        }
+        
+        const descriptor = descriptors.find(descriptor => descriptor.message.identifier === identifier)
+        
+        if (descriptor) {
+            this._scheduleTimeoutForDescriptor(descriptor)
+        }
+        
+    }
+    
+    
     get storedResponseHashesDictionary() {
         
         if (IS_NOT(this._storedResponseHashesDictionary)) {
@@ -468,7 +497,6 @@ export class CBSocketCallbackHolder extends UIObject {
             })
             
             const pushedDescriptor = this.messageDescriptors[descriptorKey].lastElement
-            this._scheduleTimeoutForDescriptor(pushedDescriptor)
             
             this.keysForIdentifiers[message.identifier] = descriptorKey
             

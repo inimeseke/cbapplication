@@ -131,13 +131,14 @@ export class CBSocketClient extends UIObject {
     /**
      * How long (in milliseconds) to wait for a server response before treating
      * the request as failed. Set to 0 to disable timeouts entirely.
-     * Default: 30 000 ms (30 seconds).
+     * Default: 30 000 ms (30 seconds) in production; disabled in development
+     * so that breakpoints do not cause spurious request failures.
      *
      * Each keepalive frame from the server resets this window, so long-running
      * requests only time out if the server goes completely silent for this duration.
      */
-    requestTimeoutMs: number = 30_000
-
+    requestTimeoutMs: number = 30000
+    
     /**
      * Application-level keepalive handler. Called for every keepalive frame
      * received on any request, unless the per-call handler was registered with
@@ -155,6 +156,10 @@ export class CBSocketClient extends UIObject {
         
         this._core = core
         this._socket = io()
+        
+        /// #if DEV
+        this.requestTimeoutMs = 0
+        /// #endif
         
         this.socket.on("connect", () => {
             
@@ -355,6 +360,10 @@ export class CBSocketClient extends UIObject {
         
         this.socket.emit(CBSocketClient.multipleMessageKey, messageObject)
         
+        groupedMessages.forEach((groupedMessage) => {
+            this._callbackHolder.scheduleTimeoutForIdentifierIfNeeded(groupedMessage.message.identifier)
+        })
+        
         
         didSendFunctions.forEach((didSendFunction, index, array) => {
             didSendFunction()
@@ -428,19 +437,19 @@ export class CBSocketClient extends UIObject {
         errorResult: any,
         respondWithMessage: CBSocketMessageSendResponseFunction
     }> {
-
+        
         // The identifier is assigned synchronously inside _sendMessageForKey.
         // We capture it via didObtainIdentifier so we can look up the descriptor
         // immediately after the send, before any async gap.
         let capturedIdentifier: string | undefined
-
+        
         const basePromise = new Promise<{
             responseMessage: any,
             result: any,
             errorResult: any,
             respondWithMessage: CBSocketMessageSendResponseFunction
         }>((resolve, reject) => {
-
+            
             this._sendMessageForKey(
                 key as string,
                 message,
@@ -450,41 +459,43 @@ export class CBSocketClient extends UIObject {
                 isUserBound,
                 nil,
                 (responseMessage, respondWithMessage) => resolve({
-
+                    
                     responseMessage: responseMessage,
                     result: IF(IS_NOT_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE(RETURNER(undefined)),
                     errorResult: IF(IS_SOCKET_ERROR(responseMessage))(() => responseMessage).ELSE(RETURNER(undefined)),
-
+                    
                     respondWithMessage: respondWithMessage
-
+                    
                 }),
-                (identifier) => { capturedIdentifier = identifier }
+                (identifier) => {
+                    capturedIdentifier = identifier
+                }
             )
-
+            
         })
-
+        
         const requestPromise = basePromise as CBSocketRequestPromise<any>
-
+        
         requestPromise.didReceiveKeepalive = (
             handler: (payload: CBSocketKeepalivePayload) => void,
             extendsDefaultHandler = YES
         ): CBSocketRequestPromise<any> => {
-
+            
             // The descriptor is pushed synchronously before _sendMessageForKey returns,
             // so capturedIdentifier is already set at this point.
             if (capturedIdentifier) {
                 this._attachKeepaliveHandlerForIdentifier(capturedIdentifier, handler, extendsDefaultHandler)
             }
-
+            
             return requestPromise
-
+            
         }
-
+        
         return requestPromise
-
+        
     }
-
-
+    
+    
     /**
      * Finds the descriptor for the given request identifier and attaches the
      * keepalive handler fields to it.
@@ -494,27 +505,27 @@ export class CBSocketClient extends UIObject {
         handler: (payload: CBSocketKeepalivePayload) => void,
         extendsDefaultHandler: boolean
     ) {
-
+        
         const descriptorKey = this._callbackHolder.keysForIdentifiers[identifier]
         if (!descriptorKey) {
             return
         }
-
+        
         const descriptors = this._callbackHolder.messageDescriptors[descriptorKey]
         if (!descriptors) {
             return
         }
-
+        
         const descriptor = descriptors.find(d => d.message.identifier === identifier)
         if (!descriptor) {
             return
         }
-
+        
         descriptor.keepaliveHandler = handler
         descriptor.keepaliveHandlerOverridesDefault = !extendsDefaultHandler
-
+        
     }
-
+    
     
     _sendMessageForKey(
         key: string,
@@ -537,7 +548,7 @@ export class CBSocketClient extends UIObject {
         if (this._isConnectionEstablished && !this._collectMessagesToSendLater) {
             
             const identifier = MAKE_ID()
-
+            
             didObtainIdentifier?.(identifier)
             
             const messageObject: CBSocketMessage<any> = {
@@ -568,6 +579,7 @@ export class CBSocketClient extends UIObject {
                 }
                 
                 this.socket.emit(key, messageObject)
+                this._callbackHolder.scheduleTimeoutForIdentifierIfNeeded(identifier)
                 
             }
             

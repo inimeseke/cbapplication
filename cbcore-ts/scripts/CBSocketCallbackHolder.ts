@@ -588,6 +588,14 @@ export class CBSocketCallbackHolder extends UIObject {
                 respondWithMessage: any
             ) {
                 
+                if (!Array.isArray(responseMessage)) {
+                    
+                    completionFunction([responseMessage], function () {})
+                    
+                    return
+                    
+                }
+                
                 completionFunction(
                     responseMessage.map(function (messageObject, index, array) {
                         

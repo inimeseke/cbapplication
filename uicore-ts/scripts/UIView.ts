@@ -183,6 +183,7 @@ export class UIView extends UIObject {
     
     _nativeSelectionEnabled: boolean = YES
     _shouldLayout?: boolean
+    _shouldSetNeedsLayoutAfterAddingToViewTree: boolean = NO
     _UITableViewRowIndex?: number
     _UITableViewReusabilityIdentifier: any
     _UIViewIntrinsicTemporaryWidth?: string
@@ -2144,6 +2145,7 @@ export class UIView extends UIObject {
     setNeedsLayout() {
         
         this.clearIntrinsicSizeCache()
+        this._shouldSetNeedsLayoutAfterAddingToViewTree = NO
         
         if (this.isVirtualLayouting) {
             return
@@ -2524,6 +2526,9 @@ export class UIView extends UIObject {
     
     
     cancelNeedsLayout() {
+        if (this._shouldLayout) {
+            this._shouldSetNeedsLayoutAfterAddingToViewTree = YES
+        }
         this._shouldLayout = NO
     }
     
@@ -2600,6 +2605,11 @@ export class UIView extends UIObject {
     wasAddedToViewTree() {
         
         UIView.resizeObserver.observe(this.viewHTMLElement)
+        
+        if (this._shouldSetNeedsLayoutAfterAddingToViewTree) {
+            this._shouldSetNeedsLayoutAfterAddingToViewTree = NO
+            this.setNeedsLayout()
+        }
         
         /// #if DEV
         if (UIView.annotatePathOnViewHTMLElements) {

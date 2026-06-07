@@ -81,10 +81,18 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    apply() {
+    /**
+     * @param forcefully When `true`, applies the route even if its string
+     * representation is identical to the current URL hash, causing the browser
+     * to fire a `hashchange` event and re-run the full `handleRoute` flow.
+     * Use this only when you explicitly need re-entrant navigation (e.g. the
+     * "tap the already-active tab to reset to root" feature in TopBarView).
+     * Defaults to `false`.
+     */
+    apply(forcefully = NO) {
         
         const stringRepresentation = this.stringRepresentation
-        if (new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
+        if (!forcefully && new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
             return
         }
         
@@ -93,10 +101,15 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    applyByReplacingCurrentRouteInHistory() {
+    /**
+     * @param forcefully When `true`, replaces the current history entry with
+     * this route even when the route is identical to the current URL hash.
+     * Defaults to `false`.
+     */
+    applyByReplacingCurrentRouteInHistory(forcefully = NO) {
         
         const stringRepresentation = this.stringRepresentation
-        if (new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
+        if (!forcefully && new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
             return
         }
         
@@ -254,52 +267,3 @@ export class UIRoute extends Array<UIRouteComponent> {
     
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

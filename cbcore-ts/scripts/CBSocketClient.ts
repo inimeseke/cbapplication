@@ -165,6 +165,7 @@ export class CBSocketClient extends UIObject {
             
             console.log("Socket.io connected to server. clientID = ", this.socket, " socketID = ", this.socket)
             
+            this._resetCallbackHolderAfterReconnectIfNeeded()
             this.sendUnsentMessages()
             
         })
@@ -178,6 +179,7 @@ export class CBSocketClient extends UIObject {
                 
                 core.userProfile = message.messageData.userProfile
                 
+                this._resetCallbackHolderAfterReconnectIfNeeded()
                 this._isConnectionEstablished = YES
                 
                 this.sendUnsentMessages()
@@ -239,6 +241,18 @@ export class CBSocketClient extends UIObject {
     
     get socket() {
         return this._socket
+    }
+    
+    _resetCallbackHolderAfterReconnectIfNeeded() {
+        
+        if (this._callbackHolder.isValid) {
+            
+            return
+            
+        }
+        
+        this._callbackHolder = new CBSocketCallbackHolder(this, this._callbackHolder)
+        
     }
     
     

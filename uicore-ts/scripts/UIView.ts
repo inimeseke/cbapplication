@@ -2461,7 +2461,7 @@ export class UIView extends UIObject {
             view.core = this.core
             view.didMoveToSuperview(this)
             
-            if (this.superview && this.isMemberOfViewTree) {
+            if ((this.superview || this.rootView == this) && this.isMemberOfViewTree) {
                 
                 view.broadcastEventInSubtree({
                     name: UIView.broadcastEventName.AddedToViewTree,

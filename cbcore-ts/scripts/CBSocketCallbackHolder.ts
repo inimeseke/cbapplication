@@ -124,17 +124,28 @@ export class CBSocketCallbackHolder extends UIObject {
     triggerDisconnectHandlers() {
         
         this.messageDescriptors.forEach(
-            function (this: CBSocketCallbackHolder, descriptor: CBSocketCallbackHolderMessageDescriptor, key: string) {
+            function (
+                this: CBSocketCallbackHolder,
+                descriptors: CBSocketCallbackHolderMessageDescriptor[],
+                key: string
+            ) {
                 
-                if (!descriptor.mainResponseReceived) {
+                descriptors.forEach(function (
+                    this: CBSocketCallbackHolder,
+                    descriptor: CBSocketCallbackHolderMessageDescriptor
+                ) {
                     
-                    this._cancelTimeoutForDescriptor(descriptor)
-                    
-                    if (typeof descriptor?.completionFunction == "function") {
-                        descriptor.completionFunction(CBSocketClient.disconnectionMessage, nil)
+                    if (!descriptor.mainResponseReceived) {
+                        
+                        this._cancelTimeoutForDescriptor(descriptor)
+                        
+                        if (typeof descriptor?.completionFunction == "function") {
+                            descriptor.completionFunction(CBSocketClient.disconnectionMessage, nil)
+                        }
+                        
                     }
                     
-                }
+                }.bind(this))
                 
             }.bind(this))
         

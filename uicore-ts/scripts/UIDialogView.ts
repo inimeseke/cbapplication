@@ -125,6 +125,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
             UIDialogView._activeDialogCount++
             if (UIDialogView._activeDialogCount >= 1) {
                 document.body.style.overflow = "hidden"
+                this.style.overflowY = "auto"
             }
         }
         
@@ -185,6 +186,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 if (UIDialogView._activeDialogCount === 0) {
                     document.body.style.overflow = ""
                 }
+                this.style.overflowY = ""
             }
         }
         
@@ -247,8 +249,6 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
             
         }
         
-        //this.frame = this.superview.bounds;
-        
         if (this._fillsViewport) {
             const containerRect = this.superview?.viewHTMLElement?.getBoundingClientRect()
             const topOffset = containerRect ? -containerRect.top / UIView.pageScale : 0
@@ -272,22 +272,9 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
             )
         }
         
-        const bounds = this.bounds
-        
-        const margin = 20
-        
-        //this.view.centerInContainer();
-        
         this.view.style.zIndex = "" + this.zIndex
         
         this.view.setNeedsLayout()
-        
-        // this.view.style.maxHeight = "" + (bounds.height - margin * 2).integerValue + "px";
-        // this.view.style.maxWidth = "" + (bounds.width - margin * 2).integerValue + "px";
-        
-        
-        // var viewIntrinsicRectangle = this.view.intrinsicContentSize();
-        // this.view.frame = new UIRectangle((bounds.width - viewIntrinsicRectangle.width)*0.5,  )
         
         super.layoutSubviews()
         

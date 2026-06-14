@@ -1027,8 +1027,8 @@ export class UITableView extends UINativeScrollView {
                 while (walkedTarget && walkedTarget !== el) {
                     const viewObject = (walkedTarget as any).UIViewObject as UITableViewRowView | undefined
                     if (viewObject?._UITableViewRowIndex !== undefined) {
-                        el.focus({ preventScroll: true })
                         this._setKeyboardFocus(viewObject._UITableViewRowIndex, this._keyboardFocusedCellIndex)
+                        el.focus({ preventScroll: true })
                         return
                     }
                     walkedTarget = walkedTarget.parentElement

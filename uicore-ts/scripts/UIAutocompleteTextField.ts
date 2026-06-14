@@ -66,8 +66,18 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
             }
         }
         
-        // Close on blur
-        this.controlEventTargetAccumulator.Blur = () => {
+        // Close on blur — but not when focus is moving into the dropdown itself
+        // (e.g. the user clicked a row). relatedTarget is the element receiving
+        // focus, so if it is inside the dropdown's element tree, keep it open and
+        // let the row's PointerUpInside / didSelectItem complete the selection.
+        this.controlEventTargetAccumulator.Blur = (sender, event) => {
+            const focusEvent = event as FocusEvent
+            if (
+                IS(focusEvent.relatedTarget) &&
+                this._dropdownView.viewHTMLElement.contains(focusEvent.relatedTarget as Node)
+            ) {
+                return
+            }
             this.closeDropdown()
         }
         
@@ -368,7 +378,13 @@ export class UIAutocompleteTextField<T = string> extends UITextField {
         
         this._isDropdownOpen = YES
         this._dropdownView.filterWords = []
-        this.updateFilteredItems()
+        this._dropdownView.filteredItems = this._autocompleteItems
+        if (this._dropdownView.filteredItems.length > 0) {
+            const matchIndex = this._autocompleteItems.findIndex(
+                item => item.label === this.text
+            )
+            this._dropdownView.highlightedRowIndex = matchIndex !== -1 ? matchIndex : 0
+        }
         this._dropdownView.showAnchoredToView(this)
         
     }

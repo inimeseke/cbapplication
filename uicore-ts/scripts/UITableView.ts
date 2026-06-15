@@ -142,7 +142,18 @@ export class UITableView extends UINativeScrollView {
      */
     _keyboardListenerElement: HTMLElement = this.viewHTMLElement
     
+    /**
+     * When YES, suppresses the grid ARIA role, tabIndex, and all keyboard/pointer
+     * focus listeners. Set this on table views that are controlled by an external
+     * focus owner (e.g. an autocomplete text field) so clicks inside the table
+     * never steal focus away from that owner.
+     */
+    disablesKeyboardNavigation: boolean = NO
+    
     _setupGridAccessibility() {
+        if (this.disablesKeyboardNavigation) {
+            return
+        }
         const el = this._keyboardListenerElement
         el.setAttribute("role", "grid")
         el.setAttribute("aria-rowcount", "0")
@@ -1019,6 +1030,9 @@ export class UITableView extends UINativeScrollView {
             el.addEventListener("keydown", this._keydownHandler!)
             
             el.addEventListener("pointerdown", (event: PointerEvent) => {
+                if (this.disablesKeyboardNavigation) {
+                    return
+                }
                 const target = event.target as HTMLElement | null
                 if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") {
                     return
@@ -1062,7 +1076,9 @@ export class UITableView extends UINativeScrollView {
         })
         // Re-assert tabIndex=0 on the listener element — wasAddedToViewTree fires
         // on every tree insertion including navigation returns.
-        this._keyboardListenerElement.tabIndex = 0
+        if (!this.disablesKeyboardNavigation) {
+            this._keyboardListenerElement.tabIndex = 0
+        }
         
     }
     

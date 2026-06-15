@@ -38,6 +38,11 @@ export class UIAutocompleteDropdownView<T> extends UIView {
         this.tableView = new UITableView(elementID ? elementID + "TableView" : undefined)
         this.addSubview(this.tableView)
         
+        // Keyboard navigation and focus are owned by the text field, not the table.
+        // Disabling it prevents the pointerdown handler from calling el.focus() and
+        // stealing focus away from the text field when the user clicks a row.
+        this.tableView.disablesKeyboardNavigation = YES
+        
         this.tableView.allRowsHaveEqualHeight = YES
         this.tableView.numberOfRows = () => this._filteredItems.length
         this.tableView.heightForRowWithIndex = () => this._rowHeight
@@ -282,6 +287,3 @@ export class UIAutocompleteDropdownView<T> extends UIView {
     
     
 }
-
-
-

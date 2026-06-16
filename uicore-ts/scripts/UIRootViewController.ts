@@ -369,19 +369,44 @@ export class UIRootViewController extends UIViewController {
                 this.detailsViewController.view.intrinsicContentWidth() || contentView.bounds.width,
                 contentView.bounds.width
             )
-            this.detailsViewController.view.frame = this.backgroundView.frame.rectangleWithInset(
-                paddingLength
-            ).rectangleWithWidth(
-                detailsWidth,
-                0.5
-            ).rectangleWithHeight(
-                Math.max(
-                    this.detailsViewController.view.intrinsicContentHeight(
-                        this.detailsViewController.view.bounds.width
-                    ),
-                    contentView.bounds.height
-                )
+            
+            // _detailsDialogView fills the currently visible viewport and uses
+            // viewport-relative local coordinates (its own y = 0 is "top of the
+            // visible viewport", tracking scroll — see UIDialogView.layoutSubviews).
+            // The dialog content is a subview of that backdrop, so its frame must
+            // be computed in that same viewport-relative space, not in the page's
+            // document coordinates that backgroundView.frame uses. Otherwise the
+            // dialog's vertical position drifts further down the page the more
+            // the user has scrolled before opening it.
+            const containerRect = this.view.viewHTMLElement.getBoundingClientRect()
+            const visibleTopBarHeight = Math.max(
+                0,
+                (this.topBarView?.frame.height ?? 0) + containerRect.top / UIView.pageScale
             )
+            const minimumTop = visibleTopBarHeight + paddingLength
+            const viewportHeight = window.innerHeight / UIView.pageScale
+            const viewportBelowTopBarCenterY = minimumTop + (viewportHeight - minimumTop) * 0.5
+            
+            const detailsHeight = Math.max(
+                this.detailsViewController.view.intrinsicContentHeight(
+                    this.detailsViewController.view.bounds.width
+                ),
+                contentView.bounds.height
+            )
+            
+            let detailsFrame = this.backgroundView.frame
+                .rectangleWithWidth(detailsWidth, 0.5)
+                .rectangleWithHeight(detailsHeight)
+                .rectangleWithY(viewportBelowTopBarCenterY, 0.5)
+            
+            // If centering would place the dialog's top edge above the visible
+            // top bar (or above the viewport entirely, on very short dialogs),
+            // shift it down so it never overlaps or floats above that boundary.
+            if (detailsFrame.y < minimumTop) {
+                detailsFrame = detailsFrame.rectangleWithY(minimumTop)
+            }
+            
+            this.detailsViewController.view.frame = detailsFrame
             
         }
         else {

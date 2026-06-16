@@ -237,6 +237,12 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
             
         }
         
+        if (event.name == UIView.broadcastEventName.PageDidScroll) {
+            
+            this.setNeedsLayout()
+            
+        }
+        
     }
     
     

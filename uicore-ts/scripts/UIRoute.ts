@@ -1,4 +1,4 @@
-import { IS_NIL, IS_NOT, NO, ValueOf } from "./UIObject"
+import { IS_NIL, IS_NOT, NO, ValueOf, YES } from "./UIObject"
 import { UIViewController } from "./UIViewController"
 
 
@@ -19,7 +19,24 @@ export interface UIRouteComponent<T = any> {
 }
 
 
+export interface UIRouteChangeDescriptor {
+    
+    currentRoute: UIRoute;
+    targetRoute: UIRoute;
+    forcefully: boolean;
+    replacesCurrentRouteInHistory: boolean;
+    
+}
+
+
+export type UIRouteShouldApplyRouteChangeCallbackFunction = (
+    routeChangeDescriptor: UIRouteChangeDescriptor
+) => boolean | Promise<boolean>;
+
+
 export class UIRoute extends Array<UIRouteComponent> {
+    
+    static shouldApplyRouteChange?: UIRouteShouldApplyRouteChangeCallbackFunction
     
     constructor(hash?: string) {
         
@@ -89,14 +106,21 @@ export class UIRoute extends Array<UIRouteComponent> {
      * "tap the already-active tab to reset to root" feature in TopBarView).
      * Defaults to `false`.
      */
-    apply(forcefully = NO) {
+    apply(forcefully = NO): boolean | Promise<boolean> {
         
-        const stringRepresentation = this.stringRepresentation
-        if (!forcefully && new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
-            return
-        }
+        return this._applyRouteAfterRouteApplicationCheck(forcefully, NO)
         
-        window.location.hash = stringRepresentation
+    }
+    
+    
+    /**
+     * Applies this route without consulting `UIRoute.routeApplicationShouldProceed`.
+     * Use this only for route changes that are internal bookkeeping or that already
+     * passed a higher-level confirmation flow.
+     */
+    applyWithoutRouteApplicationCheck(forcefully = NO): boolean {
+        
+        return this._applyRouteWithoutRouteApplicationCheck(forcefully, NO)
         
     }
     
@@ -106,14 +130,112 @@ export class UIRoute extends Array<UIRouteComponent> {
      * this route even when the route is identical to the current URL hash.
      * Defaults to `false`.
      */
-    applyByReplacingCurrentRouteInHistory(forcefully = NO) {
+    applyByReplacingCurrentRouteInHistory(forcefully = NO): boolean | Promise<boolean> {
         
-        const stringRepresentation = this.stringRepresentation
-        if (!forcefully && new UIRoute(window.location.hash).stringRepresentation == stringRepresentation) {
-            return
+        return this._applyRouteAfterRouteApplicationCheck(forcefully, YES)
+        
+    }
+    
+    
+    /**
+     * Replaces the current history entry without consulting
+     * `UIRoute.routeApplicationShouldProceed`.
+     */
+    applyByReplacingCurrentRouteInHistoryWithoutRouteApplicationCheck(forcefully = NO): boolean {
+        
+        return this._applyRouteWithoutRouteApplicationCheck(forcefully, YES)
+        
+    }
+    
+    
+    _applyRouteAfterRouteApplicationCheck(
+        forcefully: boolean,
+        replacesCurrentRouteInHistory: boolean
+    ): boolean | Promise<boolean> {
+        
+        if (!this._needsRouteApplication(forcefully)) {
+            return NO
         }
         
-        window.location.replace(this.linkRepresentation)
+        const routeApplicationShouldProceed = UIRoute.shouldApplyRouteChange
+        if (!routeApplicationShouldProceed) {
+            return this._applyRouteWithoutRouteApplicationCheck(forcefully, replacesCurrentRouteInHistory)
+        }
+        
+        const shouldProceed = routeApplicationShouldProceed(
+            this._routeApplication(forcefully, replacesCurrentRouteInHistory)
+        )
+        
+        if (shouldProceed instanceof Promise) {
+            return shouldProceed.then(routeApplicationShouldProceed => {
+                return this._applyRouteIfAllowed(
+                    routeApplicationShouldProceed,
+                    forcefully,
+                    replacesCurrentRouteInHistory
+                )
+            })
+        }
+        
+        return this._applyRouteIfAllowed(shouldProceed, forcefully, replacesCurrentRouteInHistory)
+        
+    }
+    
+    
+    _applyRouteIfAllowed(
+        routeApplicationShouldProceed: boolean,
+        forcefully: boolean,
+        replacesCurrentRouteInHistory: boolean
+    ): boolean {
+        
+        if (!routeApplicationShouldProceed) {
+            return NO
+        }
+        
+        return this._applyRouteWithoutRouteApplicationCheck(forcefully, replacesCurrentRouteInHistory)
+        
+    }
+    
+    
+    _applyRouteWithoutRouteApplicationCheck(
+        forcefully: boolean,
+        replacesCurrentRouteInHistory: boolean
+    ): boolean {
+        
+        if (!this._needsRouteApplication(forcefully)) {
+            return NO
+        }
+        
+        if (replacesCurrentRouteInHistory) {
+            window.location.replace(this.linkRepresentation)
+        }
+        else {
+            window.location.hash = this.stringRepresentation
+        }
+        
+        return YES
+        
+    }
+    
+    
+    _needsRouteApplication(forcefully: boolean): boolean {
+        
+        if (!forcefully && new UIRoute(window.location.hash).stringRepresentation == this.stringRepresentation) {
+            return NO
+        }
+        
+        return YES
+        
+    }
+    
+    
+    _routeApplication(forcefully: boolean, replacesCurrentRouteInHistory: boolean): UIRouteChangeDescriptor {
+        
+        return {
+            currentRoute: UIRoute.currentRoute,
+            targetRoute: this.copy(),
+            forcefully: forcefully,
+            replacesCurrentRouteInHistory: replacesCurrentRouteInHistory
+        }
         
     }
     
@@ -218,7 +340,7 @@ export class UIRoute extends Array<UIRouteComponent> {
     
     navigateBySettingComponent(name: string, parameters: UIRouteParameters, extendParameters: boolean = NO) {
         
-        this.routeWithComponent(name, parameters, extendParameters).apply()
+        return this.routeWithComponent(name, parameters, extendParameters).apply()
         
     }
     

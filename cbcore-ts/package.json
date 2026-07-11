@@ -1,6 +1,6 @@
 {
   "name": "cbcore-ts",
-  "version": "1.1.15",
+  "version": "1.1.16",
   "description": "CBCore is a library to build web applications using pure Typescript.",
   "main": "compiledScripts/index.js",
   "types": "compiledScripts/index.d.ts",
@@ -35,7 +35,7 @@
     "@types/object-hash": "^2.1.1",
     "object-hash": "^2.1.1",
     "socket.io-client": "^4.7.5",
-    "uicore-ts": "1.1.142"
+    "uicore-ts": "1.1.373"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^23.0.0",

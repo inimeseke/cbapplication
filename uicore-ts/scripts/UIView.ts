@@ -1680,7 +1680,8 @@ export class UIView extends UIObject {
         delay: number,
         timingStyle = "cubic-bezier(0.25,0.1,0.25,1)",
         transformFunction: Function,
-        transitioncompletionFunction: Function
+        transitioncompletionFunction: Function,
+        transitionProperty = "all"
     ) {
         
         function callTransitioncompletionFunction() {
@@ -1729,7 +1730,7 @@ export class UIView extends UIObject {
             transitionDelays.push(view.style.transitionDelay)
             transitionTimings.push(view.style.transitionTimingFunction)
             
-            view.style.transition = "all"
+            view.style.transition = transitionProperty
             view.style.transitionDuration = "" + duration + "s"
             view.style.transitionDelay = "" + delay + "s"
             view.style.transitionTimingFunction = timingStyle
@@ -1751,7 +1752,7 @@ export class UIView extends UIObject {
                 if (isUIView(view)) {
                     view = view.viewHTMLElement
                 }
-                view.style.transition = "all"
+                view.style.transition = transitionProperty
                 view.style.transitionDuration = "" + duration + "s"
                 view.style.transitionDelay = "" + delay + "s"
                 view.style.transition = transitionStyles[i]

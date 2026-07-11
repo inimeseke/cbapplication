@@ -143,7 +143,8 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 0,
                 undefined,
                 () => this.animateAppearing(),
-                nil
+                nil,
+                "opacity"
             )
             
             
@@ -211,7 +212,8 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                         
                     }
                     
-                }
+                },
+                "opacity"
             )
             
         }

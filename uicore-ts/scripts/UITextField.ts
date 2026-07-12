@@ -361,7 +361,7 @@ export class UITextField extends UITextView {
      * Returns a list of autocomplete options that match the current text (case-insensitive).
      * Useful for implementing custom filtering or showing filtered results elsewhere.
      */
-    public getMatchingAutocompleteOptions(): string[] {
+    public matchingAutocompleteOptions(): string[] {
         const currentText = this.text
         if (currentText.length === 0) {
             return [...this._nativeAutocompleteData]

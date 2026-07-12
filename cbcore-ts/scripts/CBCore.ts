@@ -41,17 +41,17 @@ declare const CBCoreInitializerObject: any
  *        // Additional session-level state goes here.
  *        mySessionData: MySessionData | undefined = undefined
  *
- *        // Override didSetUserProfile to fetch session data before the
+ *        // Override userProfileDidChange to fetch session data before the
  *        // userDidLogIn broadcast fires. Call super only after your data
  *        // is ready so that every listener receives a fully populated core.
- *        override async didSetUserProfile() {
+ *        override async userProfileDidChange() {
  *            if (IS(this.userProfile)) {
  *                this.mySessionData = await fetchMySessionData()
  *            }
  *            else {
  *                this.mySessionData = undefined
  *            }
- *            super.didSetUserProfile()
+ *            super.userProfileDidChange()
  *        }
  *
  *        // Expose a typed singleton so callers never need CBCore.sharedInstance.
@@ -65,7 +65,7 @@ declare const CBCoreInitializerObject: any
  * 2. Register the subclass at app startup, before UICore is initialised:
  *
  *    ```typescript
- *    CBCore.setSharedInstance(new MyAppCore())
+ *    CBCore.registerSharedInstance(new MyAppCore())
  *    CBCore.initIfNeededWithViewCore(new UICore(...))
  *    ```
  *
@@ -108,13 +108,13 @@ export class CBCore extends UIObject {
             }
             
             if (event.key == "CBLanguageKey") {
-                this.didSetLanguageKey()
+                this.languageKeyDidChange()
             }
             
         }.bind(this))
         
         
-        this.didSetLanguageKey()
+        this.languageKeyDidChange()
         
         
     }
@@ -130,10 +130,10 @@ export class CBCore extends UIObject {
     /**
      * Returns the shared singleton instance.
      *
-     * If `setSharedInstance` was called before this getter was first accessed,
+     * If `registerSharedInstance` was called before this getter was first accessed,
      * that instance is returned. Otherwise a default `CBCore` is created.
      * Library-internal code always goes through this getter, so registering a
-     * subclass via `setSharedInstance` is sufficient to replace the singleton
+     * subclass via `registerSharedInstance` is sufficient to replace the singleton
      * for the entire session.
      */
     static get sharedInstance() {
@@ -154,16 +154,16 @@ export class CBCore extends UIObject {
      *
      * ```typescript
      * // App entry point — must be the very first thing that runs.
-     * CBCore.setSharedInstance(new MyAppCore())
+     * CBCore.registerSharedInstance(new MyAppCore())
      * CBCore.initIfNeededWithViewCore(new UICore("root", RootViewController))
      * ```
      */
-    static setSharedInstance(instance: CBCore) {
+    static registerSharedInstance(instance: CBCore) {
         
         if (CBCore._sharedInstance) {
             /// #if DEV
             throw new Error(
-                "CBCore.setSharedInstance must be called before sharedInstance is first accessed. " +
+                "CBCore.registerSharedInstance must be called before sharedInstance is first accessed. " +
                 "Move the call to the very top of your app entry point."
             )
             /// #endif
@@ -201,10 +201,10 @@ export class CBCore extends UIObject {
     set isUserLoggedIn(isUserLoggedIn: boolean) {
         const previousValue = this.isUserLoggedIn
         this._isUserLoggedIn = isUserLoggedIn
-        this.didSetIsUserLoggedIn(previousValue)
+        this.userLoginStateDidChange(previousValue)
     }
     
-    didSetIsUserLoggedIn(previousValue: boolean) {
+    userLoginStateDidChange(previousValue: boolean) {
         
         const isUserLoggedIn = this.isUserLoggedIn
         
@@ -221,7 +221,7 @@ export class CBCore extends UIObject {
         }
         else if (previousValue != isUserLoggedIn) {
             
-            this.didLogOut()
+            this.userDidLogOut()
             
         }
         
@@ -233,7 +233,7 @@ export class CBCore extends UIObject {
      * Subclasses may override this to suppress the route change when they intend
      * to navigate somewhere specific immediately after logout.
      */
-    didLogOut() {
+    userDidLogOut() {
         
         this.performFunctionWithDelay(0.01, function (this: CBCore) {
             
@@ -273,33 +273,33 @@ export class CBCore extends UIObject {
     
     set userProfile(userProfile: CBUserProfile) {
         this._userProfile = userProfile
-        this.didSetUserProfile()
+        this.userProfileDidChange()
     }
     
     /**
      * Called whenever `userProfile` is assigned.
      *
      * The default implementation derives `isUserLoggedIn` from the profile
-     * and triggers the login/logout broadcast via `didSetIsUserLoggedIn`.
+     * and triggers the login/logout broadcast via `userLoginStateDidChange`.
      *
      * Subclasses may override this to fetch additional session data before
      * the broadcast fires. The override must be `async` and must call
-     * `super.didSetUserProfile()` after it has finished populating any
+     * `super.userProfileDidChange()` after it has finished populating any
      * extra state, so that all broadcast listeners receive a complete core:
      *
      * ```typescript
-     * override async didSetUserProfile() {
+     * override async userProfileDidChange() {
      *     if (IS(this.userProfile)) {
      *         this.companyStatus = (await SocketClient.CurrentUserStatusInCompany()).result
      *     }
      *     else {
      *         this.companyStatus = undefined
      *     }
-     *     super.didSetUserProfile()   // broadcast fires here
+     *     super.userProfileDidChange()   // broadcast fires here
      * }
      * ```
      */
-    didSetUserProfile() {
+    userProfileDidChange() {
         this.isUserLoggedIn = IS(this.userProfile)
     }
     
@@ -309,7 +309,7 @@ export class CBCore extends UIObject {
             localStorage.removeItem("CBLanguageKey")
         }
         localStorage.setItem("CBLanguageKey", JSON.stringify(languageKey))
-        this.didSetLanguageKey()
+        this.languageKeyDidChange()
     }
     
     get languageKey() {
@@ -319,7 +319,7 @@ export class CBCore extends UIObject {
         ).replace("\"", "")
     }
     
-    didSetLanguageKey() {
+    languageKeyDidChange() {
         UIRoute.currentRoute.routeWithComponent(
             "settings",
             { "language": this.languageKey },

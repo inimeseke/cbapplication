@@ -65,7 +65,7 @@ export function IS_NOT_SOCKET_ERROR(object: any) {
 
 /**
  * A Promise returned by resultForMessageForKey.
- * Exposes didReceiveKeepalive() for registering a keepalive callback
+ * Exposes addKeepaliveHandler() for registering a keepalive callback
  * in the same fluent style as the rest of the API.
  */
 export interface CBSocketRequestPromise<T> extends Promise<T> {
@@ -73,16 +73,15 @@ export interface CBSocketRequestPromise<T> extends Promise<T> {
      * Register a handler to be called each time a keepalive frame arrives
      * for this request.
      *
-     * @param handler               Called with the payload sent by the server.
-     * @param extendsDefaultHandler When true (default) the application-level
-     *                              defaultKeepaliveHandler fires first, then
-     *                              this handler. When false this handler fires
-     *                              alone and the default is suppressed for this
-     *                              request.
+     * @param handler             Called with the payload sent by the server.
+     * @param callsDefaultHandler When true (default) the application-level
+     *                            keepaliveDidArrive fires first, then this
+     *                            handler. When false this handler fires alone
+     *                            and the default is suppressed for this request.
      */
-    didReceiveKeepalive(
+    addKeepaliveHandler(
         handler: (payload: CBSocketKeepalivePayload) => void,
-        extendsDefaultHandler?: boolean
+        callsDefaultHandler?: boolean
     ): CBSocketRequestPromise<T>
 }
 
@@ -142,12 +141,12 @@ export class CBSocketClient extends UIObject {
     /**
      * Application-level keepalive handler. Called for every keepalive frame
      * received on any request, unless the per-call handler was registered with
-     * extendsDefaultHandler = false.
+     * callsDefaultHandler = false.
      *
      * Configure once at application startup:
-     *   CBSocketClient.sharedInstance.defaultKeepaliveHandler = payload => { ... }
+     *   CBSocketClient.sharedInstance.keepaliveDidArrive = payload => { ... }
      */
-    defaultKeepaliveHandler?: (payload: CBSocketKeepalivePayload) => void
+    keepaliveDidArrive?: (payload: CBSocketKeepalivePayload) => void
     
     
     constructor(core: CBCore) {
@@ -490,15 +489,15 @@ export class CBSocketClient extends UIObject {
         
         const requestPromise = basePromise as CBSocketRequestPromise<any>
         
-        requestPromise.didReceiveKeepalive = (
+        requestPromise.addKeepaliveHandler = (
             handler: (payload: CBSocketKeepalivePayload) => void,
-            extendsDefaultHandler = YES
+            callsDefaultHandler = YES
         ): CBSocketRequestPromise<any> => {
             
             // The descriptor is pushed synchronously before _sendMessageForKey returns,
             // so capturedIdentifier is already set at this point.
             if (capturedIdentifier) {
-                this._attachKeepaliveHandlerForIdentifier(capturedIdentifier, handler, extendsDefaultHandler)
+                this._attachKeepaliveHandlerForRequestIdentifier(capturedIdentifier, handler, callsDefaultHandler)
             }
             
             return requestPromise
@@ -514,10 +513,10 @@ export class CBSocketClient extends UIObject {
      * Finds the descriptor for the given request identifier and attaches the
      * keepalive handler fields to it.
      */
-    _attachKeepaliveHandlerForIdentifier(
+    _attachKeepaliveHandlerForRequestIdentifier(
         identifier: string,
         handler: (payload: CBSocketKeepalivePayload) => void,
-        extendsDefaultHandler: boolean
+        callsDefaultHandler: boolean
     ) {
         
         const descriptorKey = this._callbackHolder.keysForIdentifiers[identifier]
@@ -536,7 +535,7 @@ export class CBSocketClient extends UIObject {
         }
         
         descriptor.keepaliveHandler = handler
-        descriptor.keepaliveHandlerOverridesDefault = !extendsDefaultHandler
+        descriptor.skipsDefaultKeepaliveHandler = !callsDefaultHandler
         
     }
     
@@ -780,7 +779,7 @@ export class CBSocketClient extends UIObject {
     
     addTargetForOneMessageForKey(key: string, handlerFunction: CBSocketMessageHandlerFunction) {
         
-        this._callbackHolder.registerOnetimeHandler(key, handlerFunction)
+        this._callbackHolder.registerOneTimeHandler(key, handlerFunction)
         
         if (IS_NOT(this._subscribedKeys[key])) {
             

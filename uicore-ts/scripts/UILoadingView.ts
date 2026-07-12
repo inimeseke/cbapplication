@@ -24,7 +24,7 @@ export class UILoadingView extends UIView implements IUILoadingView {
      */
     set theme(theme: "light" | "dark") {
         this._theme = theme
-        this.updateColors()
+        this.applyCurrentThemeColors()
     }
     
     get theme() {
@@ -49,7 +49,7 @@ export class UILoadingView extends UIView implements IUILoadingView {
         
         // 3. Initialize CSS
         this.initViewStyleSelectors()
-        this.updateColors()
+        this.applyCurrentThemeColors()
     }
     
     
@@ -93,7 +93,7 @@ export class UILoadingView extends UIView implements IUILoadingView {
         `)
     }
     
-    private updateColors() {
+    private applyCurrentThemeColors() {
         // --- Indicator Mode Styling ---
         const isLightTheme = this._theme === "light"
         
@@ -145,14 +145,14 @@ export class UILoadingView extends UIView implements IUILoadingView {
         // 2. Adaptive Logic
         // If smaller than 40px, use pulsing. Otherwise spinner.
         if (minDimension < 40) {
-            this.enablePulsingMode()
+            this.enterPulsingMode()
         }
         else {
-            this.enableIndicatorMode()
+            this.enterIndicatorMode()
         }
     }
     
-    private enablePulsingMode() {
+    private enterPulsingMode() {
         if (this.isPulsing) {
             return
         }
@@ -166,7 +166,7 @@ export class UILoadingView extends UIView implements IUILoadingView {
         this.isPulsing = YES
     }
     
-    private enableIndicatorMode() {
+    private enterIndicatorMode() {
         // Remove pulsing class
         this.removeStyleClass("UILoadingViewPulsing")
         this.isPulsing = NO
@@ -174,7 +174,7 @@ export class UILoadingView extends UIView implements IUILoadingView {
         this.spinnerView.hidden = NO
         
         // Apply Overlay Color immediately
-        this.updateColors()
+        this.applyCurrentThemeColors()
         
         // Layout Spinner
         // Bootstrap standard is ~2rem (32px). We can scale it slightly based on available space if we wanted,
@@ -195,7 +195,6 @@ export class UILoadingView extends UIView implements IUILoadingView {
 }
 
 UIView.LoadingViewClass = UILoadingView
-
 
 
 

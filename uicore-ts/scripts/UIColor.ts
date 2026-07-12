@@ -477,14 +477,14 @@ export class UIColor extends UIObject {
         const red = Math.min(255, Math.max(0, descriptor.red)).toFixed(0)
         const green = Math.min(255, Math.max(0, descriptor.green)).toFixed(0)
         const blue = Math.min(255, Math.max(0, descriptor.blue)).toFixed(0)
-        const alpha = this.defaultAlphaToOne(descriptor.alpha)
+        const alpha = this.alphaDefaultingToOne(descriptor.alpha)
         
         return new UIColor("rgba(" + red + "," + green + "," + blue + "," + alpha + ")")
         
     }
     
     
-    private static defaultAlphaToOne(value = 1) {
+    private static alphaDefaultingToOne(value = 1) {
         if (value != value) {
             value = 1
         }
@@ -543,4 +543,3 @@ export class UIColor extends UIObject {
     
     
 }
-

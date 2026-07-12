@@ -37,12 +37,12 @@ export class UIBaseButton extends UIView {
         this._isPointerInside = NO
         
         
-        const setHovered = () => {
+        const markHovered = () => {
             this.hovered = YES
         }
-        this.addTargetForControlEvent(UIView.controlEvent.PointerHover, setHovered)
+        this.addTargetForControlEvent(UIView.controlEvent.PointerHover, markHovered)
         
-        const setNotHovered = () => {
+        const clearHovered = () => {
             
             this.hovered = NO
             
@@ -50,21 +50,21 @@ export class UIBaseButton extends UIView {
         
         this.addTargetForControlEvents([
             UIView.controlEvent.PointerLeave, UIView.controlEvent.PointerCancel, UIView.controlEvent.MultipleTouches
-        ], setNotHovered)
+        ], clearHovered)
         
         
         let highlightingTime: number
-        const setHighlighted = () => {
+        const markHighlighted = () => {
             this.highlighted = YES
             highlightingTime = Date.now()
         }
-        this.addTargetForControlEvent(UIView.controlEvent.PointerDown, setHighlighted)
-        this.addTargetForControlEvent(UIView.controlEvent.PointerEnter, setHighlighted)
+        this.addTargetForControlEvent(UIView.controlEvent.PointerDown, markHighlighted)
+        this.addTargetForControlEvent(UIView.controlEvent.PointerEnter, markHighlighted)
         
-        const setNotHighlighted = () => {
+        const clearHighlighted = () => {
             this.highlighted = NO
         }
-        const setNotHighlightedWithMinimumDuration = () => {
+        const clearHighlightedAfterMinimumDuration = () => {
             const minimumDurationInMilliseconds = 50
             const elapsedTime = Date.now() - highlightingTime
             if (minimumDurationInMilliseconds < elapsedTime) {
@@ -78,15 +78,15 @@ export class UIBaseButton extends UIView {
         }
         this.addTargetForControlEvents([
             UIView.controlEvent.PointerLeave, UIView.controlEvent.PointerCancel, UIView.controlEvent.MultipleTouches
-        ], setNotHighlighted)
-        this.addTargetForControlEvent(UIView.controlEvent.PointerUp, setNotHighlightedWithMinimumDuration)
+        ], clearHighlighted)
+        this.addTargetForControlEvent(UIView.controlEvent.PointerUp, clearHighlightedAfterMinimumDuration)
         
         // Enter and Space both activate the button.
         // Fire PointerUpInside (which cascades to PrimaryActionTriggered via sendControlEventForKey).
         this.addTargetForControlEvent(UIView.controlEvent.EnterDown, () => {
             
-            setHighlighted()
-            setNotHighlightedWithMinimumDuration()
+            markHighlighted()
+            clearHighlightedAfterMinimumDuration()
             this.sendControlEventForKey(UIView.controlEvent.PointerUpInside, nil)
             
         })
@@ -94,8 +94,8 @@ export class UIBaseButton extends UIView {
         this.addTargetForControlEvent(UIView.controlEvent.SpaceDown, (sender, event) => {
             
             event.preventDefault()
-            setHighlighted()
-            setNotHighlightedWithMinimumDuration()
+            markHighlighted()
+            clearHighlightedAfterMinimumDuration()
             this.sendControlEventForKey(UIView.controlEvent.PointerUpInside, nil)
             
         })
@@ -363,7 +363,7 @@ export class UIBaseButton extends UIView {
     }
     
     
-    static getEventCoordinatesInDocument(touchOrMouseEvent: any) {
+    static eventCoordinatesInDocument(touchOrMouseEvent: any) {
         // http://www.quirksmode.org/js/events_properties.html
         var posx = 0
         var posy = 0
@@ -389,8 +389,7 @@ export class UIBaseButton extends UIView {
         
     }
     
-    
-    static getElementPositionInDocument(el: { tagName: string; offsetLeft: number; scrollLeft: number; clientLeft: number; offsetTop: number; scrollTop: number; clientTop: number; offsetParent: any }) {
+    static elementPositionInDocument(el: { tagName: string; offsetLeft: number; scrollLeft: number; clientLeft: number; offsetTop: number; scrollTop: number; clientTop: number; offsetParent: any }) {
         //https://www.kirupa.com/html5/getting_mouse_click_position.htm
         var xPosition = 0
         var yPosition = 0
@@ -420,15 +419,15 @@ export class UIBaseButton extends UIView {
         }
     }
     
-    static convertCoordinatesFromDocumentToElement(x: number, y: number, element: any) {
-        const elementPositionInDocument = this.getElementPositionInDocument(element)
+    static coordinatesInElementFromDocumentCoordinates(x: number, y: number, element: any) {
+        const elementPositionInDocument = this.elementPositionInDocument(element)
         const coordinatesInElement = { "x": x - elementPositionInDocument.x, "y": y - elementPositionInDocument.y }
         return coordinatesInElement
     }
     
-    static getEventCoordinatesInElement(touchOrMouseEvent: any, element: any) {
-        const coordinatesInDocument = this.getEventCoordinatesInDocument(touchOrMouseEvent)
-        const coordinatesInElement = this.convertCoordinatesFromDocumentToElement(
+    static eventCoordinatesInElement(touchOrMouseEvent: any, element: any) {
+        const coordinatesInDocument = this.eventCoordinatesInDocument(touchOrMouseEvent)
+        const coordinatesInElement = this.coordinatesInElementFromDocumentCoordinates(
             coordinatesInDocument.x,
             coordinatesInDocument.y,
             element

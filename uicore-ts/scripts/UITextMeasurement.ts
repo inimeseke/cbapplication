@@ -87,7 +87,7 @@ export class UITextMeasurement {
         ].join("|")
     }
     
-    private static getSemanticCacheKey(element: HTMLElement): string {
+    private static semanticCacheKeyForElement(element: HTMLElement): string {
         const existingKey = this.elementToCacheKey.get(element)
         if (existingKey) {
             return existingKey
@@ -106,7 +106,7 @@ export class UITextMeasurement {
         return styleCacheKey
     }
     
-    private static getCanvasContext(): CanvasRenderingContext2D {
+    private static canvasContext(): CanvasRenderingContext2D {
         if (!this._context) {
             this._canvas  = document.createElement("canvas")
             this._context = this._canvas.getContext("2d")!
@@ -114,7 +114,7 @@ export class UITextMeasurement {
         return this._context
     }
     
-    private static getMeasurementElement(): HTMLDivElement {
+    private static sharedMeasurementElement(): HTMLDivElement {
         if (!this.measurementElement) {
             this.measurementElement = document.createElement("div")
             this.measurementElement.style.cssText = `
@@ -160,7 +160,7 @@ export class UITextMeasurement {
     
     // ─── Pretext fast path ────────────────────────────────────────────────────────
     
-    private static getPreparedText(text: string, font: string, whiteSpace: string): any {
+    private static preparedTextWithTextFontAndWhiteSpace(text: string, font: string, whiteSpace: string): any {
         const whiteSpaceOption = whiteSpace === "pre-wrap" ? "pre-wrap" : "normal"
         const cacheKey = `${text}|${font}|${whiteSpaceOption}`
         
@@ -185,7 +185,7 @@ export class UITextMeasurement {
         if (styles.whiteSpace === "nowrap" || styles.whiteSpace === "pre" || !constrainingWidth) {
             // Single-line: layout with Infinity gives us lineCount == 1 and
             // height == lineHeight. Width is not needed by height-only callers.
-            const prepared = this.getPreparedText(transformedText, styles.font, styles.whiteSpace)
+            const prepared = this.preparedTextWithTextFontAndWhiteSpace(transformedText, styles.font, styles.whiteSpace)
             const result   = _pretextLayout!(prepared, Infinity, styles.lineHeight)
             if (isNaN(result.height)) {
                 return { width: NaN, height: NaN }
@@ -197,7 +197,7 @@ export class UITextMeasurement {
         }
         
         const availableWidth = constrainingWidth - paddingH
-        const prepared = this.getPreparedText(transformedText, styles.font, styles.whiteSpace)
+        const prepared = this.preparedTextWithTextFontAndWhiteSpace(transformedText, styles.font, styles.whiteSpace)
         const result   = _pretextLayout!(prepared, availableWidth, styles.lineHeight)
         
         // pretext propagates NaN when the canvas font hasn't loaded yet.
@@ -220,7 +220,7 @@ export class UITextMeasurement {
     private static _fontsLoadingSet = new Set<string>()
     
     static measureTextWidth(text: string, font: string, letterSpacing: number = 0): number {
-        const ctx = this.getCanvasContext()
+        const ctx = this.canvasContext()
         ctx.font = font
         
         // If the normalised ctx.font doesn't contain the requested family the font
@@ -302,7 +302,7 @@ export class UITextMeasurement {
             return [text]
         }
         
-        const ctx = this.getCanvasContext()
+        const ctx = this.canvasContext()
         ctx.font = font
         
         // Font not yet loaded into canvas — signal caller not to cache
@@ -359,7 +359,7 @@ export class UITextMeasurement {
         constrainingHeight?: number,
         providedStyles?: TextMeasurementStyle
     ): { width: number; height: number } {
-        const styles = this.getElementStyles(element, providedStyles)
+        const styles = this.elementStylesForElement(element, providedStyles)
         
         // Use pretext when available AND letter-spacing is zero.
         // pretext does not model letter-spacing, so non-zero values require the
@@ -380,8 +380,8 @@ export class UITextMeasurement {
         constrainingHeight?: number,
         providedStyles?: TextMeasurementStyle
     ): { width: number; height: number } {
-        const measureEl = this.getMeasurementElement()
-        const styles    = this.getElementStyles(element, providedStyles)
+        const measureEl = this.sharedMeasurementElement()
+        const styles    = this.elementStylesForElement(element, providedStyles)
         
         measureEl.style.font          = styles.font
         measureEl.style.lineHeight    = styles.lineHeight + "px"
@@ -421,12 +421,12 @@ export class UITextMeasurement {
     
     // ─── Public API ───────────────────────────────────────────────────────────────
     
-    static getElementStyles(element: HTMLElement, providedStyles?: TextMeasurementStyle): TextMeasurementStyle {
+    static elementStylesForElement(element: HTMLElement, providedStyles?: TextMeasurementStyle): TextMeasurementStyle {
         if (providedStyles) {
             return providedStyles
         }
         
-        const cacheKey = this.getSemanticCacheKey(element)
+        const cacheKey = this.semanticCacheKeyForElement(element)
         const cached   = this.globalStyleCache.get(cacheKey)
         if (cached) {
             return cached
@@ -457,7 +457,6 @@ export class UITextMeasurement {
         this.globalStyleCache.set(cacheKey, styles)
         return styles
     }
-    
     /**
      * Calculate intrinsic content size for text.
      *
@@ -475,7 +474,7 @@ export class UITextMeasurement {
         providedStyles?: TextMeasurementStyle
     ): { width: number; height: number } {
         if (!content || content.length === 0) {
-            const styles = this.getElementStyles(element, providedStyles)
+            const styles = this.elementStylesForElement(element, providedStyles)
             return {
                 width:  styles.paddingLeft + styles.paddingRight,
                 height: styles.paddingTop  + styles.paddingBottom
@@ -542,7 +541,7 @@ export class UITextMeasurement {
      */
     static prewarmCache(elements: HTMLElement[]): void {
         for (const el of elements) {
-            this.getElementStyles(el)
+            this.elementStylesForElement(el)
         }
     }
     

@@ -38,15 +38,15 @@ interface CBSocketCallbackHolderMessageDescriptor {
     
     /**
      * Called when a keepalive frame arrives for this descriptor's request.
-     * Registered via CBSocketRequestPromise.didReceiveKeepalive().
+     * Registered via CBSocketRequestPromise.addKeepaliveHandler().
      */
     keepaliveHandler?: (payload: CBSocketKeepalivePayload) => void;
     
     /**
-     * When true the defaultKeepaliveHandler on CBSocketClient is NOT called
+     * When true the default keepalive handler on CBSocketClient is NOT called
      * for this descriptor — only keepaliveHandler fires.
      */
-    keepaliveHandlerOverridesDefault: boolean;
+    skipsDefaultKeepaliveHandler: boolean;
     
 }
 
@@ -72,7 +72,7 @@ export class CBSocketCallbackHolder extends UIObject {
         [x: string]: CBSocketMessageHandlerFunction[]
     } = {}
     
-    onetimeHandlers: {
+    oneTimeHandlers: {
         [x: string]: CBSocketMessageHandlerFunction[]
     } = {}
     
@@ -164,15 +164,15 @@ export class CBSocketCallbackHolder extends UIObject {
         
     }
     
-    registerOnetimeHandler(key: string, handlerFunction: CBSocketMessageHandlerFunction) {
+    registerOneTimeHandler(key: string, handlerFunction: CBSocketMessageHandlerFunction) {
         
-        if (!this.onetimeHandlers[key]) {
+        if (!this.oneTimeHandlers[key]) {
             
-            this.onetimeHandlers[key] = []
+            this.oneTimeHandlers[key] = []
             
         }
         
-        this.onetimeHandlers[key].push(handlerFunction)
+        this.oneTimeHandlers[key].push(handlerFunction)
         
     }
     
@@ -503,7 +503,7 @@ export class CBSocketCallbackHolder extends UIObject {
                 completionFunction: completionFunction,
                 
                 keepaliveHandler: undefined,
-                keepaliveHandlerOverridesDefault: NO
+                skipsDefaultKeepaliveHandler: NO
                 
             })
             
@@ -625,7 +625,7 @@ export class CBSocketCallbackHolder extends UIObject {
             }.bind(this),
             
             keepaliveHandler: undefined,
-            keepaliveHandlerOverridesDefault: NO
+            skipsDefaultKeepaliveHandler: NO
             
         })
         
@@ -664,9 +664,9 @@ export class CBSocketCallbackHolder extends UIObject {
             
         }
         
-        if (this.onetimeHandlers[key]) {
+        if (this.oneTimeHandlers[key]) {
             
-            this.onetimeHandlers[key].forEach(function (
+            this.oneTimeHandlers[key].forEach(function (
                 this: CBSocketCallbackHolder,
                 handler: CBSocketMessageHandlerFunction
             ) {
@@ -675,7 +675,7 @@ export class CBSocketCallbackHolder extends UIObject {
                 
             }.bind(this))
             
-            delete this.onetimeHandlers[key]
+            delete this.oneTimeHandlers[key]
             
         }
         
@@ -706,8 +706,8 @@ export class CBSocketCallbackHolder extends UIObject {
                     this._resetTimeoutForDescriptor(descriptor)
                     
                     // Fire the default handler unless the per-call handler overrides it
-                    if (!descriptor.keepaliveHandlerOverridesDefault) {
-                        this._socketClient.defaultKeepaliveHandler?.(payload)
+                    if (!descriptor.skipsDefaultKeepaliveHandler) {
+                        this._socketClient.keepaliveDidArrive?.(payload)
                     }
                     
                     // Fire the per-call handler if one was registered

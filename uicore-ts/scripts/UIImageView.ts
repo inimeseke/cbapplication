@@ -82,7 +82,7 @@ export class UIImageView extends UIView {
             let multiplier = maxSize / Math.max(originalSize.height, originalSize.width)
             multiplier = Math.min(1, multiplier)
         
-            const result = imageView.getDataURL((originalSize.height * multiplier).integerValue, (originalSize.width *
+            const result = imageView.dataURLWithHeightAndWidth((originalSize.height * multiplier).integerValue, (originalSize.width *
                 multiplier).integerValue)
         
             completion(result)
@@ -104,7 +104,7 @@ export class UIImageView extends UIView {
     
         imageView.viewHTMLElement.onload = () => {
         
-            const result = imageView.getDataURL(height, width)
+            const result = imageView.dataURLWithHeightAndWidth(height, width)
             completion(result)
         
         }
@@ -112,7 +112,7 @@ export class UIImageView extends UIView {
     }
     
     
-    getDataURL(height?: number, width?: number) {
+    dataURLWithHeightAndWidth(height?: number, width?: number) {
     
         const img = this.viewHTMLElement
     
@@ -132,7 +132,6 @@ export class UIImageView extends UIView {
         return canvas.toDataURL("image/png")
     
     }
-    
     
     get imageSource() {
         
@@ -177,10 +176,10 @@ export class UIImageView extends UIView {
     }
     
     
-    setImageSource(key: string, defaultString: string) {
+    applyLocalizedImageSourceForKey(key: string, defaultSource: string) {
     
         const languageName = UICore.languageService.currentLanguageKey
-        this.imageSource = UICore.languageService.stringForKey(key, languageName, defaultString, undefined)
+        this.imageSource = UICore.languageService.stringForKey(key, languageName, defaultSource, undefined)
         
     }
     
@@ -192,7 +191,7 @@ export class UIImageView extends UIView {
         if (event.name == UIView.broadcastEventName.LanguageChanged || event.name ==
             UIView.broadcastEventName.AddedToViewTree) {
             
-            this._setImageSourceFromKeyIfPossible()
+            this._applyLocalizedImageSourceIfPossible()
             
         }
         
@@ -203,15 +202,15 @@ export class UIImageView extends UIView {
         
         super.willMoveToSuperview(superview)
         
-        this._setImageSourceFromKeyIfPossible()
+        this._applyLocalizedImageSourceIfPossible()
         
     }
     
-    _setImageSourceFromKeyIfPossible() {
+    _applyLocalizedImageSourceIfPossible() {
         
         if (this._sourceKey && this._defaultSource) {
             
-            this.setImageSource(this._sourceKey, this._defaultSource)
+            this.applyLocalizedImageSourceForKey(this._sourceKey, this._defaultSource)
             
         }
         
@@ -282,8 +281,6 @@ export class UIImageView extends UIView {
     
     
 }
-
-
 
 
 

@@ -2201,7 +2201,13 @@ export class UIView extends UIObject {
                 return
             }
             
-            this.layoutSubviews()
+            UIRectangle._beginGroupingWrapperFrameLayoutPass(this)
+            try {
+                this.layoutSubviews()
+            }
+            finally {
+                UIRectangle._endGroupingWrapperFrameLayoutPass(this)
+            }
             
         }
         catch (exception) {
@@ -2434,13 +2440,13 @@ export class UIView extends UIObject {
     }
     
     get viewBelowThisView() {
-        const result: UIView = (this.viewHTMLElement.previousElementSibling as any || {}).UIView
-        return result
+        const index = this.superview?.subviews.indexOf(this) ?? -1
+        return this.superview?.subviews[index - 1]
     }
     
     get viewAboveThisView() {
-        const result: UIView = (this.viewHTMLElement.nextElementSibling as any || {}).UIView
-        return result
+        const index = this.superview?.subviews.indexOf(this) ?? -1
+        return this.superview?.subviews[index + 1]
     }
     
     
@@ -2451,7 +2457,8 @@ export class UIView extends UIObject {
             view.willMoveToSuperview(this)
             
             if (IS(aboveView)) {
-                this.viewHTMLElement.insertBefore(view.viewHTMLElement, aboveView.viewHTMLElement.nextSibling)
+                const aboveViewHTMLElement = UIRectangle._topLevelHTMLElementForView(aboveView)
+                this.viewHTMLElement.insertBefore(view.viewHTMLElement, aboveViewHTMLElement.nextSibling)
                 this.subviews.insertElementAtIndex(this.subviews.indexOf(aboveView), view)
             }
             else {
@@ -2498,9 +2505,13 @@ export class UIView extends UIObject {
                 return
             }
             
+            UIRectangle._detachViewFromGroupingWrapperFrame(this)
             this.superview.subviews.removeElement(this)
             this.superview.subviews.insertElementAtIndex(0, this)
-            this.superview.viewHTMLElement.insertBefore(this.viewHTMLElement, bottomView.viewHTMLElement)
+            this.superview.viewHTMLElement.insertBefore(
+                this.viewHTMLElement,
+                UIRectangle._topLevelHTMLElementForView(bottomView)
+            )
             
         }
         
@@ -2517,6 +2528,7 @@ export class UIView extends UIObject {
                 return
             }
             
+            UIRectangle._detachViewFromGroupingWrapperFrame(this)
             this.superview.subviews.removeElement(this)
             this.superview.subviews.push(this)
             this.superview.viewHTMLElement.appendChild(this.viewHTMLElement)
@@ -2543,7 +2555,15 @@ export class UIView extends UIObject {
             const index = this.superview.subviews.indexOf(this)
             if (index > -1) {
                 this.superview.subviews.splice(index, 1)
-                this.superview.viewHTMLElement.removeChild(this.viewHTMLElement)
+                const groupingWrapperHTMLElement = this.viewHTMLElement.closest(
+                    "[data-uicore-grouping-wrapper-frame]"
+                )
+                this.viewHTMLElement.remove()
+                if (groupingWrapperHTMLElement && !groupingWrapperHTMLElement.querySelector(
+                    "[data-uicore-grouping-wrapper-coordinate-space]"
+                )?.children.length) {
+                    groupingWrapperHTMLElement.remove()
+                }
                 this.superview = undefined
                 this.broadcastEventInSubtree({
                     name: UIView.broadcastEventName.RemovedFromViewTree,
@@ -3780,6 +3800,10 @@ export class UIView extends UIObject {
         const onblur = (event: Event) => {
             this.sendControlEventForKey(UIView.controlEvent.Blur, event)
         }
+
+        const onScrollWheel = (event: WheelEvent) => {
+            this.sendControlEventForKey(UIView.controlEvent.ScrollWheel, event)
+        }
         
         
         // Mouse and touch start events
@@ -3796,6 +3820,7 @@ export class UIView extends UIObject {
         this.viewHTMLElement.addEventListener("touchmove", onTouchMove, false)
         
         //this.viewHTMLElement.addEventListener("mousewheel", onmousewheel.bind(this), false)
+        this._viewHTMLElement.addEventListener("wheel", onScrollWheel)
         
         this._viewHTMLElement.onmouseover = onmouseover
         // this.viewHTMLElement.addEventListener("mouseover", onmouseover.bind(this), false)
@@ -3852,7 +3877,8 @@ export class UIView extends UIObject {
         "DownArrowDown": "DownArrowDown",
         "UpArrowDown": "UpArrowDown",
         "Focus": "Focus",
-        "Blur": "Blur"
+        "Blur": "Blur",
+        "ScrollWheel": "ScrollWheel"
         
     } as const
     
@@ -4552,4 +4578,3 @@ function props(obj: any) {
 const _UIViewPropertyKeys = props(UIView.prototype).concat(new UIView().allKeys)
 const _UIViewControllerPropertyKeys = props(UIViewController.prototype)
     .concat(new UIViewController(nil).allKeys)
-

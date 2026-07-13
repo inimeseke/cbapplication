@@ -5,7 +5,45 @@ import { UIView } from "./UIView"
 
 export type SizeNumberOrFunctionOrView = number | ((constrainingOrthogonalSize: number) => number) | UIView
 
+export type UIGroupingWrapperFrameConfiguration = {
+    /** Stable identity used to reuse the same wrapper when surrounding conditional layout changes. */
+    identifier?: string
+    /** CSS classes applied to the generated outer wrapper element. */
+    classNames?: string[]
+    /** HTML attributes applied to the generated outer wrapper element. */
+    attributes?: Record<string, string>
+    /** Presentational CSS applied to the generated outer wrapper element. */
+    style?: Partial<CSSStyleDeclaration>
+    /** Optionally transforms the bounding frame calculated from all assigned view frames. */
+    frame?: (defaultFrame: UIRectangle, assignedFrames: UIRectangle[]) => UIRectangle
+}
+
+type UIGroupingWrapperFrameContext = {
+    configuration: UIGroupingWrapperFrameConfiguration
+    views: UIView[]
+    framesByView: Map<UIView, UIRectangle>
+}
+
+type UIGroupingWrapperFrameLayoutPass = {
+    owner: UIView
+    groupingContext?: UIGroupingWrapperFrameContext
+    requests: UIGroupingWrapperFrameContext[]
+}
+
+type UIGroupingWrapperFrameRecord = {
+    identifier?: string
+    wrapperHTMLElement: HTMLDivElement
+    coordinateSpaceHTMLElement: HTMLDivElement
+    views: UIView[]
+    configuredClassNames: string[]
+    configuredAttributeNames: string[]
+    configuredStyleNames: string[]
+}
+
 export class UIRectangle extends UIObject {
+
+    static _groupingWrapperFrameLayoutPasses: UIGroupingWrapperFrameLayoutPass[] = []
+    static _groupingWrapperFrameRecordsByOwner = new WeakMap<UIView, UIGroupingWrapperFrameRecord[]>()
     
     _isBeingUpdated: boolean
     rectanglePointDidChange?: (b: any) => void
@@ -757,7 +795,7 @@ export class UIRectangle extends UIObject {
             weights = [weights].arrayByRepeating(views.length)
         }
         const frames = this.rectanglesBySplittingWidth(weights, paddings, absoluteWidths)
-        frames.forEach((frame, index) => FIRST_OR_NIL(views[index]).frame = frame)
+        frames.forEach((frame, index) => UIRectangle._assignFrameToView(frame, FIRST_OR_NIL(views[index])))
         return this
     }
     
@@ -771,20 +809,20 @@ export class UIRectangle extends UIObject {
             weights = [weights].arrayByRepeating(views.length)
         }
         const frames = this.rectanglesBySplittingHeight(weights, paddings, absoluteHeights)
-        frames.forEach((frame, index) => FIRST_OR_NIL(views[index]).frame = frame)
+        frames.forEach((frame, index) => UIRectangle._assignFrameToView(frame, FIRST_OR_NIL(views[index])))
         return this
     }
     
     
     distributeViewsEquallyAlongWidth(views: UIView[], padding: number) {
         const frames = this.rectanglesByEquallySplittingWidth(views.length, padding)
-        frames.forEach((frame, index) => views[index].frame = frame)
+        frames.forEach((frame, index) => UIRectangle._assignFrameToView(frame, views[index]))
         return this
     }
     
     distributeViewsEquallyAlongHeight(views: UIView[], padding: number) {
         const frames = this.rectanglesByEquallySplittingHeight(views.length, padding)
-        frames.forEach((frame, index) => views[index].frame = frame)
+        frames.forEach((frame, index) => UIRectangle._assignFrameToView(frame, views[index]))
         return this
     }
     
@@ -881,7 +919,7 @@ export class UIRectangle extends UIObject {
                 frame.height = absoluteHeights[i] as number
             }
             
-            views[i].frame = frame
+            UIRectangle._assignFrameToView(frame, views[i])
             frames.push(frame)
             
             const padding = (paddings[i] || 0) as number
@@ -941,7 +979,7 @@ export class UIRectangle extends UIObject {
             frames.forEach(frame => { frame.x += offset })
         }
         
-        frames.forEach((frame, index) => views[index].frame = frame)
+        frames.forEach((frame, index) => UIRectangle._assignFrameToView(frame, views[index]))
         
         return frames
     }
@@ -984,7 +1022,7 @@ export class UIRectangle extends UIObject {
                 const heightNumber = absoluteHeights[i] as number
                 rowFrames.forEach((frame, j) => {
                     frame.height = heightNumber
-                    rowViews[j].frame = frame
+                    UIRectangle._assignFrameToView(frame, rowViews[j])
                 })
             }
             
@@ -1042,9 +1080,266 @@ export class UIRectangle extends UIObject {
     
     
     assignedAsFrameOfView(view: UIView, isWeakFrame = view.hasWeakFrame) {
-        view.frame = this
+        UIRectangle._assignFrameToView(this, view)
         view.hasWeakFrame = isWeakFrame
         return this
+    }
+
+
+    /**
+     * Begins collecting views assigned through the rectangle frame-assignment API into a DOM wrapper.
+     * The matching endGroupingWrapperFrame() returns the current rectangle unchanged, preserving the chain.
+     */
+    beginGroupingWrapperFrame(configuration: UIGroupingWrapperFrameConfiguration = {}) {
+        const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement
+        if (!layoutPass) {
+            throw new Error("beginGroupingWrapperFrame() must be called during a UIView layout pass")
+        }
+        if (layoutPass.groupingContext) {
+            throw new Error("Nested grouping wrapper frames are not supported")
+        }
+        layoutPass.groupingContext = {
+            configuration,
+            views: [],
+            framesByView: new Map()
+        }
+        return this
+    }
+
+
+    /** Ends the current grouping wrapper frame and returns this rectangle unchanged. */
+    endGroupingWrapperFrame() {
+        const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement
+        if (!layoutPass?.groupingContext) {
+            throw new Error("endGroupingWrapperFrame() requires a matching beginGroupingWrapperFrame()")
+        }
+        layoutPass.requests.push(layoutPass.groupingContext)
+        layoutPass.groupingContext = undefined
+        return this
+    }
+
+
+    static _beginGroupingWrapperFrameLayoutPass(owner: UIView) {
+        UIRectangle._groupingWrapperFrameLayoutPasses.push({
+            owner,
+            requests: []
+        })
+    }
+
+
+    static _endGroupingWrapperFrameLayoutPass(owner: UIView) {
+        const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.pop()
+        if (!layoutPass || layoutPass.owner !== owner) {
+            throw new Error("Unbalanced grouping wrapper frame layout pass")
+        }
+        if (layoutPass.groupingContext) {
+            console.error("beginGroupingWrapperFrame() was not balanced with endGroupingWrapperFrame()", owner)
+            layoutPass.requests.push(layoutPass.groupingContext)
+        }
+        if (!UIView.isVirtualLayouting) {
+            UIRectangle._reconcileGroupingWrapperFrames(layoutPass)
+        }
+    }
+
+
+    static _assignFrameToView(frame: UIRectangle, view: UIView) {
+        view.frame = frame
+        const groupingContext = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement?.groupingContext
+        if (!groupingContext) {
+            return
+        }
+        if (!groupingContext.framesByView.has(view)) {
+            groupingContext.views.push(view)
+        }
+        groupingContext.framesByView.set(view, frame.copy())
+    }
+
+
+    static _reconcileGroupingWrapperFrames(layoutPass: UIGroupingWrapperFrameLayoutPass) {
+        const owner = layoutPass.owner
+        const previousRecords = UIRectangle._groupingWrapperFrameRecordsByOwner.get(owner) ?? []
+        const availablePreviousRecords = previousRecords.copy()
+        const nextRecords: UIGroupingWrapperFrameRecord[] = []
+        const groupedViews = new Set<UIView>()
+
+        layoutPass.requests.forEach((request, requestIndex) => {
+            if (!request.views.length) {
+                return
+            }
+            request.views.forEach(view => {
+                if (view.superview !== owner) {
+                    throw new Error("Views in a grouping wrapper frame must be direct subviews of the layout owner")
+                }
+                if (groupedViews.has(view)) {
+                    throw new Error("A view cannot belong to multiple grouping wrapper frames in one layout pass")
+                }
+                groupedViews.add(view)
+            })
+
+            let record: UIGroupingWrapperFrameRecord | undefined
+            if (request.configuration.identifier) {
+                record = availablePreviousRecords.find(
+                    candidate => candidate.identifier === request.configuration.identifier
+                )
+            }
+            record = record ?? availablePreviousRecords[requestIndex] ?? availablePreviousRecords.firstElement
+            if (record) {
+                availablePreviousRecords.removeElement(record)
+            }
+            else {
+                record = UIRectangle._newGroupingWrapperFrameRecord()
+            }
+
+            UIRectangle._configureGroupingWrapperFrameRecord(record, request, owner)
+            nextRecords.push(record)
+        })
+
+        availablePreviousRecords.forEach(record => {
+            record.views.forEach(view => {
+                if (view.viewHTMLElement.parentElement === record.coordinateSpaceHTMLElement) {
+                    record.wrapperHTMLElement.parentElement?.insertBefore(
+                        view.viewHTMLElement,
+                        record.wrapperHTMLElement
+                    )
+                }
+            })
+            record.wrapperHTMLElement.remove()
+        })
+
+        const recordByView = new Map<UIView, UIGroupingWrapperFrameRecord>()
+        nextRecords.forEach(record => record.views.forEach(view => recordByView.set(view, record)))
+        const desiredTopLevelElements: HTMLElement[] = []
+        owner.subviews.forEach(view => {
+            const record = recordByView.get(view)
+            const element = record?.wrapperHTMLElement ?? view.viewHTMLElement
+            if (!desiredTopLevelElements.contains(element)) {
+                desiredTopLevelElements.push(element)
+            }
+        })
+        const currentTopLevelElements = Array.from(owner.viewHTMLElement.children).filter(element =>
+            desiredTopLevelElements.contains(element as HTMLElement)
+        ) as HTMLElement[]
+        if (!currentTopLevelElements.isEqualToArray(desiredTopLevelElements)) {
+            desiredTopLevelElements.forEach(element => owner.viewHTMLElement.appendChild(element))
+        }
+
+        UIRectangle._groupingWrapperFrameRecordsByOwner.set(owner, nextRecords)
+    }
+
+
+    static _newGroupingWrapperFrameRecord(): UIGroupingWrapperFrameRecord {
+        const wrapperHTMLElement = document.createElement("div")
+        const coordinateSpaceHTMLElement = document.createElement("div")
+        wrapperHTMLElement.classList.add("UICore_UIGroupingWrapperFrame")
+        wrapperHTMLElement.setAttribute("data-uicore-grouping-wrapper-frame", "")
+        coordinateSpaceHTMLElement.classList.add("UICore_UIGroupingWrapperFrame_CoordinateSpace")
+        coordinateSpaceHTMLElement.setAttribute("data-uicore-grouping-wrapper-coordinate-space", "")
+        wrapperHTMLElement.appendChild(coordinateSpaceHTMLElement)
+        return {
+            wrapperHTMLElement,
+            coordinateSpaceHTMLElement,
+            views: [],
+            configuredClassNames: [],
+            configuredAttributeNames: [],
+            configuredStyleNames: []
+        }
+    }
+
+
+    static _configureGroupingWrapperFrameRecord(
+        record: UIGroupingWrapperFrameRecord,
+        request: UIGroupingWrapperFrameContext,
+        owner: UIView
+    ) {
+        const wrapperHTMLElement = record.wrapperHTMLElement
+        record.configuredClassNames.forEach(className => wrapperHTMLElement.classList.remove(className))
+        record.configuredAttributeNames.forEach(attributeName => wrapperHTMLElement.removeAttribute(attributeName))
+        record.configuredStyleNames.forEach(styleName => (wrapperHTMLElement.style as any)[styleName] = "")
+
+        wrapperHTMLElement.classList.add("UICore_UIGroupingWrapperFrame")
+        wrapperHTMLElement.setAttribute("data-uicore-grouping-wrapper-frame", "")
+
+        record.identifier = request.configuration.identifier
+        record.views = request.views.copy()
+        record.configuredClassNames = request.configuration.classNames?.copy() ?? []
+        record.configuredAttributeNames = Object.keys(request.configuration.attributes ?? {})
+        record.configuredStyleNames = Object.keys(request.configuration.style ?? {})
+
+        record.configuredClassNames.forEach(className => wrapperHTMLElement.classList.add(className))
+        Object.keys(request.configuration.attributes ?? {}).forEach(attributeName => {
+            wrapperHTMLElement.setAttribute(
+                attributeName,
+                (request.configuration.attributes as Record<string, string>)[attributeName]
+            )
+        })
+        Object.keys(request.configuration.style ?? {}).forEach(styleName => {
+            (wrapperHTMLElement.style as any)[styleName] = (request.configuration.style as any)[styleName]
+        })
+        if (record.identifier) {
+            wrapperHTMLElement.setAttribute("data-uicore-grouping-wrapper-frame-identifier", record.identifier)
+        }
+        else {
+            wrapperHTMLElement.removeAttribute("data-uicore-grouping-wrapper-frame-identifier")
+        }
+
+        const assignedFrames = request.views.map(view => request.framesByView.get(view) as UIRectangle)
+        const framePoints: UIPoint[] = []
+        assignedFrames.forEach(frame => {
+            framePoints.push(frame.min)
+            framePoints.push(frame.max)
+        })
+        const defaultFrame = UIRectangle.boundingBoxForPoints(framePoints)
+        const wrapperFrame = request.configuration.frame?.(defaultFrame.copy(), assignedFrames.copy()) ?? defaultFrame
+
+        wrapperHTMLElement.style.position = "absolute"
+        wrapperHTMLElement.style.left = wrapperFrame.x + "px"
+        wrapperHTMLElement.style.top = wrapperFrame.y + "px"
+        wrapperHTMLElement.style.width = wrapperFrame.width + "px"
+        wrapperHTMLElement.style.height = wrapperFrame.height + "px"
+        wrapperHTMLElement.style.boxSizing = "border-box"
+
+        if (wrapperHTMLElement.parentElement !== owner.viewHTMLElement) {
+            owner.viewHTMLElement.appendChild(wrapperHTMLElement)
+        }
+
+        const coordinateSpaceHTMLElement = record.coordinateSpaceHTMLElement
+        coordinateSpaceHTMLElement.classList.add("UICore_UIGroupingWrapperFrame_CoordinateSpace")
+        coordinateSpaceHTMLElement.setAttribute("data-uicore-grouping-wrapper-coordinate-space", "")
+        coordinateSpaceHTMLElement.style.position = "absolute"
+        coordinateSpaceHTMLElement.style.left =
+            -wrapperFrame.x - (wrapperHTMLElement.clientLeft || 0) + "px"
+        coordinateSpaceHTMLElement.style.top =
+            -wrapperFrame.y - (wrapperHTMLElement.clientTop || 0) + "px"
+        coordinateSpaceHTMLElement.style.width = owner.bounds.width + "px"
+        coordinateSpaceHTMLElement.style.height = owner.bounds.height + "px"
+
+        const currentViewElements = Array.from(coordinateSpaceHTMLElement.children)
+        const desiredViewElements = request.views.map(view => view.viewHTMLElement)
+        if (!currentViewElements.isEqualToArray(desiredViewElements)) {
+            desiredViewElements.forEach(element => coordinateSpaceHTMLElement.appendChild(element))
+        }
+    }
+
+
+    static _topLevelHTMLElementForView(view: UIView) {
+        let element = view.viewHTMLElement
+        while (element.parentElement && element.parentElement !== view.superview?.viewHTMLElement) {
+            element = element.parentElement as HTMLElement & typeof element
+        }
+        return element
+    }
+
+
+    static _detachViewFromGroupingWrapperFrame(view: UIView) {
+        const superviewHTMLElement = view.superview?.viewHTMLElement
+        if (!superviewHTMLElement || view.viewHTMLElement.parentElement === superviewHTMLElement) {
+            return
+        }
+        const wrapperHTMLElement = view.viewHTMLElement.closest("[data-uicore-grouping-wrapper-frame]")
+        superviewHTMLElement.appendChild(view.viewHTMLElement)
+        if (wrapperHTMLElement && !wrapperHTMLElement.querySelector("[data-uicore-grouping-wrapper-coordinate-space]")?.children.length) {
+            wrapperHTMLElement.remove()
+        }
     }
     
     
@@ -1374,4 +1669,3 @@ class UIRectangleConditionalBlock {
     }
     
 }
-

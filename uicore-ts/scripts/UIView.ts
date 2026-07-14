@@ -2559,11 +2559,7 @@ export class UIView extends UIObject {
                     "[data-uicore-grouping-wrapper-frame]"
                 )
                 this.viewHTMLElement.remove()
-                if (groupingWrapperHTMLElement && !groupingWrapperHTMLElement.querySelector(
-                    "[data-uicore-grouping-wrapper-coordinate-space]"
-                )?.children.length) {
-                    groupingWrapperHTMLElement.remove()
-                }
+                UIRectangle._removeEmptyGroupingWrapperFrameAncestors(groupingWrapperHTMLElement)
                 this.superview = undefined
                 this.broadcastEventInSubtree({
                     name: UIView.broadcastEventName.RemovedFromViewTree,

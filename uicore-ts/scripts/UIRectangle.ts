@@ -22,11 +22,12 @@ type UIGroupingWrapperFrameContext = {
     configuration: UIGroupingWrapperFrameConfiguration
     views: UIView[]
     framesByView: Map<UIView, UIRectangle>
+    childContexts: UIGroupingWrapperFrameContext[]
 }
 
 type UIGroupingWrapperFrameLayoutPass = {
     owner: UIView
-    groupingContext?: UIGroupingWrapperFrameContext
+    groupingContextStack: UIGroupingWrapperFrameContext[]
     requests: UIGroupingWrapperFrameContext[]
 }
 
@@ -35,6 +36,7 @@ type UIGroupingWrapperFrameRecord = {
     wrapperHTMLElement: HTMLDivElement
     coordinateSpaceHTMLElement: HTMLDivElement
     views: UIView[]
+    childRecords: UIGroupingWrapperFrameRecord[]
     configuredClassNames: string[]
     configuredAttributeNames: string[]
     configuredStyleNames: string[]
@@ -1095,14 +1097,20 @@ export class UIRectangle extends UIObject {
         if (!layoutPass) {
             throw new Error("beginGroupingWrapperFrame() must be called during a UIView layout pass")
         }
-        if (layoutPass.groupingContext) {
-            throw new Error("Nested grouping wrapper frames are not supported")
-        }
-        layoutPass.groupingContext = {
+        const groupingContext: UIGroupingWrapperFrameContext = {
             configuration,
             views: [],
-            framesByView: new Map()
+            framesByView: new Map(),
+            childContexts: []
         }
+        const parentContext = layoutPass.groupingContextStack.lastElement
+        if (parentContext) {
+            parentContext.childContexts.push(groupingContext)
+        }
+        else {
+            layoutPass.requests.push(groupingContext)
+        }
+        layoutPass.groupingContextStack.push(groupingContext)
         return this
     }
 
@@ -1110,11 +1118,10 @@ export class UIRectangle extends UIObject {
     /** Ends the current grouping wrapper frame and returns this rectangle unchanged. */
     endGroupingWrapperFrame() {
         const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement
-        if (!layoutPass?.groupingContext) {
+        if (!layoutPass?.groupingContextStack.length) {
             throw new Error("endGroupingWrapperFrame() requires a matching beginGroupingWrapperFrame()")
         }
-        layoutPass.requests.push(layoutPass.groupingContext)
-        layoutPass.groupingContext = undefined
+        layoutPass.groupingContextStack.pop()
         return this
     }
 
@@ -1122,6 +1129,7 @@ export class UIRectangle extends UIObject {
     static _beginGroupingWrapperFrameLayoutPass(owner: UIView) {
         UIRectangle._groupingWrapperFrameLayoutPasses.push({
             owner,
+            groupingContextStack: [],
             requests: []
         })
     }
@@ -1132,9 +1140,9 @@ export class UIRectangle extends UIObject {
         if (!layoutPass || layoutPass.owner !== owner) {
             throw new Error("Unbalanced grouping wrapper frame layout pass")
         }
-        if (layoutPass.groupingContext) {
+        if (layoutPass.groupingContextStack.length) {
             console.error("beginGroupingWrapperFrame() was not balanced with endGroupingWrapperFrame()", owner)
-            layoutPass.requests.push(layoutPass.groupingContext)
+            layoutPass.groupingContextStack.length = 0
         }
         if (!UIView.isVirtualLayouting) {
             UIRectangle._reconcileGroupingWrapperFrames(layoutPass)
@@ -1144,14 +1152,15 @@ export class UIRectangle extends UIObject {
 
     static _assignFrameToView(frame: UIRectangle, view: UIView) {
         view.frame = frame
-        const groupingContext = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement?.groupingContext
-        if (!groupingContext) {
+        const groupingContexts = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement?.groupingContextStack
+        if (!groupingContexts?.length) {
             return
         }
-        if (!groupingContext.framesByView.has(view)) {
-            groupingContext.views.push(view)
+        groupingContexts.forEach(groupingContext => groupingContext.framesByView.set(view, frame.copy()))
+        const innermostContext = groupingContexts.lastElement
+        if (!innermostContext.views.contains(view)) {
+            innermostContext.views.push(view)
         }
-        groupingContext.framesByView.set(view, frame.copy())
     }
 
 
@@ -1161,10 +1170,14 @@ export class UIRectangle extends UIObject {
         const availablePreviousRecords = previousRecords.copy()
         const nextRecords: UIGroupingWrapperFrameRecord[] = []
         const groupedViews = new Set<UIView>()
+        const configuredIdentifiers = new Set<string>()
 
-        layoutPass.requests.forEach((request, requestIndex) => {
-            if (!request.views.length) {
-                return
+        const validateContext = (request: UIGroupingWrapperFrameContext) => {
+            if (request.configuration.identifier) {
+                if (configuredIdentifiers.has(request.configuration.identifier)) {
+                    throw new Error("Grouping wrapper frame identifiers must be unique within one layout owner")
+                }
+                configuredIdentifiers.add(request.configuration.identifier)
             }
             request.views.forEach(view => {
                 if (view.superview !== owner) {
@@ -1175,55 +1188,115 @@ export class UIRectangle extends UIObject {
                 }
                 groupedViews.add(view)
             })
+            request.childContexts.forEach(validateContext)
+        }
+        layoutPass.requests.forEach(validateContext)
 
+        const recordForRequest = (request: UIGroupingWrapperFrameContext) => {
             let record: UIGroupingWrapperFrameRecord | undefined
             if (request.configuration.identifier) {
                 record = availablePreviousRecords.find(
                     candidate => candidate.identifier === request.configuration.identifier
                 )
             }
-            record = record ?? availablePreviousRecords[requestIndex] ?? availablePreviousRecords.firstElement
+            else {
+                record = availablePreviousRecords.find(candidate => !candidate.identifier)
+            }
             if (record) {
                 availablePreviousRecords.removeElement(record)
             }
             else {
                 record = UIRectangle._newGroupingWrapperFrameRecord()
             }
+            return record
+        }
 
-            UIRectangle._configureGroupingWrapperFrameRecord(record, request, owner)
+        const reconcileContext = (
+            request: UIGroupingWrapperFrameContext,
+            containerHTMLElement: HTMLElement
+        ): UIGroupingWrapperFrameRecord | undefined => {
+            if (!request.framesByView.size) {
+                return
+            }
+            const record = recordForRequest(request)
+            UIRectangle._configureGroupingWrapperFrameRecord(
+                record,
+                request,
+                owner,
+                containerHTMLElement
+            )
             nextRecords.push(record)
-        })
+            record.childRecords = request.childContexts.map(childContext =>
+                reconcileContext(childContext, record.coordinateSpaceHTMLElement)
+            ).filter((childRecord): childRecord is UIGroupingWrapperFrameRecord => !!childRecord)
+
+            const elementByView = new Map<UIView, HTMLElement>()
+            record.views.forEach(view => elementByView.set(view, view.viewHTMLElement))
+            record.childRecords.forEach(childRecord => {
+                UIRectangle._viewsInGroupingWrapperFrameRecord(childRecord).forEach(view =>
+                    elementByView.set(view, childRecord.wrapperHTMLElement)
+                )
+            })
+            UIRectangle._reorderGroupingWrapperFrameElements(
+                record.coordinateSpaceHTMLElement,
+                owner.subviews.map(view => elementByView.get(view)).filter(
+                    (element): element is HTMLElement => !!element
+                )
+            )
+            return record
+        }
+
+        const rootRecords = layoutPass.requests.map(request =>
+            reconcileContext(request, owner.viewHTMLElement)
+        ).filter((record): record is UIGroupingWrapperFrameRecord => !!record)
 
         availablePreviousRecords.forEach(record => {
             record.views.forEach(view => {
                 if (view.viewHTMLElement.parentElement === record.coordinateSpaceHTMLElement) {
-                    record.wrapperHTMLElement.parentElement?.insertBefore(
-                        view.viewHTMLElement,
-                        record.wrapperHTMLElement
-                    )
+                    owner.viewHTMLElement.appendChild(view.viewHTMLElement)
                 }
             })
             record.wrapperHTMLElement.remove()
         })
 
-        const recordByView = new Map<UIView, UIGroupingWrapperFrameRecord>()
-        nextRecords.forEach(record => record.views.forEach(view => recordByView.set(view, record)))
+        const rootRecordByView = new Map<UIView, UIGroupingWrapperFrameRecord>()
+        rootRecords.forEach(record => {
+            UIRectangle._viewsInGroupingWrapperFrameRecord(record).forEach(view =>
+                rootRecordByView.set(view, record)
+            )
+        })
         const desiredTopLevelElements: HTMLElement[] = []
         owner.subviews.forEach(view => {
-            const record = recordByView.get(view)
+            const record = rootRecordByView.get(view)
             const element = record?.wrapperHTMLElement ?? view.viewHTMLElement
             if (!desiredTopLevelElements.contains(element)) {
                 desiredTopLevelElements.push(element)
             }
         })
-        const currentTopLevelElements = Array.from(owner.viewHTMLElement.children).filter(element =>
-            desiredTopLevelElements.contains(element as HTMLElement)
-        ) as HTMLElement[]
-        if (!currentTopLevelElements.isEqualToArray(desiredTopLevelElements)) {
-            desiredTopLevelElements.forEach(element => owner.viewHTMLElement.appendChild(element))
-        }
+        UIRectangle._reorderGroupingWrapperFrameElements(owner.viewHTMLElement, desiredTopLevelElements)
 
         UIRectangle._groupingWrapperFrameRecordsByOwner.set(owner, nextRecords)
+    }
+
+
+    static _viewsInGroupingWrapperFrameRecord(record: UIGroupingWrapperFrameRecord): UIView[] {
+        return record.views.concat(record.childRecords.flatMap(childRecord =>
+            UIRectangle._viewsInGroupingWrapperFrameRecord(childRecord)
+        ))
+    }
+
+
+    static _reorderGroupingWrapperFrameElements(containerHTMLElement: HTMLElement, desiredElements: HTMLElement[]) {
+        const uniqueDesiredElements = desiredElements.filter(
+            (element, index) => desiredElements.indexOf(element) === index
+        )
+        const currentElements = Array.from(containerHTMLElement.children).filter(element =>
+            uniqueDesiredElements.contains(element as HTMLElement)
+        ) as HTMLElement[]
+        if (!currentElements.isEqualToArray(uniqueDesiredElements) ||
+            uniqueDesiredElements.some(element => element.parentElement !== containerHTMLElement)) {
+            uniqueDesiredElements.forEach(element => containerHTMLElement.appendChild(element))
+        }
     }
 
 
@@ -1239,6 +1312,7 @@ export class UIRectangle extends UIObject {
             wrapperHTMLElement,
             coordinateSpaceHTMLElement,
             views: [],
+            childRecords: [],
             configuredClassNames: [],
             configuredAttributeNames: [],
             configuredStyleNames: []
@@ -1249,7 +1323,8 @@ export class UIRectangle extends UIObject {
     static _configureGroupingWrapperFrameRecord(
         record: UIGroupingWrapperFrameRecord,
         request: UIGroupingWrapperFrameContext,
-        owner: UIView
+        owner: UIView,
+        containerHTMLElement: HTMLElement
     ) {
         const wrapperHTMLElement = record.wrapperHTMLElement
         record.configuredClassNames.forEach(className => wrapperHTMLElement.classList.remove(className))
@@ -1282,7 +1357,7 @@ export class UIRectangle extends UIObject {
             wrapperHTMLElement.removeAttribute("data-uicore-grouping-wrapper-frame-identifier")
         }
 
-        const assignedFrames = request.views.map(view => request.framesByView.get(view) as UIRectangle)
+        const assignedFrames = Array.from(request.framesByView.values())
         const framePoints: UIPoint[] = []
         assignedFrames.forEach(frame => {
             framePoints.push(frame.min)
@@ -1298,8 +1373,8 @@ export class UIRectangle extends UIObject {
         wrapperHTMLElement.style.height = wrapperFrame.height + "px"
         wrapperHTMLElement.style.boxSizing = "border-box"
 
-        if (wrapperHTMLElement.parentElement !== owner.viewHTMLElement) {
-            owner.viewHTMLElement.appendChild(wrapperHTMLElement)
+        if (wrapperHTMLElement.parentElement !== containerHTMLElement) {
+            containerHTMLElement.appendChild(wrapperHTMLElement)
         }
 
         const coordinateSpaceHTMLElement = record.coordinateSpaceHTMLElement
@@ -1313,11 +1388,6 @@ export class UIRectangle extends UIObject {
         coordinateSpaceHTMLElement.style.width = owner.bounds.width + "px"
         coordinateSpaceHTMLElement.style.height = owner.bounds.height + "px"
 
-        const currentViewElements = Array.from(coordinateSpaceHTMLElement.children)
-        const desiredViewElements = request.views.map(view => view.viewHTMLElement)
-        if (!currentViewElements.isEqualToArray(desiredViewElements)) {
-            desiredViewElements.forEach(element => coordinateSpaceHTMLElement.appendChild(element))
-        }
     }
 
 
@@ -1337,8 +1407,23 @@ export class UIRectangle extends UIObject {
         }
         const wrapperHTMLElement = view.viewHTMLElement.closest("[data-uicore-grouping-wrapper-frame]")
         superviewHTMLElement.appendChild(view.viewHTMLElement)
-        if (wrapperHTMLElement && !wrapperHTMLElement.querySelector("[data-uicore-grouping-wrapper-coordinate-space]")?.children.length) {
+        UIRectangle._removeEmptyGroupingWrapperFrameAncestors(wrapperHTMLElement)
+    }
+
+
+    static _removeEmptyGroupingWrapperFrameAncestors(wrapperHTMLElement: Element | null) {
+        while (wrapperHTMLElement) {
+            const parentWrapperHTMLElement = wrapperHTMLElement.parentElement?.closest(
+                "[data-uicore-grouping-wrapper-frame]"
+            ) ?? null
+            const coordinateSpaceHTMLElement = wrapperHTMLElement.querySelector(
+                ":scope > [data-uicore-grouping-wrapper-coordinate-space]"
+            )
+            if (coordinateSpaceHTMLElement?.children.length) {
+                return
+            }
             wrapperHTMLElement.remove()
+            wrapperHTMLElement = parentWrapperHTMLElement
         }
     }
     
@@ -1444,6 +1529,26 @@ export class UIRectangle extends UIObject {
     }
     
     
+}
+
+
+declare global {
+    interface Array<T> {
+        /** Returns the smallest rectangle containing every point and rectangle in the array. */
+        boundingBox(this: Array<UIPoint | UIRectangle>): UIRectangle
+    }
+}
+
+
+if (!("boundingBox" in Array.prototype)) {
+    Object.defineProperty(Array.prototype, "boundingBox", {
+        configurable: YES,
+        enumerable: NO,
+        writable: YES,
+        value: function (this: Array<UIPoint | UIRectangle>) {
+            return UIRectangle.boundingBoxForRectanglesAndPoints(this)
+        }
+    })
 }
 
 

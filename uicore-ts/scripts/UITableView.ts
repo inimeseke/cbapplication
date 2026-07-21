@@ -1,6 +1,6 @@
 import { UIButton } from "./UIButton"
 import { UINativeScrollView } from "./UINativeScrollView"
-import { EXTEND, FIRST_OR_NIL, IF, IS, IS_DEFINED, MAKE_ID, nil, NO, YES } from "./UIObject"
+import { EXTEND, FIRST_OR_NIL, IS, IS_DEFINED, MAKE_ID, NO, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
@@ -9,7 +9,18 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 interface UITableViewRowView extends UIView {
     
     _UITableViewRowIndex?: number;
+    _UITableViewWasHiddenBeforeLayout?: boolean;
+    _UITableViewRequiresLayout?: boolean;
     
+}
+
+
+interface UITableViewViewportState {
+    visibleFrameTop: number;
+    visibleFrameBottom: number;
+    overscanLength: number;
+    scrollTop: number;
+    viewportHeight: number;
 }
 
 
@@ -43,6 +54,15 @@ export class UITableView extends UINativeScrollView {
     _equalRowHeightCacheIdentifier: string
     
     _rowPositions: UITableViewReusableViewPositionObject[] = []
+    /** Fallback used for rows whose intrinsic height has not been measured yet. */
+    _estimatedRowHeight = 50
+    _measuredRowHeights = new Map<number, number>()
+    _rowHeightDeltaTree: number[] = [0]
+    _rowHeightModelRowCount = 0
+    _rowHeightModelWidth = -1
+    _isAssigningRowFrames = NO
+    _isPreparingRowsForMeasurement = NO
+    _isLayingOutRowsForViewport = NO
     
     _highestValidRowPositionIndex: number = 0
     
@@ -86,6 +106,25 @@ export class UITableView extends UINativeScrollView {
     _keyboardListenersAttached = false
     
     
+    get estimatedRowHeight() {
+        return this._estimatedRowHeight
+    }
+    
+    set estimatedRowHeight(height: number) {
+        if (height <= 0 || height === this._estimatedRowHeight) {
+            return
+        }
+        this._estimatedRowHeight = height
+        this._rowHeightModelRowCount = this.numberOfRows()
+        this._rowHeightDeltaTree = new Array(this._rowHeightModelRowCount + 1).fill(0)
+        this._measuredRowHeights.forEach((measuredHeight, index) => {
+            this._addRowHeightDeltaAtIndex(index, measuredHeight - height)
+        })
+        this._needsDrawingOfVisibleRowsBeforeLayout = YES
+        this.setNeedsLayout()
+    }
+    
+    
     get _reusableViews(): UITableViewReusableViewsContainerObject {
         
         const result: UITableViewReusableViewsContainerObject = {}
@@ -109,6 +148,40 @@ export class UITableView extends UINativeScrollView {
         
     }
     
+    _measureAttachedRowsAtOrBelowVisibleAnchor() {
+        if (this.allRowsHaveEqualHeight || !this.numberOfRows()) {
+            return NO
+        }
+        const viewportState = this._viewportState()
+        const anchorContentY = viewportState.scrollTop + viewportState.visibleFrameTop
+        const firstVisibleIndex = this._rowIndexAtContentPosition(anchorContentY)
+        let didMeasureRow = NO
+        this._visibleRows.forEach(row => {
+            const rowIndex = row._UITableViewRowIndex
+            if (!IS_DEFINED(rowIndex) || rowIndex < firstVisibleIndex || this._measuredRowHeights.has(rowIndex)) {
+                return
+            }
+            const measuredHeight = this.heightForRowWithIndex(rowIndex)
+            if (this._recordMeasuredHeightForRowWithIndex(measuredHeight, rowIndex)) {
+                didMeasureRow = YES
+            }
+        })
+        if (didMeasureRow) {
+            this._assignFullHeightViewFrameForContentHeight(this._estimatedContentHeight())
+        }
+        return didMeasureRow
+    }
+    
+    _assignFullHeightViewFrameForContentHeight(contentHeight: number) {
+        const contentBounds = this.contentBounds
+        const frame = contentBounds.rectangleWithHeight(contentHeight)
+            .rectangleWithWidth(contentBounds.width * 0.5)
+        this._fullHeightView.frame = frame
+        // The spacer's height change is table-owned and must not propagate back
+        // through UIView.didLayoutSubviews as a fresh table layout request.
+        this._fullHeightView._lastReportedHeight = frame.height.integerValue
+    }
+    
     
     constructor(elementID?: string) {
         
@@ -120,6 +193,8 @@ export class UITableView extends UINativeScrollView {
         this._fullHeightView.hidden = YES
         this._fullHeightView.userInteractionEnabled = NO
         this.addSubview(this._fullHeightView)
+        this.style.overflowAnchor = "none"
+        this.broadcastsPageDidScrollInSubtree = NO
         
         this.scrollsX = NO
         
@@ -422,9 +497,11 @@ export class UITableView extends UINativeScrollView {
         if (!this.isMemberOfViewTree) {
             return
         }
-        // Invalidate all row positions on resize as widths may have changed
-        this._rowPositions.everyElement.isValid = NO
-        this._highestValidRowPositionIndex = -1
+        if (this._rowHeightModelWidth !== this.bounds.width) {
+            this._rowPositions.everyElement.isValid = NO
+            this._highestValidRowPositionIndex = -1
+            this._resetEstimatedRowHeightModel()
+        }
         this._scheduleDrawVisibleRows()
     }
     
@@ -479,7 +556,12 @@ export class UITableView extends UINativeScrollView {
         
         this._persistedData = []
         
-        this._calculatePositionsUntilIndex(this.numberOfRows() - 1)
+        if (this.allRowsHaveEqualHeight) {
+            this._calculatePositionsUntilIndex(this.numberOfRows() - 1)
+        }
+        else {
+            this._prepareEstimatedRowHeightModel()
+        }
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
         
         this.setNeedsLayout()
@@ -493,6 +575,7 @@ export class UITableView extends UINativeScrollView {
         
         this._rowPositions = []
         this._highestValidRowPositionIndex = -1
+        this._resetEstimatedRowHeightModel()
         
         if (this.allRowsHaveEqualHeight) {
             UIView.invalidateSharedIntrinsicSizeCache(this._equalRowHeightCacheIdentifier)
@@ -540,19 +623,70 @@ export class UITableView extends UINativeScrollView {
     
     
     invalidateSizeOfRowWithIndex(index: number, animateChange = NO) {
-        if (this._rowPositions?.[index]) {
-            FIRST_OR_NIL(this._rowPositions[index]).isValid = NO
-            this._rowPositions.slice(index).everyElement.isValid = NO
+        const unwrappedTableView = (this as any).wrapped_nil_target as UITableView | undefined
+        if (unwrappedTableView) {
+            unwrappedTableView.invalidateSizeOfRowWithIndex(index, animateChange)
+            return
         }
-        this._highestValidRowPositionIndex = Math.min(this._highestValidRowPositionIndex, index - 1)
+        // UIView's constructor can reach overridden invalidation methods before
+        // UITableView field initializers run. There is no row state to invalidate yet.
+        if (!this._rowPositions || !this._measuredRowHeights || !this._rowHeightDeltaTree) {
+            return
+        }
+        // Assigning a table-computed row frame naturally changes that row's bounds.
+        // It must not invalidate the height that produced the frame.
+        if (this._isAssigningRowFrames || this._isLayingOutRowsForViewport) {
+            return
+        }
+        if (this._isPreparingRowsForMeasurement) {
+            return
+        }
+        const firstInvalidIndex = Math.max(0, index)
+        if (!this.allRowsHaveEqualHeight) {
+            this._forgetMeasuredRowHeightsStartingAtIndex(firstInvalidIndex)
+        }
+        else {
+            UIView.invalidateSharedIntrinsicSizeCache(this._equalRowHeightCacheIdentifier)
+            if (this._rowPositions[0]) {
+                this._rowPositions[0].isValid = NO
+            }
+        }
+        this._rowPositions.slice(firstInvalidIndex).everyElement.isValid = NO
+        this._highestValidRowPositionIndex = Math.min(this._highestValidRowPositionIndex, firstInvalidIndex - 1)
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
         this._shouldAnimateNextLayout = animateChange
     }
     
+    _invalidateOnlySizeOfRowWithIndex(index: number) {
+        if (!this._rowPositions || !this._measuredRowHeights || !this._rowHeightDeltaTree) {
+            return
+        }
+        if (!this.allRowsHaveEqualHeight) {
+            this._recordEstimatedHeightForRowWithIndex(index)
+        }
+        else {
+            UIView.invalidateSharedIntrinsicSizeCache(this._equalRowHeightCacheIdentifier)
+        }
+        if (this.allRowsHaveEqualHeight && this._rowPositions[0]) {
+            this._rowPositions[0].isValid = NO
+            this._highestValidRowPositionIndex = -1
+        }
+        else if (this._rowPositions[index]) {
+            this._rowPositions[index].isValid = NO
+        }
+        this._needsDrawingOfVisibleRowsBeforeLayout = YES
+    }
+    
     
     _rowPositionWithIndex(index: number, positions = this._rowPositions) {
-        if (this.allRowsHaveEqualHeight && index > 0) {
-            const firstPositionObject = positions[0]
+        if (positions !== this._rowPositions && positions[index]) {
+            return positions[index]
+        }
+        if (this.allRowsHaveEqualHeight) {
+            if (!positions[0]) {
+                this._calculatePositionsUntilIndex(0)
+            }
+            const firstPositionObject = positions[0] ?? this._rowPositions[0]
             const rowHeight = firstPositionObject.bottomY - firstPositionObject.topY
             const result = {
                 bottomY: rowHeight * (index + 1),
@@ -561,183 +695,237 @@ export class UITableView extends UINativeScrollView {
             }
             return result
         }
+        if (!this.allRowsHaveEqualHeight) {
+            this._prepareEstimatedRowHeightModel()
+            const topY = index * this.estimatedRowHeight + this._rowHeightDeltaBeforeIndex(index)
+            const height = this._measuredRowHeights.get(index) ?? this.estimatedRowHeight
+            return {
+                bottomY: topY + height,
+                topY,
+                isValid: this._measuredRowHeights.has(index)
+            }
+        }
         return positions[index]
     }
     
     _calculateAllPositions() {
+        if (!this.allRowsHaveEqualHeight) {
+            this._prepareEstimatedRowHeightModel()
+            return
+        }
         this._calculatePositionsUntilIndex(this.numberOfRows() - 1)
     }
     
-    _calculatePositionsUntilIndex(maxIndex: number) {
+    _calculatePositionsUntilIndex(_maxIndex: number) {
         
         if (this.allRowsHaveEqualHeight) {
             const positionObject: UITableViewReusableViewPositionObject = {
-                bottomY: this._heightForAnyRow(),
+                bottomY: this._heightForAnyRow(NO),
                 topY: 0,
                 isValid: YES
             }
             this._rowPositions = [positionObject]
             return
         }
-        
-        let validPositionObject = this._rowPositions[this._highestValidRowPositionIndex]
-        if (!IS(validPositionObject)) {
-            validPositionObject = {
-                bottomY: 0,
-                topY: 0,
-                isValid: YES
-            }
-        }
-        
-        let previousBottomY = validPositionObject.bottomY
-        if (!this._rowPositions.length) {
-            this._highestValidRowPositionIndex = -1
-        }
-        
-        for (let i = this._highestValidRowPositionIndex + 1; i <= maxIndex; i++) {
-            
-            let height: number
-            
-            const rowPositionObject = this._rowPositions[i]
-            
-            if (IS((rowPositionObject || nil).isValid)) {
-                height = rowPositionObject.bottomY - rowPositionObject.topY
-            }
-            // Do not calculate heights if all rows have equal heights, and we already have a height
-            else if (this.allRowsHaveEqualHeight && i > 0) {
-                height = this._rowPositions[0].bottomY - this._rowPositions[0].topY
-            }
-            else {
-                height = this.heightForRowWithIndex(i)
-            }
-            
-            const positionObject: UITableViewReusableViewPositionObject = {
-                bottomY: previousBottomY + height,
-                topY: previousBottomY,
-                isValid: YES
-            }
-            
-            if (i < this._rowPositions.length) {
-                this._rowPositions[i] = positionObject
-            }
-            else {
-                this._rowPositions.push(positionObject)
-            }
-            this._highestValidRowPositionIndex = i
-            previousBottomY = previousBottomY + height
-            
-        }
-        
+        this._prepareEstimatedRowHeightModel()
     }
     
+    _prepareEstimatedRowHeightModel() {
+        const rowCount = this.numberOfRows()
+        if (rowCount === this._rowHeightModelRowCount && this._rowHeightDeltaTree.length === rowCount + 1) {
+            return
+        }
+        this._rowHeightModelRowCount = rowCount
+        this._rowHeightDeltaTree = new Array(rowCount + 1).fill(0)
+        const outOfRangeIndexes: number[] = []
+        this._measuredRowHeights.forEach((measuredHeight, measuredIndex) => {
+            if (measuredIndex >= rowCount) {
+                outOfRangeIndexes.push(measuredIndex)
+                return
+            }
+            this._addRowHeightDeltaAtIndex(measuredIndex, measuredHeight - this.estimatedRowHeight)
+        })
+        outOfRangeIndexes.forEach(measuredIndex => this._measuredRowHeights.delete(measuredIndex))
+    }
+    
+    _resetEstimatedRowHeightModel() {
+        if (!this._measuredRowHeights || !this._rowHeightDeltaTree) {
+            return
+        }
+        this._measuredRowHeights.clear()
+        this._rowHeightModelRowCount = this.numberOfRows()
+        this._rowHeightModelWidth = this.bounds.width
+        if (this.allRowsHaveEqualHeight) {
+            this._rowHeightDeltaTree = [0]
+        }
+        else {
+            this._rowHeightDeltaTree = new Array(this._rowHeightModelRowCount + 1).fill(0)
+        }
+    }
+    
+    _forgetMeasuredRowHeightsStartingAtIndex(index: number) {
+        this._prepareEstimatedRowHeightModel()
+        Array.from(this._measuredRowHeights.keys()).forEach(measuredIndex => {
+            if (measuredIndex >= index) {
+                this._recordEstimatedHeightForRowWithIndex(measuredIndex)
+            }
+        })
+    }
+    
+    _recordEstimatedHeightForRowWithIndex(index: number) {
+        const previousHeight = this._measuredRowHeights.get(index)
+        if (previousHeight === undefined) {
+            return
+        }
+        this._measuredRowHeights.delete(index)
+        this._addRowHeightDeltaAtIndex(index, this.estimatedRowHeight - previousHeight)
+    }
+    
+    _recordMeasuredHeightForRowWithIndex(height: number, index: number) {
+        this._prepareEstimatedRowHeightModel()
+        if (!Number.isFinite(height) || height < 0) {
+            height = this.estimatedRowHeight
+        }
+        const previousHeight = this._measuredRowHeights.get(index) ?? this.estimatedRowHeight
+        if (Math.abs(previousHeight - height) < 0.01 && this._measuredRowHeights.has(index)) {
+            return NO
+        }
+        this._measuredRowHeights.set(index, height)
+        this._addRowHeightDeltaAtIndex(index, height - previousHeight)
+        return YES
+    }
+    
+    _addRowHeightDeltaAtIndex(index: number, delta: number) {
+        if (index < 0 || index >= this._rowHeightModelRowCount) {
+            return
+        }
+        for (let treeIndex = index + 1; treeIndex < this._rowHeightDeltaTree.length;
+             treeIndex += treeIndex & -treeIndex) {
+            this._rowHeightDeltaTree[treeIndex] += delta
+        }
+    }
+    
+    _rowHeightDeltaBeforeIndex(index: number) {
+        let result = 0
+        let treeIndex = Math.min(index, this._rowHeightModelRowCount)
+        for (; treeIndex > 0; treeIndex -= treeIndex & -treeIndex) {
+            result += this._rowHeightDeltaTree[treeIndex]
+        }
+        return result
+    }
+    
+    _estimatedContentHeight() {
+        const rowCount = this.numberOfRows()
+        if (!rowCount) {
+            return 0
+        }
+        if (this.allRowsHaveEqualHeight) {
+            return this._rowPositionWithIndex(rowCount - 1).bottomY
+        }
+        this._prepareEstimatedRowHeightModel()
+        return rowCount * this.estimatedRowHeight + this._rowHeightDeltaBeforeIndex(rowCount)
+    }
+    
+    _rowIndexAtContentPosition(contentY: number) {
+        const rowCount = this.numberOfRows()
+        if (!rowCount) {
+            return 0
+        }
+        let lowerIndex = 0
+        let upperIndex = rowCount - 1
+        while (lowerIndex < upperIndex) {
+            const middleIndex = Math.floor((lowerIndex + upperIndex) * 0.5)
+            if (this._rowPositionWithIndex(middleIndex).bottomY <= contentY) {
+                lowerIndex = middleIndex + 1
+            }
+            else {
+                upperIndex = middleIndex
+            }
+        }
+        return lowerIndex
+    }
     
     _heightForAnyRow(calculateVisibleRows = YES) {
-        return this.heightForRowWithIndex(
-            this._visibleRows.firstElement?._UITableViewRowIndex ??
-            (calculateVisibleRows ? this.indexesForVisibleRows().firstElement : 0) ??
-            0
-        )
+        if (!this.allRowsHaveEqualHeight) {
+            let rowIndex = this._visibleRows.firstElement?._UITableViewRowIndex
+            if (!IS_DEFINED(rowIndex) && calculateVisibleRows) {
+                rowIndex = this.indexesForVisibleRows().firstElement
+            }
+            if (!IS_DEFINED(rowIndex)) {
+                rowIndex = 0
+            }
+            return this._measuredRowHeights.get(rowIndex) ?? this.estimatedRowHeight
+        }
+        let rowIndex = this._visibleRows.firstElement?._UITableViewRowIndex
+        if (!IS_DEFINED(rowIndex) && calculateVisibleRows) {
+            rowIndex = this.indexesForVisibleRows().firstElement
+        }
+        if (!IS_DEFINED(rowIndex)) {
+            rowIndex = 0
+        }
+        return this.heightForRowWithIndex(rowIndex)
     }
     
-    indexesForVisibleRows(paddingRatio = 0.5): number[] {
-        
-        // 1. Calculate the visible frame relative to the Table's bounds (0,0 is top-left of the table view)
-        // This accounts for the Window viewport clipping the table if it is partially off-screen.
+    _viewportState(paddingRatio = 0.5): UITableViewViewportState {
         const tableRect = this.viewHTMLElement.getBoundingClientRect()
-        const viewportHeight = window.innerHeight
         const pageScale = UIView.pageScale
-        
-        // The top of the visible window relative to the view's top edge.
-        // If tableRect.top is negative, the table is scrolled up and clipped by the window top.
         const visibleFrameTop = Math.max(0, -tableRect.top / pageScale)
-        
-        // The bottom of the visible window relative to the view's top edge.
-        // We clip it to the table's actual bounds height so we don't look past the table content.
         const visibleFrameBottom = Math.min(
             this.bounds.height,
-            (viewportHeight - tableRect.top) / pageScale
+            (window.innerHeight - tableRect.top) / pageScale
         )
-        
-        // If the table is completely off-screen, return empty
-        if (visibleFrameBottom <= visibleFrameTop) {
-            return []
+        let viewportHeight = this.viewHTMLElement.clientHeight
+        if (!viewportHeight) {
+            viewportHeight = this.bounds.height
         }
-        
-        // 2. Convert to Content Coordinates (Scroll Offset)
-        // contentOffset.y is the internal scroll position.
-        // If using viewport scrolling (full height), contentOffset.y is typically 0.
-        // If using internal scrolling, this shifts the visible frame to the correct content rows.
-        let firstVisibleY = this.contentOffset.y + visibleFrameTop
-        let lastVisibleY = this.contentOffset.y + visibleFrameBottom
-        
-        // 3. Apply Padding
-        // We calculate padding based on the viewport height to ensure smooth scrolling
-        const paddingPx = (viewportHeight / pageScale) * paddingRatio
-        firstVisibleY = Math.max(0, firstVisibleY - paddingPx)
-        lastVisibleY = lastVisibleY + paddingPx
-        
+        return {
+            visibleFrameTop,
+            visibleFrameBottom,
+            overscanLength: Math.max(0, visibleFrameBottom - visibleFrameTop) * paddingRatio,
+            scrollTop: this.viewHTMLElement.scrollTop,
+            viewportHeight
+        }
+    }
+    
+    _indexesForViewportState(viewportState: UITableViewViewportState, scrollTop = viewportState.scrollTop) {
         const numberOfRows = this.numberOfRows()
+        if (!numberOfRows || viewportState.visibleFrameBottom <= viewportState.visibleFrameTop) {
+            return [] as number[]
+        }
+        let firstVisibleY = scrollTop + viewportState.visibleFrameTop - viewportState.overscanLength
+        let lastVisibleY = scrollTop + viewportState.visibleFrameBottom + viewportState.overscanLength
+        firstVisibleY = Math.max(0, firstVisibleY)
+        const contentHeight = this._estimatedContentHeight()
+        lastVisibleY = Math.min(contentHeight, lastVisibleY)
         
-        // 4. Find Indexes
         if (this.allRowsHaveEqualHeight) {
-            
             const rowHeight = this._heightForAnyRow(NO)
-            
+            if (rowHeight <= 0) {
+                return [] as number[]
+            }
             let firstIndex = Math.floor(firstVisibleY / rowHeight)
             let lastIndex = Math.floor(lastVisibleY / rowHeight)
-            
-            // Clamp BOTH indexes to [0, numberOfRows-1].
-            // Without the upper clamp on firstIndex, when the viewport extends below the
-            // last row firstIndex can exceed numberOfRows-1 while lastIndex is already
-            // clamped there. firstIndex > lastIndex → empty result → _removeVisibleRows →
-            // browser collapses scrollHeight → scrollTop resets to 0 → rows pile at top.
             firstIndex = Math.max(0, Math.min(firstIndex, numberOfRows - 1))
             lastIndex = Math.max(0, Math.min(lastIndex, numberOfRows - 1))
-            
-            const result = []
-            for (let i = firstIndex; i <= lastIndex; i++) {
-                result.push(i)
+            const result: number[] = []
+            for (let rowIndex = firstIndex; rowIndex <= lastIndex; rowIndex++) {
+                result.push(rowIndex)
             }
             return result
         }
-        
-        // Variable Heights
-        this._calculateAllPositions()
-        const result = []
-        
-        // Clamp firstVisibleY to the actual content height so that when the viewport
-        // extends below the last row the intersection check still matches the final rows
-        // rather than producing an empty result.
-        const totalContentHeight = IF(this._rowPositions.lastElement)(() =>
-            this._rowPositions.lastElement.bottomY
-        ).ELSE(() =>
-            0
-        )
-        firstVisibleY = Math.min(firstVisibleY, totalContentHeight)
-        
-        for (let i = 0; i < numberOfRows; i++) {
-            
-            const position = this._rowPositionWithIndex(i)
-            if (!position) {
-                break
-            }
-            
-            const rowTop = position.topY
-            const rowBottom = position.bottomY
-            
-            // Check intersection
-            if (rowBottom >= firstVisibleY && rowTop <= lastVisibleY) {
-                result.push(i)
-            }
-            
-            if (rowTop > lastVisibleY) {
-                break
-            }
-            
+        this._prepareEstimatedRowHeightModel()
+        firstVisibleY = Math.min(firstVisibleY, contentHeight)
+        const firstIndex = this._rowIndexAtContentPosition(firstVisibleY)
+        const lastIndex = this._rowIndexAtContentPosition(lastVisibleY)
+        const result: number[] = []
+        for (let rowIndex = firstIndex; rowIndex <= lastIndex; rowIndex++) {
+            result.push(rowIndex)
         }
-        
         return result
-        
+    }
+    
+    indexesForVisibleRows(paddingRatio = 0.5): number[] {
+        return this._indexesForViewportState(this._viewportState(paddingRatio))
     }
     
     
@@ -785,29 +973,187 @@ export class UITableView extends UINativeScrollView {
         }
     }
     
+    _layoutRowsForCurrentViewport() {
+        if (!this.isMemberOfViewTree || this._isLayingOutRowsForViewport) {
+            return
+        }
+        this._isLayingOutRowsForViewport = YES
+        try {
+            const rowCount = this.numberOfRows()
+            if (!rowCount) {
+                this._removeVisibleRows()
+                this._assignFullHeightViewFrameForContentHeight(0)
+                this._needsDrawingOfVisibleRowsBeforeLayout = NO
+                return
+            }
+            
+            if (!this.allRowsHaveEqualHeight && this._rowHeightModelWidth !== this.bounds.width) {
+                this._resetEstimatedRowHeightModel()
+            }
+            this._calculateAllPositions()
+            
+            const viewportState = this._viewportState()
+            const contentHeightBeforeMeasurement = this._estimatedContentHeight()
+            const anchorContentY = viewportState.scrollTop + viewportState.visibleFrameTop
+            const anchorRowIndex = this._rowIndexAtContentPosition(anchorContentY)
+            const anchorPosition = this._rowPositionWithIndex(anchorRowIndex)
+            const anchorOffsetWithinRow = anchorContentY - anchorPosition.topY
+            const bottomDistanceBeforeMeasurement = Math.max(
+                0,
+                contentHeightBeforeMeasurement - viewportState.scrollTop - viewportState.viewportHeight
+            )
+            const preservesBottomPosition = bottomDistanceBeforeMeasurement <= 1
+            
+            let workingScrollTop = viewportState.scrollTop
+            let visibleIndexes = this._indexesForViewportState(viewportState, workingScrollTop)
+            let measurementPass = 0
+            while (measurementPass < rowCount) {
+                this._reconcileVisibleRowsWithIndexes(visibleIndexes)
+                const didMeasureRows = this._measureUnresolvedRowsWithIndexes(visibleIndexes)
+                workingScrollTop = this._scrollTopByPreservingAnchorRow(
+                    anchorRowIndex,
+                    anchorOffsetWithinRow,
+                    bottomDistanceBeforeMeasurement,
+                    preservesBottomPosition,
+                    viewportState
+                )
+                const nextVisibleIndexes = this._indexesForViewportState(viewportState, workingScrollTop)
+                let rangesAreEqual = nextVisibleIndexes.length === visibleIndexes.length
+                if (rangesAreEqual) {
+                    for (let rowIndexOffset = 0; rowIndexOffset < visibleIndexes.length; rowIndexOffset++) {
+                        if (visibleIndexes[rowIndexOffset] !== nextVisibleIndexes[rowIndexOffset]) {
+                            rangesAreEqual = NO
+                            break
+                        }
+                    }
+                }
+                visibleIndexes = nextVisibleIndexes
+                if (rangesAreEqual && !didMeasureRows) {
+                    break
+                }
+                measurementPass = measurementPass + 1
+            }
+            
+            this._reconcileVisibleRowsWithIndexes(visibleIndexes)
+            this._layoutAllRows()
+            if (Math.abs(viewportState.scrollTop - workingScrollTop) >= 0.01) {
+                this.viewHTMLElement.scrollTop = workingScrollTop
+            }
+            this._layoutVisibleRowSubtrees()
+            this._applyKeyboardFocusToVisibleRows()
+            this._needsDrawingOfVisibleRowsBeforeLayout = NO
+        }
+        finally {
+            this._isLayingOutRowsForViewport = NO
+        }
+    }
+    
+    _layoutVisibleRowsForCurrentViewport() {
+        this._layoutRowsForCurrentViewport()
+    }
+    
+    _scrollTopByPreservingAnchorRow(
+        anchorRowIndex: number,
+        anchorOffsetWithinRow: number,
+        bottomDistance: number,
+        preservesBottomPosition: boolean,
+        viewportState: UITableViewViewportState
+    ) {
+        const contentHeight = this._estimatedContentHeight()
+        const maximumScrollTop = Math.max(0, contentHeight - viewportState.viewportHeight)
+        let result = 0
+        if (preservesBottomPosition) {
+            result = contentHeight - viewportState.viewportHeight - bottomDistance
+        }
+        else {
+            const anchorPosition = this._rowPositionWithIndex(anchorRowIndex)
+            result = anchorPosition.topY + anchorOffsetWithinRow - viewportState.visibleFrameTop
+        }
+        return Math.max(0, Math.min(result, maximumScrollTop))
+    }
+    
+    _measureUnresolvedRowsWithIndexes(rowIndexes: number[]) {
+        if (this.allRowsHaveEqualHeight) {
+            return NO
+        }
+        const rowBounds = this.contentBounds.rectangleWithInsets(this.sidePadding, this.sidePadding, 0, 0)
+        let didMeasureRows = NO
+        this._isPreparingRowsForMeasurement = YES
+        try {
+            rowIndexes.forEach(rowIndex => {
+                if (this._measuredRowHeights.has(rowIndex)) {
+                    return
+                }
+                const row = this.visibleRowWithIndex(rowIndex) as UITableViewRowView | undefined
+                if (!row) {
+                    return
+                }
+                const position = this._rowPositionWithIndex(rowIndex)
+                const measurementFrame = rowBounds.copy()
+                measurementFrame.min.y = position.topY
+                measurementFrame.max.y = position.bottomY
+                row.frame = measurementFrame
+                row._UITableViewRequiresLayout = YES
+                row.clearIntrinsicSizeCache()
+                const measuredHeight = this.heightForRowWithIndex(rowIndex)
+                this._recordMeasuredHeightForRowWithIndex(measuredHeight, rowIndex)
+                didMeasureRows = YES
+            })
+        }
+        finally {
+            this._isPreparingRowsForMeasurement = NO
+        }
+        return didMeasureRows
+    }
+    
+    _layoutVisibleRowSubtrees() {
+        this._isPreparingRowsForMeasurement = YES
+        try {
+            this._visibleRows.forEach(row => {
+                const shouldLayoutRowSubtree = row._UITableViewRequiresLayout || row.needsLayout
+                if (shouldLayoutRowSubtree) {
+                    row.setNeedsLayout()
+                    row.forEachViewInSubtree(view => {
+                        const frame = view.isVirtualLayouting ? view._frameForVirtualLayouting : view._frame
+                        if (frame) {
+                            view._lastReportedHeight = frame.height.integerValue
+                        }
+                        view.layoutIfNeeded()
+                    })
+                }
+                row._UITableViewRequiresLayout = NO
+                if (IS_DEFINED(row._UITableViewWasHiddenBeforeLayout)) {
+                    row.hidden = row._UITableViewWasHiddenBeforeLayout
+                    delete row._UITableViewWasHiddenBeforeLayout
+                }
+            })
+        }
+        finally {
+            this._isPreparingRowsForMeasurement = NO
+        }
+    }
+    
     _scheduleDrawVisibleRows() {
         if (!this._isDrawVisibleRowsScheduled) {
             this._isDrawVisibleRowsScheduled = YES
             
             UIView.runFunctionBeforeNextFrame(() => {
-                this._calculateAllPositions()
-                this._drawVisibleRows()
-                this.setNeedsLayout()
-                this._isDrawVisibleRowsScheduled = NO
+                try {
+                    this._layoutRowsForCurrentViewport()
+                }
+                finally {
+                    this._isDrawVisibleRowsScheduled = NO
+                }
             })
         }
     }
     
     _drawVisibleRows() {
+        this._layoutRowsForCurrentViewport()
+    }
+    
+    _reconcileVisibleRowsWithIndexes(visibleIndexes: number[]) {
         
-        if (!this.isMemberOfViewTree) {
-            return
-        }
-        
-        // Uses the unified method above
-        const visibleIndexes = this.indexesForVisibleRows()
-        
-        // If no rows are visible, remove all current rows
         if (visibleIndexes.length === 0) {
             this._removeVisibleRows()
             return
@@ -819,16 +1165,17 @@ export class UITableView extends UINativeScrollView {
         const removedViews: UITableViewRowView[] = []
         const visibleRows: UITableViewRowView[] = []
         
-        // 1. Identify rows that have moved off-screen
         this._visibleRows.forEach((row) => {
             if (IS_DEFINED(row._UITableViewRowIndex) &&
                 (row._UITableViewRowIndex < minIndex || row._UITableViewRowIndex > maxIndex)) {
-                
-                // Persist state before removal
                 this._persistedData[row._UITableViewRowIndex] = this.persistenceDataItemForRowWithIndex(
                     row._UITableViewRowIndex,
                     row
                 )
+                if (!IS_DEFINED(row._UITableViewWasHiddenBeforeLayout)) {
+                    row._UITableViewWasHiddenBeforeLayout = row.hidden
+                }
+                row.hidden = YES
                 this._markReusableViewAsUnused(row)
                 removedViews.push(row)
             }
@@ -839,36 +1186,31 @@ export class UITableView extends UINativeScrollView {
         
         this._visibleRows = visibleRows
         
-        // 2. Add new rows that have moved onto the screen
         visibleIndexes.forEach((rowIndex: number) => {
-            // If the view is already in this._visibleRows, do nothing to it
             if (this.isRowWithIndexVisible(rowIndex)) {
                 return
             }
-            
-            // Get view from reuse pool (marked as unused before) or make a new one
             const view: UITableViewRowView = this.viewForRowWithIndex(rowIndex)
+            if (!IS_DEFINED(view._UITableViewWasHiddenBeforeLayout)) {
+                view._UITableViewWasHiddenBeforeLayout = view.hidden
+            }
+            view.hidden = YES
+            view._UITableViewRequiresLayout = YES
             this._visibleRows.push(view)
-            this.addSubview(view)
-            
-            // Ensure the row and all its children stay out of the natural tab order
+            if (view.superview !== this) {
+                this.addSubview(view, undefined, NO)
+            }
             view.tabIndex = -1
             view.forEachViewInSubtree(subview => {
                 subview.tabIndex = -1
             })
         })
         
-        // 3. Clean up DOM
         removedViews.forEach(row => {
-            // Check that the row has not been added back
             if (this._visibleRows.indexOf(row) == -1) {
                 row.removeFromSuperview()
             }
         })
-        
-        // 4. Re-apply keyboard focus highlight after rows are re-rendered
-        this._applyKeyboardFocusToVisibleRows()
-        
     }
     
     
@@ -923,7 +1265,11 @@ export class UITableView extends UINativeScrollView {
                 clearIntrinsicSizeCache: EXTEND(() => {
                     const currentRowIndex = view._UITableViewRowIndex
                     if (IS_DEFINED(currentRowIndex) && view.isMemberOfViewTree) {
-                        this.invalidateSizeOfRowWithIndex(currentRowIndex)
+                        if (this._isAssigningRowFrames || this._isPreparingRowsForMeasurement ||
+                            this._isLayingOutRowsForViewport) {
+                            return
+                        }
+                        this._invalidateOnlySizeOfRowWithIndex(currentRowIndex)
                         this.setNeedsLayout()
                     }
                 })
@@ -992,9 +1338,7 @@ export class UITableView extends UINativeScrollView {
         
         super.didScrollToPosition(offsetPosition)
         
-        this.forEachViewInSubtree((view: UIView) => {
-            view._isPointerValid = NO
-        })
+        UIView._invalidateViewsWithValidPointers()
         
         this._scheduleDrawVisibleRows()
         
@@ -1089,6 +1433,9 @@ export class UITableView extends UINativeScrollView {
         if (frame.isEqualTo(rectangle) && !performUncheckedLayout) {
             return
         }
+        if (frame.width !== rectangle.width && !this.allRowsHaveEqualHeight) {
+            this._resetEstimatedRowHeightModel()
+        }
         
         this._needsDrawingOfVisibleRowsBeforeLayout = YES
         
@@ -1111,66 +1458,42 @@ export class UITableView extends UINativeScrollView {
     
     override clearIntrinsicSizeCache() {
         super.clearIntrinsicSizeCache()
-        if (this.allRowsHaveEqualHeight) {
-            UIView.invalidateSharedIntrinsicSizeCache(this._equalRowHeightCacheIdentifier)
-        }
-        this.invalidateSizeOfRowWithIndex(0)
     }
     
-    private _layoutAllRows(positions = this._rowPositions) {
+    _layoutAllRows(positions = this._rowPositions) {
         
-        const bounds = this.bounds
+        const rowBounds = this.contentBounds.rectangleWithInsets(this.sidePadding, this.sidePadding, 0, 0)
         
         const sortedRows = this._visibleRows.sort(
             (rowA, rowB) => rowA._UITableViewRowIndex! - rowB._UITableViewRowIndex!
         )
         
-        sortedRows.forEach((row, i) => {
-            
-            const frame = bounds.copy()
-            
-            const positionObject = this._rowPositionWithIndex(row._UITableViewRowIndex!, positions)
-            frame.min.y = positionObject.topY
-            frame.max.y = positionObject.bottomY
-            row.frame = frame
-            
-            row.style.width = "" + (bounds.width - this.sidePadding * 2).integerValue + "px"
-            row.style.left = "" + this.sidePadding.integerValue + "px"
-            
-            // Set aria-rowindex (1-based per ARIA spec)
-            row.viewHTMLElement.setAttribute("aria-rowindex", String((row._UITableViewRowIndex ?? 0) + 1))
-            
-            // Insert before the correct next sibling so DOM order always matches
-            // row index order. The nextSibling check makes this a no-op when the
-            // element is already in the right position, avoiding unnecessary DOM
-            // mutations and the focus loss that appendChild causes.
-            const nextSiblingElement = sortedRows[i + 1]?.viewHTMLElement
-                ?? this._fullHeightView.viewHTMLElement
-            if (row.viewHTMLElement.nextSibling !== nextSiblingElement) {
-                this.viewHTMLElement.insertBefore(row.viewHTMLElement, nextSiblingElement)
+        this._isAssigningRowFrames = YES
+        try {
+            let nextSiblingElement = this._fullHeightView.viewHTMLElement
+            for (let index = sortedRows.length - 1; index >= 0; index--) {
+                const row = sortedRows[index]
+                const frame = rowBounds.copy()
+                const positionObject = this._rowPositionWithIndex(row._UITableViewRowIndex!, positions)
+                frame.min.y = positionObject.topY
+                frame.max.y = positionObject.bottomY
+                row.frame = frame
+                row._lastReportedHeight = frame.height.integerValue
+                row.viewHTMLElement.setAttribute("aria-rowindex", String((row._UITableViewRowIndex ?? 0) + 1))
+                if (row.viewHTMLElement.nextSibling !== nextSiblingElement) {
+                    this.viewHTMLElement.insertBefore(row.viewHTMLElement, nextSiblingElement)
+                }
+                nextSiblingElement = row.viewHTMLElement
             }
-            
-        })
-        
-        // Use _rowPositionWithIndex rather than positions.lastElement.
-        // When allRowsHaveEqualHeight = YES, _rowPositions contains only a single
-        // entry (row 0). positions.lastElement.bottomY would therefore equal just
-        // ONE row's height (e.g. 50px) instead of the full content height.
-        // _rowPositionWithIndex correctly uses the computed formula for equal-height
-        // tables (numberOfRows × rowHeight) and falls back to positions[N-1] otherwise.
-        // This ensures _fullHeightView maintains the correct scroll height even when
-        // all visible rows have been removed from the DOM (e.g. after crossing the
-        // bottom edge), preventing the browser from clamping scrollTop to 0.
-        const numberOfRows = this.numberOfRows()
-        const fullContentHeight = numberOfRows
-                                  ? this._rowPositionWithIndex(numberOfRows - 1, positions).bottomY
-                                  : 0
-        this._fullHeightView.frame = bounds.rectangleWithHeight(fullContentHeight)
-            .rectangleWithWidth(bounds.width * 0.5)
+        }
+        finally {
+            this._isAssigningRowFrames = NO
+        }
+        this._assignFullHeightViewFrameForContentHeight(this._estimatedContentHeight())
         
     }
     
-    private _animateLayoutAllRows() {
+    _animateLayoutAllRows() {
         
         UIView.animateViewOrViewsWithDurationDelayAndFunction(
             this._visibleRows,
@@ -1190,25 +1513,8 @@ export class UITableView extends UINativeScrollView {
         
     }
     
-    // UITableView has usesVirtualLayoutingForIntrinsicSizing = NO and is always
-    // given a fixed viewport frame by its parent — so frame.height never changes
-    // between layout passes. The base didLayoutSubviews compares frame.height and
-    // therefore never propagates upward, even when row positions have changed and
-    // intrinsicContentHeight now returns a different value.
-    // We override here to track the intrinsic content height instead, so that
-    // parents (e.g. CBDataView) get their cache invalidated and re-layout whenever
-    // the total row stack height changes.
     override didLayoutSubviews() {
-        this.viewController?.viewDidLayoutSubviews()
-        
-        if (!this.isVirtualLayouting && IS(this.superview) && this.isMemberOfViewTree) {
-            const currentContentHeight = this.intrinsicContentHeight()
-            if (currentContentHeight !== this._lastReportedHeight) {
-                this._lastReportedHeight = currentContentHeight
-                this.clearIntrinsicSizeCache()
-                this.superview.setNeedsLayout()
-            }
-        }
+        super.didLayoutSubviews()
     }
     
     
@@ -1220,38 +1526,39 @@ export class UITableView extends UINativeScrollView {
             return
         }
         
-        const previousPositions: UITableViewReusableViewPositionObject[] = JSON.parse(
-            JSON.stringify(this._rowPositions))
+        const previousPositions: UITableViewReusableViewPositionObject[] = []
+        if (this.allRowsHaveEqualHeight && this.numberOfRows()) {
+            previousPositions[0] = {
+                ...this._rowPositionWithIndex(0)
+            }
+        }
+        this._visibleRows.forEach(row => {
+            if (IS_DEFINED(row._UITableViewRowIndex)) {
+                previousPositions[row._UITableViewRowIndex] = {
+                    ...this._rowPositionWithIndex(row._UITableViewRowIndex)
+                }
+            }
+        })
         
         const previousVisibleRowsLength = this._visibleRows.length
         
-        if (this._needsDrawingOfVisibleRowsBeforeLayout) {
-            
-            this._drawVisibleRows()
-            
-            this._needsDrawingOfVisibleRowsBeforeLayout = NO
-            
+        const hasRowsToLayout = this.numberOfRows() > 0 && this.isMemberOfViewTree
+        if (hasRowsToLayout) {
+            this._layoutRowsForCurrentViewport()
+            if (this._shouldAnimateNextLayout) {
+                // Reapply the animation's previous frames after calculating the
+                // target frames and heights above.
+                this._layoutAllRows(previousPositions)
+            }
         }
-        
         
         super.layoutSubviews()
         
-        
-        if (!this.numberOfRows() || !this.isMemberOfViewTree) {
-            
+        if (!hasRowsToLayout) {
             return
-            
         }
         
-        
         if (this._shouldAnimateNextLayout) {
-            
-            
-            // Need to do layout with the previous positions
-            
-            this._layoutAllRows(previousPositions)
-            
-            
             if (previousVisibleRowsLength < this._visibleRows.length) {
                 
                 
@@ -1270,15 +1577,6 @@ export class UITableView extends UINativeScrollView {
             
             
             this._shouldAnimateNextLayout = NO
-            
-        }
-        else {
-            
-            this._calculateAllPositions()
-            
-            this._layoutAllRows()
-            
-            
         }
         
         

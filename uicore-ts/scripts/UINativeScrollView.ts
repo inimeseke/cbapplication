@@ -1,4 +1,5 @@
 import { UIPoint } from "./UIPoint"
+import { YES } from "./UIObject"
 import { LooseObject, UIView } from "./UIView"
 
 
@@ -6,6 +7,7 @@ export class UINativeScrollView extends UIView {
     
     animationDuration = 0
     private _contentOffset?: UIPoint
+    broadcastsPageDidScrollInSubtree = YES
     
     constructor(elementID?: string, viewHTMLElement?: (HTMLElement & LooseObject) | null | undefined) {
         
@@ -30,10 +32,12 @@ export class UINativeScrollView extends UIView {
             
             this.didScrollToPosition(this._contentOffset)
             
-            this.broadcastEventInSubtree({
-                name: UIView.broadcastEventName.PageDidScroll,
-                parameters: undefined
-            })
+            if (this.broadcastsPageDidScrollInSubtree) {
+                this.broadcastEventInSubtree({
+                    name: UIView.broadcastEventName.PageDidScroll,
+                    parameters: undefined
+                })
+            }
             
         })
         
@@ -184,8 +188,6 @@ export class UINativeScrollView extends UIView {
     
     
 }
-
-
 
 
 

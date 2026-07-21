@@ -262,6 +262,7 @@ export class UIView extends UIObject {
     _UIViewIndex: number
     
     static _viewsToLayout: UIView[] = []
+    static _viewsWithValidPointer = new Set<UIView>()
     
     forceIntrinsicSizeZero: boolean = NO
     _touchEventTime?: number
@@ -2450,7 +2451,7 @@ export class UIView extends UIObject {
     }
     
     
-    addSubview(view: UIView, aboveView?: UIView) {
+    addSubview(view: UIView, aboveView?: UIView, schedulesLayout = YES) {
         
         if (!this.hasSubview(view) && IS(view)) {
             
@@ -2478,7 +2479,9 @@ export class UIView extends UIObject {
                 
             }
             
-            this.setNeedsLayout()
+            if (schedulesLayout) {
+                this.setNeedsLayout()
+            }
             
         }
         
@@ -3401,6 +3404,13 @@ export class UIView extends UIObject {
         
     }
     
+    static _invalidateViewsWithValidPointers() {
+        UIView._viewsWithValidPointer.forEach(view => {
+            view._isPointerValid = NO
+        })
+        UIView._viewsWithValidPointer.clear()
+    }
+    
     shouldCallPointerUpInside(event: MouseEvent | TouchEvent) {
         return UIView.shouldCallPointerUpInsideOnView(this, event)
     }
@@ -3457,6 +3467,7 @@ export class UIView extends UIObject {
             
             this._isPointerInside = YES
             this._isPointerValid = YES
+            UIView._viewsWithValidPointer.add(this)
             this._isPointerValidForMovement = YES
             this._isPointerDown = YES
             this._initialPointerPosition = new UIPoint(event.clientX, event.clientY)
@@ -3544,6 +3555,7 @@ export class UIView extends UIObject {
             
             this._isPointerInside = YES
             this._isPointerValid = YES
+            UIView._viewsWithValidPointer.add(this)
             this._isPointerValidForMovement = YES
             
             pauseEvent(event)
@@ -3670,6 +3682,7 @@ export class UIView extends UIObject {
             }
             
             this._isPointerValid = NO
+            UIView._viewsWithValidPointer.delete(this)
             this._isPointerValidForMovement = NO
             this._isPointerDown = NO
             
@@ -4064,6 +4077,7 @@ export class UIView extends UIObject {
         
         if (event.name == UIView.broadcastEventName.PageDidScroll) {
             this._isPointerValid = NO
+            UIView._viewsWithValidPointer.delete(this)
         }
         
         if (event.name == UIView.broadcastEventName.AddedToViewTree) {

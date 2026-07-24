@@ -15,6 +15,14 @@ interface UITableViewRowView extends UIView {
 }
 
 
+interface UITableViewKeyboardNavigableRowView extends UITableViewRowView {
+    
+    firstButtonCellIndex?: () => number;
+    setKeyboardFocusedCellIndex?: (index: number | undefined) => void;
+    
+}
+
+
 interface UITableViewViewportState {
     visibleFrameTop: number;
     visibleFrameBottom: number;
@@ -393,8 +401,8 @@ export class UITableView extends UINativeScrollView {
         
         // When moving to a different data row, land on the first button cell by default
         if (rowIndex >= 0 && rowIndex !== previousRowIndex) {
-            const row = this.visibleRowWithIndex(rowIndex) as any
-            if (row && typeof row.firstButtonCellIndex === "function") {
+            const row = this.visibleRowWithIndex(rowIndex) as UITableViewKeyboardNavigableRowView | undefined
+            if (row?.firstButtonCellIndex) {
                 cellIndex = row.firstButtonCellIndex()
             }
         }
@@ -438,22 +446,23 @@ export class UITableView extends UINativeScrollView {
             this.keyboardFocusDidChange?.(-1, -1)
             return
         }
-        const row = this.visibleRowWithIndex(rowIndex) as any
-        if (row && typeof row.setKeyboardFocusedCellIndex === "function") {
+        const row = this.visibleRowWithIndex(rowIndex) as UITableViewKeyboardNavigableRowView | undefined
+        if (row?.setKeyboardFocusedCellIndex) {
             row.setKeyboardFocusedCellIndex(undefined)
         }
     }
     
     _applyKeyboardFocusToVisibleRows(clearAll = false) {
-        this._visibleRows.forEach((row: any) => {
-            if (typeof row.setKeyboardFocusedCellIndex !== "function") {
+        this._visibleRows.forEach(row => {
+            const keyboardNavigableRow = row as UITableViewKeyboardNavigableRowView
+            if (!keyboardNavigableRow.setKeyboardFocusedCellIndex) {
                 return
             }
-            if (clearAll || row._UITableViewRowIndex !== this._keyboardFocusedRowIndex) {
-                row.setKeyboardFocusedCellIndex(undefined)
+            if (clearAll || keyboardNavigableRow._UITableViewRowIndex !== this._keyboardFocusedRowIndex) {
+                keyboardNavigableRow.setKeyboardFocusedCellIndex(undefined)
             }
             else {
-                row.setKeyboardFocusedCellIndex(this._keyboardFocusedCellIndex)
+                keyboardNavigableRow.setKeyboardFocusedCellIndex(this._keyboardFocusedCellIndex)
             }
         })
     }
@@ -623,7 +632,7 @@ export class UITableView extends UINativeScrollView {
     
     
     invalidateSizeOfRowWithIndex(index: number, animateChange = NO) {
-        const unwrappedTableView = (this as any).wrapped_nil_target as UITableView | undefined
+        const unwrappedTableView = (this as UITableView & { wrapped_nil_target?: UITableView }).wrapped_nil_target
         if (unwrappedTableView) {
             unwrappedTableView.invalidateSizeOfRowWithIndex(index, animateChange)
             return
@@ -1383,7 +1392,7 @@ export class UITableView extends UINativeScrollView {
                 }
                 let walkedTarget = target
                 while (walkedTarget && walkedTarget !== el) {
-                    const viewObject = (walkedTarget as any).UIViewObject as UITableViewRowView | undefined
+                    const viewObject = walkedTarget.UIViewObject as UITableViewRowView | undefined
                     if (viewObject?._UITableViewRowIndex !== undefined) {
                         this._setKeyboardFocus(viewObject._UITableViewRowIndex, this._keyboardFocusedCellIndex)
                         el.focus({ preventScroll: true })
@@ -1599,3 +1608,4 @@ export class UITableView extends UINativeScrollView {
     
     
 }
+

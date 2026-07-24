@@ -124,6 +124,14 @@ export interface UIViewBroadcastEvent {
 }
 
 
+type UIViewNativeControlEventRegistration = {
+    listener: EventListener
+    eventName?: string
+    options?: boolean | AddEventListenerOptions
+    target?: EventTarget
+}
+
+
 type Mutable<T> = {
     -readonly [P in keyof T]: T[P]
 };
@@ -229,6 +237,8 @@ export class UIView extends UIObject {
                                                          // "PointerLeave": Function[]; "PointerEnter": Function[];
                                                          // "PointerUpInside": Function[]; "PointerUp": Function[];
                                                          // "PointerHover": Function[]; };
+    _nativeControlEventRegistrations: { [nativeEventName: string]: UIViewNativeControlEventRegistration } = {}
+    _loadedNativeControlEventNames: string[] = []
     _broadcastEventTargets: { [eventName: string]: ((event: UIViewBroadcastEvent) => void)[] } = {}
     _ongoingControlEventHandlers: { _controlEventKey: string }[] = []
     _frameTransform: string
@@ -241,7 +251,7 @@ export class UIView extends UIObject {
     _styleClasses: any[]
     _isHidden: boolean = NO
     
-    pausesPointerEvents: boolean = NO
+    _pausesPointerEvents: boolean = NO
     stopsPointerEventPropagation: boolean = YES
     pointerDraggingPoint: UIPoint = new UIPoint(0, 0)
     _previousClientPoint: UIPoint = new UIPoint(0, 0)
@@ -263,6 +273,7 @@ export class UIView extends UIObject {
     
     static _viewsToLayout: UIView[] = []
     static _viewsWithValidPointer = new Set<UIView>()
+    static _loadedGlobalNativeControlEventNames: string[] = []
     
     forceIntrinsicSizeZero: boolean = NO
     _touchEventTime?: number
@@ -3428,6 +3439,17 @@ export class UIView extends UIObject {
         return UIView.shouldCallPointerLeaveOnView(this, event)
     }
     
+    get pausesPointerEvents() {
+        return this._pausesPointerEvents
+    }
+    
+    set pausesPointerEvents(pausesPointerEvents: boolean) {
+        this._pausesPointerEvents = pausesPointerEvents
+        if (pausesPointerEvents) {
+            this._loadNativeControlEventNames(UIView._pointerBlockingNativeControlEventNames)
+        }
+    }
+    
     protected _loadUIEvents() {
         
         
@@ -3455,7 +3477,7 @@ export class UIView extends UIObject {
             
         }
         
-        const onMouseDown = (event: MouseEvent) => {
+        const onMouseDown = (event: MouseEvent | TouchEvent) => {
             
             if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
                 ((this.ignoresMouse || (IS(this._touchEventTime) && (Date.now() - this._touchEventTime) > 500)) &&
@@ -3470,7 +3492,6 @@ export class UIView extends UIObject {
             UIView._viewsWithValidPointer.add(this)
             this._isPointerValidForMovement = YES
             this._isPointerDown = YES
-            this._initialPointerPosition = new UIPoint(event.clientX, event.clientY)
             if (isTouchEventClassDefined && event instanceof TouchEvent) {
                 this._touchEventTime = Date.now()
                 this._initialPointerPosition = new UIPoint(event.touches[0].clientX, event.touches[0].clientY)
@@ -3480,8 +3501,11 @@ export class UIView extends UIObject {
                 }
             }
             else {
+                const mouseEvent = event as MouseEvent
+                
                 this._touchEventTime = nil
-                pauseEvent(event)
+                this._initialPointerPosition = new UIPoint(mouseEvent.clientX, mouseEvent.clientY)
+                pauseEvent(mouseEvent)
             }
             
             this._hasPointerDragged = NO
@@ -3492,9 +3516,9 @@ export class UIView extends UIObject {
             
         }
         
-        const onTouchStart = onMouseDown as any
+        const onTouchStart = onMouseDown
         
-        const onmouseup = async (event: MouseEvent) => {
+        const onmouseup = async (event: MouseEvent | TouchEvent) => {
             
             this._isPointerDown = NO
             
@@ -3523,7 +3547,7 @@ export class UIView extends UIObject {
         
         const onTouchEnd = onmouseup
         
-        const onmouseout = async (event: MouseEvent) => {
+        const onmouseout = async (event: MouseEvent | TouchEvent) => {
             
             if ((this.ignoresTouches && isTouchEventClassDefined && event instanceof TouchEvent) ||
                 (this.ignoresMouse && event instanceof MouseEvent)) {
@@ -3809,56 +3833,100 @@ export class UIView extends UIObject {
         const onblur = (event: Event) => {
             this.sendControlEventForKey(UIView.controlEvent.Blur, event)
         }
-
-        const onScrollWheel = (event: WheelEvent) => {
-            this.sendControlEventForKey(UIView.controlEvent.ScrollWheel, event)
+        
+        const nativeControlEventListener = <EventType extends Event>(
+            listener: (event: EventType) => void | Promise<void>
+        ): EventListener => {
+            return event => {
+                listener(event as EventType)
+            }
         }
         
+        this._nativeControlEventRegistrations = {
+            mousedown: { listener: nativeControlEventListener(onMouseDown), options: false },
+            touchstart: { listener: nativeControlEventListener(onTouchStart), options: false },
+            touchmove: { listener: nativeControlEventListener(onTouchMove), options: false },
+            mouseover: { listener: nativeControlEventListener(onmouseover), options: false },
+            mouseup: { listener: nativeControlEventListener(onmouseup), options: false },
+            touchend: { listener: nativeControlEventListener(onTouchEnd), options: false },
+            touchcancel: { listener: nativeControlEventListener(onTouchCancel), options: false },
+            mouseout: { listener: nativeControlEventListener(onmouseout), options: false },
+            touchleave: { listener: nativeControlEventListener(onTouchLeave), options: true },
+            keydown: { listener: nativeControlEventListener(onKeyDown), options: false },
+            keyup: { listener: nativeControlEventListener(onKeyUp), options: false },
+            focus: { listener: nativeControlEventListener(onfocus), options: false },
+            blur: { listener: nativeControlEventListener(onblur), options: false },
+            wheel: {
+                listener: nativeControlEventListener((event: WheelEvent) => {
+                    this.sendControlEventForKey(UIView.controlEvent.ScrollWheel, event)
+                }),
+                options: false
+            },
+            "window.mousemove": {
+                target: window,
+                eventName: "mousemove",
+                listener: nativeControlEventListener((event: MouseEvent) => {
+                    UIView._onWindowMouseMove(event)
+                }),
+                options: false
+            },
+            "window.mouseup": {
+                target: window,
+                eventName: "mouseup",
+                listener: nativeControlEventListener((event: MouseEvent) => {
+                    const onWindowMouseUp = UIView._onWindowMouseup
+                    
+                    UIView._onWindowMouseMove = nil
+                    UIView._onWindowMouseup = nil
+                    
+                    onWindowMouseUp(event)
+                }),
+                options: true
+            },
+            "body.mouseleave": {
+                target: document.body,
+                eventName: "mouseleave",
+                listener: nativeControlEventListener((event: MouseEvent) => {
+                    const onWindowMouseUp = UIView._onWindowMouseup
+                    
+                    UIView._onWindowMouseMove = nil
+                    UIView._onWindowMouseup = nil
+                    
+                    onWindowMouseUp(event)
+                }),
+                options: false
+            },
+            "window.touchmove": {
+                target: window,
+                eventName: "touchmove",
+                listener: nativeControlEventListener((event: TouchEvent) => {
+                    UIView._onWindowTouchMove(event)
+                }),
+                options: true
+            },
+            "window.touchend": {
+                target: window,
+                eventName: "touchend",
+                listener: nativeControlEventListener(() => {
+                    UIView._onWindowTouchMove = nil
+                    UIView._onWindowMouseup = nil
+                }),
+                options: true
+            },
+            "window.touchcancel": {
+                target: window,
+                eventName: "touchcancel",
+                listener: nativeControlEventListener(() => {
+                    UIView._onWindowTouchMove = nil
+                    UIView._onWindowMouseup = nil
+                }),
+                options: true
+            }
+        }
         
-        // Mouse and touch start events
-        // this._viewHTMLElement.onmousedown = onMouseDown
-        // this._viewHTMLElement.ontouchstart = onTouchStart
-        this.viewHTMLElement.addEventListener("mousedown", onMouseDown, false)
-        this.viewHTMLElement.addEventListener("touchstart", onTouchStart, false)
-        // //this.viewHTMLElement.addEventListener("mouseenter", onMouseEnter.bind(this), false);
-        
-        // Mouse and touch move events
-        // this._viewHTMLElement.onmousemove = onMouseMove
-        // this._viewHTMLElement.ontouchmove = onTouchMove
-        //this.viewHTMLElement.addEventListener("mousemove", onMouseMove, false)
-        this.viewHTMLElement.addEventListener("touchmove", onTouchMove, false)
-        
-        //this.viewHTMLElement.addEventListener("mousewheel", onmousewheel.bind(this), false)
-        this._viewHTMLElement.addEventListener("wheel", onScrollWheel)
-        
-        this._viewHTMLElement.onmouseover = onmouseover
-        // this.viewHTMLElement.addEventListener("mouseover", onmouseover.bind(this), false)
-        
-        // Mouse and touch end events
-        // this._viewHTMLElement.onmouseup = onmouseup
-        // // @ts-ignore
-        // this._viewHTMLElement.ontouchend = onTouchEnd
-        // this._viewHTMLElement.ontouchcancel = onTouchCancel
-        this.viewHTMLElement.addEventListener("mouseup", onmouseup, false)
-        // @ts-ignore
-        this.viewHTMLElement.addEventListener("touchend", onTouchEnd, false)
-        this.viewHTMLElement.addEventListener("touchcancel", onTouchCancel, false)
-        
-        //this._viewHTMLElement.onmouseout = onmouseout
-        this.viewHTMLElement.addEventListener("mouseout", onmouseout, false)
-        // @ts-ignore
-        this._viewHTMLElement.addEventListener("touchleave", onTouchLeave, true)
-        
-        // this.viewHTMLElement.onkeydown = onkeydown
-        // this.viewHTMLElement.onkeyup = onkeyup
-        this._viewHTMLElement.addEventListener("keydown", onKeyDown, false)
-        this._viewHTMLElement.addEventListener("keyup", onKeyUp, false)
-        
-        // Focus events
-        this._viewHTMLElement.onfocus = onfocus
-        this._viewHTMLElement.onblur = onblur
-        // this.viewHTMLElement.addEventListener("focus", onfocus, true)
-        // this.viewHTMLElement.addEventListener("blur", onblur, true)
+        if (this.pausesPointerEvents) {
+            this._loadNativeControlEventNames(UIView._pointerBlockingNativeControlEventNames)
+        }
         
         
     }
@@ -3890,6 +3958,93 @@ export class UIView extends UIObject {
         "ScrollWheel": "ScrollWheel"
         
     } as const
+    
+    static _nativeControlEventNamesByControlEventKey: { [controlEventKey: string]: string[] } = {
+        [UIView.controlEvent.PointerDown]: ["mousedown", "touchstart"],
+        [UIView.controlEvent.PointerMove]: ["mousedown", "touchstart", "touchmove", "window.mousemove", "window.touchmove"],
+        [UIView.controlEvent.PointerDrag]: [
+            "mousedown",
+            "touchstart",
+            "touchmove",
+            "mouseup",
+            "touchend",
+            "touchcancel",
+            "window.mousemove",
+            "window.mouseup",
+            "body.mouseleave",
+            "window.touchmove",
+            "window.touchend",
+            "window.touchcancel"
+        ],
+        [UIView.controlEvent.PointerLeave]: ["mouseout", "touchstart", "touchmove", "touchleave"],
+        [UIView.controlEvent.PointerEnter]: ["mouseover"],
+        [UIView.controlEvent.PointerUpInside]: [
+            "mousedown",
+            "touchstart",
+            "mouseup",
+            "touchend",
+            "touchcancel",
+            "window.mouseup",
+            "body.mouseleave",
+            "window.touchend",
+            "window.touchcancel"
+        ],
+        [UIView.controlEvent.PointerTap]: [
+            "mousedown",
+            "touchstart",
+            "mouseup",
+            "touchend",
+            "touchcancel",
+            "window.mouseup",
+            "body.mouseleave",
+            "window.touchend",
+            "window.touchcancel"
+        ],
+        [UIView.controlEvent.PointerUp]: [
+            "mousedown",
+            "touchstart",
+            "mouseup",
+            "touchend",
+            "touchcancel",
+            "window.mouseup",
+            "body.mouseleave",
+            "window.touchend",
+            "window.touchcancel"
+        ],
+        [UIView.controlEvent.MultipleTouches]: ["touchstart", "touchmove", "window.touchmove"],
+        [UIView.controlEvent.PointerCancel]: [
+            "mousedown",
+            "touchstart",
+            "touchcancel",
+            "body.mouseleave",
+            "window.touchcancel"
+        ],
+        [UIView.controlEvent.PointerHover]: ["mouseover"],
+        [UIView.controlEvent.EnterDown]: ["keydown"],
+        [UIView.controlEvent.EnterUp]: ["keyup"],
+        [UIView.controlEvent.SpaceDown]: ["keydown"],
+        [UIView.controlEvent.EscDown]: ["keydown"],
+        [UIView.controlEvent.TabDown]: ["keydown"],
+        [UIView.controlEvent.LeftArrowDown]: ["keydown"],
+        [UIView.controlEvent.RightArrowDown]: ["keydown"],
+        [UIView.controlEvent.DownArrowDown]: ["keydown"],
+        [UIView.controlEvent.UpArrowDown]: ["keydown"],
+        [UIView.controlEvent.Focus]: ["focus"],
+        [UIView.controlEvent.Blur]: ["blur"],
+        [UIView.controlEvent.ScrollWheel]: ["wheel"]
+    }
+    
+    static _pointerBlockingNativeControlEventNames = [
+        "mousedown",
+        "touchstart",
+        "touchmove",
+        "mouseover",
+        "mouseup",
+        "touchend",
+        "touchcancel",
+        "mouseout",
+        "touchleave"
+    ]
     
     
     controlEvent = UIView.controlEvent
@@ -3931,10 +4086,44 @@ export class UIView extends UIObject {
         eventKeys.forEach(key => this.addTargetForControlEvent(key, targetFunction))
     }
     
+    _loadNativeControlEventNames(nativeEventNames: string[]) {
+        nativeEventNames.forEach(nativeEventName => {
+            const registration = this._nativeControlEventRegistrations[nativeEventName]
+            if (!registration) {
+                return
+            }
+            
+            let loadedNativeControlEventNames = this._loadedNativeControlEventNames
+            if (registration.target) {
+                loadedNativeControlEventNames = UIView._loadedGlobalNativeControlEventNames
+            }
+            if (loadedNativeControlEventNames.contains(nativeEventName)) {
+                return
+            }
+            
+            const target = registration.target ?? this._viewHTMLElement
+            target.addEventListener(
+                registration.eventName ?? nativeEventName,
+                registration.listener,
+                registration.options
+            )
+            loadedNativeControlEventNames.push(nativeEventName)
+        })
+    }
+    
+    _loadNativeControlEventsForControlEventKey(controlEventKey: string) {
+        const nativeEventNames = UIView._nativeControlEventNamesByControlEventKey[controlEventKey]
+        if (!nativeEventNames) {
+            return
+        }
+        this._loadNativeControlEventNames(nativeEventNames)
+    }
+    
     addTargetForControlEvent(
         eventKey: string,
         targetFunction: (sender: UIView, event: Event, callbackControl: { allowConcurrentCalls: () => void }) => any | Promise<any>
     ) {
+        this._loadNativeControlEventsForControlEventKey(eventKey)
         
         let targets = this._controlEventTargets[eventKey]
         
@@ -4536,41 +4725,6 @@ export class UIView extends UIObject {
     
     
 }
-
-
-const windowMouseMoveFunction = (event: MouseEvent) => {
-    
-    UIView._onWindowMouseMove(event)
-    //pauseEvent(event, YES)
-    
-}
-const windowMouseUpOrLeaveFunction = (event: MouseEvent) => {
-    
-    const onWindowMouseUp = UIView._onWindowMouseup
-    
-    UIView._onWindowMouseMove = nil
-    UIView._onWindowMouseup = nil
-    
-    // window.removeEventListener("mousemove", windowMouseMoveFunction)
-    // window.removeEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
-    // document.body.removeEventListener("mouseleave", windowMouseUpOrLeaveFunction)
-    onWindowMouseUp(event)
-    
-}
-window.addEventListener("mousemove", windowMouseMoveFunction)
-window.addEventListener("mouseup", windowMouseUpOrLeaveFunction, true)
-document.body.addEventListener("mouseleave", windowMouseUpOrLeaveFunction)
-
-const windowTouchFunction = () => {
-    
-    UIView._onWindowTouchMove = nil
-    UIView._onWindowMouseup = nil
-    // window.removeEventListener("touchmove", UIView._onWindowTouchMove, true)
-    // window.removeEventListener("mouseup", windowTouchFunction, true)
-    
-}
-window.addEventListener("touchmove", UIView._onWindowTouchMove, true)
-window.addEventListener("mouseup", windowTouchFunction, true)
 
 function props(obj: any) {
     const p = []

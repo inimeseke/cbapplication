@@ -73,10 +73,24 @@ export class UICore extends UIObject {
         
         this.rootViewController.view.addTargetForControlEvent(
             UIView.controlEvent.PointerUpInside,
-            () => {
-                
-                (document.activeElement as HTMLElement)?.blur?.()
-                
+            (sender, event) => {
+
+                // Only dismiss focus for taps genuinely outside the focused element - not for
+                // the tap that just focused it (or a tap on one of its own children). Native
+                // controls like <select> gain focus on mousedown and open their own popup; if
+                // this handler blurs them on the very next PointerUpInside regardless of target,
+                // it closes that popup before the user can pick an option (macOS Chrome renders
+                // <select> popups as a native control that closes as soon as its anchor blurs).
+                const activeElement = document.activeElement as HTMLElement | null
+                const eventTarget = event?.target as Node | null
+
+                if (activeElement && eventTarget &&
+                    (activeElement === eventTarget || activeElement.contains(eventTarget))) {
+                    return
+                }
+
+                activeElement?.blur?.()
+
             }
         )
         

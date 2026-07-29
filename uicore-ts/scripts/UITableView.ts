@@ -1592,20 +1592,75 @@ export class UITableView extends UINativeScrollView {
     }
     
     
+    /**
+     * When `allRowsHaveEqualHeight` is NO, this is a CHEAP ESTIMATE, not a measurement: any row
+     * that has never actually rendered inside the viewport falls back to `estimatedRowHeight`
+     * (default 50) rather than its real height (see `_rowPositionWithIndex` /
+     * `_measuredRowHeights`). That's fine for scroll-position math on a table that's already
+     * sized and scrolling, but it means this value is UNRELIABLE for sizing a container to fit
+     * all rows ("intrinsic/auto height") whenever rows have unequal, content-dependent heights -
+     * the result silently under-reports as soon as the table has more rows than fit in whatever
+     * transient size it had the first time it rendered. If you need an accurate fit-all-rows
+     * height for a variable-height table, use `measuredRowsHeight` instead, which forces real
+     * per-row measurement (optionally capped, to bound the cost - see its own doc comment).
+     */
     override intrinsicContentHeight(constrainingWidth = 0) {
-        
+
         let result = 0
         this._calculateAllPositions()
-        
+
         const numberOfRows = this.numberOfRows()
         if (numberOfRows) {
             result = this._rowPositionWithIndex(numberOfRows - 1).bottomY
         }
-        
+
         return result
-        
+
     }
-    
-    
+
+
+    /**
+     * Real (not estimated) total row height: measures every row in order via
+     * `heightForRowWithIndex` - the same on-demand, borrow-a-reusable-view-and-measure path
+     * already used for individual off-screen rows (see `_measureAttachedRowsAtOrBelowVisibleAnchor`
+     * and CBDataView's override of `heightForRowWithIndex`) - rather than falling back to
+     * `estimatedRowHeight` for anything that hasn't rendered yet, the way `intrinsicContentHeight`
+     * does. Use this when you need an accurate "grow to fit all rows" height for a table whose
+     * rows have unequal, content-dependent heights.
+     *
+     * Pass `maximumHeight` to bound the cost: rows are measured in strict order, accumulating,
+     * and measurement STOPS the moment the running total exceeds it - `wasClamped` comes back
+     * `true` and every remaining row is left untouched (its height is never computed at all).
+     * This is the common real-world pattern - "grow to fit exactly, up to a cap, then let the
+     * table scroll internally past that" - and its cost is proportional to however many rows it
+     * takes to fill `maximumHeight`, NOT to the total row count, so it stays cheap even for very
+     * long lists as long as the cap itself is modest.
+     *
+     * Omit `maximumHeight` only for lists you know are short: measuring every row is O(row count)
+     * real DOM layout work (each `heightForRowWithIndex` call can force a synchronous reflow),
+     * which is fine for tens of rows and increasingly expensive well beyond that. For long,
+     * unbounded lists, prefer a fixed height with internal scrolling instead of calling this
+     * without a cap.
+     */
+    measuredRowsHeight(constrainingWidth: number, maximumHeight?: number): { height: number, wasClamped: boolean } {
+
+        const rowCount = this.numberOfRows()
+        let total = 0
+
+        for (let index = 0; index < rowCount; index++) {
+
+            total += this.heightForRowWithIndex(index)
+
+            if (maximumHeight !== undefined && total > maximumHeight) {
+                return { height: maximumHeight, wasClamped: YES }
+            }
+
+        }
+
+        return { height: total, wasClamped: NO }
+
+    }
+
+
 }
 

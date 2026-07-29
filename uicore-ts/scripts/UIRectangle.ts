@@ -43,7 +43,7 @@ type UIGroupingWrapperFrameRecord = {
 }
 
 export class UIRectangle extends UIObject {
-    
+
     static _groupingWrapperFrameLayoutPasses: UIGroupingWrapperFrameLayoutPass[] = []
     static _groupingWrapperFrameRecordsByOwner = new WeakMap<UIView, UIGroupingWrapperFrameRecord[]>()
     
@@ -435,34 +435,37 @@ export class UIRectangle extends UIObject {
     intersectsWithRectangle(rectangle: UIRectangle) {
         return (this.intersectionRectangleWithRectangle(rectangle).area != 0)
     }
-    
-    
+
+
     // Distance between two rectangles' facing edges, assuming `rectangle`
     // sits in the named direction from `this`. Zero means the edges touch
     // exactly; negative means the rectangles overlap in that axis.
     topGapToRectangle(rectangle: UIRectangle): number {
         return rectangle.min.y - this.max.y
     }
-    
+
     bottomGapToRectangle(rectangle: UIRectangle): number {
         return this.min.y - rectangle.max.y
     }
-    
+
     leftGapToRectangle(rectangle: UIRectangle): number {
         return rectangle.min.x - this.max.x
     }
-    
+
     rightGapToRectangle(rectangle: UIRectangle): number {
         return this.min.x - rectangle.max.x
     }
-    
-    
+
+
+    // True when `rectangle` lies entirely within this rectangle's bounds —
+    // stricter than intersectsWithRectangle; catches a child frame that
+    // overflows its container.
     containsRectangle(rectangle: UIRectangle): boolean {
         return this.min.x <= rectangle.min.x && this.min.y <= rectangle.min.y &&
             this.max.x >= rectangle.max.x && this.max.y >= rectangle.max.y
     }
-    
-    
+
+
     // add some space around the rectangle
     rectangleWithInsets(left: number, right: number, bottom: number, top: number) {
         const result = this.lazyCopy() // COW: Use lazyCopy
@@ -1004,9 +1007,7 @@ export class UIRectangle extends UIObject {
         if (centeredOnPosition !== 0 && frames.length > 0) {
             const rowWidth = frames.lastElement.max.x - frames.firstElement.x
             const offset = (this.width - rowWidth) * centeredOnPosition - (frames.firstElement.x - this.x)
-            frames.forEach(frame => {
-                frame.x += offset
-            })
+            frames.forEach(frame => { frame.x += offset })
         }
         
         frames.forEach((frame, index) => UIRectangle._assignFrameToView(frame, views[index]))
@@ -1114,8 +1115,8 @@ export class UIRectangle extends UIObject {
         view.hasWeakFrame = isWeakFrame
         return this
     }
-    
-    
+
+
     /**
      * Begins collecting views assigned through the rectangle frame-assignment API into a DOM wrapper.
      * The matching endGroupingWrapperFrame() returns the current rectangle unchanged, preserving the chain.
@@ -1141,8 +1142,8 @@ export class UIRectangle extends UIObject {
         layoutPass.groupingContextStack.push(groupingContext)
         return this
     }
-    
-    
+
+
     /** Ends the current grouping wrapper frame and returns this rectangle unchanged. */
     endGroupingWrapperFrame() {
         const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement
@@ -1152,8 +1153,8 @@ export class UIRectangle extends UIObject {
         layoutPass.groupingContextStack.pop()
         return this
     }
-    
-    
+
+
     static _beginGroupingWrapperFrameLayoutPass(owner: UIView) {
         UIRectangle._groupingWrapperFrameLayoutPasses.push({
             owner,
@@ -1161,8 +1162,8 @@ export class UIRectangle extends UIObject {
             requests: []
         })
     }
-    
-    
+
+
     static _endGroupingWrapperFrameLayoutPass(owner: UIView) {
         const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.pop()
         if (!layoutPass || layoutPass.owner !== owner) {
@@ -1176,8 +1177,8 @@ export class UIRectangle extends UIObject {
             UIRectangle._reconcileGroupingWrapperFrames(layoutPass)
         }
     }
-    
-    
+
+
     static _assignFrameToView(frame: UIRectangle, view: UIView) {
         view.frame = frame
         const groupingContexts = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement?.groupingContextStack
@@ -1190,8 +1191,8 @@ export class UIRectangle extends UIObject {
             innermostContext.views.push(view)
         }
     }
-    
-    
+
+
     static _reconcileGroupingWrapperFrames(layoutPass: UIGroupingWrapperFrameLayoutPass) {
         const owner = layoutPass.owner
         const previousRecords = UIRectangle._groupingWrapperFrameRecordsByOwner.get(owner) ?? []
@@ -1199,7 +1200,7 @@ export class UIRectangle extends UIObject {
         const nextRecords: UIGroupingWrapperFrameRecord[] = []
         const groupedViews = new Set<UIView>()
         const configuredIdentifiers = new Set<string>()
-        
+
         const validateContext = (request: UIGroupingWrapperFrameContext) => {
             if (request.configuration.identifier) {
                 if (configuredIdentifiers.has(request.configuration.identifier)) {
@@ -1219,7 +1220,7 @@ export class UIRectangle extends UIObject {
             request.childContexts.forEach(validateContext)
         }
         layoutPass.requests.forEach(validateContext)
-        
+
         const recordForRequest = (request: UIGroupingWrapperFrameContext) => {
             let record: UIGroupingWrapperFrameRecord | undefined
             if (request.configuration.identifier) {
@@ -1238,7 +1239,7 @@ export class UIRectangle extends UIObject {
             }
             return record
         }
-        
+
         const reconcileContext = (
             request: UIGroupingWrapperFrameContext,
             containerHTMLElement: HTMLElement
@@ -1257,7 +1258,7 @@ export class UIRectangle extends UIObject {
             record.childRecords = request.childContexts.map(childContext =>
                 reconcileContext(childContext, record.coordinateSpaceHTMLElement)
             ).filter((childRecord): childRecord is UIGroupingWrapperFrameRecord => !!childRecord)
-            
+
             const elementByView = new Map<UIView, HTMLElement>()
             record.views.forEach(view => elementByView.set(view, view.viewHTMLElement))
             record.childRecords.forEach(childRecord => {
@@ -1273,11 +1274,11 @@ export class UIRectangle extends UIObject {
             )
             return record
         }
-        
+
         const rootRecords = layoutPass.requests.map(request =>
             reconcileContext(request, owner.viewHTMLElement)
         ).filter((record): record is UIGroupingWrapperFrameRecord => !!record)
-        
+
         availablePreviousRecords.forEach(record => {
             record.views.forEach(view => {
                 if (view.viewHTMLElement.parentElement === record.coordinateSpaceHTMLElement) {
@@ -1286,7 +1287,7 @@ export class UIRectangle extends UIObject {
             })
             record.wrapperHTMLElement.remove()
         })
-        
+
         const rootRecordByView = new Map<UIView, UIGroupingWrapperFrameRecord>()
         rootRecords.forEach(record => {
             UIRectangle._viewsInGroupingWrapperFrameRecord(record).forEach(view =>
@@ -1302,18 +1303,18 @@ export class UIRectangle extends UIObject {
             }
         })
         UIRectangle._reorderGroupingWrapperFrameElements(owner.viewHTMLElement, desiredTopLevelElements)
-        
+
         UIRectangle._groupingWrapperFrameRecordsByOwner.set(owner, nextRecords)
     }
-    
-    
+
+
     static _viewsInGroupingWrapperFrameRecord(record: UIGroupingWrapperFrameRecord): UIView[] {
         return record.views.concat(record.childRecords.flatMap(childRecord =>
             UIRectangle._viewsInGroupingWrapperFrameRecord(childRecord)
         ))
     }
-    
-    
+
+
     static _reorderGroupingWrapperFrameElements(containerHTMLElement: HTMLElement, desiredElements: HTMLElement[]) {
         const uniqueDesiredElements = desiredElements.filter(
             (element, index) => desiredElements.indexOf(element) === index
@@ -1326,8 +1327,8 @@ export class UIRectangle extends UIObject {
             uniqueDesiredElements.forEach(element => containerHTMLElement.appendChild(element))
         }
     }
-    
-    
+
+
     static _newGroupingWrapperFrameRecord(): UIGroupingWrapperFrameRecord {
         const wrapperHTMLElement = document.createElement("div")
         const coordinateSpaceHTMLElement = document.createElement("div")
@@ -1346,8 +1347,8 @@ export class UIRectangle extends UIObject {
             configuredStyleNames: []
         }
     }
-    
-    
+
+
     static _configureGroupingWrapperFrameRecord(
         record: UIGroupingWrapperFrameRecord,
         request: UIGroupingWrapperFrameContext,
@@ -1358,16 +1359,16 @@ export class UIRectangle extends UIObject {
         record.configuredClassNames.forEach(className => wrapperHTMLElement.classList.remove(className))
         record.configuredAttributeNames.forEach(attributeName => wrapperHTMLElement.removeAttribute(attributeName))
         record.configuredStyleNames.forEach(styleName => (wrapperHTMLElement.style as any)[styleName] = "")
-        
+
         wrapperHTMLElement.classList.add("UICore_UIGroupingWrapperFrame")
         wrapperHTMLElement.setAttribute("data-uicore-grouping-wrapper-frame", "")
-        
+
         record.identifier = request.configuration.identifier
         record.views = request.views.copy()
         record.configuredClassNames = request.configuration.classNames?.copy() ?? []
         record.configuredAttributeNames = Object.keys(request.configuration.attributes ?? {})
         record.configuredStyleNames = Object.keys(request.configuration.style ?? {})
-        
+
         record.configuredClassNames.forEach(className => wrapperHTMLElement.classList.add(className))
         Object.keys(request.configuration.attributes ?? {}).forEach(attributeName => {
             wrapperHTMLElement.setAttribute(
@@ -1384,7 +1385,7 @@ export class UIRectangle extends UIObject {
         else {
             wrapperHTMLElement.removeAttribute("data-uicore-grouping-wrapper-frame-identifier")
         }
-        
+
         const assignedFrames = Array.from(request.framesByView.values())
         const framePoints: UIPoint[] = []
         assignedFrames.forEach(frame => {
@@ -1393,18 +1394,18 @@ export class UIRectangle extends UIObject {
         })
         const defaultFrame = UIRectangle.boundingBoxForPoints(framePoints)
         const wrapperFrame = request.configuration.frame?.(defaultFrame.copy(), assignedFrames.copy()) ?? defaultFrame
-        
+
         wrapperHTMLElement.style.position = "absolute"
         wrapperHTMLElement.style.left = wrapperFrame.x + "px"
         wrapperHTMLElement.style.top = wrapperFrame.y + "px"
         wrapperHTMLElement.style.width = wrapperFrame.width + "px"
         wrapperHTMLElement.style.height = wrapperFrame.height + "px"
         wrapperHTMLElement.style.boxSizing = "border-box"
-        
+
         if (wrapperHTMLElement.parentElement !== containerHTMLElement) {
             containerHTMLElement.appendChild(wrapperHTMLElement)
         }
-        
+
         const coordinateSpaceHTMLElement = record.coordinateSpaceHTMLElement
         coordinateSpaceHTMLElement.classList.add("UICore_UIGroupingWrapperFrame_CoordinateSpace")
         coordinateSpaceHTMLElement.setAttribute("data-uicore-grouping-wrapper-coordinate-space", "")
@@ -1415,10 +1416,10 @@ export class UIRectangle extends UIObject {
             -wrapperFrame.y - (wrapperHTMLElement.clientTop || 0) + "px"
         coordinateSpaceHTMLElement.style.width = owner.bounds.width + "px"
         coordinateSpaceHTMLElement.style.height = owner.bounds.height + "px"
-        
+
     }
-    
-    
+
+
     static _topLevelHTMLElementForView(view: UIView) {
         let element = view.viewHTMLElement
         while (element.parentElement && element.parentElement !== view.superview?.viewHTMLElement) {
@@ -1426,8 +1427,8 @@ export class UIRectangle extends UIObject {
         }
         return element
     }
-    
-    
+
+
     static _detachViewFromGroupingWrapperFrame(view: UIView) {
         const superviewHTMLElement = view.superview?.viewHTMLElement
         if (!superviewHTMLElement || view.viewHTMLElement.parentElement === superviewHTMLElement) {
@@ -1437,8 +1438,8 @@ export class UIRectangle extends UIObject {
         superviewHTMLElement.appendChild(view.viewHTMLElement)
         UIRectangle._removeEmptyGroupingWrapperFrameAncestors(wrapperHTMLElement)
     }
-    
-    
+
+
     static _removeEmptyGroupingWrapperFrameAncestors(wrapperHTMLElement: Element | null) {
         while (wrapperHTMLElement) {
             const parentWrapperHTMLElement = wrapperHTMLElement.parentElement?.closest(
@@ -1583,7 +1584,7 @@ if (!("boundingBox" in Array.prototype)) {
 // 1. Methods available when holding a UIRectangle
 type RectangleChainMethods<TResult> = {
     [K in keyof UIRectangle as (
-        K extends "IF" | "ELSE" | "ELSE_IF" | "ENDIF" ? never : K
+        K extends 'IF' | 'ELSE' | 'ELSE_IF' | 'ENDIF' ? never : K
         )]:
     UIRectangle[K] extends (...args: infer Args) => infer R
     ? R extends UIRectangle | UIRectangle[]
@@ -1657,15 +1658,13 @@ class UIRectangleConditionalBlock {
         // Seed the stack with the first IF frame.
         // resultBeforeIF is null here because this is the outermost block;
         // ENDIF on the last frame simply returns currentResult.
-        this._stack = [
-            {
-                resultBeforeIF: null,
-                currentResult: initialResult,
-                originalResult: initialResult,
-                anyConditionMet: condition,
-                currentBranchActive: condition
-            }
-        ]
+        this._stack = [{
+            resultBeforeIF: null,
+            currentResult: initialResult,
+            originalResult: initialResult,
+            anyConditionMet: condition,
+            currentBranchActive: condition,
+        }]
     }
     
     // Convenience getter that operates on the innermost frame.
@@ -1687,7 +1686,7 @@ class UIRectangleConditionalBlock {
                 
                 // ── Control Flow ────────────────────────────────────────────────────
                 
-                if (prop === "IF") {
+                if (prop === 'IF') {
                     return (condition: boolean) => {
                         // Push a new frame. The new frame's result starts as a copy of
                         // the current innermost result so that chaining inside the nested
@@ -1697,13 +1696,13 @@ class UIRectangleConditionalBlock {
                             currentResult: self._top.currentResult,
                             originalResult: self._top.currentResult,
                             anyConditionMet: condition,
-                            currentBranchActive: condition
+                            currentBranchActive: condition,
                         })
                         return self.createProxy()
                     }
                 }
                 
-                if (prop === "TRANSFORM") {
+                if (prop === 'TRANSFORM') {
                     return <R extends UIRectangle>(fn: (current: any) => R) => {
                         if (self._shouldExecute) {
                             self._top.currentResult = fn(self._top.currentResult)
@@ -1712,7 +1711,7 @@ class UIRectangleConditionalBlock {
                     }
                 }
                 
-                if (prop === "ELSE_IF") {
+                if (prop === 'ELSE_IF') {
                     return (condition: boolean) => {
                         const top = self._top
                         // Only consider this branch if no prior branch has been taken.
@@ -1727,7 +1726,7 @@ class UIRectangleConditionalBlock {
                     }
                 }
                 
-                if (prop === "ELSE") {
+                if (prop === 'ELSE') {
                     return () => {
                         const top = self._top
                         top.currentBranchActive = !top.anyConditionMet
@@ -1739,7 +1738,7 @@ class UIRectangleConditionalBlock {
                     }
                 }
                 
-                if (prop === "ENDIF") {
+                if (prop === 'ENDIF') {
                     function endif(): any
                     function endif<R>(performFunction: (result: any) => R): R
                     function endif<R>(performFunction?: (result: any) => R): R | any {
@@ -1772,7 +1771,6 @@ class UIRectangleConditionalBlock {
                         // Return the proxy so the outer chain can continue.
                         return self.createProxy()
                     }
-                    
                     return endif
                 }
                 
@@ -1781,7 +1779,7 @@ class UIRectangleConditionalBlock {
                 const value = self._top.currentResult[prop]
                 
                 // Case A: method call
-                if (typeof value === "function") {
+                if (typeof value === 'function') {
                     return (...args: any[]) => {
                         if (self._shouldExecute) {
                             self._top.currentResult = value.apply(self._top.currentResult, args)

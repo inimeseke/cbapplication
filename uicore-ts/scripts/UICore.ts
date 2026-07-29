@@ -7,23 +7,30 @@ import { UIViewController } from "./UIViewController"
 
 
 export class UICore extends UIObject {
-    
+
     rootViewController: UIViewController
-    
-    
-    
+
+
+
     static RootViewControllerClass: typeof UIViewController
     static main: UICore
-    
+
     static languageService: UILanguageService = nil
-    
+
     static readonly broadcastEventName = {
-        
+
         "RouteDidChange": "RouteDidChange",
         "WindowDidResize": "WindowDidResize"
-        
+
     }
-    
+
+    // See `reapplyCurrentRoute` for why these exist and why route application
+    // must always go through it rather than calling `rootViewController.handleRoute`
+    // or `handleRouteRecursively` directly.
+    _isApplyingRoute = false
+    _hasQueuedRouteChangeWhileApplying = false
+    _currentRouteApplicationPromise?: Promise<void>
+
     constructor(rootDivElementID: string, rootViewControllerClass: typeof UIViewController, public paddingLength = 20) {
         
         super()
@@ -117,31 +124,94 @@ export class UICore extends UIObject {
         }
         
         window.addEventListener("scroll", didScroll, false)
-        
+
         const hashDidChange = () => {
-            
+
             //code
-            
-            this.rootViewController.handleRouteRecursively(UIRoute.currentRoute)
-            
-            this.rootViewController.view.broadcastEventInSubtree({
-                
-                name: UICore.broadcastEventName.RouteDidChange,
-                parameters: nil
-                
-            })
-            
-            
+
+            this.reapplyCurrentRoute()
+
         }
-        
+
         window.addEventListener("hashchange", hashDidChange, false)
-        
+
         hashDidChange()
-        
-        
+
+
     }
-    
-    
+
+
+    /**
+     * Re-runs route handling for `UIRoute.currentRoute` against `rootViewController`,
+     * serialized against every other caller of this method (including the
+     * `hashchange` listener installed in the constructor).
+     *
+     * This is the ONLY correct way to force route handling to (re-)run - never
+     * call `rootViewController.handleRoute(...)` or `handleRouteRecursively(...)`
+     * directly. A route change can legitimately be requested twice in quick
+     * succession from independent, uncoordinated places (e.g. two related
+     * server-pushed broadcasts derived from one real-world event, each
+     * triggering its own re-apply). Without serialization, two concurrent,
+     * un-synchronized route applications race on shared root-view-controller
+     * state (`contentViewController`, `detailsViewController`) and whichever
+     * finishes last wins - regardless of which request was actually last, or
+     * which request even reflects the current, settled state. Serializing here
+     * instead coalesces a request that arrives mid-application into a single
+     * trailing re-run rather than starting a second, overlapping one, and that
+     * re-run re-reads `UIRoute.currentRoute` fresh once the burst has settled,
+     * so the final state always matches the truly-last route.
+     */
+    async reapplyCurrentRoute(): Promise<void> {
+
+        if (this._isApplyingRoute) {
+
+            // Joining an in-flight application: request one more loop pass
+            // (guaranteed to observe `UIRoute.currentRoute` fresh, since the
+            // owner below re-reads it at the top of every pass) and await the
+            // SAME promise the owner is already awaiting, rather than
+            // returning early - a caller of this method expects route
+            // handling to have actually run by the time it resolves.
+            this._hasQueuedRouteChangeWhileApplying = true
+            return this._currentRouteApplicationPromise
+
+        }
+
+        this._isApplyingRoute = true
+
+        this._currentRouteApplicationPromise = (async () => {
+
+            try {
+
+                do {
+
+                    this._hasQueuedRouteChangeWhileApplying = false
+
+                    await this.rootViewController.handleRouteRecursively(UIRoute.currentRoute)
+
+                    this.rootViewController.view.broadcastEventInSubtree({
+
+                        name: UICore.broadcastEventName.RouteDidChange,
+                        parameters: nil
+
+                    })
+
+                } while (this._hasQueuedRouteChangeWhileApplying)
+
+            }
+            finally {
+
+                this._isApplyingRoute = false
+                this._currentRouteApplicationPromise = undefined
+
+            }
+
+        })()
+
+        return this._currentRouteApplicationPromise
+
+    }
+
+
 }
 
 

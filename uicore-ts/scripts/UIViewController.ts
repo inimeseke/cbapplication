@@ -25,16 +25,26 @@ export class UIViewController extends UIObject {
         return UIRoute.currentRoute.componentWithViewController(this.class)
     }
     
-    handleRouteRecursively(route: UIRoute) {
-        
-        this.handleRoute(route)
-        
-        this.childViewControllers.forEach(controller => {
-            
+    /**
+     * Kicks off `handleRoute` on this controller and, in the same synchronous
+     * tick and iteration order as before, on every child - preserving the
+     * original fire-and-forget timing exactly. The returned promise resolves
+     * only once this controller's own `handleRoute` and the entire child
+     * subtree's `handleRouteRecursively` calls have settled, so a caller that
+     * wants to serialize successive route applications (see `UICore`'s
+     * `hashDidChange` handling) can `await` full completion. Existing callers
+     * that ignore the return value keep behaving exactly as before.
+     */
+    async handleRouteRecursively(route: UIRoute): Promise<void> {
+
+        const handleRoutePromise = this.handleRoute(route)
+
+        const childHandleRoutePromises = this.childViewControllers.map(controller =>
             controller.handleRouteRecursively(route)
-            
-        })
-        
+        )
+
+        await Promise.all([handleRoutePromise, ...childHandleRoutePromises])
+
     }
     
     async handleRoute(route: UIRoute) {
@@ -214,11 +224,27 @@ export class UIViewController extends UIObject {
     }
     
     addChildViewControllerInDialogView(controller: UIViewController, dialogView: UIDialogView) {
-        
+
         controller = FIRST_OR_NIL(controller)
         dialogView = FIRST_OR_NIL(dialogView)
         controller.viewWillAppear()
-        this.addChildViewController(controller)
+        // Register as a child view controller (needed for routing recursion and
+        // parent tracking) WITHOUT `addChildViewController`'s own DOM attachment
+        // (`this.view.addSubview(controller.view)`) - this controller's view
+        // belongs inside `dialogView`, not directly inside `this.view`. The very
+        // next line already attaches it to `dialogView` correctly; attaching it
+        // to `this.view` first (as `addChildViewController` would) only gets
+        // silently corrected in the DOM by the native `appendChild` re-parenting
+        // `dialogView.view = ...` performs - `this.view`'s own `subviews` array
+        // bookkeeping is never cleaned up to match, leaving a permanently stale
+        // entry that a later layout pass can use to resurrect this controller's
+        // view directly under `this.view`, even after it has been correctly
+        // dismissed and removed from `dialogView`.
+        if (!this.hasChildViewController(controller)) {
+            controller.willMoveToParentViewController(this)
+            this.childViewControllers.push(controller)
+            controller.didMoveToParentViewController(this)
+        }
         dialogView.view = controller.view
         
         const originalDismissFunction = dialogView.dismiss.bind(dialogView)

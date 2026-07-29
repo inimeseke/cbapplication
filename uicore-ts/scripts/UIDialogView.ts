@@ -2,7 +2,7 @@ import { IS_FIREFOX } from "./ClientCheckers"
 import { UIColor } from "./UIColor"
 import { UICore } from "./UICore"
 import { UINativeScrollView } from "./UINativeScrollView"
-import { FIRST, IF, IS, nil, NO, YES } from "./UIObject"
+import { FIRST, IF, IS, nil, NO, UIObject, YES } from "./UIObject"
 import { UIScrollView } from "./UIScrollView"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
@@ -112,7 +112,7 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     
     showInView(containerView: UIView, animated: boolean) {
-        
+
         this._fillsViewport = containerView.rootView == containerView
         animated = (animated && !IS_FIREFOX)
         
@@ -168,19 +168,19 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
     
     dismiss(animated?: boolean) {
-        
+
         if (!this.isVisible) {
             return
         }
-        
+
         animated = (animated && !IS_FIREFOX)
-        
+
         if (animated == undefined) {
-            
+
             animated = this._appearedAnimated
-            
+
         }
-        
+
         const unlockScroll = () => {
             if (this._fillsViewport) {
                 UIDialogView._activeDialogCount = Math.max(0, UIDialogView._activeDialogCount - 1)
@@ -190,42 +190,65 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
                 this.style.overflowY = ""
             }
         }
-        
+
         if (animated) {
-            
+
+            // `transitionend` only fires when the CSS transition actually runs a
+            // visible course - if this dialog is dismissed again shortly after
+            // being shown (e.g. a server-pushed event auto-cancels a just-opened
+            // confirmation), the opacity can revert to its starting value before
+            // the browser ever paints the intermediate "shown" state, and the
+            // browser correctly considers there to be nothing to transition -
+            // `transitionend` then never dispatches for either transition. Without
+            // a fallback, `removeFromSuperview` below (inside the transitionend
+            // callback) would never run: `isVisible` correctly becomes NO, but the
+            // dialog's DOM element is never actually removed, leaving it stuck
+            // visibly open. `hasCompletedDismissal` makes the fallback a no-op
+            // when the normal transitionend-driven removal already ran.
+            let hasCompletedDismissal = NO
+            const completeDismissalIfNeeded = () => {
+                if (hasCompletedDismissal) {
+                    return
+                }
+                hasCompletedDismissal = YES
+                this.removeFromSuperview()
+                unlockScroll()
+            }
+
             UIView.animateViewOrViewsWithDurationDelayAndFunction(
                 this,
                 this.animationDuration,
                 0,
                 undefined,
                 (() => {
-                    
+
                     this.animateDisappearing()
-                    
+
                 }).bind(this),
                 () => {
-                    
+
                     if (this.isVisible == NO) {
-                        
-                        this.removeFromSuperview()
-                        unlockScroll()
-                        
+
+                        completeDismissalIfNeeded()
+
                     }
-                    
+
                 },
                 "opacity"
             )
-            
+
+            new UIObject().performFunctionWithDelay(this.animationDuration, completeDismissalIfNeeded)
+
         }
         else {
-            
+
             this.removeFromSuperview()
             unlockScroll()
-            
+
         }
-        
+
         this.isVisible = NO
-        
+
     }
     
     

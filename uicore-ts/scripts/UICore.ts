@@ -139,17 +139,14 @@ export class UICore extends UIObject {
         
         window.addEventListener("scroll", didScroll, false)
 
-        const hashDidChange = () => {
+        // Native Back/Forward navigation fires `hashchange` directly, which
+        // would otherwise reapply the route unconditionally below with no
+        // chance for the app to veto it (e.g. to protect unsaved changes) the
+        // way `UIRoute.apply()` can. This makes native history traversal go
+        // through the same `UIRoute.shouldApplyRouteChange` check first.
+        UIRoute._installNativeHistoryNavigationGuard(() => this.reapplyCurrentRoute())
 
-            //code
-
-            this.reapplyCurrentRoute()
-
-        }
-
-        window.addEventListener("hashchange", hashDidChange, false)
-
-        hashDidChange()
+        this.reapplyCurrentRoute()
 
 
     }

@@ -338,6 +338,7 @@ export class UIRoute extends Array<UIRouteComponent> {
                 targetHistoryPosition = targetHistoryPosition + 1
             }
             UIRoute._recordPresentedRouteAtHistoryPosition(targetRoute, targetHistoryPosition)
+            reapplyCurrentRoute()
             return
 
         }
@@ -356,11 +357,13 @@ export class UIRoute extends Array<UIRouteComponent> {
                 untaggedHistoryPosition = untaggedHistoryPosition + 1
             }
             UIRoute._recordPresentedRouteAtHistoryPosition(targetRoute, untaggedHistoryPosition)
+            reapplyCurrentRoute()
             return
 
         }
         if (targetHistoryPosition === UIRoute._presentedHistoryPosition) {
             UIRoute._recordPresentedRouteAtHistoryPosition(targetRoute, targetHistoryPosition)
+            reapplyCurrentRoute()
             return
         }
 

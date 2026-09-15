@@ -1,5 +1,5 @@
-import { IS_NIL, IS_NOT, NO, ValueOf, YES } from "./UIObject"
-import { UIViewController } from "./UIViewController"
+import {IS_NIL, IS_NOT, NO, ValueOf, YES} from "./UIObject"
+import {UIViewController} from "./UIViewController"
 
 
 export type PropType<TObj, TProp extends keyof TObj> = TObj[TProp];
@@ -107,12 +107,12 @@ export class UIRoute extends Array<UIRouteComponent> {
     
     
     static get currentRoute() {
-
+        
         return new UIRoute(window.location.hash)
-
+        
     }
-
-
+    
+    
     /**
      * @param forcefully When `true`, applies the route even if its string
      * representation is identical to the current URL hash, causing the browser
@@ -219,22 +219,21 @@ export class UIRoute extends Array<UIRouteComponent> {
         if (!this._needsRouteChange(forcefully)) {
             return NO
         }
-
+        
         // Tags the hashchange this is about to cause as this class's own
         // doing, so `_hashDidChange` can tell it apart from a native
         // Back/Forward traversal instead of falling back to guessing from
         // `window.history.length`.
         UIRoute._selfInitiatedRouteChange = this._routeChangeDescriptor(forcefully, replacesCurrentRouteInHistory)
-
+        
         if (replacesCurrentRouteInHistory) {
             window.location.replace(this.linkRepresentation)
-        }
-        else {
+        } else {
             window.location.hash = this.stringRepresentation
         }
-
+        
         return YES
-
+        
     }
     
     
@@ -257,10 +256,10 @@ export class UIRoute extends Array<UIRouteComponent> {
             forcefully: forcefully,
             replacesCurrentRouteInHistory: replacesCurrentRouteInHistory
         }
-
+        
     }
-
-
+    
+    
     /**
      * Installs handling so that native browser Back/Forward navigation
      * consults `shouldApplyRouteChange` the same way `apply()` does, instead
@@ -272,43 +271,43 @@ export class UIRoute extends Array<UIRouteComponent> {
      * so its effect actually appears on screen.
      */
     static _installNativeHistoryNavigationGuard(reapplyCurrentRoute: () => void | Promise<void>) {
-
+        
         UIRoute._recordPresentedRouteAtHistoryPosition(
             UIRoute.currentRoute,
             UIRoute._historyPositionFromCurrentEntry() ?? 0
         )
-
+        
         window.addEventListener("hashchange", event =>
             UIRoute._hashDidChange(event, reapplyCurrentRoute)
         )
-
+        
     }
-
-
+    
+    
     static _historyPositionFromCurrentEntry(): number | undefined {
-
+        
         const historyPosition = (window.history.state as Record<string, unknown> | null)?.[historyPositionStateKey]
         if (typeof historyPosition !== "number") {
             return undefined
         }
         return historyPosition
-
+        
     }
-
-
+    
+    
     static _recordPresentedRouteAtHistoryPosition(route: UIRoute, historyPosition: number) {
-
+        
         const historyState = Object.assign({}, window.history.state)
         historyState[historyPositionStateKey] = historyPosition
         window.history.replaceState(historyState, "")
-
+        
         UIRoute._presentedRoute = route.copy()
         UIRoute._presentedHistoryPosition = historyPosition
         UIRoute._recordedHistoryLength = window.history.length
-
+        
     }
-
-
+    
+    
     /**
      * The single listener installed for every `hashchange` - self-initiated,
      * native Back/Forward, or an untagged bypass (see the class-level comment
@@ -323,16 +322,16 @@ export class UIRoute extends Array<UIRouteComponent> {
      * - see its own doc comment.
      */
     static _hashDidChange(event: HashChangeEvent, reapplyCurrentRoute: () => void | Promise<void>) {
-
+        
         const targetRoute = UIRoute.currentRoute
         const selfInitiatedRouteChange = UIRoute._selfInitiatedRouteChange
         UIRoute._selfInitiatedRouteChange = undefined
-
+        
         if (
             selfInitiatedRouteChange &&
             selfInitiatedRouteChange.targetRoute.stringRepresentation === targetRoute.stringRepresentation
         ) {
-
+            
             let targetHistoryPosition = UIRoute._presentedHistoryPosition
             if (!selfInitiatedRouteChange.replacesCurrentRouteInHistory) {
                 targetHistoryPosition = targetHistoryPosition + 1
@@ -340,12 +339,12 @@ export class UIRoute extends Array<UIRouteComponent> {
             UIRoute._recordPresentedRouteAtHistoryPosition(targetRoute, targetHistoryPosition)
             reapplyCurrentRoute()
             return
-
+            
         }
-
+        
         const targetHistoryPosition = UIRoute._historyPositionFromCurrentEntry()
         if (targetHistoryPosition === undefined) {
-
+            
             // A hash mutation that bypassed this class entirely (e.g. a
             // direct `window.location.hash = ...` assignment) produces an
             // untagged entry. A larger native history length means it was
@@ -359,14 +358,14 @@ export class UIRoute extends Array<UIRouteComponent> {
             UIRoute._recordPresentedRouteAtHistoryPosition(targetRoute, untaggedHistoryPosition)
             reapplyCurrentRoute()
             return
-
+            
         }
         if (targetHistoryPosition === UIRoute._presentedHistoryPosition) {
             UIRoute._recordPresentedRouteAtHistoryPosition(targetRoute, targetHistoryPosition)
             reapplyCurrentRoute()
             return
         }
-
+        
         event.stopImmediatePropagation()
         const navigationGeneration = ++UIRoute._nativeHistoryNavigationGeneration
         UIRoute._applyHistoryNavigationToRouteAtPositionIfAllowed(
@@ -377,10 +376,10 @@ export class UIRoute extends Array<UIRouteComponent> {
         ).catch(error => {
             console.error("UIRoute: native history navigation check failed", error)
         })
-
+        
     }
-
-
+    
+    
     /**
      * Consults `shouldApplyRouteChange` for a native Back/Forward traversal,
      * exactly like `apply()` does for a programmatic one, then either lets it
@@ -402,7 +401,7 @@ export class UIRoute extends Array<UIRouteComponent> {
         navigationGeneration: number,
         reapplyCurrentRoute: () => void | Promise<void>
     ) {
-
+        
         const shouldApplyRouteChange = UIRoute.shouldApplyRouteChange
         const isRouteChangeApproved = shouldApplyRouteChange
             ? await shouldApplyRouteChange({
@@ -412,7 +411,7 @@ export class UIRoute extends Array<UIRouteComponent> {
                 replacesCurrentRouteInHistory: NO
             })
             : YES
-
+        
         if (navigationGeneration !== UIRoute._nativeHistoryNavigationGeneration) {
             return
         }
@@ -422,21 +421,21 @@ export class UIRoute extends Array<UIRouteComponent> {
         ) {
             return
         }
-
+        
         if (isRouteChangeApproved) {
             UIRoute._recordPresentedRouteAtHistoryPosition(targetRoute, targetHistoryPosition)
             await reapplyCurrentRoute()
             return
         }
-
+        
         const historyDelta = UIRoute._presentedHistoryPosition - targetHistoryPosition
         if (historyDelta !== 0) {
             window.history.go(historyDelta)
         }
-
+        
     }
-
-
+    
+    
     override copy() {
         const result = new UIRoute(this.stringRepresentation)
         return result
@@ -526,8 +525,7 @@ export class UIRoute extends Array<UIRouteComponent> {
         
         if (extendParameters) {
             component.parameters = Object.assign(component.parameters, parameters)
-        }
-        else {
+        } else {
             component.parameters = parameters
         }
         

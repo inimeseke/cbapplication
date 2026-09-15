@@ -1,9 +1,29 @@
-import { FIRST_OR_NIL, IS, IS_DEFINED, IS_NIL, IS_NOT_LIKE_NULL, IS_NOT_NIL, nil, NO, UIObject, YES } from "./UIObject"
-import { UIPoint } from "./UIPoint"
-import { UIView } from "./UIView"
+import {FIRST_OR_NIL, IS, IS_DEFINED, IS_NIL, IS_NOT_LIKE_NULL, IS_NOT_NIL, nil, NO, UIObject, YES} from "./UIObject"
+import {UIPoint} from "./UIPoint"
+import {UIView} from "./UIView"
 
 
 export type SizeNumberOrFunctionOrView = number | ((constrainingOrthogonalSize: number) => number) | UIView
+
+/** A position along an axis (0 = start, 0.5 = centered, 1 = end), or "stretch" to fill the available space instead. */
+export type UIRectanglePositionOrStretch = number | "stretch"
+
+export interface UIRectangleFlowLayoutOptions {
+    /** Horizontal spacing between views on the same row. Defaults to 0. */
+    itemGap?: number
+    /** Vertical spacing between wrapped rows. Defaults to 0. */
+    lineGap?: number
+    /** Caps how many views a row may hold before wrapping, even if more would fit by width. Defaults to unlimited. */
+    maxViewsPerRow?: number
+    /** Position of a row within this rectangle's width when that row holds more than one view. Defaults to 0 (left). */
+    centeredOnPosition?: number
+    /**
+     * Position (or "stretch" to fill the row) of a view that wrapping isolated onto a row of its
+     * own - never consulted for a view still sharing a row with another. A single value broadcasts
+     * to every isolated view; an array is matched by index against `views`. Defaults to 0 (left).
+     */
+    positionOrStretchWhenIsolatedOnOwnWrappedRow?: UIRectanglePositionOrStretch | UIRectanglePositionOrStretch[]
+}
 
 export type UIGroupingWrapperFrameConfiguration = {
     /** Stable identity used to reuse the same wrapper when surrounding conditional layout changes. */
@@ -43,7 +63,7 @@ type UIGroupingWrapperFrameRecord = {
 }
 
 export class UIRectangle extends UIObject {
-
+    
     static _groupingWrapperFrameLayoutPasses: UIGroupingWrapperFrameLayoutPass[] = []
     static _groupingWrapperFrameRecordsByOwner = new WeakMap<UIView, UIGroupingWrapperFrameRecord[]>()
     
@@ -435,28 +455,28 @@ export class UIRectangle extends UIObject {
     intersectsWithRectangle(rectangle: UIRectangle) {
         return (this.intersectionRectangleWithRectangle(rectangle).area != 0)
     }
-
-
+    
+    
     // Distance between two rectangles' facing edges, assuming `rectangle`
     // sits in the named direction from `this`. Zero means the edges touch
     // exactly; negative means the rectangles overlap in that axis.
     topGapToRectangle(rectangle: UIRectangle): number {
         return rectangle.min.y - this.max.y
     }
-
+    
     bottomGapToRectangle(rectangle: UIRectangle): number {
         return this.min.y - rectangle.max.y
     }
-
+    
     leftGapToRectangle(rectangle: UIRectangle): number {
         return rectangle.min.x - this.max.x
     }
-
+    
     rightGapToRectangle(rectangle: UIRectangle): number {
         return this.min.x - rectangle.max.x
     }
-
-
+    
+    
     // True when `rectangle` lies entirely within this rectangle's bounds —
     // stricter than intersectsWithRectangle; catches a child frame that
     // overflows its container.
@@ -464,8 +484,8 @@ export class UIRectangle extends UIObject {
         return this.min.x <= rectangle.min.x && this.min.y <= rectangle.min.y &&
             this.max.x >= rectangle.max.x && this.max.y >= rectangle.max.y
     }
-
-
+    
+    
     // add some space around the rectangle
     rectangleWithInsets(left: number, right: number, bottom: number, top: number) {
         const result = this.lazyCopy() // COW: Use lazyCopy
@@ -703,8 +723,7 @@ export class UIRectangle extends UIObject {
             let resultWidth: number
             if (IS_NOT_NIL(absoluteWidths[i])) {
                 resultWidth = (absoluteWidths[i] || 0) as number
-            }
-            else {
+            } else {
                 resultWidth = totalRelativeWidth * (weights[i] as number / sumOfWeights)
             }
             
@@ -768,8 +787,7 @@ export class UIRectangle extends UIObject {
                 
                 resultHeight = (absoluteHeights[i] || 0) as number
                 
-            }
-            else {
+            } else {
                 
                 resultHeight = totalRelativeHeight * (weights[i] as number / sumOfWeights)
                 
@@ -1007,10 +1025,110 @@ export class UIRectangle extends UIObject {
         if (centeredOnPosition !== 0 && frames.length > 0) {
             const rowWidth = frames.lastElement.max.x - frames.firstElement.x
             const offset = (this.width - rowWidth) * centeredOnPosition - (frames.firstElement.x - this.x)
-            frames.forEach(frame => { frame.x += offset })
+            frames.forEach(frame => {
+                frame.x += offset
+            })
         }
         
         frames.forEach((frame, index) => UIRectangle._assignFrameToView(frame, views[index]))
+        
+        return frames
+    }
+    
+    /**
+     * Flows views left-to-right at their preferred widths, wrapping to a new row below this
+     * rectangle whenever the next view no longer fits on the current row - the same idea as HTML
+     * inline/flow layout or a UICollectionView flow layout. Rows are packed greedily: each row
+     * holds as many views as actually fit before wrapping (up to `options.maxViewsPerRow`, if
+     * given), so this degenerates to a single row when everything fits, and to one view per row
+     * when nothing does.
+     * @param views - Array of views to distribute, in flow order
+     * @param preferredWidths - Preferred width for each view, matched by index
+     * @param itemHeight - Height applied to every row
+     * @param options - Wrapping and alignment settings, all optional
+     * @param options.itemGap - Horizontal spacing between views on the same row
+     * @param options.lineGap - Vertical spacing between wrapped rows
+     * @param options.maxViewsPerRow - Caps views per row even if more would fit by width
+     * @param options.centeredOnPosition - Position of a row holding more than one view
+     * @param options.positionOrStretchWhenIsolatedOnOwnWrappedRow - Position or stretch for a view wrapping isolated alone
+     * @returns Array of rectangles representing the frame for each view, matching `views`' order
+     */
+    framesByFlowingViewsAlongWidth(
+        views: UIView[],
+        preferredWidths: number[],
+        itemHeight: SizeNumberOrFunctionOrView,
+        options: UIRectangleFlowLayoutOptions = {}
+    ): UIRectangle[] {
+        const {
+            itemGap = 0,
+            lineGap = 0,
+            maxViewsPerRow = Infinity,
+            centeredOnPosition = 0,
+            positionOrStretchWhenIsolatedOnOwnWrappedRow = 0
+        } = options
+        
+        const heightNumber = this._heightNumberFromSizeNumberOrFunctionOrView(itemHeight)
+        
+        // Pack view indices into rows first (no frames yet), so each row's placement can see
+        // its whole membership - needed for group centering and for detecting isolation.
+        const rowsOfIndices: number[][] = []
+        let currentRow: number[] = []
+        let currentRowWidth = 0
+        
+        views.forEach((_view, index) => {
+            const width = preferredWidths[index]
+            const widthIfAdded = currentRow.length === 0 ? width : currentRowWidth + itemGap + width
+            const overflowsWidth = currentRow.length > 0 && widthIfAdded > this.width
+            const overflowsCount = currentRow.length >= maxViewsPerRow
+            
+            if (currentRow.length > 0 && (overflowsWidth || overflowsCount)) {
+                rowsOfIndices.push(currentRow)
+                currentRow = []
+                currentRowWidth = 0
+            }
+            
+            currentRow.push(index)
+            currentRowWidth = currentRow.length === 1 ? width : currentRowWidth + itemGap + width
+        })
+        if (currentRow.length > 0) {
+            rowsOfIndices.push(currentRow)
+        }
+        
+        const frames: UIRectangle[] = new Array(views.length)
+        let rowRectangle = this.rectangleWithHeight(heightNumber)
+        
+        rowsOfIndices.forEach((rowIndices, rowNumber) => {
+            if (rowNumber > 0) {
+                rowRectangle = rowRectangle.rectangleForNextRow(lineGap)
+            }
+            
+            if (rowIndices.length === 1) {
+                const index = rowIndices[0]
+                const isolatedValue = Array.isArray(positionOrStretchWhenIsolatedOnOwnWrappedRow)
+                    ? positionOrStretchWhenIsolatedOnOwnWrappedRow[index]
+                    : positionOrStretchWhenIsolatedOnOwnWrappedRow
+                
+                if (isolatedValue === "stretch") {
+                    const frame = rowRectangle.lazyCopy()
+                    UIRectangle._assignFrameToView(frame, views[index])
+                    frames[index] = frame
+                    return
+                }
+                
+                const rowFrames = rowRectangle.framesByDistributingViewsAsRow(
+                    [views[index]], itemGap, [preferredWidths[index]], isolatedValue
+                )
+                frames[index] = rowFrames[0]
+                return
+            }
+            
+            const rowViews = rowIndices.map(index => views[index])
+            const rowWidths = rowIndices.map(index => preferredWidths[index])
+            const rowFrames = rowRectangle.framesByDistributingViewsAsRow(rowViews, itemGap, rowWidths, centeredOnPosition)
+            rowIndices.forEach((index, position) => {
+                frames[index] = rowFrames[position]
+            })
+        })
         
         return frames
     }
@@ -1115,8 +1233,8 @@ export class UIRectangle extends UIObject {
         view.hasWeakFrame = isWeakFrame
         return this
     }
-
-
+    
+    
     /**
      * Begins collecting views assigned through the rectangle frame-assignment API into a DOM wrapper.
      * The matching endGroupingWrapperFrame() returns the current rectangle unchanged, preserving the chain.
@@ -1135,15 +1253,14 @@ export class UIRectangle extends UIObject {
         const parentContext = layoutPass.groupingContextStack.lastElement
         if (parentContext) {
             parentContext.childContexts.push(groupingContext)
-        }
-        else {
+        } else {
             layoutPass.requests.push(groupingContext)
         }
         layoutPass.groupingContextStack.push(groupingContext)
         return this
     }
-
-
+    
+    
     /** Ends the current grouping wrapper frame and returns this rectangle unchanged. */
     endGroupingWrapperFrame() {
         const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement
@@ -1153,8 +1270,8 @@ export class UIRectangle extends UIObject {
         layoutPass.groupingContextStack.pop()
         return this
     }
-
-
+    
+    
     static _beginGroupingWrapperFrameLayoutPass(owner: UIView) {
         UIRectangle._groupingWrapperFrameLayoutPasses.push({
             owner,
@@ -1162,8 +1279,8 @@ export class UIRectangle extends UIObject {
             requests: []
         })
     }
-
-
+    
+    
     static _endGroupingWrapperFrameLayoutPass(owner: UIView) {
         const layoutPass = UIRectangle._groupingWrapperFrameLayoutPasses.pop()
         if (!layoutPass || layoutPass.owner !== owner) {
@@ -1177,8 +1294,8 @@ export class UIRectangle extends UIObject {
             UIRectangle._reconcileGroupingWrapperFrames(layoutPass)
         }
     }
-
-
+    
+    
     static _assignFrameToView(frame: UIRectangle, view: UIView) {
         view.frame = frame
         const groupingContexts = UIRectangle._groupingWrapperFrameLayoutPasses.lastElement?.groupingContextStack
@@ -1191,8 +1308,8 @@ export class UIRectangle extends UIObject {
             innermostContext.views.push(view)
         }
     }
-
-
+    
+    
     static _reconcileGroupingWrapperFrames(layoutPass: UIGroupingWrapperFrameLayoutPass) {
         const owner = layoutPass.owner
         const previousRecords = UIRectangle._groupingWrapperFrameRecordsByOwner.get(owner) ?? []
@@ -1200,7 +1317,7 @@ export class UIRectangle extends UIObject {
         const nextRecords: UIGroupingWrapperFrameRecord[] = []
         const groupedViews = new Set<UIView>()
         const configuredIdentifiers = new Set<string>()
-
+        
         const validateContext = (request: UIGroupingWrapperFrameContext) => {
             if (request.configuration.identifier) {
                 if (configuredIdentifiers.has(request.configuration.identifier)) {
@@ -1220,26 +1337,24 @@ export class UIRectangle extends UIObject {
             request.childContexts.forEach(validateContext)
         }
         layoutPass.requests.forEach(validateContext)
-
+        
         const recordForRequest = (request: UIGroupingWrapperFrameContext) => {
             let record: UIGroupingWrapperFrameRecord | undefined
             if (request.configuration.identifier) {
                 record = availablePreviousRecords.find(
                     candidate => candidate.identifier === request.configuration.identifier
                 )
-            }
-            else {
+            } else {
                 record = availablePreviousRecords.find(candidate => !candidate.identifier)
             }
             if (record) {
                 availablePreviousRecords.removeElement(record)
-            }
-            else {
+            } else {
                 record = UIRectangle._newGroupingWrapperFrameRecord()
             }
             return record
         }
-
+        
         const reconcileContext = (
             request: UIGroupingWrapperFrameContext,
             containerHTMLElement: HTMLElement
@@ -1258,7 +1373,7 @@ export class UIRectangle extends UIObject {
             record.childRecords = request.childContexts.map(childContext =>
                 reconcileContext(childContext, record.coordinateSpaceHTMLElement)
             ).filter((childRecord): childRecord is UIGroupingWrapperFrameRecord => !!childRecord)
-
+            
             const elementByView = new Map<UIView, HTMLElement>()
             record.views.forEach(view => elementByView.set(view, view.viewHTMLElement))
             record.childRecords.forEach(childRecord => {
@@ -1274,11 +1389,11 @@ export class UIRectangle extends UIObject {
             )
             return record
         }
-
+        
         const rootRecords = layoutPass.requests.map(request =>
             reconcileContext(request, owner.viewHTMLElement)
         ).filter((record): record is UIGroupingWrapperFrameRecord => !!record)
-
+        
         availablePreviousRecords.forEach(record => {
             record.views.forEach(view => {
                 if (view.viewHTMLElement.parentElement === record.coordinateSpaceHTMLElement) {
@@ -1287,7 +1402,7 @@ export class UIRectangle extends UIObject {
             })
             record.wrapperHTMLElement.remove()
         })
-
+        
         const rootRecordByView = new Map<UIView, UIGroupingWrapperFrameRecord>()
         rootRecords.forEach(record => {
             UIRectangle._viewsInGroupingWrapperFrameRecord(record).forEach(view =>
@@ -1303,18 +1418,18 @@ export class UIRectangle extends UIObject {
             }
         })
         UIRectangle._reorderGroupingWrapperFrameElements(owner.viewHTMLElement, desiredTopLevelElements)
-
+        
         UIRectangle._groupingWrapperFrameRecordsByOwner.set(owner, nextRecords)
     }
-
-
+    
+    
     static _viewsInGroupingWrapperFrameRecord(record: UIGroupingWrapperFrameRecord): UIView[] {
         return record.views.concat(record.childRecords.flatMap(childRecord =>
             UIRectangle._viewsInGroupingWrapperFrameRecord(childRecord)
         ))
     }
-
-
+    
+    
     static _reorderGroupingWrapperFrameElements(containerHTMLElement: HTMLElement, desiredElements: HTMLElement[]) {
         const uniqueDesiredElements = desiredElements.filter(
             (element, index) => desiredElements.indexOf(element) === index
@@ -1327,8 +1442,8 @@ export class UIRectangle extends UIObject {
             uniqueDesiredElements.forEach(element => containerHTMLElement.appendChild(element))
         }
     }
-
-
+    
+    
     static _newGroupingWrapperFrameRecord(): UIGroupingWrapperFrameRecord {
         const wrapperHTMLElement = document.createElement("div")
         const coordinateSpaceHTMLElement = document.createElement("div")
@@ -1347,8 +1462,8 @@ export class UIRectangle extends UIObject {
             configuredStyleNames: []
         }
     }
-
-
+    
+    
     static _configureGroupingWrapperFrameRecord(
         record: UIGroupingWrapperFrameRecord,
         request: UIGroupingWrapperFrameContext,
@@ -1359,16 +1474,16 @@ export class UIRectangle extends UIObject {
         record.configuredClassNames.forEach(className => wrapperHTMLElement.classList.remove(className))
         record.configuredAttributeNames.forEach(attributeName => wrapperHTMLElement.removeAttribute(attributeName))
         record.configuredStyleNames.forEach(styleName => (wrapperHTMLElement.style as any)[styleName] = "")
-
+        
         wrapperHTMLElement.classList.add("UICore_UIGroupingWrapperFrame")
         wrapperHTMLElement.setAttribute("data-uicore-grouping-wrapper-frame", "")
-
+        
         record.identifier = request.configuration.identifier
         record.views = request.views.copy()
         record.configuredClassNames = request.configuration.classNames?.copy() ?? []
         record.configuredAttributeNames = Object.keys(request.configuration.attributes ?? {})
         record.configuredStyleNames = Object.keys(request.configuration.style ?? {})
-
+        
         record.configuredClassNames.forEach(className => wrapperHTMLElement.classList.add(className))
         Object.keys(request.configuration.attributes ?? {}).forEach(attributeName => {
             wrapperHTMLElement.setAttribute(
@@ -1381,11 +1496,10 @@ export class UIRectangle extends UIObject {
         })
         if (record.identifier) {
             wrapperHTMLElement.setAttribute("data-uicore-grouping-wrapper-frame-identifier", record.identifier)
-        }
-        else {
+        } else {
             wrapperHTMLElement.removeAttribute("data-uicore-grouping-wrapper-frame-identifier")
         }
-
+        
         const assignedFrames = Array.from(request.framesByView.values())
         const framePoints: UIPoint[] = []
         assignedFrames.forEach(frame => {
@@ -1394,18 +1508,18 @@ export class UIRectangle extends UIObject {
         })
         const defaultFrame = UIRectangle.boundingBoxForPoints(framePoints)
         const wrapperFrame = request.configuration.frame?.(defaultFrame.copy(), assignedFrames.copy()) ?? defaultFrame
-
+        
         wrapperHTMLElement.style.position = "absolute"
         wrapperHTMLElement.style.left = wrapperFrame.x + "px"
         wrapperHTMLElement.style.top = wrapperFrame.y + "px"
         wrapperHTMLElement.style.width = wrapperFrame.width + "px"
         wrapperHTMLElement.style.height = wrapperFrame.height + "px"
         wrapperHTMLElement.style.boxSizing = "border-box"
-
+        
         if (wrapperHTMLElement.parentElement !== containerHTMLElement) {
             containerHTMLElement.appendChild(wrapperHTMLElement)
         }
-
+        
         const coordinateSpaceHTMLElement = record.coordinateSpaceHTMLElement
         coordinateSpaceHTMLElement.classList.add("UICore_UIGroupingWrapperFrame_CoordinateSpace")
         coordinateSpaceHTMLElement.setAttribute("data-uicore-grouping-wrapper-coordinate-space", "")
@@ -1416,10 +1530,10 @@ export class UIRectangle extends UIObject {
             -wrapperFrame.y - (wrapperHTMLElement.clientTop || 0) + "px"
         coordinateSpaceHTMLElement.style.width = owner.bounds.width + "px"
         coordinateSpaceHTMLElement.style.height = owner.bounds.height + "px"
-
+        
     }
-
-
+    
+    
     static _topLevelHTMLElementForView(view: UIView) {
         let element = view.viewHTMLElement
         while (element.parentElement && element.parentElement !== view.superview?.viewHTMLElement) {
@@ -1427,8 +1541,8 @@ export class UIRectangle extends UIObject {
         }
         return element
     }
-
-
+    
+    
     static _detachViewFromGroupingWrapperFrame(view: UIView) {
         const superviewHTMLElement = view.superview?.viewHTMLElement
         if (!superviewHTMLElement || view.viewHTMLElement.parentElement === superviewHTMLElement) {
@@ -1438,8 +1552,8 @@ export class UIRectangle extends UIObject {
         superviewHTMLElement.appendChild(view.viewHTMLElement)
         UIRectangle._removeEmptyGroupingWrapperFrameAncestors(wrapperHTMLElement)
     }
-
-
+    
+    
     static _removeEmptyGroupingWrapperFrameAncestors(wrapperHTMLElement: Element | null) {
         while (wrapperHTMLElement) {
             const parentWrapperHTMLElement = wrapperHTMLElement.parentElement?.closest(
@@ -1518,16 +1632,15 @@ export class UIRectangle extends UIObject {
         
         const first = rectanglesAndPoints[0]
         const result = first instanceof UIRectangle
-                       ? new UIRectangle(first.x, first.y, first.height, first.width)
-                       : new UIRectangle(first.x, first.y, 0, 0)
+            ? new UIRectangle(first.x, first.y, first.height, first.width)
+            : new UIRectangle(first.x, first.y, 0, 0)
         
         for (let i = 1; i < rectanglesAndPoints.length; i++) {
             const rectangleOrPoint = rectanglesAndPoints[i]
             if (rectangleOrPoint instanceof UIRectangle) {
                 result.updateByAddingPoint(rectangleOrPoint.min)
                 result.updateByAddingPoint(rectangleOrPoint.max)
-            }
-            else {
+            } else {
                 result.updateByAddingPoint(rectangleOrPoint)
             }
         }
@@ -1587,24 +1700,24 @@ type RectangleChainMethods<TResult> = {
         K extends 'IF' | 'ELSE' | 'ELSE_IF' | 'ENDIF' ? never : K
         )]:
     UIRectangle[K] extends (...args: infer Args) => infer R
-    ? R extends UIRectangle | UIRectangle[]
-        // CHANGE: We do NOT add 'R' to 'TResult' here. We only update the current state (R).
-      ? (...args: Args) => UIRectangleConditionalChain<R, TResult>
-      : never
-    : never
+        ? R extends UIRectangle | UIRectangle[]
+            // CHANGE: We do NOT add 'R' to 'TResult' here. We only update the current state (R).
+            ? (...args: Args) => UIRectangleConditionalChain<R, TResult>
+            : never
+        : never
 };
 
 // 2. Methods available when holding a UIRectangle[]
 type ArrayChainMethods<TResult> = {
     [K in keyof UIRectangle[]]:
     UIRectangle[][K] extends UIRectangle
-    ? UIRectangleConditionalChain<UIRectangle, TResult> // No accumulation for properties
-    : UIRectangle[][K] extends (...args: infer Args) => infer R
-      ? R extends UIRectangle | UIRectangle[]
-          // CHANGE: We do NOT add 'R' to 'TResult' here either.
-        ? (...args: Args) => UIRectangleConditionalChain<R, TResult>
-        : never
-      : never
+        ? UIRectangleConditionalChain<UIRectangle, TResult> // No accumulation for properties
+        : UIRectangle[][K] extends (...args: infer Args) => infer R
+            ? R extends UIRectangle | UIRectangle[]
+                // CHANGE: We do NOT add 'R' to 'TResult' here either.
+                ? (...args: Args) => UIRectangleConditionalChain<R, TResult>
+                : never
+            : never
 };
 
 // 3. Methods available in both states (Control Flow + Transform)
@@ -1749,8 +1862,7 @@ class UIRectangleConditionalBlock {
                             const result = top.currentResult
                             if (performFunction && top.anyConditionMet) {
                                 return performFunction(result)
-                            }
-                            else {
+                            } else {
                                 return result
                             }
                         }
@@ -1761,8 +1873,8 @@ class UIRectangleConditionalBlock {
                         // If any branch was taken use its accumulated result; otherwise
                         // fall back to the value that existed before entering this IF.
                         const resolvedResult = completedFrame.anyConditionMet
-                                               ? completedFrame.currentResult
-                                               : completedFrame.resultBeforeIF
+                            ? completedFrame.currentResult
+                            : completedFrame.resultBeforeIF
                         
                         // Optionally transform, then write back into the parent frame.
                         const finalResult = performFunction ? performFunction(resolvedResult) : resolvedResult
@@ -1771,6 +1883,7 @@ class UIRectangleConditionalBlock {
                         // Return the proxy so the outer chain can continue.
                         return self.createProxy()
                     }
+                    
                     return endif
                 }
                 

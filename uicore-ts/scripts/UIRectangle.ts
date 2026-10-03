@@ -1313,6 +1313,10 @@ export class UIRectangle extends UIObject {
     static _reconcileGroupingWrapperFrames(layoutPass: UIGroupingWrapperFrameLayoutPass) {
         const owner = layoutPass.owner
         const previousRecords = UIRectangle._groupingWrapperFrameRecordsByOwner.get(owner) ?? []
+        // Ungrouped views manage their own DOM order, including reusable table rows.
+        if (!layoutPass.requests.length && !previousRecords.length) {
+            return
+        }
         const availablePreviousRecords = previousRecords.copy()
         const nextRecords: UIGroupingWrapperFrameRecord[] = []
         const groupedViews = new Set<UIView>()
